@@ -1,6 +1,6 @@
 package com.ple.jerbil.testcommon;
 
-enum ItemType {
+public enum ItemType {
   weapon,
   armor,
   shield,

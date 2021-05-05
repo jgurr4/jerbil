@@ -5,8 +5,8 @@ import com.ple.jerbil.Table;
 
 public class UserTable extends Table {
 
-  final Column userId = Column.make("userId").primary();
-  final Column name = Column.make("name").varchar(20).indexed();
+  public final Column userId = Column.make("userId").primary();
+  public final Column name = Column.make("name").varchar(20).indexed();
 
   public UserTable() {
     super("user");

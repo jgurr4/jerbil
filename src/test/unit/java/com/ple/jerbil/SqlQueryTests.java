@@ -18,7 +18,7 @@ public class SqlQueryTests {
   void testSelect() {
 
     final Query q = user.where(user.name.eq("john")).select(user.userId);
-    assertEquals(q.toString(), """
+    assertEquals(q.toSql(), """
       select userId 
       from user 
       where name='john'
@@ -34,13 +34,13 @@ public class SqlQueryTests {
     final Query q2 = base.where(user.name.eq("james"));
 
 
-    assertEquals(q1.toString(), """
+    assertEquals(q1.toSql(), """
       select userId 
       from user 
       where name='john'
       """);
 
-    assertEquals(q2.toString(), """
+    assertEquals(q2.toSql(), """
       select userId 
       from user 
       where name='james'
@@ -52,7 +52,7 @@ public class SqlQueryTests {
   void testSelectEnum() {
 
     final Query q = item.where(item.type.eq(ItemType.weapon));
-    assertEquals(q.toString(), """
+    assertEquals(q.toSql(), """
       select * 
       from item 
       where type = 'weapon'
@@ -63,8 +63,8 @@ public class SqlQueryTests {
   @Test
   void testSelectJoins() {
 
-    final Query q = player.join(inventory, item).where(player.name.eq("bob")).and(item.name.eq("sword")));
-    assertEquals(q.toString(), """
+    final Query q = player.join(inventory, item).where(player.name.eq("bob")).and(item.name.eq("sword"));
+    assertEquals(q.toSql(), """
       select *
       from player
       inner join inventory using (playerId)
@@ -78,7 +78,7 @@ public class SqlQueryTests {
   void testAggregation() {
 
     final Query q = item.select(count);
-    assertEquals(q.toString(), """
+    assertEquals(q.toSql(), """
       select count(*)
       from item
       """);
@@ -88,8 +88,8 @@ public class SqlQueryTests {
   @Test
   void testGroupBy() {
 
-    final Query q = item.select(item.type.as("type"), count.as("total")), groupBy (item.type);
-    assertEquals(q.toString(), """
+    final Query q = item.select(item.type.as("type"), count.as("total")).groupBy(item.type);
+    assertEquals(q.toSql(), """
       select item.type as type, count(*) as total
       from item
       group by item.type
