@@ -1,0 +1,66 @@
+package com.ple.jerbil;
+
+import com.ple.jerbil.testcommon.*;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class SqlStatementTests {
+
+  final UserTable user = new UserTable();
+  final PlayerTable player = new PlayerTable();
+  final ItemTable item = new ItemTable();
+  final InventoryTable inventory = new InventoryTable();
+
+  final Database testDb = Database.make("test").add(user, player, item, inventory);
+
+  @Test
+  void testInsertSingle() {
+
+    final Statement q = item.insert().set(item.name, "sword of spirit").set(item.type, ItemType.weapon);
+    assertEquals(q.toString(), """
+      insert into item
+      set name='sword of spirit',
+      type='weapon'
+      """);
+
+  }
+
+  @Test
+  void testInsertMulti() {
+
+    final Statement q = item.insert().set(
+      List.of(item.name, item.type),
+      List.of(
+        List.of("sword of spirit", ItemType.weapon),
+        List.of("shield of faith", ItemType.shield),
+        List.of("breastplate of righteousness", ItemType.armor)
+      );
+    assertEquals(q.toString(), """
+      insert into item
+      (name, type) values 
+      ('sword of spirit', 'weapon'),
+      ('shield of faith', 'shield'),
+      ('breastplate of righteousness', 'armor')
+      """);
+
+  }
+
+  @Test
+  void testTableCreate() {
+
+    final Statement q = item.create();
+    assertEquals(q.toString(), """
+                      
+      """);
+
+  }
+
+  @Test
+  void testMultiColumnIndex() {
+
+  }
+
+}
