@@ -33,7 +33,6 @@ public class SqlQueryTests {
     final Query q1 = base.where(user.name.eq("john"));
     final Query q2 = base.where(user.name.eq("james"));
 
-
     assertEquals(q1.toSql(), """
       select userId 
       from user 

@@ -1,12 +1,12 @@
 package com.ple.jerbil;
 
-public class Table {
+public abstract class Table {
 
-  private final String name;
+  protected StorageEngine engine = StorageEngine.simple;
+  private final String tableName;
 
   public Table(String name) {
-    this.name = name;
-
+    this.tableName = name;
   }
 
 }

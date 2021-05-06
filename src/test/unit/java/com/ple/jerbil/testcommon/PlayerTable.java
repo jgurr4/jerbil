@@ -1,6 +1,7 @@
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.Column;
+import com.ple.jerbil.StorageEngine;
 import com.ple.jerbil.Table;
 
 public class PlayerTable extends Table {
@@ -11,6 +12,7 @@ public class PlayerTable extends Table {
 
   public PlayerTable() {
     super("player");
+    engine = StorageEngine.transactional;
   }
 
 }

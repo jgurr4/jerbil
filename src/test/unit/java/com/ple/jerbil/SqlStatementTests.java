@@ -19,7 +19,7 @@ public class SqlStatementTests {
   @Test
   void testInsertSingle() {
 
-    final Statement q = item.insert().set(item.name, "sword of spirit").set(item.type, ItemType.weapon);
+    final Query q = item.insert().set(item.name, "sword of spirit").set(item.type, ItemType.weapon);
     assertEquals(q.toString(), """
       insert into item
       set name='sword of spirit',
@@ -31,7 +31,7 @@ public class SqlStatementTests {
   @Test
   void testInsertMulti() {
 
-    final Statement q = item.insert().set(
+    final Query q = item.insert().set(
       List.of(item.name, item.type),
       List.of(
         List.of("sword of spirit", ItemType.weapon),
@@ -51,9 +51,13 @@ public class SqlStatementTests {
   @Test
   void testTableCreate() {
 
-    final Statement q = item.create();
+    final Query q = item.create();
     assertEquals(q.toString(), """
-                      
+      create table item (
+      itemId long not null primary key,
+      name varchar(255) not null,
+      type enum('weapon', 'armor', 'shield',  'accessory') not null
+      ) ENGINE=Aria
       """);
 
   }

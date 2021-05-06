@@ -1,6 +1,6 @@
 package com.ple.jerbil;
 
-public class global {
+public class Global {
 
 
 
