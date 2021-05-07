@@ -24,4 +24,7 @@ public class Column {
     return varchar(255);
   }
 
+  public Column integer() {
+  }
+
 }

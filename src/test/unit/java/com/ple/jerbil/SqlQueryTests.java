@@ -96,4 +96,19 @@ public class SqlQueryTests {
 
   }
 
+  @Test
+  void testComplexExpressions() {
+
+    final Query q = item
+      .select(item.price.times(42).minus(1).times(literal(3).plus(1)).as("adjustedPrice"))
+      .where(item.price.dividedBy(4).isGreaterThan(5))
+      ;
+    assertEquals(q.toSql(), """
+      select (price * 42 - 1) * (3 + 1) as adjustedPrice
+      from item
+      where price / 4 > 5
+      """);
+
+  }
+
 }

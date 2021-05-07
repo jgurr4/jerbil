@@ -54,16 +54,25 @@ public class SqlStatementTests {
     final Query q = item.create();
     assertEquals(q.toString(), """
       create table item (
-      itemId long not null primary key,
-      name varchar(255) not null,
-      type enum('weapon', 'armor', 'shield',  'accessory') not null
+        itemId long not null primary key,
+        name varchar(255) not null,
+        type enum('weapon', 'armor', 'shield',  'accessory') not null
       ) ENGINE=Aria
       """);
 
   }
 
   @Test
-  void testMultiColumnIndex() {
+  void testMultiColumnPrimaryKey() {
+
+    final Query q = inventory.create();
+    assertEquals(q.toString(), """
+      create table inventory (
+        player long not null,
+        itemId long not null,
+        primary key (player, itemId)
+      ) ENGINE=Aria
+      """);
 
   }
 
