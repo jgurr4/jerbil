@@ -19,7 +19,7 @@ public class SqlStatementTests {
   @Test
   void testInsertSingle() {
 
-    final Query q = item.insert().set(item.name, "sword of spirit").set(item.type, ItemType.weapon);
+    final Query q = item.insert().set(item.name, Literal.from("sword of spirit")).set(item.type, Literal.from(ItemType.weapon.toString()));
     assertEquals(q.toString(), """
       insert into item
       set name='sword of spirit',
@@ -34,10 +34,11 @@ public class SqlStatementTests {
     final Query q = item.insert().set(
       List.of(item.name, item.type),
       List.of(
-        List.of("sword of spirit", ItemType.weapon),
-        List.of("shield of faith", ItemType.shield),
-        List.of("breastplate of righteousness", ItemType.armor)
-      );
+        List.of("sword of spirit", ItemType.weapon.toString()),
+        List.of("shield of faith", ItemType.shield.toString()),
+        List.of("breastplate of righteousness", ItemType.armor.toString())
+      )
+    );
     assertEquals(q.toString(), """
       insert into item
       (name, type) values 

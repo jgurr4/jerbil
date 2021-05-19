@@ -1,7 +1,6 @@
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.Column;
-import com.ple.jerbil.ItemType;
 import com.ple.jerbil.StorageEngine;
 import com.ple.jerbil.Table;
 
