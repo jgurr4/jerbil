@@ -10,6 +10,7 @@ public class UserTable extends Table {
 
   public UserTable() {
     super("user");
+    userId.table = this;
   }
 
 }

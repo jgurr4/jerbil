@@ -2,8 +2,17 @@ package com.ple.jerbil;
 
 public class Column extends Expression {
 
-  public static Column make(String column) {
-    return null;
+  public final String name;
+  public Table table; // This should only be set 1 time and never changed. Semi-immutable.
+
+  public Column(String columnName) {
+    this.name = columnName;
+
+  }
+
+  public static Column make(String columnName) {
+
+    return new Column(columnName);
   }
 
   public Column primary() {
