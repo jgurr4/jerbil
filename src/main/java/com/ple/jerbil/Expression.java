@@ -2,6 +2,7 @@ package com.ple.jerbil;
 
 import javax.swing.*;
 
+@Immutable
 public class Expression {
 
   public Expression as(String name) {

@@ -13,7 +13,7 @@ public class SqlQueryTests {
   final ItemTable item = new ItemTable();
   final InventoryTable inventory = new InventoryTable();
 
-  final Database testDb = Database.make("test").add(user, player, item, inventory);
+  final Database testDb = Database.from("test").add(user, player, item, inventory);
 
   @Test
   void testSelect() {

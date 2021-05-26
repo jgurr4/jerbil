@@ -2,6 +2,7 @@ package com.ple.jerbil;
 
 import java.awt.*;
 
+@DelayedImmutable
 public abstract class Table {
 
   protected StorageEngine engine = StorageEngine.simple;
@@ -26,7 +27,7 @@ public abstract class Table {
   }
 
   public Query insert() {
-    return null;
+    return Query.from(QueryType.insert);
   }
 
   public Query create() {

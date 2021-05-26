@@ -1,9 +1,13 @@
 package com.ple.jerbil;
 
+@DelayedImmutable
 public class Column extends Expression {
 
   public final String name;
   public Table table; // This should only be set 1 time and never changed. Semi-immutable.
+  private DataSpec dataSpec;
+  private boolean indexed;
+  private boolean primary;
 
   public Column(String columnName) {
     this.name = columnName;
@@ -16,15 +20,18 @@ public class Column extends Expression {
   }
 
   public Column primary() {
-    return null;
+    this.primary = true;
+    return this;
   }
 
   public Column varchar(int size) {
-    return null;
+    this.dataSpec = DataSpec.from(DataType.varchar, size);
+    return this;
   }
 
   public Column indexed() {
-    return null;
+    this.indexed = true;
+    return this;
   }
 
   public Column id() {
