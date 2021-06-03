@@ -11,7 +11,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Immutable
-public class IHashMap<K,V>  implements IMap<K,V> {
+public class IHashMap<K,V>  implements IMap<K,V,IHashMap<K, V>> {
 
   private final IHashMapEntry<K, V>[][] buckets;
   private final int maxBucketSize;
@@ -20,6 +20,7 @@ public class IHashMap<K,V>  implements IMap<K,V> {
 
     this.buckets = buckets;
     this.maxBucketSize = maxBucketSize;
+
   }
 
   public static <K, V> IHashMap<K, V> from(Object... objects) {
@@ -51,7 +52,14 @@ public class IHashMap<K,V>  implements IMap<K,V> {
   }
 
   @Override
-  public IMap<K, V> put(K key, V value) {
+  public IHashMap<K, V> putAll(Object... keyOrValue) {
+
+    return null;
+
+  }
+
+  @Override
+  public IHashMap<K, V> put(K key, V value) {
     // use From method here somehow.
     return null;
   }
