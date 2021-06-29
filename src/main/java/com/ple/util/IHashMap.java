@@ -2,17 +2,10 @@ package com.ple.util;
 
 import com.ple.jerbil.Immutable;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
-
 @Immutable
 public class IHashMap<K,V>  implements IMap<K,V,IHashMap<K, V>> {
 
+  public static IHashMapEntry empty = new IHashMapEntry(new IHashMapEntry[0][], 10);
   private final IHashMapEntry<K, V>[][] buckets;
   private final int maxBucketSize;
 
@@ -77,29 +70,34 @@ public class IHashMap<K,V>  implements IMap<K,V,IHashMap<K, V>> {
     return null;
   }
 
-  private static class IHashMapEntry<K,V> implements Map.Entry<K, V> {
+  private static class IHashMapEntry<K,V> {
+
+    private final K key;
+    private final V value;
+
+    private IHashMapEntry(K key, V value) {
+      this.key = key;
+      this.value = value;
+    }
 
     public static <K, V> IHashMapEntry<K, V> from(K key, V value) {
-
-      return null;
+      return new IHashMapEntry<>(key, value);
     }
 
-    @Override
     public K getKey() {
-
-      return null;
+      return key;
     }
 
-    @Override
     public V getValue() {
-
-      return null;
+      return value;
     }
 
-    @Override
-    public V setValue(V value) {
+    public IHashMapEntry<K, V> setValue(V v) {
+      return new IHashMapEntry<K,V>(key, v);
+    }
 
-      return null;
+    public IHashMapEntry<K, V>[][] setBucketCount(int i) {
+      return new IHashMapEntry[i][];
     }
 
   }
