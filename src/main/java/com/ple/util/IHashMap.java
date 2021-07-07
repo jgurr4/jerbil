@@ -2,48 +2,51 @@ package com.ple.util;
 
 import com.ple.jerbil.Immutable;
 
-import java.util.Arrays;
-
 @Immutable
 public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
-  static public final IHashMap empty = new IHashMap(new IHashMapEntry[10][], 10);
-  private final IHashMapEntry<K, V>[][] buckets;
-  private final int maxBucketSize;
-  private int threshold;
-  private int size;
+  static public final IHashMap empty = new IHashMap(new IHashMapEntry[0], 5, 0);
+  private final IHashMapEntry<K, V>[] entries;
+  private final int bucketSize;
+  private final float threshold = 0.3f;
+  private final int entriesInUse;
 
-  public IHashMap(IHashMapEntry<K, V>[][] buckets, int maxBucketSize) {
+  public IHashMap(IHashMapEntry<K, V>[] entries, int bucketSize, int entriesInUse) {
 
-    this.buckets = buckets;
-    this.maxBucketSize = maxBucketSize;
+    this.entries = entries;
+    this.bucketSize = bucketSize;
+    this.entriesInUse = entriesInUse;
 
   }
 
   public static <K, V> IHashMap<K, V> from(Object... objects) {
 
     assert objects.length % 2 == 0;
-    final int bucketCount = 10;
-    final IHashMapEntry<K, V>[][] buckets = new IHashMapEntry[bucketCount][];
+    final int bucketSize = 5;
+    final int entryCount = (int) (objects.length / empty.threshold);
+    final int bucketCount = entryCount / bucketSize;
+    final IHashMapEntry<K, V>[] entries = new IHashMapEntry[entryCount];
     for (int i = 0; i < objects.length - 1; i += 2) {
       final K key = (K) objects[i];
       final V value = (V) objects[i + 1];
       final int hashCode = Math.abs(key.hashCode());
       final int bucketIndex = hashCode % bucketCount;
-      IHashMapEntry<K, V>[] bucket = buckets[bucketIndex];
-      if (bucket == null) {
-        bucket = new IHashMapEntry[10];
-        buckets[bucketIndex] = bucket;
-      }
-      for (int entryIndex = 0; entryIndex < bucket.length; entryIndex++) {
-        if (bucket[entryIndex] == null) {
-          bucket[entryIndex] = IHashMapEntry.from(key, value);
+      int c = 0;
+      int entryIndex = bucketIndex * bucketSize;
+      while (c < entries.length) {
+        if (entries[entryIndex] == null) {
+          entries[entryIndex] = IHashMapEntry.from(key, value);
           break;
+        }
+        c++;
+        entryIndex++;
+        if (entryIndex >= entries.length) {
+          entryIndex = 0;
         }
       }
 
     }
-    IHashMap<K, V> map = new IHashMap<>(buckets, 10);
+    IHashMap<K, V> map = new IHashMap<>(buckets, 10, entriesInUse);
 
     return map;
   }
@@ -82,20 +85,20 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
   public IHashMap<K, V> setBucketSize(int newBucketSize) {
 
-    final IHashMapEntry<K, V>[][] newBuckets = new IHashMapEntry[buckets.length][];
-    copyHashTable(buckets, newBuckets);
-    return new IHashMap(newBuckets, newBucketSize);
+    final IHashMapEntry<K, V>[] newBuckets = new IHashMapEntry[entries.length];
+    copyHashTable(entries, newBuckets);
+    return new IHashMap(newBuckets, newBucketSize, entriesInUse);
 
   }
 
   public IHashMap<K, V> setBucketCount(int newBucketCount) {
 
-    final IHashMapEntry<K, V>[][] newBuckets = new IHashMapEntry[newBucketCount][buckets[0].length];
-    rehash(buckets, newBuckets);
-    return new IHashMap(newBuckets, newBucketCount);
+    final IHashMapEntry<K, V>[] newBuckets = new IHashMapEntry[newBucketCount];
+    rehash(entries, newBuckets);
+    return new IHashMap(newBuckets, newBucketCount, entriesInUse);
   }
 
-  private void rehash(IHashMapEntry<K, V>[][] buckets, IHashMapEntry<K, V>[][] newBuckets) {  // rehash is useful for adding when your bucket array is full.
+  private void rehash(IHashMapEntry<K, V>[] buckets, IHashMapEntry<K, V>[] newBuckets) {  // rehash is useful for adding when your bucket array is full.
 
     for (int i = 0; i < buckets.length; i++) {
       for (int j = 0; j < buckets[i].length; j++) {
@@ -112,7 +115,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
   }
 
-  private void copyHashTable(IHashMapEntry<K, V>[][] buckets, IHashMapEntry<K, V>[][] newBuckets) {
+  private void copyHashTable(IHashMapEntry<K, V>[] buckets, IHashMapEntry<K, V>[] newBuckets) {
 
     for (int i = 0; i < buckets.length; i++) {
       for (int j = 0; j < buckets[i].length; j++) {
@@ -126,7 +129,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
     private final K key;
     private final V value;
-    public static IHashMapEntry empty = new IHashMapEntry(new IHashMapEntry[0][], 10);
+    public static IHashMapEntry empty = new IHashMapEntry(new IHashMapEntry[0], 10);
 
     private IHashMapEntry(K key, V value) {
 
