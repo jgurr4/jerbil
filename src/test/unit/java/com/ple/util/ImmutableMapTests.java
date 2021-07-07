@@ -24,7 +24,7 @@ public class ImmutableMapTests {
   @Test
   void testListExpansion() {
 
-    IHashMap<String, String> m1 = IHashMap.empty.setBucketCount(1).setInitialBucketSize(2).setMaxBucketSize(10);
+    IHashMap<String, String> m1 = IHashMap.empty.setBucketCount(1).setBucketSize(2).setMaxBucketSize(10);
     assertEquals(m1.getBucketCount(), 1);
     assertEquals(m1.getBucketCapacity(0), 2);
     assertEquals(m1.getBucketSize(0), 0);
