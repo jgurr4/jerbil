@@ -5,7 +5,7 @@ import com.ple.jerbil.Immutable;
 @Immutable
 public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
-  static public final IHashMap empty = new IHashMap(new IHashMapEntry[0], 5, 0, bucketCount);
+  static public final IHashMap empty = new IHashMap(new IHashMapEntry[0], 5, 0, 6);
   private final IHashMapEntry<K, V>[] entries;
   private final int bucketSize;
   private static final float threshold = 0.3f;
@@ -26,7 +26,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
     assert objects.length % 2 == 0;
     final int entriesInUse = objects.length / 2;
     final int bucketSize = 5;
-    final int entryCount = (int) (objects.length / threshold);  // Should be (objects.length / 2 / threshold)
+    final int entryCount = (int) (objects.length / threshold);
     final int bucketCount = entryCount / bucketSize;
     final IHashMapEntry<K, V>[] entries = new IHashMapEntry[entryCount];
     for (int i = 0; i < objects.length - 1; i += 2) {
@@ -54,11 +54,6 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
   @Override
   public IHashMap<K, V> putAll(Object... keyOrValue) {
-    // If the buckets are full, and they reach a certain max size then these methods need to add more buckets instead of
-    // increasing bucket size infinitely, because increasing bucket size will negatively impact performance.
-    // In other words, they may have to rehash. If the hashmap reaches a threshold of 30% is a good time to increase the
-    // number of buckets. Because some buckets will get close to overflowing which will auto-increase the
-    // size of those buckets.
 
     return null;
 
@@ -67,8 +62,13 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
   @Override
   public IHashMap<K, V> put(K key, V value) {
 
+    int putBucketCount = bucketCount;
+    if (entriesInUse > entries.length * threshold) {
+      final int entryCount = (int) (entriesInUse * 2 / threshold);  // Makes possible size double what the current max value is.
+      putBucketCount = entryCount / bucketSize;
+    }
     final int hashCode = Math.abs(key.hashCode());
-    final int bucketIndex = hashCode % bucketCount;
+    final int bucketIndex = hashCode % putBucketCount;
     int c = 0;
     int entryIndex = bucketIndex * bucketSize;
     while (c < entries.length) {
@@ -83,7 +83,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
       }
     }
 
-    return new IHashMap<>(entries, bucketSize, entriesInUse, bucketCount);
+    return new IHashMap<>(entries, bucketSize, entriesInUse, putBucketCount);
   }
 
   @Override
@@ -118,14 +118,12 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
   private void rehash(IHashMapEntry<K, V>[] buckets, IHashMapEntry<K, V>[] newBuckets) {  // rehash is useful for adding when your bucket array is full.
 
     for (int i = 0; i < buckets.length; i++) {
-      for (int j = 0; j < buckets[i].length; j++) {
-        IHashMapEntry<K, V> entry = buckets[i][j];   // i is the old bucket index. All buckets start with nulls. So the first null you find in a bucket is where you plugin each entry.
+        IHashMapEntry<K, V> entry = buckets[i];   // i is the old bucket index. All buckets start with nulls. So the first null you find in a bucket is where you plugin each entry.
         final int newBucketIndex = entry.getKey().hashCode() % newBuckets.length;
-        for (int k = 0; k < newBuckets[0].length; k++) {
-          if (newBuckets[newBucketIndex][k] == null) {
-            newBuckets[newBucketIndex][k] = entry;
+        for (int k = 0; k < newBuckets.length; k++) {
+          if (newBuckets[k] == null) {
+            newBuckets[k] = entry;
             break;
-          }
         }
       }
     }
@@ -135,14 +133,35 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
   private void copyHashTable(IHashMapEntry<K, V>[] buckets, IHashMapEntry<K, V>[] newBuckets) {
 
     for (int i = 0; i < buckets.length; i++) {
-      for (int j = 0; j < buckets[i].length; j++) {
-        newBuckets[i][j] = buckets[i][j];
+        newBuckets[i] = buckets[i];
       }
     }
 
+  public IHashMap<K, V> setMaxBucketSize(int bucketSize) {   // Should we get rid of this? It's in tests.
+
+    return null;
   }
 
-  private static class IHashMapEntry<K, V> {
+  public int getBucketCount() {
+
+    return 0;
+  }
+
+  public int getBucketCapacity(int bucketIndex) {
+    // Probably used to get the number of available spots in the specified bucket.
+
+    return 0;
+  }
+
+  public int getBucketSize(int bucketIndex) {
+// Probably used to get the number of entries in use of this bucket. Since otherwise if just trying to get actual bucket
+// size you don't need the index, since each bucket is exactly the same size.
+    return 0;
+  }
+
+}
+
+  class IHashMapEntry<K, V> {    // This used to be private static, but for some reason it's not allowed anymore.
 
     private final K key;
     private final V value;
@@ -176,4 +195,3 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
   }
 
-}
