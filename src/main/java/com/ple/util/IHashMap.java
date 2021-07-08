@@ -48,7 +48,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
         }
       }
     }
-    IHashMap<K, V> map = new IHashMap<>(entries, bucketSize, entriesInUse, bucketCount);
+    final IHashMap<K, V> map = new IHashMap<>(entries, bucketSize, entriesInUse, bucketCount);
     return map;
   }
 
@@ -62,41 +62,61 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
   @Override
   public IHashMap<K, V> put(K key, V value) {
 
-    int putBucketCount = bucketCount;
-    if (entriesInUse > entries.length * threshold) {
-      final int entryCount = (int) (entriesInUse * 2 / threshold);  // Makes possible size double what the current max value is.
-      putBucketCount = entryCount / bucketSize;
-    }
-    final int hashCode = Math.abs(key.hashCode());
-    final int bucketIndex = hashCode % putBucketCount;
+    int newBucketCount = bucketCount;
+    IHashMapEntry<K, V>[] newEntries = new IHashMapEntry[entries.length];
     int c = 0;
-    int entryIndex = bucketIndex * bucketSize;
     while (c < entries.length) {
-      if (entries[entryIndex] == null) {
-        entries[entryIndex] = IHashMapEntry.from(key, value);
+      newEntries[c] = entries[c];
+      c++;
+    }
+    c = 0;
+    final int hashCode = Math.abs(key.hashCode());
+    final int bucketIndex = hashCode % newBucketCount;
+    int entryIndex = bucketIndex * bucketSize;
+    int newEntriesInUse = entriesInUse;
+    while (c < newEntries.length) {
+      if (newEntries[entryIndex] == null) {
+        newEntries[entryIndex] = IHashMapEntry.from(key, value);
+        newEntriesInUse += 1;
         break;
       }
       c++;
       entryIndex++;
-      if (entryIndex >= entries.length) {
+      if (entryIndex >= newEntries.length) {
         entryIndex = 0;
       }
     }
-
-    return new IHashMap<>(entries, bucketSize, entriesInUse, putBucketCount);
+    if (entriesInUse > newEntries.length * threshold) {   // This should be a good place for this code. Try test which goes past threshold.
+      final int entryCount = (int) (entriesInUse * 2 / threshold);  // Makes fillable size within threshold double what the current max value is.
+      newBucketCount = entryCount / bucketSize;
+      newEntries = new IHashMapEntry[entryCount];
+    }
+    final IHashMap<K, V> map = new IHashMap<>(newEntries, bucketSize, newEntriesInUse, newBucketCount);
+    return map;
   }
 
   @Override
   public int size() {
 
-    return 0;
+    return entriesInUse;
   }
 
   @Override
   public V get(K key) {
 
     final int hashCode = Math.abs(key.hashCode());
-
+    final int bucketIndex = hashCode % bucketCount;
+    int entryIndex = bucketIndex * bucketSize;
+    int c = 0;
+    while (c < entries.length) {
+      if (entries[entryIndex] == null) {
+        return null;
+      } else if (entries[entryIndex].getKey() == key) {
+        return entries[entryIndex].getValue();
+      }
+      c++;
+      entryIndex++;
+    }
     return null;
   }
 
@@ -118,12 +138,12 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
   private void rehash(IHashMapEntry<K, V>[] buckets, IHashMapEntry<K, V>[] newBuckets) {  // rehash is useful for adding when your bucket array is full.
 
     for (int i = 0; i < buckets.length; i++) {
-        IHashMapEntry<K, V> entry = buckets[i];   // i is the old bucket index. All buckets start with nulls. So the first null you find in a bucket is where you plugin each entry.
-        final int newBucketIndex = entry.getKey().hashCode() % newBuckets.length;
-        for (int k = 0; k < newBuckets.length; k++) {
-          if (newBuckets[k] == null) {
-            newBuckets[k] = entry;
-            break;
+      IHashMapEntry<K, V> entry = buckets[i];   // i is the old bucket index. All buckets start with nulls. So the first null you find in a bucket is where you plugin each entry.
+      final int newBucketIndex = entry.getKey().hashCode() % newBuckets.length;
+      for (int k = 0; k < newBuckets.length; k++) {
+        if (newBuckets[k] == null) {
+          newBuckets[k] = entry;
+          break;
         }
       }
     }
@@ -133,9 +153,9 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
   private void copyHashTable(IHashMapEntry<K, V>[] buckets, IHashMapEntry<K, V>[] newBuckets) {
 
     for (int i = 0; i < buckets.length; i++) {
-        newBuckets[i] = buckets[i];
-      }
+      newBuckets[i] = buckets[i];
     }
+  }
 
   public IHashMap<K, V> setMaxBucketSize(int bucketSize) {   // Should we get rid of this? It's in tests.
 
@@ -161,37 +181,37 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
 }
 
-  class IHashMapEntry<K, V> {    // This used to be private static, but for some reason it's not allowed anymore.
+class IHashMapEntry<K, V> {    // This used to be private static, but for some reason it's not allowed anymore.
 
-    private final K key;
-    private final V value;
-    public static IHashMapEntry empty = new IHashMapEntry(new IHashMapEntry[0], 10);
+  private final K key;
+  private final V value;
+  public static IHashMapEntry empty = new IHashMapEntry(new IHashMapEntry[0], 10);
 
-    private IHashMapEntry(K key, V value) {
+  private IHashMapEntry(K key, V value) {
 
-      this.key = key;
-      this.value = value;
-    }
-
-    public static <K, V> IHashMapEntry<K, V> from(K key, V value) {
-
-      return new IHashMapEntry<>(key, value);
-    }
-
-    public K getKey() {
-
-      return key;
-    }
-
-    public V getValue() {
-
-      return value;
-    }
-
-    public IHashMapEntry<K, V> setValue(V v) {
-
-      return new IHashMapEntry<K, V>(key, v);
-    }
-
+    this.key = key;
+    this.value = value;
   }
+
+  public static <K, V> IHashMapEntry<K, V> from(K key, V value) {
+
+    return new IHashMapEntry<>(key, value);
+  }
+
+  public K getKey() {
+
+    return key;
+  }
+
+  public V getValue() {
+
+    return value;
+  }
+
+  public IHashMapEntry<K, V> setValue(V v) {
+
+    return new IHashMapEntry<K, V>(key, v);
+  }
+
+}
 

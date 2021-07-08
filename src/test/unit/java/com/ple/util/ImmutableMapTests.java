@@ -12,12 +12,13 @@ public class ImmutableMapTests {
     IMap<String, Integer, ?> m1 = IHashMap.from("banana", 2, "grape", 3);
     IMap<String, Integer, ?> m2 = m1.put("apple", 1);
 
-    assertEquals(m1.size(), 2);   // How many entries in the map/bucket. for loop of all buckets, and add number of entries of each bucket together
-    assertEquals(m2.size(), 3);   // Alternatively, just have a size field, and update it every time you update it. This saves time so you don't have to scan every time.
+    assertEquals(2, m1.size());
+    assertEquals(3, m2.size());
     assertNull(m1.get("apple"));
-    assertEquals(m2.get("apple"), 1);
-    assertEquals(m1.get("banana"), 2);
-    assertEquals(m1.get("grape"), 3);
+    assertEquals(1, m2.get("apple"));
+    assertEquals(2, m1.get("banana"));
+    assertEquals(3, m1.get("grape"));
+    assertEquals(2, m2.get("banana"));  // This test makes sure m2 still has the m1 values.
 
   }
 
