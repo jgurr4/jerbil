@@ -5,25 +5,28 @@ import com.ple.jerbil.Immutable;
 @Immutable
 public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
-  static public final IHashMap empty = new IHashMap(new IHashMapEntry[0], 5, 0);
+  static public final IHashMap empty = new IHashMap(new IHashMapEntry[0], 5, 0, bucketCount);
   private final IHashMapEntry<K, V>[] entries;
   private final int bucketSize;
-  private final float threshold = 0.3f;
+  private static final float threshold = 0.3f;
   private final int entriesInUse;
+  private final int bucketCount;
 
-  public IHashMap(IHashMapEntry<K, V>[] entries, int bucketSize, int entriesInUse) {
+  public IHashMap(IHashMapEntry<K, V>[] entries, int bucketSize, int entriesInUse, int bucketCount) {
 
     this.entries = entries;
     this.bucketSize = bucketSize;
     this.entriesInUse = entriesInUse;
+    this.bucketCount = bucketCount;
 
   }
 
   public static <K, V> IHashMap<K, V> from(Object... objects) {
 
     assert objects.length % 2 == 0;
+    final int entriesInUse = objects.length / 2;
     final int bucketSize = 5;
-    final int entryCount = (int) (objects.length / empty.threshold);
+    final int entryCount = (int) (objects.length / threshold);  // Should be (objects.length / 2 / threshold)
     final int bucketCount = entryCount / bucketSize;
     final IHashMapEntry<K, V>[] entries = new IHashMapEntry[entryCount];
     for (int i = 0; i < objects.length - 1; i += 2) {
@@ -44,10 +47,8 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
           entryIndex = 0;
         }
       }
-
     }
-    IHashMap<K, V> map = new IHashMap<>(buckets, 10, entriesInUse);
-
+    IHashMap<K, V> map = new IHashMap<>(entries, bucketSize, entriesInUse, bucketCount);
     return map;
   }
 
@@ -65,8 +66,24 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
   @Override
   public IHashMap<K, V> put(K key, V value) {
-    // use From method here somehow.
-    return null;
+
+    final int hashCode = Math.abs(key.hashCode());
+    final int bucketIndex = hashCode % bucketCount;
+    int c = 0;
+    int entryIndex = bucketIndex * bucketSize;
+    while (c < entries.length) {
+      if (entries[entryIndex] == null) {
+        entries[entryIndex] = IHashMapEntry.from(key, value);
+        break;
+      }
+      c++;
+      entryIndex++;
+      if (entryIndex >= entries.length) {
+        entryIndex = 0;
+      }
+    }
+
+    return new IHashMap<>(entries, bucketSize, entriesInUse, bucketCount);
   }
 
   @Override
@@ -87,7 +104,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
     final IHashMapEntry<K, V>[] newBuckets = new IHashMapEntry[entries.length];
     copyHashTable(entries, newBuckets);
-    return new IHashMap(newBuckets, newBucketSize, entriesInUse);
+    return new IHashMap(newBuckets, newBucketSize, entriesInUse, bucketCount);
 
   }
 
@@ -95,7 +112,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
     final IHashMapEntry<K, V>[] newBuckets = new IHashMapEntry[newBucketCount];
     rehash(entries, newBuckets);
-    return new IHashMap(newBuckets, newBucketCount, entriesInUse);
+    return new IHashMap(newBuckets, newBucketCount, entriesInUse, bucketCount);
   }
 
   private void rehash(IHashMapEntry<K, V>[] buckets, IHashMapEntry<K, V>[] newBuckets) {  // rehash is useful for adding when your bucket array is full.
