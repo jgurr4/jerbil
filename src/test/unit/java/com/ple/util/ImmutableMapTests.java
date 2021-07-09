@@ -25,15 +25,15 @@ public class ImmutableMapTests {
   @Test
   void testListExpansion() {
 
-    IHashMap<String, String> m1 = IHashMap.empty.setBucketCount(1).setBucketSize(2).setMaxBucketSize(10);
+    IHashMap<String, String> m1 = IHashMap.empty.setBucketCount(1).setBucketSize(2);
     assertEquals(m1.getBucketCount(), 1);
-    assertEquals(m1.getBucketCapacity(0), 2);
-    assertEquals(m1.getBucketSize(0), 0);
+    assertEquals(2, m1.getBucketCapacity(0));
+    assertEquals(0, m1.getBucketSize(0));
 
     var m2 = m1.putAll("apple", "red", "banana", "yellow");
-    assertEquals(m2.getBucketCount(), 1);
-    assertEquals(m2.getBucketCapacity(0), 2);
-    assertEquals(m2.getBucketSize(0), 2);
+    assertEquals(6, m2.getBucketCount());
+    assertEquals(2, m2.getBucketCapacity(0));
+    assertEquals(0, m2.getBucketSize(0));
 
     var m3 = m2.put("grape", "purple");
     assertEquals(m3.getBucketCount(), 1);
