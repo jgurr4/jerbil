@@ -5,19 +5,21 @@ import com.ple.jerbil.Immutable;
 @Immutable
 public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
-  static public final IHashMap empty = new IHashMap(new IHashMapEntry[0], 5, 0, 6);
+  static public final IHashMap empty = new IHashMap(new IHashMapEntry[0], 5, 0, 6, 2);
   private final IHashMapEntry<K, V>[] entries;
   private final int bucketSize;
-  private static final float threshold = 0.3f;
+  private final float threshold = 0.3f;
   private final int entriesInUse;
   private final int bucketCount;
+  private final int expansionFactor;
 
-  public IHashMap(IHashMapEntry<K, V>[] entries, int bucketSize, int entriesInUse, int bucketCount) {
+  private IHashMap(IHashMapEntry<K, V>[] entries, int bucketSize, int entriesInUse, int bucketCount, int expansionFactor) {
 
     this.entries = entries;
     this.bucketSize = bucketSize;
     this.entriesInUse = entriesInUse;
     this.bucketCount = bucketCount;
+    this.expansionFactor = expansionFactor;
 
   }
 
@@ -26,7 +28,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
     assert objects.length % 2 == 0;
     final int entriesInUse = objects.length / 2;
     final int bucketSize = 5;
-    final int entryCount = (int) (objects.length / threshold);
+    final int entryCount = (int) (objects.length / .3f);
     final int bucketCount = entryCount / bucketSize;
     final IHashMapEntry<K, V>[] entries = new IHashMapEntry[entryCount];
     for (int i = 0; i < objects.length - 1; i += 2) {
@@ -48,7 +50,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
         }
       }
     }
-    final IHashMap<K, V> map = new IHashMap<>(entries, bucketSize, entriesInUse, bucketCount);
+    final IHashMap<K, V> map = new IHashMap<>(entries, bucketSize, entriesInUse, bucketCount, 2);
     return map;
   }
 
@@ -90,7 +92,7 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
         }
       }
     }
-    final IHashMap<K, V> map = new IHashMap<>(newEntries, bucketSize, newEntriesInUse, newBucketCount);
+    final IHashMap<K, V> map = new IHashMap<>(newEntries, bucketSize, newEntriesInUse, newBucketCount, 2);
     return map;
 
   }
@@ -100,9 +102,6 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
    * recreate the IHashMap object for each loop/entry. Instead you should use .putAll() method since that
    * will only recreate the IHashMap one time no matter how many entries you put in.
    *
-   * @param key
-   * @param value
-   * @return
    */
   @Override
   public IHashMap<K, V> put(K key, V value) {
@@ -132,12 +131,16 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
       }
     }
     if (entriesInUse > newEntries.length * threshold) {
-      final int entryCount = (int) (entriesInUse * 2 / threshold);
+      final int entryCount = getEntryCount();
       newBucketCount = entryCount / bucketSize;
       newEntries = new IHashMapEntry[entryCount];
     }
-    final IHashMap<K, V> map = new IHashMap<>(newEntries, bucketSize, newEntriesInUse, newBucketCount);
+    final IHashMap<K, V> map = new IHashMap<>(newEntries, bucketSize, newEntriesInUse, newBucketCount, 2);
     return map;
+  }
+
+  private int getEntryCount() {
+    return (int) (entriesInUse * expansionFactor / threshold);
   }
 
   @Override
@@ -167,31 +170,31 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
   public IHashMap<K, V> setBucketSize(int newBucketSize) {
 
-    final IHashMapEntry<K, V>[] newBuckets = new IHashMapEntry[entries.length];
-    rehash(entries, newBuckets, bucketCount, newBucketSize);
-    return new IHashMap(newBuckets, newBucketSize, entriesInUse, bucketCount);
+    final IHashMapEntry<K, V>[] newEntries = new IHashMapEntry[entries.length];
+    rehash(entries, newEntries, bucketCount, newBucketSize);
+    return new IHashMap(newEntries, newBucketSize, entriesInUse, bucketCount, 2);
 
   }
 
   public IHashMap<K, V> setBucketCount(int newBucketCount) {
 
-    final IHashMapEntry<K, V>[] newBuckets = new IHashMapEntry[newBucketCount * bucketSize];
-    rehash(entries, newBuckets, newBucketCount, bucketSize);
-    return new IHashMap(newBuckets, bucketSize, entriesInUse, newBucketCount);
+    final IHashMapEntry<K, V>[] newEntries = new IHashMapEntry[newBucketCount * bucketSize];
+    rehash(entries, newEntries, newBucketCount, bucketSize);
+    return new IHashMap(newEntries, bucketSize, entriesInUse, newBucketCount, 2);
   }
 
-  private void rehash(IHashMapEntry<K, V>[] entries, IHashMapEntry<K, V>[] newBuckets, int newBucketCount, int newBucketSize) {
+  private void rehash(IHashMapEntry<K, V>[] entries, IHashMapEntry<K, V>[] newEntries, int newBucketCount, int newBucketSize) {
 
     for (int i = 0; i < entries.length; i++) {
       if (entries[i] != null) {
         IHashMapEntry<K, V> entry = entries[i];
         final int newBucketIndex = Math.abs(entry.getKey().hashCode()) % newBucketCount * newBucketSize;
-        for (int k = newBucketIndex; k < newBuckets.length; k++) {
-          if (k > newBuckets.length) {
+        for (int k = newBucketIndex; k < newEntries.length; k++) {
+          if (k > newEntries.length) {
             k = 0;
           }
-          if (newBuckets[k] == null) {
-            newBuckets[k] = entry;
+          if (newEntries[k] == null) {
+            newEntries[k] = entry;
             break;
           }
         }
@@ -200,44 +203,29 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
   }
 
-  private void copyHashTable(IHashMapEntry<K, V>[] buckets, IHashMapEntry<K, V>[] newBuckets) {
-
-    for (int i = 0; i < buckets.length; i++) {
-      newBuckets[i] = buckets[i];
-    }
-  }
-
   public int getBucketCount() {
-
     return bucketCount;
   }
 
-  public int getBucketCapacity(int bucketIndex) {
-
-    int spaceAvailable = 0;
-    for (int i = 0; i < bucketSize; i++) {
-      if (entries[bucketIndex + i] == null) {
-        spaceAvailable++;
-      }
-    }
-
-    return spaceAvailable;
+  public int getBucketSize() {
+    return bucketSize;
   }
 
-  public int getBucketSize(int bucketIndex) {
+  public IHashMap<K, V> setThreshold(double v) {
 
-    int numValues = 0;
-    for (int i = 0; i < bucketSize; i++) {
-      if (entries[bucketIndex + i] != null) {
-        numValues++;
-      }
+    IHashMapEntry<K, V>[] newEntries = entries;
+    int newBucketCount = bucketCount;
+    if (entriesInUse > entries.length * threshold) {
+      newEntries = new IHashMapEntry[entries.length];
+      newBucketCount = getEntryCount() / bucketSize;
+      rehash(entries, newEntries, newBucketCount, bucketSize);
     }
-    return numValues;
+    return new IHashMap(newEntries, bucketSize, entriesInUse, newBucketCount, expansionFactor);
   }
 
 }
 
-class IHashMapEntry<K, V> {    // This used to be private static, but for some reason it's not allowed anymore.
+class IHashMapEntry<K, V> {
 
   private final K key;
   private final V value;
