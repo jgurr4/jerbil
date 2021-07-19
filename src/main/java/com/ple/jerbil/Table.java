@@ -22,7 +22,7 @@ public abstract class Table {
     return null;
   }
 
-  public Query join(Table... tables) {
+  public Query join(TableExpression... tables) {
     return null;
   }
 

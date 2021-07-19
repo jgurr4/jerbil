@@ -5,7 +5,8 @@ import javax.swing.*;
 @Immutable
 public class Expression {
 
-  public Expression as(String name) {
+  public AliasedColumn as(String name) {
+    // Return Aliased Field or Aliased
 
     return null;
   }

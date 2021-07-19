@@ -18,7 +18,7 @@ public class ImmutableMapTests {
     assertEquals(1, m2.get("apple"));
     assertEquals(2, m1.get("banana"));
     assertEquals(3, m1.get("grape"));
-    assertEquals(2, m2.get("banana"));  // This test makes sure m2 still has the m1 values.
+    assertEquals(2, m2.get("banana"));
 
   }
 
