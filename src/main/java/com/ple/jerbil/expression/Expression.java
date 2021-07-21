@@ -1,12 +1,12 @@
-package com.ple.jerbil;
+package com.ple.jerbil.expression;
 
-import javax.swing.*;
+import com.ple.jerbil.Immutable;
 
 @Immutable
-public class Expression {
+public class Expression extends SelectExpression {
 
-  public AliasedColumn as(String name) {
-    // Return Aliased Field or Aliased
+  public AliasedExpression as(String name) {
+    // Return Aliased Field.
 
     return null;
   }
@@ -34,6 +34,10 @@ public class Expression {
   public Expression dividedBy(Expression i) {
 
     return null;
+  }
+
+  public BooleanExpression eq(String item) {
+    return Equals.from(this, Literal.from(item));
   }
 
 }

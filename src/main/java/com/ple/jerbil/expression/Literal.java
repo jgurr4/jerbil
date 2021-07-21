@@ -1,6 +1,5 @@
-package com.ple.jerbil;
+package com.ple.jerbil.expression;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public class Literal extends Expression {
@@ -14,7 +13,6 @@ public class Literal extends Expression {
   }
 
   public static Literal from(int i) {
-
     return null;
   }
 

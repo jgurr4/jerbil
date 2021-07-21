@@ -1,9 +1,10 @@
 package com.ple.jerbil;
 
+import com.ple.jerbil.expression.Agg;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
-import static com.ple.jerbil.Literal.from;
+import static com.ple.jerbil.expression.Literal.from;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlQueryTests {

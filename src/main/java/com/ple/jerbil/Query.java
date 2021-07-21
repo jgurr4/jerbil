@@ -1,5 +1,9 @@
 package com.ple.jerbil;
 
+import com.ple.jerbil.expression.BooleanExpression;
+import com.ple.jerbil.expression.Column;
+import com.ple.jerbil.expression.Expression;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

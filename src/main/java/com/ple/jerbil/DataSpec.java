@@ -8,4 +8,9 @@ public class DataSpec {
     return null;
   }
 
+  public static DataSpec from(DataType type) {
+
+    return null;
+  }
+
 }

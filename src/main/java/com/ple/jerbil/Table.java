@@ -1,9 +1,12 @@
 package com.ple.jerbil;
 
-import java.awt.*;
+import com.ple.jerbil.expression.BooleanExpression;
+import com.ple.jerbil.expression.Expression;
+import com.ple.jerbil.expression.SelectExpression;
+import com.ple.jerbil.expression.TableExpression;
 
 @DelayedImmutable
-public abstract class Table {
+public abstract class Table implements TableExpression {
 
   protected StorageEngine engine = StorageEngine.simple;
   private final String tableName;
@@ -14,10 +17,11 @@ public abstract class Table {
 
   public Query where(BooleanExpression condition) {
 
+    System.out.println(condition);
     return null;
   }
 
-  public Query select(Expression... expression) {
+  public Query select(SelectExpression... expression) {
 
     return null;
   }

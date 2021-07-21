@@ -1,4 +1,9 @@
-package com.ple.jerbil;
+package com.ple.jerbil.expression;
+
+import com.ple.jerbil.DataSpec;
+import com.ple.jerbil.DataType;
+import com.ple.jerbil.DelayedImmutable;
+import com.ple.jerbil.Table;
 
 @DelayedImmutable
 public class Column extends Expression {
@@ -47,11 +52,8 @@ public class Column extends Expression {
   }
 
   public Column integer() {
-    return null;
-  }
-
-  public BooleanExpression eq(String john) {
-    return null;
+    this.dataSpec = DataSpec.from(DataType.integer);
+    return this;
   }
 
 }
