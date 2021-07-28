@@ -1,7 +1,8 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.expression.Literal;
-import com.ple.jerbil.query.CompleteQuery;
+import com.ple.jerbil.sql.Database;
+import com.ple.jerbil.sql.expression.Literal;
+import com.ple.jerbil.sql.query.CompleteQuery;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 

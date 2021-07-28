@@ -1,8 +1,8 @@
 package com.ple.jerbil.testcommon;
 
-import com.ple.jerbil.expression.Column;
-import com.ple.jerbil.StorageEngine;
-import com.ple.jerbil.Table;
+import com.ple.jerbil.sql.expression.Column;
+import com.ple.jerbil.sql.StorageEngine;
+import com.ple.jerbil.sql.Table;
 
 public class PlayerTable extends Table {
 

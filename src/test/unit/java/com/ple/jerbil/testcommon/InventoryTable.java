@@ -1,7 +1,7 @@
 package com.ple.jerbil.testcommon;
 
-import com.ple.jerbil.expression.Column;
-import com.ple.jerbil.Table;
+import com.ple.jerbil.sql.expression.Column;
+import com.ple.jerbil.sql.Table;
 
 public class InventoryTable extends Table {
 
