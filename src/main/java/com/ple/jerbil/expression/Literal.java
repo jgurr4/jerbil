@@ -4,15 +4,15 @@ import java.util.List;
 
 public class Literal extends Expression {
 
-  public static Literal from(String string) {
+  public static Literal make(String string) {
     return null;
   }
 
-  public static Literal from(List list) {
+  public static Literal make(List list) {
     return null;
   }
 
-  public static Literal from(int i) {
+  public static Literal make(int i) {
     return null;
   }
 

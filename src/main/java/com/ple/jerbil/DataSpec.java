@@ -3,12 +3,12 @@ package com.ple.jerbil;
 @Immutable
 public class DataSpec {
 
-  public static DataSpec from(DataType type, int size) {
+  public static DataSpec make(DataType type, int size) {
 
     return null;
   }
 
-  public static DataSpec from(DataType type) {
+  public static DataSpec make(DataType type) {
 
     return null;
   }

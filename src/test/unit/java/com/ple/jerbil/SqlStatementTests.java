@@ -1,6 +1,7 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.expression.Literal;
+import com.ple.jerbil.query.CompleteQuery;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
@@ -15,12 +16,12 @@ public class SqlStatementTests {
   final ItemTable item = new ItemTable();
   final InventoryTable inventory = new InventoryTable();
 
-  final Database testDb = Database.from("test").add(user, player, item, inventory);
+  final Database testDb = Database.make("test").add(user, player, item, inventory);
 
   @Test
   void testInsertSingle() {
 
-    final Query q = item.insert().set(item.name, Literal.from("sword of spirit")).set(item.type, Literal.from(ItemType.weapon.toString()));
+    final CompleteQuery q = item.insert().set(item.name, Literal.make("sword of spirit")).set(item.type, Literal.make(ItemType.weapon.toString()));
     assertEquals(q.toString(), """
       insert into item
       set name='sword of spirit',
@@ -32,7 +33,7 @@ public class SqlStatementTests {
   @Test
   void testInsertMulti() {
 
-    final Query q = item.insert().set(
+    final CompleteQuery q = item.insert().set(
       List.of(item.name, item.type),
       List.of(
         List.of("sword of spirit", ItemType.weapon.toString()),
@@ -53,7 +54,7 @@ public class SqlStatementTests {
   @Test
   void testTableCreate() {
 
-    final Query q = item.create();
+    final CompleteQuery q = item.create();
     assertEquals(q.toString(), """
       create table item (
         itemId long not null primary key,
@@ -67,7 +68,7 @@ public class SqlStatementTests {
   @Test
   void testMultiColumnPrimaryKey() {
 
-    final Query q = inventory.create();
+    final CompleteQuery q = inventory.create();
     assertEquals(q.toString(), """
       create table inventory (
         player long not null,

@@ -9,7 +9,7 @@ public class Database {
     this.name = name;
   }
 
-  public static Database from(String name) {
+  public static Database make(String name) {
     return new Database(name);
   }
 

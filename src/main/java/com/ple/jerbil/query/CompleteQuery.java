@@ -1,36 +1,36 @@
-package com.ple.jerbil;
+package com.ple.jerbil.query;
 
+import com.ple.jerbil.Global;
+import com.ple.jerbil.Immutable;
+import com.ple.jerbil.SqlGenerator;
+import com.ple.jerbil.Table;
 import com.ple.jerbil.expression.BooleanExpression;
 import com.ple.jerbil.expression.Column;
 import com.ple.jerbil.expression.Expression;
+import com.ple.jerbil.expression.SelectExpression;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Immutable
-public class Query {
+public class CompleteQuery extends Query {
 
   private final QueryType type;
+  private final Table table;
   private List<Map<Column, Expression>> dataToInsert;
 
-  public Query(QueryType type) {
+  private CompleteQuery(QueryType type, Table table, List<Map<Column, Expression>> dataToInsert) {
     this.type = type;
-
-  }
-
-  public Query(QueryType type, List<Map<Column, Expression>> dataToInsert) {
-
-    this.type = type;
+    this.table = table;
     this.dataToInsert = dataToInsert;
   }
 
-  public static Query from(QueryType type) {
-
-    return new Query(type);
+  public static CompleteQuery make(QueryType type, Table table) {
+    return new CompleteQuery(table);
   }
 
-  public Query select(Expression... expressions) {
+  public CompleteQuery select(SelectExpression... expressions) {
     return null;
   }
 
@@ -46,11 +46,11 @@ public class Query {
     return null;
   }
 
-  public Query where(BooleanExpression condition) {
+  public CompleteQuery where(BooleanExpression condition) {
     return null;
   }
 
-  public Query set(Column name, Expression expression) {
+  public CompleteQuery set(Column name, Expression expression) {
 
     Map<Column, Expression> map;
     if (dataToInsert.size() == 0 ) {
@@ -60,19 +60,19 @@ public class Query {
       map = dataToInsert.get(dataToInsert.size() - 1);
     }
     map.put(name, expression);
-    return new Query(type, dataToInsert);
+    return new CompleteQuery(type, dataToInsert);
   }
 
-  public Query set(List<Column> columns, List<List<String>> values) {
+  public CompleteQuery set(List<Column> columns, List<List<String>> values) {
     return null;
   }
 
-  public Query and(BooleanExpression expression) {
+  public CompleteQuery and(BooleanExpression expression) {
 
     return null;
   }
 
-  public Query groupBy(Column name) {
+  public CompleteQuery groupBy(Column name) {
 
     return null;
   }

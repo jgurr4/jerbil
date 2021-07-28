@@ -37,7 +37,7 @@ public class Expression extends SelectExpression {
   }
 
   public BooleanExpression eq(String item) {
-    return Equals.from(this, Literal.from(item));
+    return Equals.make(this, Literal.make(item));
   }
 
 }

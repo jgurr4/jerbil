@@ -145,7 +145,6 @@ public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
 
   @Override
   public int size() {
-
     return entriesInUse;
   }
 

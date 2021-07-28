@@ -30,7 +30,7 @@ public class Column extends Expression {
   }
 
   public Column varchar(int size) {
-    this.dataSpec = DataSpec.from(DataType.varchar, size);
+    this.dataSpec = DataSpec.make(DataType.varchar, size);
     return this;
   }
 
@@ -52,7 +52,7 @@ public class Column extends Expression {
   }
 
   public Column integer() {
-    this.dataSpec = DataSpec.from(DataType.integer);
+    this.dataSpec = DataSpec.make(DataType.integer);
     return this;
   }
 

@@ -1,9 +1,11 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.expression.BooleanExpression;
-import com.ple.jerbil.expression.Expression;
 import com.ple.jerbil.expression.SelectExpression;
 import com.ple.jerbil.expression.TableExpression;
+import com.ple.jerbil.query.PartialQuery;
+import com.ple.jerbil.query.CompleteQuery;
+import com.ple.jerbil.query.QueryType;
 
 @DelayedImmutable
 public abstract class Table implements TableExpression {
@@ -15,26 +17,23 @@ public abstract class Table implements TableExpression {
     this.tableName = name;
   }
 
-  public Query where(BooleanExpression condition) {
+  public PartialQuery where(BooleanExpression condition) {
+    return PartialQuery.make(this).where(condition);
+  }
 
-    System.out.println(condition);
+  public CompleteQuery select(SelectExpression... expression) {
+    return CompleteQuery.make(QueryType.select);
+  }
+
+  public CompleteQuery join(TableExpression... tables) {
     return null;
   }
 
-  public Query select(SelectExpression... expression) {
-
-    return null;
+  public CompleteQuery insert() {
+    return CompleteQuery.make(QueryType.insert);
   }
 
-  public Query join(TableExpression... tables) {
-    return null;
-  }
-
-  public Query insert() {
-    return Query.from(QueryType.insert);
-  }
-
-  public Query create() {
+  public CompleteQuery create() {
     return null;
   }
 
