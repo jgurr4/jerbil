@@ -6,9 +6,7 @@ import com.ple.jerbil.sql.Immutable;
 public class Expression extends SelectExpression {
 
   public AliasedExpression as(String name) {
-    // Return Aliased Field.
-
-    return null;
+    return AliasedExpression.make(name);
   }
 
   public Expression times(Expression i) {

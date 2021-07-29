@@ -4,6 +4,8 @@ import com.ple.jerbil.sql.Database;
 import com.ple.jerbil.sql.expression.Agg;
 import com.ple.jerbil.sql.expression.Literal;
 import com.ple.jerbil.sql.query.CompleteQuery;
+import com.ple.jerbil.sql.query.PartialSelectQuery;
+import com.ple.jerbil.sql.query.SelectQuery;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
@@ -119,6 +121,6 @@ public class SqlQueryTests {
 
   @Test
   void testExpressionWithoutTable() {
-    final CompleteQuery q = Literal.make(32).minus(make(15)).as("result").select();
+    final PartialSelectQuery q = Literal.make(32).minus(make(15)).as("result").select();
   }
 }

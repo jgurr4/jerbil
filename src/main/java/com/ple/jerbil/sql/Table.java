@@ -1,11 +1,11 @@
 package com.ple.jerbil.sql;
 
-import com.ple.jerbil.sql.expression.BooleanExpression;
-import com.ple.jerbil.sql.expression.SelectExpression;
-import com.ple.jerbil.sql.expression.TableExpression;
-import com.ple.jerbil.sql.query.PartialQuery;
-import com.ple.jerbil.sql.query.CompleteQuery;
-import com.ple.jerbil.sql.query.QueryType;
+import com.ple.jerbil.sql.expression.*;
+import com.ple.jerbil.sql.query.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @DelayedImmutable
 public abstract class Table implements TableExpression {
@@ -21,16 +21,16 @@ public abstract class Table implements TableExpression {
     return PartialQuery.make(this, condition);
   }
 
-  public CompleteQuery select(SelectExpression... expressions) {
-    return CompleteQuery.make(QueryType.select, this, );
+  public SelectQuery select(SelectExpression... expressions) {
+    return SelectQuery.make(expressions, this, QueryType.select);
   }
 
   public CompleteQuery join(TableExpression... tables) {
     return null;
   }
 
-  public CompleteQuery insert() {
-    return CompleteQuery.make(QueryType.insert);
+  public InsertQuery insert() {
+    return InsertQuery.make(Collections.emptyList(), this, QueryType.insert);
   }
 
   public CompleteQuery create() {
