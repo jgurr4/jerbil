@@ -9,8 +9,8 @@ public class ImmutableMapTests {
   @Test
   void testSimple() {
 
-    IMap<String, Integer, ?> m1 = IHashMap.from("banana", 2, "grape", 3);
-    IMap<String, Integer, ?> m2 = m1.put("apple", 1);
+    IMap<String, Integer> m1 = IHashMap.from("banana", 2, "grape", 3);
+    IMap<String, Integer> m2 = m1.put("apple", 1);
 
     assertEquals(2, m1.size());
     assertEquals(3, m2.size());

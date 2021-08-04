@@ -3,12 +3,22 @@ package com.ple.jerbil.sql.query;
 import com.ple.jerbil.sql.Global;
 import com.ple.jerbil.sql.Immutable;
 import com.ple.jerbil.sql.SqlGenerator;
+import com.ple.jerbil.sql.fromExpression.Table;
 import com.ple.jerbil.sql.expression.BooleanExpression;
 import com.ple.jerbil.sql.expression.Column;
 import com.ple.jerbil.sql.expression.Expression;
+import org.jetbrains.annotations.Nullable;
 
 @Immutable
 public class CompleteQuery extends Query {
+
+  protected CompleteQuery(@Nullable Table table) {
+    super(table);
+  }
+
+  public static CompleteQuery make() {
+    return new CompleteQuery(null);
+  }
 
   public String toSql() {
     if (Global.sqlGenerator == null) {

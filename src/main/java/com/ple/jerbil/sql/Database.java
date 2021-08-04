@@ -1,5 +1,7 @@
 package com.ple.jerbil.sql;
 
+import com.ple.jerbil.sql.fromExpression.Table;
+
 @DelayedImmutable
 public class Database {
 

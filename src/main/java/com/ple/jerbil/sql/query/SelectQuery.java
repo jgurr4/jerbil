@@ -1,25 +1,25 @@
 package com.ple.jerbil.sql.query;
 
-import com.ple.jerbil.sql.Table;
+import com.ple.jerbil.sql.Immutable;
+import com.ple.jerbil.sql.fromExpression.Table;
 import com.ple.jerbil.sql.expression.SelectExpression;
+import com.ple.util.IList;
+import org.jetbrains.annotations.Nullable;
 
+@Immutable
 public class SelectQuery extends CompleteQuery {
-  private final SelectExpression[] expressions;
-  private final Table table;
-  private final QueryType type;
+  public final IList<SelectExpression> expressions;
 
-  private SelectQuery(SelectExpression[] expressions, Table table, QueryType type) {
+  protected SelectQuery(IList<SelectExpression> expressions, @Nullable Table table) {
+    super(table);
     this.expressions = expressions;
-    this.table = table;
-    this.type = type;
   }
 
-  public static SelectQuery make(SelectExpression[] expressions, Table table, QueryType type) {
-    return new SelectQuery(expressions, table, type);
+  public static SelectQuery make(IList<SelectExpression> expressions, @Nullable Table table) {
+    return new SelectQuery(expressions, table);
   }
 
-  public SelectQuery select(SelectExpression... expressions) {
-    return null;
+  public static SelectQuery make(IList<SelectExpression> expressions) {
+    return new SelectQuery(expressions, null);
   }
-
 }

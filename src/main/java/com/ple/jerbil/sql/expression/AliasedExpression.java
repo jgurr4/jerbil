@@ -1,9 +1,9 @@
 package com.ple.jerbil.sql.expression;
 
 public class AliasedExpression extends SelectExpression {
-  private final String name;
+  public final String name;
 
-  public AliasedExpression(String name) {
+  protected AliasedExpression(String name) {
     this.name = name;
   }
 

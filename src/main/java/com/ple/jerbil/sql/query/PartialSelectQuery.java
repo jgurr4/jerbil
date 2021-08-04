@@ -1,19 +1,20 @@
 package com.ple.jerbil.sql.query;
 
-import com.ple.jerbil.sql.Table;
 import com.ple.jerbil.sql.expression.BooleanExpression;
-import com.ple.jerbil.sql.expression.Expression;
 import com.ple.jerbil.sql.expression.SelectExpression;
+import com.ple.jerbil.sql.fromExpression.Table;
+import org.jetbrains.annotations.Nullable;
 
 public class PartialSelectQuery extends PartialQuery {
-  private final SelectExpression condition;
+  public final SelectExpression condition;
 
-  private PartialSelectQuery(SelectExpression condition) {
+  protected PartialSelectQuery(SelectExpression condition, @Nullable Table table) {
+    super(table);
     this.condition = condition;
   }
 
   public static PartialSelectQuery make(SelectExpression condition) {
-    return new PartialSelectQuery(condition);
+    return new PartialSelectQuery(condition, null);
   }
 
   public PartialSelectQuery where(BooleanExpression condition) {

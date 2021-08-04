@@ -3,7 +3,7 @@ package com.ple.util;
 import com.ple.jerbil.sql.Immutable;
 
 @Immutable
-public class IHashMap<K, V> implements IMap<K, V, IHashMap<K, V>> {
+public class IHashMap<K, V> implements IMap<K, V> {
 
   static public final IHashMap empty = new IHashMap(new IHashMapEntry[0], 5, 0, 6, 2);
   private final IHashMapEntry<K, V>[] entries;

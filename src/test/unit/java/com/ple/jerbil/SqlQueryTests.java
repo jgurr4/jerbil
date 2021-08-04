@@ -58,7 +58,7 @@ public class SqlQueryTests {
   @Test
   void testSelectEnum() {
 
-    final CompleteQuery q = item.where(item.type.eq(ItemType.weapon.toString()));
+    final CompleteQuery q = item.where(item.type.eq(ItemType.weapon.toString())).selectAll();
     assertEquals(q.toSql(), """
       select * 
       from item 
@@ -121,6 +121,6 @@ public class SqlQueryTests {
 
   @Test
   void testExpressionWithoutTable() {
-    final PartialSelectQuery q = Literal.make(32).minus(make(15)).as("result").select();
+    final CompleteQuery q = Literal.make(32).minus(make(15)).as("result").select();
   }
 }
