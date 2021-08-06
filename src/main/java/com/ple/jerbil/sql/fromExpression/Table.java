@@ -23,8 +23,8 @@ public abstract class Table extends FromExpression {
     return QueryWithFrom.make(this, condition);
   }
 
-  public SelectQuery select(IList expressions) {
-    return SelectQuery.make(expressions, this);
+  public SelectQuery select(SelectExpression expressions) {
+    return SelectQuery.make(IArrayList.make(expressions), this);
   }
 
   public CompleteQuery join(FromExpression... tables) {

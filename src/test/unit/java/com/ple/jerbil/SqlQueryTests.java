@@ -7,6 +7,7 @@ import com.ple.jerbil.sql.query.CompleteQuery;
 import com.ple.jerbil.sql.query.PartialSelectQuery;
 import com.ple.jerbil.sql.query.SelectQuery;
 import com.ple.jerbil.testcommon.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static com.ple.jerbil.sql.expression.Literal.make;
@@ -20,6 +21,29 @@ public class SqlQueryTests {
   final InventoryTable inventory = new InventoryTable();
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
+
+  @BeforeAll
+  @Test
+  void testDatabaseMake() {
+     assertEquals(testDb.toSql(), """
+       create database `test`;
+       create table `user` ( 
+       `userId` int primary key auto_increment,
+       `name` varchar(20),
+       key (`name`)); 
+       create table `player` (
+       `playerId` int primary key auto_increment,
+       `userId` int,
+       `name` varchar(20));
+       create table `item` (
+       `itemId` int primary key auto_increment,
+       `name` varchar(255),
+       `type` enum('weapon','armor','shield','accessory'),
+       `price` int ));
+       create table `inventory` (
+       `playerId` int,
+       `itemId` int ));""");
+  }
 
   @Test
   void testSelect() {
@@ -122,5 +146,6 @@ public class SqlQueryTests {
   @Test
   void testExpressionWithoutTable() {
     final CompleteQuery q = Literal.make(32).minus(make(15)).as("result").select();
+    assertEquals(q.toSql(), "select 32 - 15 as `result`");
   }
 }

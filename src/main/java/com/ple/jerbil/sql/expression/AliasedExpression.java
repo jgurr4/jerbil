@@ -1,5 +1,8 @@
 package com.ple.jerbil.sql.expression;
 
+import com.ple.jerbil.sql.Immutable;
+
+@Immutable
 public class AliasedExpression extends SelectExpression {
   public final String name;
 

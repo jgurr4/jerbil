@@ -19,4 +19,8 @@ public class Database {
     return null;
   }
 
+  public String toSql() {
+    return null;
+  }
+
 }
