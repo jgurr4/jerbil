@@ -23,7 +23,7 @@ public abstract class Table extends FromExpression {
     return QueryWithFrom.make(this, condition);
   }
 
-  public SelectQuery select(SelectExpression expressions) {
+  public SelectQuery select(SelectExpression... expressions) {
     return SelectQuery.make(IArrayList.make(expressions), this);
   }
 

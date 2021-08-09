@@ -1,6 +1,7 @@
 package com.ple.jerbil.sql;
 
 import com.ple.jerbil.sql.fromExpression.Table;
+import com.ple.jerbil.sql.query.QueryList;
 
 @DelayedImmutable
 public class Database {
@@ -20,6 +21,10 @@ public class Database {
   }
 
   public String toSql() {
+    return null;
+  }
+
+  public QueryList createAll() {
     return null;
   }
 

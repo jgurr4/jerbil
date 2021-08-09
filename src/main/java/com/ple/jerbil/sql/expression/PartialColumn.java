@@ -1,19 +1,18 @@
 package com.ple.jerbil.sql.expression;
 
 import com.ple.jerbil.sql.DataSpec;
-import com.ple.jerbil.sql.DelayedImmutable;
 import com.ple.jerbil.sql.fromExpression.Table;
+import org.jetbrains.annotations.Nullable;
 
-@DelayedImmutable
-public class Column extends Expression {
+public class PartialColumn {
 
   public final String name;
   public final Table table;
-  public final DataSpec dataSpec;
+  @Nullable public final DataSpec dataSpec;
   public final boolean indexed;
-  private final boolean primary;
+  public final boolean primary;
 
-  protected Column(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
+  protected PartialColumn(String name, Table table, @Nullable DataSpec dataSpec, boolean indexed, boolean primary) {
     this.name = name;
     this.table = table;
     this.dataSpec = dataSpec;
@@ -37,7 +36,24 @@ public class Column extends Expression {
     return null;
   }
 
+  public Column id() {
+    // This means the column is int and indexed. Or alternatively it could mean primary key and auto_incremented.
+    return null;
+  }
+
+  public Column enumOf(Class aClass) {
+    return null;
+  }
+
   public Column varchar() {
+    return varchar(255);
+  }
+
+  public Column integer() {
+    return null;
+  }
+
+  public Column integer(int size) {
     return null;
   }
 
