@@ -6,8 +6,11 @@ public interface IMap<K, V> {
 
    IMap<K, V> put(K key, V value);
 
-   int size();
+  IMap<K, V> remove(K key);
+
+  int size();
 
    V get(K key);
+
 
 }

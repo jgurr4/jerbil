@@ -6,10 +6,7 @@ import com.ple.jerbil.sql.Database;
 import com.ple.jerbil.sql.expression.Column;
 import com.ple.jerbil.sql.query.Query;
 import com.ple.jerbil.sql.query.QueryList;
-import com.ple.jerbil.testcommon.InventoryTable;
-import com.ple.jerbil.testcommon.ItemTable;
-import com.ple.jerbil.testcommon.PlayerTable;
-import com.ple.jerbil.testcommon.UserTable;
+import com.ple.jerbil.testcommon.*;
 import com.ple.util.IList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -19,9 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SqlStructureTests {
 
   final UserTable user = new UserTable();
+  final UserTableColumns userColumns = new UserTableColumns(user);
   final PlayerTable player = new PlayerTable();
+  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
   final ItemTable item = new ItemTable();
+  final ItemTableColumns itemColumns = new ItemTableColumns(item);
   final InventoryTable inventory = new InventoryTable();
+  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
@@ -69,7 +70,7 @@ public class SqlStructureTests {
     //The translator must notice that if a existing column is removed from original code, and it is replaced with a new column
     // of a different name and possibly different data type, then the translator should attempt to rename the column, rather
     // than dropping the column and losing data.
-    item.name = Column.make("userName", item).indexed().varchar();  // Since item.name column already exists, but
+    item.remove(itemColumns.name).set(Column.make("userName", item).indexed().varchar());
     // the column is being recreated. This means the translator must change the column rather than dropping it.
   }
 

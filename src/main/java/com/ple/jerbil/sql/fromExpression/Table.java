@@ -5,38 +5,54 @@ import com.ple.jerbil.sql.StorageEngine;
 import com.ple.jerbil.sql.expression.*;
 import com.ple.jerbil.sql.query.*;
 import com.ple.util.IArrayList;
-import com.ple.util.IList;
-
-import java.util.Collections;
+import com.ple.util.IHashMap;
+import com.ple.util.IMap;
 
 @DelayedImmutable
-public abstract class Table extends FromExpression {
+public class Table extends FromExpression {
 
-  protected StorageEngine engine = StorageEngine.simple;
-  private final String tableName;
+  public final StorageEngine engine;
+  public final String name;
+  public final IMap<String, Column> columns;
 
-  public Table(String name) {
-    this.tableName = name;
+  protected Table(String name) {
+    this(StorageEngine.simple, name, IHashMap.empty);
+  }
+
+  protected Table(StorageEngine engine, String name, IMap<String, Column> columns) {
+    this.engine = engine;
+    this.name = name;
+    this.columns = columns;
+  }
+
+  private static Table make(StorageEngine engine, String name, IMap<String, Column> columns) {
+    return new Table(engine, name, columns);
+  }
+
+  public String toSql() {
+    return "create table " + name + " (" + ")";
   }
 
   public QueryWithFrom where(BooleanExpression condition) {
     return QueryWithFrom.make(this, condition);
   }
 
-  public SelectQuery select(SelectExpression... expressions) {
-    return SelectQuery.make(IArrayList.make(expressions), this);
-  }
-
   public CompleteQuery join(FromExpression... tables) {
     return null;
   }
 
-  public InsertQuery insert() {
-    return InsertQuery.make(IArrayList.make(), this);
-  }
-
   public CompleteQuery create() {
     return null;
+  }
+
+  public Table set(Column column) {
+    final IMap<String, Column> newColumns = columns.put(column.name, column);
+    return new Table(engine, name, newColumns);
+  }
+
+  public Table remove(Column column) {
+    final IMap<String, Column> newColumns = columns.remove(column.name);
+    return new Table(engine, name, newColumns);
   }
 
 }

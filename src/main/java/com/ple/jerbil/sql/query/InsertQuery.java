@@ -1,7 +1,7 @@
 package com.ple.jerbil.sql.query;
 
 import com.ple.jerbil.sql.Immutable;
-import com.ple.jerbil.sql.fromExpression.Table;
+import com.ple.jerbil.sql.fromExpression.FromExpression;
 import com.ple.jerbil.sql.expression.Column;
 import com.ple.jerbil.sql.expression.Expression;
 import com.ple.util.IList;
@@ -13,13 +13,13 @@ import java.util.List;
 public class InsertQuery extends CompleteQuery {
   public final IList<IMap<Column, Expression>> dataToInsert;
 
-  protected InsertQuery(IList<IMap<Column, Expression>> dataToInsert, Table table) {
-    super(table);
+  protected InsertQuery(IList<IMap<Column, Expression>> dataToInsert, FromExpression fromExpression) {
+    super(fromExpression);
     this.dataToInsert = dataToInsert;
   }
 
-  public static InsertQuery make(IList<IMap<Column, Expression>> dataToInsert, Table table) {
-    return new InsertQuery(dataToInsert, table);
+  public static InsertQuery make(IList<IMap<Column, Expression>> dataToInsert, FromExpression fromExpression) {
+    return new InsertQuery(dataToInsert, fromExpression);
   }
 
   public InsertQuery set(Column column, Expression expression) {

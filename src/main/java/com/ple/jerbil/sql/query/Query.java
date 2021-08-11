@@ -2,24 +2,23 @@ package com.ple.jerbil.sql.query;
 
 
 import com.ple.jerbil.sql.Immutable;
-import com.ple.jerbil.sql.fromExpression.Table;
+import com.ple.jerbil.sql.Queryable;
 import com.ple.jerbil.sql.fromExpression.FromExpression;
-import com.ple.jerbil.sql.expression.SelectExpression;
-import com.ple.util.IArrayList;
 import org.jetbrains.annotations.Nullable;
 
 @Immutable
-public class Query {
+public class Query extends Queryable {
 
   @Nullable
-  protected final Table table;
+  protected final FromExpression fromExpression;
 
-  protected Query(Table table) {
-    this.table = table;
+  protected Query(FromExpression fromExpression) {
+    this.fromExpression = fromExpression;
   }
 
-  public CompleteQuery select(SelectExpression... expressions) {
-    return SelectQuery.make(IArrayList.make(expressions), table);
+  @Override
+  protected FromExpression getFromExpression() {
+    return fromExpression;
   }
 
 }

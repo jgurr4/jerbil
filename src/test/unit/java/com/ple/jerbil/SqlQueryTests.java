@@ -16,9 +16,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SqlQueryTests {
 
   final UserTable user = new UserTable();
+  final UserTableColumns userColumns = new UserTableColumns(user);
   final PlayerTable player = new PlayerTable();
+  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
   final ItemTable item = new ItemTable();
+  final ItemTableColumns itemColumns = new ItemTableColumns(item);
   final InventoryTable inventory = new InventoryTable();
+  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
@@ -26,7 +30,7 @@ public class SqlQueryTests {
   @Test
   void testSelect() {
 
-    final CompleteQuery q = user.where(user.name.eq("john")).select(user.userId);
+    final CompleteQuery q = user.where(userColumns.name.eq("john")).select(userColumns.userId);
     assertEquals(q.toSql(), """
       select userId 
       from user 
@@ -39,9 +43,9 @@ public class SqlQueryTests {
   @Test
   void testReusableQueryBase() {
 
-    final CompleteQuery base = user.select(user.userId);
-    final CompleteQuery q1 = base.where(user.name.eq("john"));
-    final CompleteQuery q2 = base.where(user.name.eq("james"));
+    final CompleteQuery base = user.select(userColumns.userId);
+    final CompleteQuery q1 = base.where(userColumns.name.eq("john"));
+    final CompleteQuery q2 = base.where(userColumns.name.eq("james"));
 
     assertEquals(q1.toSql(), """
       select userId 
@@ -60,7 +64,7 @@ public class SqlQueryTests {
   @Test
   void testSelectEnum() {
 
-    final CompleteQuery q = item.where(item.type.eq(ItemType.weapon.toString())).selectAll();
+    final CompleteQuery q = item.where(itemColumns.type.eq(ItemType.weapon.toString())).selectAll();
     assertEquals(q.toSql(), """
       select * 
       from item 
@@ -72,7 +76,7 @@ public class SqlQueryTests {
   @Test
   void testSelectJoins() {
 
-    final CompleteQuery q = player.join(inventory, item).where(player.name.eq("bob")).and(item.name.eq("sword"));
+    final CompleteQuery q = player.join(inventory, item).where(playerColumns.name.eq("bob")).and(itemColumns.name.eq("sword"));
     assertEquals(q.toSql(), """
       select *
       from player
@@ -97,7 +101,7 @@ public class SqlQueryTests {
   @Test
   void testGroupBy() {
 
-    final CompleteQuery q = item.select(item.type.as("type"), Agg.count.as("total")).groupBy(item.type);
+    final CompleteQuery q = item.select(itemColumns.type.as("type"), Agg.count.as("total")).groupBy(itemColumns.type);
     assertEquals(q.toSql(), """
       select item.type as type, count(*) as total
       from item
@@ -110,8 +114,8 @@ public class SqlQueryTests {
   void testComplexExpressions() {
 
     final CompleteQuery q = item
-      .select(item.price.times(make(42)).minus(make(1)).times(make(3)).plus(make(1)).as("adjustedPrice"))
-      .where(item.price.dividedBy(make(4)).isGreaterThan(make(5)))
+      .select(itemColumns.price.times(make(42)).minus(make(1)).times(make(3)).plus(make(1)).as("adjustedPrice"))
+      .where(itemColumns.price.dividedBy(make(4)).isGreaterThan(make(5)))
       ;
     assertEquals(q.toSql(), """
       select (price * 42 - 1) * (3 + 1) as adjustedPrice

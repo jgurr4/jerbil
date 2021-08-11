@@ -13,16 +13,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SqlStatementTests {
 
   final UserTable user = new UserTable();
+  final UserTableColumns userColumns = new UserTableColumns(user);
   final PlayerTable player = new PlayerTable();
+  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
   final ItemTable item = new ItemTable();
+  final ItemTableColumns itemColumns = new ItemTableColumns(item);
   final InventoryTable inventory = new InventoryTable();
+  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
   @Test
   void testInsertSingle() {
 
-    final CompleteQuery q = item.insert().set(item.name, Literal.make("sword of spirit")).set(item.type, Literal.make(ItemType.weapon.toString()));
+    final CompleteQuery q = item.insert().set(itemColumns.name, Literal.make("sword of spirit")).set(itemColumns.type, Literal.make(ItemType.weapon.toString()));
     assertEquals(q.toString(), """
       insert into item
       set name='sword of spirit',
@@ -35,7 +39,7 @@ public class SqlStatementTests {
   void testInsertMulti() {
 
     final CompleteQuery q = item.insert().set(
-      List.of(item.name, item.type),
+      List.of(itemColumns.name, itemColumns.type),
       List.of(
         List.of("sword of spirit", ItemType.weapon.toString()),
         List.of("shield of faith", ItemType.shield.toString()),
