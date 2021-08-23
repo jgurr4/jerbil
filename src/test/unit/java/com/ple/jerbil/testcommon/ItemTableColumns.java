@@ -15,7 +15,7 @@ public class ItemTableColumns {
 
   public ItemTableColumns(Table table) {
 
-    itemId = Column.make("itemId", table).integer().primary();
+    itemId = Column.make("itemId", table).primary();
     name = Column.make("name", table).indexed().varchar(20);  // Made not-final for a test.
     type = Column.make("type", table).enumOf(ItemType.class);
     price = Column.make("price", table).integer();

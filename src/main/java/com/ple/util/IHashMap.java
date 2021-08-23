@@ -139,6 +139,11 @@ public class IHashMap<K, V> implements IMap<K, V> {
     return map;
   }
 
+  @Override
+  public IMap<K, V> remove(K key) {
+    return null;
+  }
+
   private int getEntryCount() {
     return (int) (entriesInUse * expansionFactor / threshold);
   }

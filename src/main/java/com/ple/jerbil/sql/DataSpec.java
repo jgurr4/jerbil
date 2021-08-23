@@ -19,7 +19,7 @@ public class DataSpec {
   }
 
   public static DataSpec make(DataType type) {
-
+    // depending on the datatype, it will return different default sizes for constructor.
     return null;
   }
 

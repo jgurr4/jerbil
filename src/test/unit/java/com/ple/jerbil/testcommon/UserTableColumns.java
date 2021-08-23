@@ -12,6 +12,6 @@ public class UserTableColumns {
 
   public UserTableColumns(Table table) {
     userId = Column.make("userId", table).primary();
-    name = Column.make("name",table).varchar(20).indexed();
+    name = Column.make("name", table).varchar(20).indexed();
   }
 }

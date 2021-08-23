@@ -1,10 +1,11 @@
 package com.ple.jerbil.sql.expression;
 
 import com.ple.jerbil.sql.DataSpec;
+import com.ple.jerbil.sql.DataType;
 import com.ple.jerbil.sql.fromExpression.Table;
 import org.jetbrains.annotations.Nullable;
 
-public class PartialColumn {
+public class PartialColumn extends Expression {
 
   public final String name;
   public final Table table;
@@ -25,15 +26,11 @@ public class PartialColumn {
   }
 
   public Column primary() {
-    return null;
-  }
-
-  public Column varchar(int size) {
-    return null;
-  }
-
-  public Column indexed() {
-    return null;
+    if (this.dataSpec == null) {
+      return new Column(this.name, this.table, DataSpec.make(DataType.integer), this.indexed, true);
+    } else {
+      return new Column(this.name, this.table, this.dataSpec, this.indexed, true);
+    }
   }
 
   public Column id() {
@@ -45,16 +42,24 @@ public class PartialColumn {
     return null;
   }
 
-  public Column varchar() {
-    return varchar(255);
-  }
-
   public Column integer() {
     return null;
   }
 
   public Column integer(int size) {
     return null;
+  }
+
+  public Column varchar(int size) {
+    return new Column(this.name, this.table, DataSpec.make(DataType.varchar, size), this.indexed, this.primary);
+  }
+
+  public Column varchar() {
+    return new Column(this.name, this.table, DataSpec.make(DataType.varchar, 255), this.indexed, this.primary);
+  }
+
+  public Column indexed() {
+    return new Column(this.name, this.table, this.dataSpec, true, this.primary);
   }
 
 }

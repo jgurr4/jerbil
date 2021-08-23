@@ -1,24 +1,16 @@
 package com.ple.jerbil.sql.expression;
 
 import com.ple.jerbil.sql.DataSpec;
+import com.ple.jerbil.sql.DataType;
 import com.ple.jerbil.sql.DelayedImmutable;
 import com.ple.jerbil.sql.fromExpression.Table;
+import org.jetbrains.annotations.Nullable;
 
 @DelayedImmutable
-public class Column extends Expression {
+public class Column extends PartialColumn {
 
-  public final String name;
-  public final Table table;
-  public final DataSpec dataSpec;
-  public final boolean indexed;
-  private final boolean primary;
-
-  protected Column(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
-    this.name = name;
-    this.table = table;
-    this.dataSpec = dataSpec;
-    this.indexed = indexed;
-    this.primary = primary;
+  public Column(String name, Table table, @Nullable DataSpec dataSpec, boolean indexed, boolean primary) {
+    super(name, table, dataSpec, indexed, primary);
   }
 
   public static PartialColumn make(String name, Table table) {
@@ -26,19 +18,7 @@ public class Column extends Expression {
   }
 
   public Column primary() {
-    return null;
-  }
-
-  public Column varchar(int size) {
-    return null;
-  }
-
-  public Column indexed() {
-    return null;
-  }
-
-  public Column varchar() {
-    return null;
+    return new Column(this.name, this.table, this.dataSpec, this.indexed, true);
   }
 
 }
