@@ -1,12 +1,15 @@
 package com.ple.jerbil.sql.query;
 
 import com.ple.jerbil.sql.fromExpression.Table;
-import org.jetbrains.annotations.Nullable;
 
-public class PartialInsertQuery extends PartialQuery {
+public class PartialInsertQuery extends PartialQueryWithValues {
 
-  protected PartialInsertQuery(@Nullable Table table) {
+  protected PartialInsertQuery(Table table) {
     super(table);
+  }
+
+  public static PartialInsertQuery make(Table table) {
+    return new PartialInsertQuery(table);
   }
 
 }

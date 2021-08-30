@@ -1,12 +1,14 @@
 package com.ple.jerbil.sql.fromExpression;
 
-import com.ple.jerbil.sql.Queryable;
-import com.ple.jerbil.sql.query.InsertQuery;
-import com.ple.util.IArrayList;
+import com.ple.jerbil.sql.expression.BooleanExpression;
+import com.ple.jerbil.sql.query.QueryWithFrom;
 
-public class FromExpression extends Queryable {
+public class FromExpression extends QueryWithFrom {
 
-  @Override
+  protected FromExpression(FromExpression fromExpression, BooleanExpression condition) {
+    super(fromExpression, condition);
+  }
+
   protected FromExpression getFromExpression() {
     return this;
   }

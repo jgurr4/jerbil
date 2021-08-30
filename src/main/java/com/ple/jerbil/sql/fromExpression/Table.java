@@ -8,6 +8,8 @@ import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
 import com.ple.util.IMap;
 
+import java.util.List;
+
 @DelayedImmutable
 public class Table extends FromExpression {
 
@@ -34,7 +36,7 @@ public class Table extends FromExpression {
   }
 
   public QueryWithFrom where(BooleanExpression condition) {
-    return QueryWithFrom.make(this, condition);
+    return QueryWithFrom.make(this).where(condition);
   }
 
   public CompleteQuery join(FromExpression... tables) {
@@ -53,6 +55,10 @@ public class Table extends FromExpression {
   public Table remove(Column column) {
     final IMap<String, Column> newColumns = columns.remove(column.name);
     return new Table(engine, name, newColumns);
+  }
+
+  public PartialInsertQuery insert() {
+    return PartialInsertQuery.make(this);
   }
 
 }

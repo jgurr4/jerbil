@@ -1,11 +1,10 @@
 package com.ple.jerbil.sql.query;
 
 import com.ple.jerbil.sql.fromExpression.Table;
-import org.jetbrains.annotations.Nullable;
 
-public class PartialUpdateQuery extends PartialQuery {
+public class PartialUpdateQuery extends PartialQueryWithValues {
 
-  protected PartialUpdateQuery(@Nullable Table table) {
+  protected PartialUpdateQuery(Table table) {
     super(table);
   }
 
