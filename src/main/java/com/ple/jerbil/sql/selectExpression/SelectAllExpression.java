@@ -1,4 +1,4 @@
-package com.ple.jerbil.sql.expression;
+package com.ple.jerbil.sql.selectExpression;
 
 public class SelectAllExpression extends SelectExpression {
 

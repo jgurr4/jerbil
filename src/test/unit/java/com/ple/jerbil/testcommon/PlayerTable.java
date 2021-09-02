@@ -1,6 +1,5 @@
 package com.ple.jerbil.testcommon;
 
-import com.ple.jerbil.sql.expression.Column;
 import com.ple.jerbil.sql.StorageEngine;
 import com.ple.jerbil.sql.fromExpression.Table;
 import com.ple.util.IHashMap;

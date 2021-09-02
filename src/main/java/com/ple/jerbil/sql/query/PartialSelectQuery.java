@@ -1,7 +1,7 @@
 package com.ple.jerbil.sql.query;
 
-import com.ple.jerbil.sql.expression.BooleanExpression;
-import com.ple.jerbil.sql.expression.SelectExpression;
+import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.sql.selectExpression.SelectExpression;
 import com.ple.jerbil.sql.fromExpression.Table;
 import org.jetbrains.annotations.Nullable;
 

@@ -1,16 +1,13 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.sql.Database;
-import com.ple.jerbil.sql.expression.Agg;
-import com.ple.jerbil.sql.expression.Literal;
+import com.ple.jerbil.sql.selectExpression.Agg;
+import com.ple.jerbil.sql.selectExpression.Literal;
 import com.ple.jerbil.sql.query.CompleteQuery;
-import com.ple.jerbil.sql.query.PartialSelectQuery;
-import com.ple.jerbil.sql.query.SelectQuery;
 import com.ple.jerbil.testcommon.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static com.ple.jerbil.sql.expression.Literal.make;
+import static com.ple.jerbil.sql.selectExpression.Literal.make;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlQueryTests {
@@ -130,4 +127,11 @@ public class SqlQueryTests {
     final CompleteQuery q = Literal.make(32).minus(make(15)).as("result").select();
     assertEquals(q.toSql(), "select 32 - 15 as result");
   }
+
+/*
+  @Test
+  void testColumnMixDataType() {
+    final CompleteQuery q = item.select(itemColumns.name.minus(Literal.make(5)));
+  }
+*/
 }

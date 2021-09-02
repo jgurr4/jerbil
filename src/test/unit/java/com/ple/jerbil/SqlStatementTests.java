@@ -1,7 +1,7 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.sql.Database;
-import com.ple.jerbil.sql.expression.Literal;
+import com.ple.jerbil.sql.selectExpression.Literal;
 import com.ple.jerbil.sql.query.CompleteQuery;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
@@ -26,11 +26,7 @@ public class SqlStatementTests {
   @Test
   void testInsertSingle() {
 
-/*
-    for (int i = 0; i < records.length; i++) { // This is bad because it makes multiple insert statements. You should be able to do bulk insert statements. Like 'insert into table values (val1, val2),(val1,val2)...'
-      item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.type, Literal.make(ItemType.weapon.toString()));
-    }
-*/
+/* for (int i = 0; i < records.length; i++) { // This is bad because it makes multiple insert statements. You should be able to do bulk insert statements. Like 'insert into table values (val1, val2),(val1,val2)...' item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.type, Literal.make(ItemType.weapon.toString())); } */
     final CompleteQuery q = item.insert().set(itemColumns.name, Literal.make("sword of spirit")).set(itemColumns.type, Literal.make(ItemType.weapon.toString()));
     assertEquals(q.toString(), """
       insert into item

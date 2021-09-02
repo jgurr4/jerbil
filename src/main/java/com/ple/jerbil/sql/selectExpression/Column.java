@@ -1,11 +1,13 @@
-package com.ple.jerbil.sql.expression;
+package com.ple.jerbil.sql.selectExpression;
 
 import com.ple.jerbil.sql.DataSpec;
-import com.ple.jerbil.sql.DataType;
 import com.ple.jerbil.sql.DelayedImmutable;
 import com.ple.jerbil.sql.fromExpression.Table;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ *
+ */
 @DelayedImmutable
 public class Column extends PartialColumn {
 

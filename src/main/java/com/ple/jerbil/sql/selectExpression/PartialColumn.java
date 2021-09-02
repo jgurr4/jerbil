@@ -1,10 +1,16 @@
-package com.ple.jerbil.sql.expression;
+package com.ple.jerbil.sql.selectExpression;
 
 import com.ple.jerbil.sql.DataSpec;
 import com.ple.jerbil.sql.DataType;
 import com.ple.jerbil.sql.fromExpression.Table;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * PartialColumn was made to allow column expressions to be created without requiring a DataSpec.
+ * That way it can be defined later as part of our fluent api, rather than always being required before dataspec is defined.
+ * For example Column.make('id', user).int().primary()
+ * After Column.make() it's only a PartialColumn but after .int() it becomes a Column.
+ */
 public class PartialColumn extends Expression {
 
   public final String name;

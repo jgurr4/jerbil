@@ -5,9 +5,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class PartialQuery extends Query {
 
+  public final Table table;
 
-  protected PartialQuery(@Nullable Table table) {
-    super(table);
+  protected PartialQuery(Table table) {
+    this.table = table;
   }
 
 }

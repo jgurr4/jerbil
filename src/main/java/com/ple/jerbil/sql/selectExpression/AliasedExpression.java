@@ -1,4 +1,4 @@
-package com.ple.jerbil.sql.expression;
+package com.ple.jerbil.sql.selectExpression;
 
 import com.ple.jerbil.sql.Immutable;
 

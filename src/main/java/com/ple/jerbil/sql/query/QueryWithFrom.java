@@ -1,25 +1,25 @@
 package com.ple.jerbil.sql.query;
 
 import com.ple.jerbil.sql.Immutable;
+import com.ple.jerbil.sql.selectExpression.Column;
 import com.ple.jerbil.sql.fromExpression.Table;
-import com.ple.jerbil.sql.expression.BooleanExpression;
-import com.ple.jerbil.sql.fromExpression.FromExpression;
-import com.ple.jerbil.sql.expression.SelectExpression;
+import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.sql.selectExpression.SelectExpression;
 import com.ple.util.IArrayList;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 
 @Immutable
 public class QueryWithFrom extends PartialQuery {
 
-  protected QueryWithFrom(@Nullable Table table) {
+  public final BooleanExpression condition;
+
+  protected QueryWithFrom(Table table, BooleanExpression condition) {
     super(table);
+    this.condition = condition;
   }
 
-  // The use of QueryWithFrom is it is used to show that a insert, update, and delete query is complete. Select is complete without tables. But the others require a table.
-  public static QueryWithFrom make(FromExpression fromExpression) {
-    return new QueryWithFrom(fromExpression);
+  public static QueryWithFrom make(Table table) {
+    return new QueryWithFrom(table, null);
   }
 
   public SelectQuery selectAll() {
@@ -27,7 +27,11 @@ public class QueryWithFrom extends PartialQuery {
   }
 
   public QueryWithFrom where(BooleanExpression condition) {
-    return new QueryWithFrom(this.fromExpression, condition);
+    return new QueryWithFrom(this.table, condition);
+  }
+
+  public CompleteQuery select(Column column) {
+    return new CompleteQuery(this.table, column, null, SelectQuery.make(null));
   }
 
 }

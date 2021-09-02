@@ -2,19 +2,18 @@ package com.ple.jerbil.sql.query;
 
 import com.ple.jerbil.sql.Immutable;
 import com.ple.jerbil.sql.fromExpression.FromExpression;
-import com.ple.jerbil.sql.expression.Column;
-import com.ple.jerbil.sql.expression.Expression;
+import com.ple.jerbil.sql.selectExpression.Column;
+import com.ple.jerbil.sql.selectExpression.Expression;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 
 import java.util.List;
 
 @Immutable
-public class InsertQuery extends CompleteQuery {
+public class InsertQuery {
   public final IList<IMap<Column, Expression>> dataToInsert;
 
   protected InsertQuery(IList<IMap<Column, Expression>> dataToInsert, FromExpression fromExpression) {
-    super(fromExpression);
     this.dataToInsert = dataToInsert;
   }
 

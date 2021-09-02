@@ -1,13 +1,9 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.sql.DataSpec;
-import com.ple.jerbil.sql.DataType;
 import com.ple.jerbil.sql.Database;
-import com.ple.jerbil.sql.expression.Column;
-import com.ple.jerbil.sql.query.Query;
+import com.ple.jerbil.sql.selectExpression.Column;
 import com.ple.jerbil.sql.query.QueryList;
 import com.ple.jerbil.testcommon.*;
-import com.ple.util.IList;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

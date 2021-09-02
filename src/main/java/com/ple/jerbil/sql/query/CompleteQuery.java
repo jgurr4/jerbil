@@ -3,29 +3,29 @@ package com.ple.jerbil.sql.query;
 import com.ple.jerbil.sql.Global;
 import com.ple.jerbil.sql.Immutable;
 import com.ple.jerbil.sql.SqlGenerator;
-import com.ple.jerbil.sql.expression.Literal;
-import com.ple.jerbil.sql.fromExpression.FromExpression;
+import com.ple.jerbil.sql.selectExpression.Literal;
 import com.ple.jerbil.sql.fromExpression.Table;
-import com.ple.jerbil.sql.expression.BooleanExpression;
-import com.ple.jerbil.sql.expression.Column;
-import com.ple.jerbil.sql.expression.Expression;
-import org.jetbrains.annotations.Nullable;
+import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.sql.selectExpression.Column;
+import com.ple.jerbil.sql.selectExpression.Expression;
 
 @Immutable
 public class CompleteQuery extends Query {
 
-  public final FromExpression fromExpression;
+  public final Table table;
   public final Column column;
   public final Literal value;
+  public final Query queryType;
 
-  protected CompleteQuery(FromExpression fromExpression, Column column, Literal value) {
-    this.fromExpression = fromExpression;
+  protected CompleteQuery(Table table, Column column, Literal value, Query query) {
+    this.table = table;
     this.column = column;
     this.value = value;
+    this.queryType = query;
   }
 
-  public static CompleteQuery make(Table table) {
-    return new CompleteQuery(table, null, null);
+  public static CompleteQuery make(Table table, Column column, Literal value, Query query) {
+    return new CompleteQuery(table, column, value, query);
   }
 
   public String toSql() {

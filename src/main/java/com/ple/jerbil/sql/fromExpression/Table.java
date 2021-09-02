@@ -2,14 +2,16 @@ package com.ple.jerbil.sql.fromExpression;
 
 import com.ple.jerbil.sql.DelayedImmutable;
 import com.ple.jerbil.sql.StorageEngine;
-import com.ple.jerbil.sql.expression.*;
+import com.ple.jerbil.sql.selectExpression.*;
+import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.sql.query.*;
-import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
 import com.ple.util.IMap;
 
-import java.util.List;
 
+/**
+ * Table is a database Object which contains columns.
+ */
 @DelayedImmutable
 public class Table extends FromExpression {
 
@@ -39,7 +41,7 @@ public class Table extends FromExpression {
     return QueryWithFrom.make(this).where(condition);
   }
 
-  public CompleteQuery join(FromExpression... tables) {
+  public CompleteQuery join(Table... tables) {
     return null;
   }
 
@@ -59,6 +61,18 @@ public class Table extends FromExpression {
 
   public PartialInsertQuery insert() {
     return PartialInsertQuery.make(this);
+  }
+
+  public CompleteQuery select(Agg agg) {
+    return null;
+  }
+
+  public CompleteQuery select(Column column) {
+    return null;
+  }
+
+  public CompleteQuery select(AliasedExpression... aliasedExpressions) {
+    return null;
   }
 
 }

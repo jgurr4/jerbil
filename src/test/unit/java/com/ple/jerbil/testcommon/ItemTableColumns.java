@@ -1,7 +1,7 @@
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.sql.Immutable;
-import com.ple.jerbil.sql.expression.Column;
+import com.ple.jerbil.sql.selectExpression.Column;
 import com.ple.jerbil.sql.fromExpression.Table;
 
 @Immutable
