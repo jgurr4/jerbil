@@ -3,6 +3,9 @@ package com.ple.jerbil.sql;
 import com.ple.jerbil.sql.fromExpression.Table;
 import com.ple.jerbil.sql.query.QueryList;
 
+/**
+ * Database is a object representing the database and it's tables.
+ */
 @DelayedImmutable
 public class Database {
 

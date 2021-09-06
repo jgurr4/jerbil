@@ -1,5 +1,18 @@
 package com.ple.jerbil.sql;
 
+/**
+ * DataSpec represents any datatype and it's parameter definitions for defining specific columns in tables. For example:
+ * create table example (
+ *   id int(11),
+ *   name varchar(20),
+ *   salutation enum("hello","goodbye"),
+ *   affected set("hair","face","body"),
+ *   price decimal(14,2),
+ *   creation_date date,
+ *   time_since_update time,
+ * );
+ * After each column name specified above is the dataspec for that column.
+ */
 @Immutable
 public class DataSpec {
 

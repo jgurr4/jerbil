@@ -6,9 +6,6 @@ import com.ple.jerbil.sql.selectExpression.booleanExpression.Equals;
 
 /**
  * Expression is more specific than SelectExpression because it doesn't include AliasedExpressions.
- * Boolean Expression(name = "name") and Numeric expressions (like 3 + 3) are forms of expression.
- * You also may have more than one Boolean Expression like so:
- * where (name = "name") or (name != "name") and (id > 100)
  * Expression includes = > < >= <= <> != [NOT] LIKE, [NOT] BETWEEN, [NOT] REGEXP, IS [NOT] NULL, IN, ANY, ALL, SOME, SOUNDS LIKE etc...
  * see: https://dev.mysql.com/doc/refman/8.0/en/expressions.html
  * if() is also a class that exists under expression even though it returns a boolean.
