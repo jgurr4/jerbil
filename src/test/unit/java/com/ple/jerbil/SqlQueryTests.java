@@ -112,8 +112,7 @@ public class SqlQueryTests {
 
     final CompleteQuery q = item
       .select(itemColumns.price.times(make(42)).minus(make(1)).times(make(3)).plus(make(1)).as("adjustedPrice"))
-      .where(itemColumns.price.dividedBy(make(4)).isGreaterThan(make(5)))
-      ;
+      .where(itemColumns.price.dividedBy(make(4)).isGreaterThan(make(5)));
     assertEquals(q.toSql(), """
       select (price * 42 - 1) * (3 + 1) as adjustedPrice
       from item
@@ -128,10 +127,4 @@ public class SqlQueryTests {
     assertEquals(q.toSql(), "select 32 - 15 as result");
   }
 
-/*
-  @Test
-  void testColumnMixDataType() {
-    final CompleteQuery q = item.select(itemColumns.name.minus(Literal.make(5)));
-  }
-*/
 }

@@ -1,5 +1,5 @@
 package com.ple.jerbil.sql.selectExpression;
 
-public class LiteralBoolean {
+public class LiteralBoolean implements Literal {
 
 }

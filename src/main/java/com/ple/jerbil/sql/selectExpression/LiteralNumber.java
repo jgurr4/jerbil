@@ -1,5 +1,5 @@
 package com.ple.jerbil.sql.selectExpression;
 
-public class LiteralNumber {
+public class LiteralNumber implements Literal {
 
 }

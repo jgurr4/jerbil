@@ -1,5 +1,5 @@
 package com.ple.jerbil.sql.selectExpression;
 
-public class NumberExpression {
+public class NumberExpression implements Expression {
 
 }
