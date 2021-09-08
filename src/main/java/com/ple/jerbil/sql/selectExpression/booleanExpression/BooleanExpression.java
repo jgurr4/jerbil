@@ -12,6 +12,7 @@ import com.ple.jerbil.sql.selectExpression.Expression;
  *
  * You are not able to mix booleans with some other data types. For example:
  * select true - 3;   // This will not compile.
+ * select 1 = 1;  // returns true.
  *
  * For cases where a column is used as a boolean, for example: 'select * from table where isTrue;') see BooleanColumn.
  */

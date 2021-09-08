@@ -24,6 +24,7 @@ public class Table extends FromExpression {
   }
 
   protected Table(StorageEngine engine, String name, IMap<String, Column> columns) {
+    super(new Table(engine, name, columns)); //TODO: ask if this is correct way to do this.
     this.engine = engine;
     this.name = name;
     this.columns = columns;
@@ -63,7 +64,7 @@ public class Table extends FromExpression {
     return PartialInsertQuery.make(this);
   }
 
-  public CompleteQuery select(Agg agg) {
+  public CompleteQuery select(CountAgg agg) {
     return null;
   }
 
@@ -73,6 +74,10 @@ public class Table extends FromExpression {
 
   public CompleteQuery select(AliasedExpression... aliasedExpressions) {
     return null;
+  }
+
+  @Override
+  protected void diffJoin() {
   }
 
 }

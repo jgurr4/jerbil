@@ -10,11 +10,14 @@ import com.ple.jerbil.sql.selectExpression.booleanExpression.Equals;
  * see: https://dev.mysql.com/doc/refman/8.0/en/expressions.html
  * if() is also a class that exists under expression even though it returns a boolean.
  * DateExpression, NumberExpression, StringExpression, BooleanExpression, PartialColumn will extend this class.
+ * .eq() evaluates to a BooleanExpression. Example: select 1 = 1; //returns 1
  */
 @Immutable
 public interface Expression extends SelectExpression {
 
-  public AliasedExpression as(String name);
+  public default AliasedExpression as(String name) {
+    return null;
+  }
 
   public Expression times(Expression i);
 

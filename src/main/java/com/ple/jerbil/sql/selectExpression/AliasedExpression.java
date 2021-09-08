@@ -1,6 +1,7 @@
 package com.ple.jerbil.sql.selectExpression;
 
 import com.ple.jerbil.sql.Immutable;
+import com.ple.jerbil.sql.query.CompleteQuery;
 
 /**
  * AliasedExpression is any expression which is given an alias. For example:
@@ -8,7 +9,7 @@ import com.ple.jerbil.sql.Immutable;
  * Sometimes tables, joins, and subqueries are given aliases as well.
  */
 @Immutable
-public class AliasedExpression extends SelectExpression {
+public class AliasedExpression implements SelectExpression {
   public final String name;
 
   protected AliasedExpression(String name) {
@@ -17,6 +18,11 @@ public class AliasedExpression extends SelectExpression {
 
   public static AliasedExpression make(String name) {
     return new AliasedExpression(name);
+  }
+
+  @Override
+  public CompleteQuery select() {
+    return null;
   }
 
 }
