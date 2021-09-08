@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
  * For example Column.make('id', user).int().primary()
  * After Column.make() it's only a PartialColumn but after .int() it becomes a Column.
  */
-public class PartialColumn extends Expression {
+public class PartialColumn implements Expression {
 
   public final String name;
   public final Table table;
