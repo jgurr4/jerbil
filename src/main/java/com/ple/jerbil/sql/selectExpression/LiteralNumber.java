@@ -6,6 +6,9 @@ package com.ple.jerbil.sql.selectExpression;
  * Contrast that with selecting Numeric columns:
  * select price, amount from tablename;
  */
-public class LiteralNumber implements Literal {
+public class LiteralNumber extends NumericExpression {
 
+    protected LiteralNumber(int value) {
+        super(value);
+    }
 }

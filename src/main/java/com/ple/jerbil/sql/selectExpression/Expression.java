@@ -19,16 +19,10 @@ public interface Expression extends SelectExpression {
     return null;
   }
 
-  public Expression times(Expression i);
-
-  public Expression minus(Expression i);
-
-  public Expression plus(Expression i);
-
   public BooleanExpression isGreaterThan(Expression i);
 
-  public Expression dividedBy(Expression i);
+  public BooleanExpression isLessThan(Expression i);
 
-  public BooleanExpression eq(String item);
+  public BooleanExpression eq(Expression item);
 
 }

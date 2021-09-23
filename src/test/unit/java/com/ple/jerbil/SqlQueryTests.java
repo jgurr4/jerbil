@@ -7,6 +7,8 @@ import com.ple.jerbil.sql.query.CompleteQuery;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
+import java.sql.Date;
+
 import static com.ple.jerbil.sql.selectExpression.Literal.make;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -126,5 +128,7 @@ public class SqlQueryTests {
     final CompleteQuery q = Literal.make(32).minus(make(15)).as("result").select();
     assertEquals(q.toSql(), "select 32 - 15 as result");
   }
+
+
 
 }

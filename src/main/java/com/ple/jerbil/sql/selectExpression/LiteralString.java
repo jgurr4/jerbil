@@ -6,6 +6,9 @@ package com.ple.jerbil.sql.selectExpression;
  * Contrast that with selecting String columns:
  * select first_name from tablename;
  */
-public class LiteralString implements Literal {
+public class LiteralString extends StringExpression {
 
+    protected LiteralString(String value) {
+        super(value);
+    }
 }

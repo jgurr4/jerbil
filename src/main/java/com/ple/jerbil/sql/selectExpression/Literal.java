@@ -1,5 +1,6 @@
 package com.ple.jerbil.sql.selectExpression;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -10,15 +11,19 @@ import java.util.List;
  */
 public interface Literal extends Expression {
 
-  public static Literal make(String string) {
+  public static LiteralString make(String string) {
     return null;
   }
 
-  public static Literal make(List list) {
+  public static LiteralNumber make(int i) {
     return null;
   }
 
-  public static Literal make(int i) {
+  public static LiteralDate make(LocalDateTime date) {
+    return null;
+  }
+
+  public static LiteralBoolean make(Boolean b) {
     return null;
   }
 
