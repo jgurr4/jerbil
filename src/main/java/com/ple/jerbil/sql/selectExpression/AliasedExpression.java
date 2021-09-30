@@ -20,9 +20,4 @@ public class AliasedExpression implements SelectExpression {
     return new AliasedExpression(name);
   }
 
-  @Override
-  public CompleteQuery select() {
-    return null;
-  }
-
 }

@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
  * Example #2: select now(), now() + interval 1 day;  //The result is 1 day difference between the two returned columns.
  */
 @Immutable
-public class DateExpression implements Expression {
+public class DateExpression extends OrderedExpression {
 
     public final LocalDateTime dateTime;
 
@@ -35,28 +35,7 @@ public class DateExpression implements Expression {
         return null;
     }
 
-    public DateExpression plus(NumericExpression i) {
-        // This version will treat i as number of whatever the last digit represents in date time object.
-        // For example, if you add 1 to YYYY-MM-DD it will increase by 1 day. But if you add 1 to YYYY-MM-DD HH-MM-SS then it will increase by 1 second.
-        return null;
-    }
-
     public DateExpression minus(DateInterval dateInterval) {
-        return null;
-    }
-
-    public DateExpression minus(NumericExpression i) {
-        // Same as plus works above.
-        return null;
-    }
-
-    @Override
-    public BooleanExpression isGreaterThan(Expression i) {
-        return null;
-    }
-
-    @Override
-    public BooleanExpression isLessThan(Expression i) {
         return null;
     }
 
@@ -65,8 +44,4 @@ public class DateExpression implements Expression {
         return null;
     }
 
-    @Override
-    public CompleteQuery select() {
-        return null;
-    }
 }

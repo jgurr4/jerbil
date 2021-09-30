@@ -10,7 +10,7 @@ import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
  * important note: "string" + "string" does not concat in mysql, use the concat() function instead.
  */
 @Immutable
-public class StringExpression implements Expression {
+public class StringExpression extends OrderedExpression {
 
     public final String value;
 
@@ -23,22 +23,8 @@ public class StringExpression implements Expression {
     }
 
     @Override
-    public BooleanExpression isGreaterThan(Expression i) {
-        return null;
-    }
-
-    @Override
-    public BooleanExpression isLessThan(Expression i) {
-        return null;
-    }
-
-    @Override
     public BooleanExpression eq(Expression item) {
         return null;
     }
 
-    @Override
-    public CompleteQuery select() {
-        return null;
-    }
 }

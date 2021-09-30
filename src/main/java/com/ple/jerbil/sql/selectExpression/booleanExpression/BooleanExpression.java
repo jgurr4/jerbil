@@ -1,6 +1,7 @@
 package com.ple.jerbil.sql.selectExpression.booleanExpression;
 import com.ple.jerbil.sql.Immutable;
 import com.ple.jerbil.sql.selectExpression.Expression;
+import com.ple.jerbil.sql.selectExpression.OrderedExpression;
 
 /**
  * BooleanExpression is any expression which evaluates to a boolean data type. For example:
@@ -17,8 +18,12 @@ import com.ple.jerbil.sql.selectExpression.Expression;
  * For cases where a column is used as a boolean, for example: 'select * from table where isTrue;') see BooleanColumn.
  */
 @Immutable
-public class BooleanExpression implements Expression {
+public class BooleanExpression extends OrderedExpression {
 
+    @Override
+    public BooleanExpression eq(Expression item) {
+        return null;
+    }
 }
 
 

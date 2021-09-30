@@ -16,6 +16,8 @@ public interface SelectExpression {
 
   public final static SelectExpression selectAll = SelectAllExpression.make();
 
-  public CompleteQuery select();
+  public default CompleteQuery select() {
+    return null;
+  }
 
 }

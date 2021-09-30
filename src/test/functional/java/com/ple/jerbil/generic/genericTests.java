@@ -17,7 +17,7 @@ public class genericTests {
     @Test
     void testLiteral() {
         final LocalDateTime dateTime = LocalDateTime.of(2014, Month.DECEMBER, 12, 01, 05, 53);
-        Literal.make(dateTime).plus(DateInterval.makeDay(1)).plus(DateInterval.makeHour(1)).minus(Literal.make(1));
+        Literal.make(dateTime).plus(DateInterval.makeDay(1)).plus(DateInterval.makeHour(1)).minus(DateInterval.makeDay(1));
     }
 
     @Test
