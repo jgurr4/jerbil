@@ -14,6 +14,7 @@ import java.time.Month;
  * A javascript translator, and more.
  */
 public class genericTests {
+/*
     @Test
     void testLiteral() {
         final LocalDateTime dateTime = LocalDateTime.of(2014, Month.DECEMBER, 12, 01, 05, 53);
@@ -25,4 +26,5 @@ public class genericTests {
         Literal.make(5).isGreaterThan(Literal.make(3));
         // Should become: select 5 > 3;
     }
+*/
 }

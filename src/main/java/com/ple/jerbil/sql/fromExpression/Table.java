@@ -51,13 +51,19 @@ public class Table extends FromExpression {
   }
 
   public Table set(Column column) {
+    return null;
+/*
     final IMap<String, Column> newColumns = columns.put(column.name, column);
     return new Table(engine, name, newColumns);
+*/
   }
 
   public Table remove(Column column) {
+    return null;
+/*
     final IMap<String, Column> newColumns = columns.remove(column.name);
     return new Table(engine, name, newColumns);
+*/
   }
 
   public PartialInsertQuery insert() {

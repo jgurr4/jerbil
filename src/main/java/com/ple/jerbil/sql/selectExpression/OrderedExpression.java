@@ -12,4 +12,5 @@ public abstract class OrderedExpression implements Expression {
     public BooleanExpression isLessThan(Expression i) {
         return null;
     }
+
 }

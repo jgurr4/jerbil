@@ -21,14 +21,11 @@ import java.time.LocalDateTime;
 @Immutable
 public class DateExpression extends OrderedExpression {
 
-    public final LocalDateTime dateTime;
-
-    protected DateExpression(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
+    protected DateExpression() {
     }
 
-    public static DateExpression make(LocalDateTime dateTime) {
-        return new DateExpression(dateTime);
+    public static DateExpression make() {
+        return new DateExpression();
     }
 
     public DateExpression plus(DateInterval dateInterval) {

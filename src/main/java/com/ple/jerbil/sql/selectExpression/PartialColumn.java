@@ -3,6 +3,7 @@ package com.ple.jerbil.sql.selectExpression;
 import com.ple.jerbil.sql.DataSpec;
 import com.ple.jerbil.sql.DataType;
 import com.ple.jerbil.sql.fromExpression.Table;
+import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -11,61 +12,58 @@ import org.jetbrains.annotations.Nullable;
  * For example Column.make('id', user).int().primary()
  * After Column.make() it's only a PartialColumn but after .int() it becomes a Column.
  */
-public class PartialColumn implements Expression {
+public class PartialColumn extends OrderedExpression implements Expression {
 
   public final String name;
   public final Table table;
-  @Nullable public final DataSpec dataSpec;
   public final boolean indexed;
   public final boolean primary;
 
-  protected PartialColumn(String name, Table table, @Nullable DataSpec dataSpec, boolean indexed, boolean primary) {
+  protected PartialColumn(String name, Table table, boolean indexed, boolean primary) {
     this.name = name;
     this.table = table;
-    this.dataSpec = dataSpec;
     this.indexed = indexed;
     this.primary = primary;
   }
 
   public static PartialColumn make(String name, Table table) {
-    return new PartialColumn(name, table, null, false, false);
+    return new PartialColumn(name, table, false, false);
   }
 
-  public Column primary() {
-    if (this.dataSpec == null) {
-      return new Column(this.name, this.table, DataSpec.make(DataType.integer), this.indexed, true);
-    } else {
-      return new Column(this.name, this.table, this.dataSpec, this.indexed, true);
-    }
+  public static PartialColumn make(String name, Table table, boolean indexed, boolean primary) {
+    return new PartialColumn(name, table, indexed, primary);
   }
 
-  public Column id() {
-    // This means the column is int and indexed. Or alternatively it could mean primary key and auto_incremented.
+  @Override
+  public BooleanExpression eq(Expression item) {
     return null;
   }
 
-  public Column enumOf(Class aClass) {
-    return null;
+  public NumericColumn asInt() {
+    return NumericColumn.make(this.name, this.table);
   }
 
-  public Column integer() {
-    return null;
+  public StringColumn asVarchar() {
+    return StringColumn.make(this.name, this.table);
   }
 
-  public Column integer(int size) {
-    return null;
+  public StringColumn asVarchar(int size) {
+    return StringColumn.make(this.name, this.table, size);
   }
 
-  public Column varchar(int size) {
-    return new Column(this.name, this.table, DataSpec.make(DataType.varchar, size), this.indexed, this.primary);
+  public StringColumn asEnum(Object enumObj) {
+    return StringColumn.make(this.name, this.table, DataSpec.make(DataType.enumeration, enumObj), this.indexed, this.primary);
   }
 
-  public Column varchar() {
-    return new Column(this.name, this.table, DataSpec.make(DataType.varchar, 255), this.indexed, this.primary);
+  public NumericColumn primary() {
+    return NumericColumn.make(this.name, this.table, true);
   }
 
-  public Column indexed() {
-    return new Column(this.name, this.table, this.dataSpec, true, this.primary);
+  public PartialColumn indexed() {
+    return PartialColumn.make(this.name, this.table, true, this.primary);
   }
 
+  public NumericColumn id() {
+    return NumericColumn.make(this.name, this.table, true);
+  }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStatementTests {
+/*
 
   final UserTable user = new UserTable();
   final UserTableColumns userColumns = new UserTableColumns(user);
@@ -26,7 +27,9 @@ public class SqlStatementTests {
   @Test
   void testInsertSingle() {
 
-/* for (int i = 0; i < records.length; i++) { // This is bad because it makes multiple insert statements. You should be able to do bulk insert statements. Like 'insert into table values (val1, val2),(val1,val2)...' item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.type, Literal.make(ItemType.weapon.toString())); } */
+*/
+/* for (int i = 0; i < records.length; i++) { // This is bad because it makes multiple insert statements. You should be able to do bulk insert statements. Like 'insert into table values (val1, val2),(val1,val2)...' item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.type, Literal.make(ItemType.weapon.toString())); } *//*
+
     final CompleteQuery q = item.insert().set(itemColumns.name, Literal.make("sword of spirit")).set(itemColumns.type, Literal.make(ItemType.weapon.toString()));
     assertEquals(q.toString(), """
       insert into item
@@ -85,4 +88,5 @@ public class SqlStatementTests {
 
   }
 
+*/
 }

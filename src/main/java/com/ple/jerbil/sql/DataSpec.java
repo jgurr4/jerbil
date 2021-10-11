@@ -26,8 +26,12 @@ public class DataSpec {
     this.size = size;
   }
 
+  //TODO: Add a default arguement which allows users to specify a default value for a column.
   public static DataSpec make(DataType type, int size) {
+    return null;
+  }
 
+  public static DataSpec make(DataType type, Object enumObj) {
     return null;
   }
 

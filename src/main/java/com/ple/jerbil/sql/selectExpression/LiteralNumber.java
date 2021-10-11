@@ -8,7 +8,12 @@ package com.ple.jerbil.sql.selectExpression;
  */
 public class LiteralNumber extends NumericExpression {
 
+    public int value;
+
     protected LiteralNumber(int value) {
-        super(value);
+        this.value = value;
+    }
+    public LiteralNumber make(int value) {
+        return new LiteralNumber(value);
     }
 }

@@ -10,4 +10,14 @@ import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
  */
 public class LiteralBoolean extends BooleanExpression {
 
+    public Boolean bool;
+
+    protected LiteralBoolean(Boolean bool) {
+        this.bool = bool;
+    }
+
+    public LiteralBoolean make(Boolean bool) {
+        return new LiteralBoolean(bool);
+    }
+
 }

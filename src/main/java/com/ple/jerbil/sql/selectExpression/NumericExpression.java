@@ -11,14 +11,11 @@ import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
 @Immutable
 public class NumericExpression extends OrderedExpression {
 
-    public final int value;
-
-    protected NumericExpression(int value) {
-        this.value = value;
+    protected NumericExpression() {
     }
 
-    public static NumericExpression make(int value) {
-        return new NumericExpression(value);
+    public static NumericExpression make() {
+        return new NumericExpression();
     }
 
     public NumericExpression plus(NumericExpression i) {

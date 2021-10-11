@@ -13,7 +13,9 @@ import java.time.LocalDateTime;
 @Immutable
 public class LiteralDate extends DateExpression {
 
+    public final LocalDateTime dateTime;
+
     protected LiteralDate(LocalDateTime dateTime) {
-        super(dateTime);
+        this.dateTime = dateTime;
     }
 }

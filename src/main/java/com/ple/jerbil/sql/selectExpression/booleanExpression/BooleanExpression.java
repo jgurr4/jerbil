@@ -1,5 +1,7 @@
 package com.ple.jerbil.sql.selectExpression.booleanExpression;
+import com.ple.jerbil.sql.DataSpec;
 import com.ple.jerbil.sql.Immutable;
+import com.ple.jerbil.sql.fromExpression.Table;
 import com.ple.jerbil.sql.selectExpression.Expression;
 import com.ple.jerbil.sql.selectExpression.OrderedExpression;
 
@@ -20,10 +22,16 @@ import com.ple.jerbil.sql.selectExpression.OrderedExpression;
 @Immutable
 public class BooleanExpression extends OrderedExpression {
 
+
     @Override
     public BooleanExpression eq(Expression item) {
         return null;
     }
+
+    public static BooleanExpression make() {
+        return new BooleanExpression();
+    }
+
 }
 
 

@@ -12,14 +12,11 @@ import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
 @Immutable
 public class StringExpression extends OrderedExpression {
 
-    public final String value;
-
-    protected StringExpression(String value) {
-        this.value = value;
+    protected StringExpression() {
     }
 
-    public static StringExpression make(String value) {
-        return new StringExpression(value);
+    public static StringExpression make() {
+        return new StringExpression();
     }
 
     @Override

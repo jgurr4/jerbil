@@ -8,7 +8,9 @@ package com.ple.jerbil.sql.selectExpression;
  */
 public class LiteralString extends StringExpression {
 
+    public String value;
+
     protected LiteralString(String value) {
-        super(value);
+        this.value = value;
     }
 }

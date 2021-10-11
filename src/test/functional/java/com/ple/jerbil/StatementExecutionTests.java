@@ -3,6 +3,7 @@ package com.ple.jerbil;
 import org.junit.jupiter.api.Test;
 
 public class StatementExecutionTests {
+/*
 
     @Test
     void testCreateStatements() {
@@ -18,4 +19,5 @@ public class StatementExecutionTests {
     void testLocalContext() {
 
     }
+*/
 }
