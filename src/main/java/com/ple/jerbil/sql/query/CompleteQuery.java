@@ -12,22 +12,6 @@ import com.ple.jerbil.sql.selectExpression.Expression;
 @Immutable
 public class CompleteQuery extends Query {
 
-  public final Table table;
-  public final Column column;
-  public final Literal value;
-  public final Query queryType;
-
-  protected CompleteQuery(Table table, Column column, Literal value, Query query) {
-    this.table = table;
-    this.column = column;
-    this.value = value;
-    this.queryType = query;
-  }
-
-  public static CompleteQuery make(Table table, Column column, Literal value, Query query) {
-    return new CompleteQuery(table, column, value, query);
-  }
-
   public String toSql() {
     if (Global.sqlGenerator == null) {
       throw new NullPointerException("Global.sqlGenerator not set.");

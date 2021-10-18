@@ -6,4 +6,8 @@ public class IArrayList<V> implements IList<V> {
     return null;
   }
 
+  @Override
+  public V[] toArray() {
+    return null;
+  }
 }

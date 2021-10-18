@@ -9,11 +9,9 @@ import org.jetbrains.annotations.Nullable;
 
 @Immutable
 public class SelectQuery extends CompleteQuery {
-  public final IList<SelectExpression> expressions;
 
   protected SelectQuery(IList<SelectExpression> expressions, @Nullable FromExpression fromExpression, @Nullable Table table) {
     super(table, null, null, null);
-    this.expressions = expressions;
   }
 
   public static SelectQuery make(IList<SelectExpression> expressions, @Nullable FromExpression fromExpression, @Nullable Table table) {

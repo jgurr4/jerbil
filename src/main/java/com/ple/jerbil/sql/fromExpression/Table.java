@@ -24,7 +24,6 @@ public class Table extends FromExpression {
   }
 
   protected Table(StorageEngine engine, String name, IMap<String, Column> columns) {
-    super(new Table(engine, name, columns)); //TODO: ask if this is correct way to do this.
     this.engine = engine;
     this.name = name;
     this.columns = columns;

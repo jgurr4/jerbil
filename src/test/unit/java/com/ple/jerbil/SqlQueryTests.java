@@ -29,6 +29,9 @@ public class SqlQueryTests {
   @Test
   void testSelect() {
 
+    // user.replace("")
+    // user.update("")
+//    user.insert("values").ignore().replace(); instead of using .replace
     final CompleteQuery q = user.where(userColumns.name.eq("john")).select(userColumns.userId);
     assertEquals(q.toSql(), """
       select userId 
@@ -40,6 +43,13 @@ public class SqlQueryTests {
   }
 
   /*
+
+  @Test
+  void multipleWheres() {
+  user.where(userColumns.name.eq("john").and(userColumns.id.gt(5)).selectAll();
+  //TODO: Finish making this test.
+  }
+
   @Test
   void testReusableQueryBase() {
 

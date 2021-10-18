@@ -11,10 +11,6 @@ import java.util.List;
 public class PartialQueryWithValues extends PartialQuery {
 //For use with PartialUpdate, PartialInsert and PartialReplace queries, because they require .set method to list columns and the values to put in/replace.
 
-  protected PartialQueryWithValues(Table table) {
-    super(table);
-  }
-
   public CompleteQuery set(List<Column> columns, List<List<String>> values) {
     return null;
   }
