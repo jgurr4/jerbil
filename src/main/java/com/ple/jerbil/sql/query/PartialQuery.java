@@ -1,7 +1,6 @@
 package com.ple.jerbil.sql.query;
 
-import com.ple.jerbil.sql.fromExpression.FromExpression;
-import com.ple.jerbil.sql.fromExpression.Table;
+import com.ple.jerbil.sql.Immutable;
 import com.ple.jerbil.sql.selectExpression.Column;
 import com.ple.jerbil.sql.selectExpression.Expression;
 import com.ple.jerbil.sql.selectExpression.SelectExpression;
@@ -10,6 +9,10 @@ import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
 
+/**
+ * PartialQuery represents any query object that
+ */
+@Immutable
 public class PartialQuery extends Query {
 
     protected PartialQuery(@Nullable IList<BooleanExpression> where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IMap<Column, Expression> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {

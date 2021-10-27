@@ -1,10 +1,9 @@
-package com.ple.jerbil.sql.fromExpression;
+package com.ple.jerbil.sql.query;
 
 import com.ple.jerbil.sql.DelayedImmutable;
 import com.ple.jerbil.sql.StorageEngine;
 import com.ple.jerbil.sql.selectExpression.*;
 import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
-import com.ple.jerbil.sql.query.*;
 import com.ple.util.IHashMap;
 import com.ple.util.IMap;
 

@@ -2,9 +2,8 @@ package com.ple.jerbil.sql.selectExpression;
 
 import com.ple.jerbil.sql.DataSpec;
 import com.ple.jerbil.sql.DataType;
-import com.ple.jerbil.sql.fromExpression.Table;
+import com.ple.jerbil.sql.query.Table;
 import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * PartialColumn was made to allow column expressions to be created without requiring a DataSpec.

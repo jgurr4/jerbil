@@ -1,16 +1,16 @@
-package com.ple.jerbil.sql.fromExpression;
+package com.ple.jerbil.sql.query;
 
+import com.ple.jerbil.sql.Immutable;
 import com.ple.jerbil.sql.PotentialQuery;
-import com.ple.jerbil.sql.StorageEngine;
-import com.ple.jerbil.sql.query.PartialQuery;
-import com.ple.jerbil.sql.selectExpression.Column;
-import com.ple.util.IMap;
+import com.ple.jerbil.sql.selectExpression.SelectExpression;
+import com.ple.util.IArrayList;
 
 /**
  * All tables are FromExpressions, but not all FromExpressions are Tables.
  * For instance FromExpressions can be subqueries, joins and tables. Joins join two fromExpressions together.
  * FromExpressions are defined as anything you can put to the right of a From in sql statement.
  */
+@Immutable
 public abstract class FromExpression extends PotentialQuery {
 
   abstract protected void diffJoin();
@@ -25,4 +25,8 @@ public abstract class FromExpression extends PotentialQuery {
     return this;
   }
 
+  @Override
+  public SelectQuery select(SelectExpression... selectExpressions) {
+    return new SelectQuery(null, this, QueryType.select, IArrayList.make(selectExpressions), null, null, null, null, null, false, false, false, false);
+  }
 }

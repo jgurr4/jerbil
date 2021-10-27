@@ -1,7 +1,6 @@
 package com.ple.jerbil.sql.query;
 
 import com.ple.jerbil.sql.Immutable;
-import com.ple.jerbil.sql.fromExpression.FromExpression;
 import com.ple.jerbil.sql.selectExpression.Column;
 import com.ple.jerbil.sql.selectExpression.Expression;
 import com.ple.util.IList;

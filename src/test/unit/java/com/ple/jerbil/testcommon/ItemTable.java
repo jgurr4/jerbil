@@ -1,6 +1,6 @@
 package com.ple.jerbil.testcommon;
 
-import com.ple.jerbil.sql.fromExpression.Table;
+import com.ple.jerbil.sql.query.Table;
 
 public class ItemTable extends Table {
 

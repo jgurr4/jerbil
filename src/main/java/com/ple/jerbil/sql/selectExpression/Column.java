@@ -1,10 +1,7 @@
 package com.ple.jerbil.sql.selectExpression;
 
-import com.ple.jerbil.sql.DataSpec;
 import com.ple.jerbil.sql.DelayedImmutable;
-import com.ple.jerbil.sql.fromExpression.Table;
-import com.ple.jerbil.sql.selectExpression.booleanExpression.BooleanExpression;
-import org.jetbrains.annotations.Nullable;
+import com.ple.jerbil.sql.query.Table;
 
 /**
  *

@@ -1,6 +1,6 @@
 package com.ple.jerbil.sql;
 
-import com.ple.jerbil.sql.fromExpression.Table;
+import com.ple.jerbil.sql.query.Table;
 import com.ple.jerbil.sql.query.QueryList;
 
 /**
