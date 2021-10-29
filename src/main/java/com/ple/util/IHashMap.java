@@ -1,6 +1,6 @@
 package com.ple.util;
 
-import com.ple.jerbil.sql.Immutable;
+import com.ple.jerbil.data.Immutable;
 
 @Immutable
 public class IHashMap<K, V> implements IMap<K, V> {

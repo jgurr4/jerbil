@@ -1,12 +1,5 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.sql.Database;
-import com.ple.jerbil.sql.selectExpression.Column;
-import com.ple.jerbil.sql.query.QueryList;
-import com.ple.jerbil.testcommon.*;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStructureTests {

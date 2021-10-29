@@ -1,6 +1,6 @@
 package com.ple.jerbil.testcommon;
 
-import com.ple.jerbil.sql.query.Table;
+import com.ple.jerbil.data.query.Table;
 
 public class UserTable extends Table {
 

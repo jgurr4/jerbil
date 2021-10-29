@@ -1,12 +1,5 @@
 package com.ple.jerbil.generic;
 
-import com.ple.jerbil.sql.DateInterval;
-import com.ple.jerbil.sql.selectExpression.Literal;
-import org.junit.jupiter.api.Test;
-
-import java.time.LocalDateTime;
-import java.time.Month;
-
 
 /**
  * The purpose of genericTests is to test that the api works when paired with the correct translator. So the tests below

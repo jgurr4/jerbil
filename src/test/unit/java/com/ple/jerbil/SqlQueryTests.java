@@ -1,15 +1,14 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.sql.Database;
-import com.ple.jerbil.sql.selectExpression.Agg;
-import com.ple.jerbil.sql.selectExpression.Literal;
-import com.ple.jerbil.sql.query.CompleteQuery;
+import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.bridge.MysqlBridge;
+import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
-import java.sql.Date;
-
-import static com.ple.jerbil.sql.selectExpression.Literal.make;
+import static com.ple.jerbil.data.selectExpression.Literal.make;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlQueryTests {
@@ -22,9 +21,11 @@ public class SqlQueryTests {
   final ItemTableColumns itemColumns = new ItemTableColumns(item);
   final InventoryTable inventory = new InventoryTable();
   final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
-
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
+  public SqlQueryTests() {
+    DataGlobal.bridge = MysqlBridge.make();
+  }
 
   @Test
   void testSelect() {
@@ -46,7 +47,7 @@ public class SqlQueryTests {
 
   @Test
   void multipleWheres() {
-  user.where(userColumns.name.eq("john").and(userColumns.id.gt(5)).selectAll();
+  user.where(userColumns.name.eq("john"), userColumns.name.isGreaterThan(Literal.make("bob")).and(userColumns.id.gt(5))).selectAll();
   //TODO: Finish making this test.
   }
 

@@ -1,13 +1,5 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.sql.Database;
-import com.ple.jerbil.sql.selectExpression.Literal;
-import com.ple.jerbil.sql.query.CompleteQuery;
-import com.ple.jerbil.testcommon.*;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStatementTests {
