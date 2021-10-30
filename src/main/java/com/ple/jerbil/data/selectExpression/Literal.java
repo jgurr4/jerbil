@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
  */
 public interface Literal extends Expression {
 
-  public static LiteralString make(String string) {
-    return null;
+  public static LiteralString make(String s) {
+    return LiteralString.make(s);
   }
 
   public static LiteralNumber make(int i) {

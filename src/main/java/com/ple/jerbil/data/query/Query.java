@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 @Immutable
 public class Query extends PotentialQuery {
 
-    @Nullable public final IList<BooleanExpression> where;
+    @Nullable public final QueryList<BooleanExpression> where;
     @Nullable public final FromExpression fromExpression;
     @Nullable public final QueryType queryType;
     @Nullable public final IList<SelectExpression> select;
@@ -35,7 +35,7 @@ public class Query extends PotentialQuery {
     // Replace = mayInsert : true; mayReplace : true; mayThrowOnDuplicate : false; triggerDeleteWhenReplacing : false; //Instead of deleting a duplicate it updates it, causing the update trigger to go off.
     // update = mayInsert : false; mayReplace : true; mayThrowOnDuplicate : false; triggerDeleteWhenReplacing : false;
 
-    protected Query(@Nullable IList<BooleanExpression> where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IMap<Column, Expression> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
+    protected Query(@Nullable QueryList<BooleanExpression> where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IMap<Column, Expression> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
         this.where = where;
         this.fromExpression = fromExpression;
         this.queryType = queryType;

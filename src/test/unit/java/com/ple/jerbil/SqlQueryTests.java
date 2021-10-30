@@ -32,7 +32,7 @@ public class SqlQueryTests {
 
     // user.replace("")
     // user.update("")
-//    user.insert("values").ignore().replace(); instead of using .replace
+    //user.insert("values").ignore().replace(); instead of using .replace
     final CompleteQuery q = user.where(userColumns.name.eq("john")).select(userColumns.userId);
     assertEquals(q.toSql(), """
       select userId 
@@ -46,8 +46,8 @@ public class SqlQueryTests {
   /*
 
   @Test
-  void multipleWheres() {
-  user.where(userColumns.name.eq("john"), userColumns.name.isGreaterThan(Literal.make("bob")).and(userColumns.id.gt(5))).selectAll();
+  void multipleWhereConditions() {
+  user.where(userColumns.name.eq("john"), userColumns.age.gt(25)).or(userColumns.age.lt(20), userColumns.id.gt(5)).selectAll();
   //TODO: Finish making this test.
   }
 

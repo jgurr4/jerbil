@@ -13,4 +13,8 @@ public class LiteralString extends StringExpression {
     protected LiteralString(String value) {
         this.value = value;
     }
+
+    public static LiteralString make(String value) {
+        return new LiteralString(value);
+    }
 }

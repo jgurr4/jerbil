@@ -20,7 +20,7 @@ import com.ple.jerbil.data.selectExpression.OrderedExpression;
 @Immutable
 public class BooleanExpression extends OrderedExpression {
 
-    public BooleanExpression() {
+    protected BooleanExpression() {
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 
 public class StringColumn extends StringExpression implements Column<StringColumn> {
 
@@ -48,6 +49,6 @@ public class StringColumn extends StringExpression implements Column<StringColum
     }
 
     public BooleanExpression eq(String value) {
-        return BooleanExpression.make();
+        return Equals.make(this, value);
     }
 }

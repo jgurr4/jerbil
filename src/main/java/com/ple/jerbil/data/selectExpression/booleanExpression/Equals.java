@@ -1,6 +1,8 @@
 package com.ple.jerbil.data.selectExpression.booleanExpression;
 
 import com.ple.jerbil.data.selectExpression.Expression;
+import com.ple.jerbil.data.selectExpression.Literal;
+import com.ple.jerbil.data.selectExpression.StringColumn;
 
 /**
  * Every single operator for booleanExpression is a class. So =, >, <, like, regexp.
@@ -8,7 +10,6 @@ import com.ple.jerbil.data.selectExpression.Expression;
  * select where 5 = false;
  */
 public class Equals extends BooleanExpression {
-
 
   public final Expression e1;
   public final Expression e2;
@@ -18,8 +19,8 @@ public class Equals extends BooleanExpression {
     this.e2 = e2;
   }
 
-  public static Equals make(Expression e1, Expression e2) {
-   return new Equals(e1, e2);
+  public static Equals make(StringColumn e1, String e2) {
+   return new Equals(e1, Literal.make(e2));
   }
 
 }
