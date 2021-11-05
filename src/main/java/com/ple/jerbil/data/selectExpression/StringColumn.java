@@ -48,7 +48,7 @@ public class StringColumn extends StringExpression implements Column<StringColum
         return new StringColumn(name, table, dataSpec, indexed, primary);
     }
 
-    public BooleanExpression eq(String value) {
+    public Equals eq(Expression value) {
         return Equals.make(this, value);
     }
 }

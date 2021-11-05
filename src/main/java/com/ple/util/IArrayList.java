@@ -1,13 +1,18 @@
 package com.ple.util;
 
 public class IArrayList<V> implements IList<V> {
+  public final V[] values;
 
-  public static <V> IList<V> make(V... values) {
-    return null;
+  private IArrayList(V[] values) {
+    this.values = values;
+  }
+
+  public static <V> IArrayList<V> make(V... values) {
+    return new IArrayList<>(values);
   }
 
   @Override
   public V[] toArray() {
-    return null;
+    return this.values;
   }
 }

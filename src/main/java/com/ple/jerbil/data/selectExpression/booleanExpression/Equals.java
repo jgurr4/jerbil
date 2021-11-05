@@ -19,8 +19,8 @@ public class Equals extends BooleanExpression {
     this.e2 = e2;
   }
 
-  public static Equals make(StringColumn e1, String e2) {
-   return new Equals(e1, Literal.make(e2));
+  public static Equals make(Expression e1, Expression e2) {
+   return new Equals(e1, e2);
   }
 
 }

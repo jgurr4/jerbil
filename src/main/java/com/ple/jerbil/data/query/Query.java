@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 @Immutable
 public class Query extends PotentialQuery {
 
-    @Nullable public final QueryList<BooleanExpression> where;
+    @Nullable public final BooleanExpression where;
     @Nullable public final FromExpression fromExpression;
     @Nullable public final QueryType queryType;
     @Nullable public final IList<SelectExpression> select;
@@ -35,7 +35,7 @@ public class Query extends PotentialQuery {
     // Replace = mayInsert : true; mayReplace : true; mayThrowOnDuplicate : false; triggerDeleteWhenReplacing : false; //Instead of deleting a duplicate it updates it, causing the update trigger to go off.
     // update = mayInsert : false; mayReplace : true; mayThrowOnDuplicate : false; triggerDeleteWhenReplacing : false;
 
-    protected Query(@Nullable QueryList<BooleanExpression> where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IMap<Column, Expression> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
+    protected Query(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IMap<Column, Expression> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
         this.where = where;
         this.fromExpression = fromExpression;
         this.queryType = queryType;
@@ -53,6 +53,6 @@ public class Query extends PotentialQuery {
 
     @Override
     public SelectQuery select(SelectExpression... selectExpressions) {
-        return new SelectQuery(where, fromExpression, queryType, IArrayList.make(selectExpressions), groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+        return SelectQuery.make(this.where, this.fromExpression, QueryType.select, IArrayList.make(selectExpressions), this.groupBy, this.orderBy, this.having, this.limit, this.set, this.mayInsert, this.mayReplace, this.triggerDeleteWhenReplacing, this.mayThrowOnDuplicate);
     }
 }

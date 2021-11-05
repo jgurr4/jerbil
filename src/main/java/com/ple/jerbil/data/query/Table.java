@@ -37,8 +37,8 @@ public class Table extends FromExpression {
     return "create table " + name + " (" + ")";
   }
 
-  public QueryWithFrom where(BooleanExpression... conditions) {
-    return QueryWithFrom.make(this).where(IArrayList.make(conditions));
+  public QueryWithFrom where(BooleanExpression condition) {
+    return QueryWithFrom.make(this).where(condition);
   }
 
   public CompleteQuery join(Table... tables) {

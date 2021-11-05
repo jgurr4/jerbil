@@ -2,6 +2,7 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 
 /**
  * StringExpression is any expression that evaluates to a String. For example:
@@ -19,8 +20,8 @@ public class StringExpression extends OrderedExpression {
     }
 
     @Override
-    public BooleanExpression eq(Expression item) {
-        return null;
+    public Equals eq(Expression item) {
+        return Equals.make(this, item);
     }
 
 }
