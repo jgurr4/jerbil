@@ -38,7 +38,7 @@ public class SqlQueryTests {
         select userId 
         from user 
         where name = 'john'
-        """); // tosql should fail if they haven't passed in what database language for the bridge/translator to use.
+        """); // TODO: tosql should fail if they haven't passed in what database language for the bridge/translator to use.
     // Because default it's null. But it will pass if they already set the global. I'll test both ways.
 
   }

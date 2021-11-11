@@ -13,8 +13,10 @@ public interface Column <T extends Column> {
         return PartialColumn.make(name, table);
     }
 
-    public abstract T primary();
+    public String getName();
 
-    public abstract T indexed();
+    public T primary();
+
+    public T indexed();
 
 }

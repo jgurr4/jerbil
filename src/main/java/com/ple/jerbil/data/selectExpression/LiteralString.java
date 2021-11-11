@@ -6,7 +6,7 @@ package com.ple.jerbil.data.selectExpression;
  * Contrast that with selecting String columns:
  * select first_name from tablename;
  */
-public class LiteralString extends StringExpression {
+public class LiteralString extends StringExpression implements Literal {
 
     public String value;
 

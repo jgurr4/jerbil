@@ -6,14 +6,15 @@ package com.ple.jerbil.data.selectExpression;
  * Contrast that with selecting Numeric columns:
  * select price, amount from tablename;
  */
-public class LiteralNumber extends NumericExpression {
+public class LiteralNumber extends NumericExpression implements Literal {
 
-    public int value;
+    public Integer value;
 
-    protected LiteralNumber(int value) {
+    protected LiteralNumber(Integer value) {
         this.value = value;
     }
-    public LiteralNumber make(int value) {
+
+    public LiteralNumber make(Integer value) {
         return new LiteralNumber(value);
     }
 }

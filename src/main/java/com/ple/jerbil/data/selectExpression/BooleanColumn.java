@@ -30,6 +30,11 @@ public class BooleanColumn extends BooleanExpression implements Column<BooleanCo
     }
 
     @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
     public BooleanColumn primary() {
         return new BooleanColumn(this.name, this.table, this.dataSpec, this.indexed, true);
     }

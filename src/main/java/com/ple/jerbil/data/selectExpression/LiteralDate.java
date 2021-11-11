@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * select creation_date from tablename;
  */
 @Immutable
-public class LiteralDate extends DateExpression {
+public class LiteralDate extends DateExpression implements Literal {
 
     public final LocalDateTime dateTime;
 
