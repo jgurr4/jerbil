@@ -1,0 +1,22 @@
+
+HttpServerVerticle:
+API Endpoints:
+/status
+/bus/*
+/static/*
+
+Specific API Endpoints:
+/status (GET)
+/bus/lobby cookie check and set when user login (GET)
+/bus/createAcct (POST)
+/bus/forgotPass (GET)
+/bus/serverError (GET)
+/bus/resetPass user=user (PUT)
+/static/main (GET)
+
+MySQLVerticle
+
+EventHandlers:
+login::handleLogin
+
+

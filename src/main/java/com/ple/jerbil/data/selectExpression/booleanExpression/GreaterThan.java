@@ -1,5 +1,26 @@
 package com.ple.jerbil.data.selectExpression.booleanExpression;
 
+import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.selectExpression.Expression;
+
+/**
+ * Object representing GreaterThan BooleanExpression.
+ *
+ */
+@Immutable
 public class GreaterThan extends BooleanExpression {
+
+  public final Expression e1;
+  public final Expression e2;
+
+  protected GreaterThan(Expression e1, Expression e2) {
+    this.e1 = e1;
+    this.e2 = e2;
+  }
+
+  public static GreaterThan make(Expression e1, Expression e2) {
+    return new GreaterThan(e1, e2);
+  }
+
 
 }

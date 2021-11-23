@@ -3,9 +3,7 @@ package com.ple.jerbil.data.translator;
 import com.ple.jerbil.data.LanguageGenerator;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
-import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
-import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
-import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
+import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.util.IList;
 
 public class MysqlLanguageGenerator implements LanguageGenerator {
@@ -41,15 +39,44 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       return "";
     }
     String fullWhereList = "where ";
+    fullWhereList += getWhereExpressionsAsString(where);
+    return fullWhereList;
+  }
+
+  private String getWhereExpressionsAsString(BooleanExpression where) {
+    String whereExpressions = "";
     if (where instanceof Equals) {
       final Equals eq = (Equals) where;
-      fullWhereList += toSql(eq.e1) + " = " + toSql(eq.e2);
+      whereExpressions += toSql(eq.e1) + " = " + toSql(eq.e2);
     } else if (where instanceof GreaterThan) {
-      //TODO: put GreaterThan handling here
+      final GreaterThan gt = (GreaterThan) where;
+      whereExpressions += toSql(gt.e1) + " > " + toSql(gt.e2);
+    } else if (where instanceof And) {
+      final And and = (And) where;
+      final BooleanExpression[] boolExp = and.conditions.toArray();
+      for (int i = 0; i < boolExp.length; i++) {
+        if (i == boolExp.length - 1) {
+          whereExpressions += getWhereExpressionsAsString(boolExp[i]);
+        } else {
+          whereExpressions += getWhereExpressionsAsString(boolExp[i]) + "\nand ";
+        }
+      }
+    } else if (where instanceof Or) {
+      final Or or = (Or) where;
+      final BooleanExpression[] boolExp = or.conditions.toArray();
+      whereExpressions += "(";
+      for (int i = 0; i < boolExp.length; i++) {
+        if (i == boolExp.length - 1) {
+          whereExpressions += getWhereExpressionsAsString(boolExp[i]);
+        } else {
+          whereExpressions += getWhereExpressionsAsString(boolExp[i]) + " or ";
+        }
+      }
+      whereExpressions += ")";
     } else {
       throw new IllegalStateException("Unexpected value: " + where.getClass().getSimpleName());
     }
-    return fullWhereList;
+    return whereExpressions;
   }
 
   private String toSql(Expression e) {

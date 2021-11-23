@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 
 import static com.ple.jerbil.data.selectExpression.Literal.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static com.ple.jerbil.data.selectExpression.booleanExpression.And.*;
+import static com.ple.jerbil.data.selectExpression.booleanExpression.Or.*;
 
 public class SqlQueryTests {
 
@@ -34,34 +36,40 @@ public class SqlQueryTests {
     // user.update("")
     //user.insert("values").ignore().replace(); instead of using .replace
     final CompleteQuery q = user.where(userColumns.name.eq(make("john"))).select(userColumns.userId);
-    assertEquals(q.toSql(), """
-        select userId 
-        from user 
-        where name = 'john'
-        """); // TODO: tosql should fail if they haven't passed in what database language for the bridge/translator to use.
+    assertEquals("""
+      select userId 
+      from user 
+      where name = 'john'
+      """, q.toSql());
+    // TODO: tosql should fail if they haven't passed in what database language for the bridge/translator to use.
     // Because default it's null. But it will pass if they already set the global. I'll test both ways.
 
   }
 
 
-  /*
   @Test
   void multipleWhereConditions() {
     final CompleteQuery q = user.where(
-        and(
-            userColumns.name.eq(make("john")),
-            or(
-                userColumns.userId.isGreaterThan(make(4)),
-                userColumns.name.eq("bob")
-            ),
-            userColumns.age.eq(make(30)
-            )
-        )
+      and(
+        userColumns.name.eq(make("john")),
+        or(
+          userColumns.userId.isGreaterThan(make(4)),
+          userColumns.name.eq(make("bob"))
+        ),
+        userColumns.age.eq(make(30))
+      )
     ).select(userColumns.userId);
-    user.where(and(userColumns.name.eq("john"), or(userColumns.id.eq(1123), userColumns.id.eq(4343)), userColumns.quantity.gt(5)));
+//    user.where(and(userColumns.name.eq("john"), or(userColumns.id.eq(1123), userColumns.id.eq(4343)), userColumns.quantity.gt(5)));
 //  user.where(userColumns.name.eq("john"), userColumns.age.gt(25)).or(userColumns.age.lt(20), userColumns.id.gt(5)).selectAll();
+    assertEquals("""
+      select userId
+      from user
+      where name = 'john'
+      and (userId > 4 or name = 'bob')
+      and age = 30
+      """, q.toSql());
   }
-
+/*
   @Test
   void testReusableQueryBase() {
 

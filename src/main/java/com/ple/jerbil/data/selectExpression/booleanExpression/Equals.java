@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.selectExpression.booleanExpression;
 
+import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.data.selectExpression.StringColumn;
@@ -9,6 +10,7 @@ import com.ple.jerbil.data.selectExpression.StringColumn;
  * Literals are not allowed to mix to prevent things like this:
  * select where 5 = false;
  */
+@Immutable
 public class Equals extends BooleanExpression {
 
   public final Expression e1;

@@ -5,6 +5,7 @@ import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
+import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
 public class StringColumn extends StringExpression implements Column<StringColumn> {
 
@@ -55,5 +56,9 @@ public class StringColumn extends StringExpression implements Column<StringColum
 
     public Equals eq(Expression value) {
         return Equals.make(this, value);
+    }
+
+    public GreaterThan isGreaterThan(Expression value) {
+        return GreaterThan.make(this, value);
     }
 }

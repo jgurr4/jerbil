@@ -15,7 +15,7 @@ public interface Literal extends Expression {
   }
 
   public static LiteralNumber make(int i) {
-    return null;
+    return LiteralNumber.make(i);
   }
 
   public static LiteralDate make(LocalDateTime date) {

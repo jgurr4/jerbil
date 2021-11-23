@@ -6,6 +6,7 @@ import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
+import com.ple.util.IList;
 import com.ple.util.IMap;
 
 
