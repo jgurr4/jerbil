@@ -74,10 +74,6 @@ public class Table extends FromExpression {
     return null;
   }
 
-  public CompleteQuery select(Column column) {
-    return null;
-  }
-
   public CompleteQuery select(AliasedExpression... aliasedExpressions) {
     return null;
   }

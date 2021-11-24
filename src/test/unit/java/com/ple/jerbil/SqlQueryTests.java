@@ -37,9 +37,6 @@ public class SqlQueryTests {
       from user 
       where name = 'john'
       """, q.toSql());
-    // TODO: tosql should fail if they haven't passed in what database language for the bridge/translator to use.
-    // Because default it's null. But it will pass if they already set the global. I'll test both ways.
-
   }
 
 
@@ -63,28 +60,26 @@ public class SqlQueryTests {
       and age = 30
       """, q.toSql());
   }
-/*
+
   @Test
   void testReusableQueryBase() {
-
     final CompleteQuery base = user.select(userColumns.userId);
-    final CompleteQuery q1 = base.where(userColumns.name.eq("john"));
-    final CompleteQuery q2 = base.where(userColumns.name.eq("james"));
-
-    assertEquals(q1.toSql(), """
+    final CompleteQuery q1 = base.where(userColumns.name.eq(make("john")));
+    final CompleteQuery q2 = base.where(userColumns.name.eq(make("james")));
+    assertEquals("""
         select userId 
         from user 
-        where name='john'
-        """);
+        where name = 'john'
+        """, q1.toSql());
 
-    assertEquals(q2.toSql(), """
+    assertEquals("""
         select userId 
         from user 
-        where name='james'
-        """);
-
+        where name = 'james'
+        """, q2.toSql());
   }
 
+/*
   @Test
   void testSelectEnum() {
 

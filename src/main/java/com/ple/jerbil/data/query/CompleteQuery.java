@@ -8,6 +8,7 @@ import com.ple.jerbil.data.selectExpression.SelectExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
+import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +38,10 @@ public class CompleteQuery extends Query {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
 
+  public static CompleteQuery make(Table table, IArrayList<SelectExpression> selectExpressions) {
+    return new CompleteQuery(null, table, null, selectExpressions, null, null, null, null, null, false, false, false, false);
+  }
+
   public static CompleteQuery make(IMap<Column, Expression> set) {
     return new CompleteQuery(null, null, null, null, null, null, null, null, set, false, false, false, false);
   }
@@ -52,8 +57,8 @@ public class CompleteQuery extends Query {
     return generator.toSql(this);
   }
 
-  public CompleteQuery where(BooleanExpression condition) {
-    return null;
+  public SelectQuery where(BooleanExpression condition) {
+    return SelectQuery.make(condition, this.fromExpression, this.queryType, this.select, this.groupBy, this.orderBy, this.having, this.limit, this.set, this.mayInsert, this.mayReplace, this.triggerDeleteWhenReplacing, this.mayThrowOnDuplicate);
   }
 
   public CompleteQuery and(BooleanExpression expression) {
