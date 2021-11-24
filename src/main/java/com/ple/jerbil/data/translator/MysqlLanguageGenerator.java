@@ -38,45 +38,50 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     if (where == null) {
       return "";
     }
-    String fullWhereList = "where ";
-    fullWhereList += getWhereExpressionsAsString(where);
-    return fullWhereList;
+    String fullWhereClause = "where ";
+    fullWhereClause += toSqlBooleanExpression(where);
+    if (fullWhereClause.endsWith(")")) {
+      fullWhereClause = fullWhereClause.replaceAll("where \\(", "where ").replaceAll("\\)\\z", "");
+    }
+    return fullWhereClause;
   }
 
-  private String getWhereExpressionsAsString(BooleanExpression where) {
-    String whereExpressions = "";
+  private String toSqlBooleanExpression(BooleanExpression where) {
+    String booleanExpressions = "";
     if (where instanceof Equals) {
       final Equals eq = (Equals) where;
-      whereExpressions += toSql(eq.e1) + " = " + toSql(eq.e2);
+      booleanExpressions += toSql(eq.e1) + " = " + toSql(eq.e2);
     } else if (where instanceof GreaterThan) {
       final GreaterThan gt = (GreaterThan) where;
-      whereExpressions += toSql(gt.e1) + " > " + toSql(gt.e2);
+      booleanExpressions += toSql(gt.e1) + " > " + toSql(gt.e2);
     } else if (where instanceof And) {
       final And and = (And) where;
       final BooleanExpression[] boolExp = and.conditions.toArray();
+      booleanExpressions += "(";
       for (int i = 0; i < boolExp.length; i++) {
         if (i == boolExp.length - 1) {
-          whereExpressions += getWhereExpressionsAsString(boolExp[i]);
+          booleanExpressions += toSqlBooleanExpression(boolExp[i]);
         } else {
-          whereExpressions += getWhereExpressionsAsString(boolExp[i]) + "\nand ";
+          booleanExpressions += toSqlBooleanExpression(boolExp[i]) + "\nand ";
         }
       }
+      booleanExpressions += ")";
     } else if (where instanceof Or) {
       final Or or = (Or) where;
       final BooleanExpression[] boolExp = or.conditions.toArray();
-      whereExpressions += "(";
+      booleanExpressions += "(";
       for (int i = 0; i < boolExp.length; i++) {
         if (i == boolExp.length - 1) {
-          whereExpressions += getWhereExpressionsAsString(boolExp[i]);
+          booleanExpressions += toSqlBooleanExpression(boolExp[i]);
         } else {
-          whereExpressions += getWhereExpressionsAsString(boolExp[i]) + " or ";
+          booleanExpressions += toSqlBooleanExpression(boolExp[i]) + " or ";
         }
       }
-      whereExpressions += ")";
+      booleanExpressions += ")";
     } else {
       throw new IllegalStateException("Unexpected value: " + where.getClass().getSimpleName());
     }
-    return whereExpressions;
+    return booleanExpressions;
   }
 
   private String toSql(Expression e) {

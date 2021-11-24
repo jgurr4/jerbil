@@ -31,10 +31,6 @@ public class SqlQueryTests {
 
   @Test
   void testSelect() {
-
-    // user.replace("")
-    // user.update("")
-    //user.insert("values").ignore().replace(); instead of using .replace
     final CompleteQuery q = user.where(userColumns.name.eq(make("john"))).select(userColumns.userId);
     assertEquals("""
       select userId 
@@ -59,8 +55,6 @@ public class SqlQueryTests {
         userColumns.age.eq(make(30))
       )
     ).select(userColumns.userId);
-//    user.where(and(userColumns.name.eq("john"), or(userColumns.id.eq(1123), userColumns.id.eq(4343)), userColumns.quantity.gt(5)));
-//  user.where(userColumns.name.eq("john"), userColumns.age.gt(25)).or(userColumns.age.lt(20), userColumns.id.gt(5)).selectAll();
     assertEquals("""
       select userId
       from user
