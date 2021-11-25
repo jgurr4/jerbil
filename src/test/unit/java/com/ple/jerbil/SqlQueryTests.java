@@ -79,19 +79,18 @@ public class SqlQueryTests {
         """, q2.toSql());
   }
 
-/*
   @Test
   void testSelectEnum() {
-
     final CompleteQuery q = item.where(itemColumns.type.eq(ItemType.weapon.toString())).selectAll();
-    assertEquals(q.toSql(), """
+    assertEquals("""
         select * 
         from item 
         where type = 'weapon'
-        """);
+        """, q.toSql());
 
   }
 
+/*
   @Test
   void testSelectJoins() {
 

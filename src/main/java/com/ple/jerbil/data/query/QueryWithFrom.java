@@ -24,7 +24,7 @@ public class QueryWithFrom extends PartialQuery {
   }
 
   public SelectQuery selectAll() {
-    return SelectQuery.make(IArrayList.make(SelectExpression.selectAll));
+    return SelectQuery.make(this.where, this.fromExpression, QueryType.select, IArrayList.make(SelectExpression.selectAll), this.groupBy, this.orderBy, this.having, this.limit, this.set, this.mayInsert, this.mayReplace, this.triggerDeleteWhenReplacing, this.mayThrowOnDuplicate);
   }
 
   public QueryWithFrom where(BooleanExpression where) {

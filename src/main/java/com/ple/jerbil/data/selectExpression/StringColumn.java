@@ -58,6 +58,10 @@ public class StringColumn extends StringExpression implements Column<StringColum
         return Equals.make(this, value);
     }
 
+    public Equals eq(String value) {
+        return Equals.make(this, Literal.make(value));
+    }
+
     public GreaterThan isGreaterThan(Expression value) {
         return GreaterThan.make(this, value);
     }

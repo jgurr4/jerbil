@@ -122,6 +122,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         fullSelectList += ((NumericColumn) selectArr[i]).name;
       } else if (selectArr[i] instanceof LiteralNumber) {
         // TODO: Handle Literal values here.
+      } else if (selectArr[i] instanceof SelectAllExpression) {
+        fullSelectList += "*";
       }
       if (selectArr.length != i + 1) {
         fullSelectList += ", ";
