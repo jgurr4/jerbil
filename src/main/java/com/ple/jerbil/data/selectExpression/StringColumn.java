@@ -33,6 +33,11 @@ public class StringColumn extends StringExpression implements Column<StringColum
     }
 
     @Override
+    public Table getTable() {
+        return this.table;
+    }
+
+    @Override
     public StringColumn primary() {
         return new StringColumn(this.name, this.table, this.dataSpec, this.indexed, true);
     }

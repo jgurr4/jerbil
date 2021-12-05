@@ -36,6 +36,11 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
     return this.name;
   }
 
+  @Override
+  public Table getTable() {
+    return this.table;
+  }
+
   public static NumericColumn make(String name, Table table, boolean primary) {
     return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary);
   }

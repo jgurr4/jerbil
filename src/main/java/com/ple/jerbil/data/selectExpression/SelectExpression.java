@@ -14,9 +14,10 @@ import com.ple.jerbil.data.query.CompleteQuery;
 @Immutable
 public interface SelectExpression {
 
-  public final static SelectExpression selectAll = SelectAllExpression.make();
+  SelectExpression selectAll = SelectAllExpression.make();
 
-  public default CompleteQuery select() {
+  //TODO: Figure out how to use this method to return a "select *" statement when no select() parameters are used.
+  default CompleteQuery select() {
     return null;
   }
 

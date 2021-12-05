@@ -90,21 +90,26 @@ public class SqlQueryTests {
 
   }
 
-/*
   @Test
   void testSelectJoins() {
-
-    final CompleteQuery q = player.join(inventory, item).where(playerColumns.name.eq("bob")).and(itemColumns.name.eq("sword"));
+    final CompleteQuery q = player.join(inventory, item).where(
+      and(
+        playerColumns.name.eq("bob"),
+        itemColumns.name.eq("sword")
+      )
+    ).select();
     assertEquals(q.toSql(), """
         select *
         from player
         inner join inventory using (playerId)
         inner join item using (itemId)
-        where player.name='bob' and item.name='sword'
+        where player.name = 'bob'
+        and item.name = 'sword'
         """);
 
   }
 
+/*
   @Test
   void testAggregation() {
 

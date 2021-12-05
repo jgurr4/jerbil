@@ -1,6 +1,11 @@
 package com.ple.util;
 
 import com.ple.jerbil.data.Immutable;
+import org.jetbrains.annotations.NotNull;
+
+import java.rmi.NoSuchObjectException;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 @Immutable
 public class IHashMap<K, V> implements IMap<K, V> {
@@ -227,9 +232,33 @@ public class IHashMap<K, V> implements IMap<K, V> {
     return new IHashMap(newEntries, bucketSize, entriesInUse, newBucketCount, expansionFactor);
   }
 
+  @NotNull
+  @Override
+  public Iterator<IEntry<K, V>> iterator() {
+    return new Iterator<>() {
+
+      public int currentIndex;
+
+      @Override
+      public boolean hasNext() {
+        return currentIndex < entries.length;
+      }
+
+      @Override
+      public IEntry<K, V> next() {
+        if (hasNext()) {
+          currentIndex++;
+          return entries[currentIndex];
+        } else {
+          throw new NoSuchElementException();
+        }
+      }
+    };
+  }
+
 }
 
-class IHashMapEntry<K, V> {
+class IHashMapEntry<K, V> implements IEntry<K, V>{
 
   private final K key;
   private final V value;

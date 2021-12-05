@@ -19,8 +19,8 @@ public class QueryWithFrom extends PartialQuery {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
 
-  public static QueryWithFrom make(Table table) {
-    return new QueryWithFrom(null, table, null, null, null, null, null, null, null, false, false, false, false);
+  public static QueryWithFrom make(FromExpression fromExpression) {
+    return new QueryWithFrom(null, fromExpression, null, null, null, null, null, null, null, false, false, false, false);
   }
 
   public SelectQuery selectAll() {

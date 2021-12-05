@@ -15,6 +15,8 @@ public interface Column <T extends Column> {
 
     public String getName();
 
+    public Table getTable();
+
     public T primary();
 
     public T indexed();

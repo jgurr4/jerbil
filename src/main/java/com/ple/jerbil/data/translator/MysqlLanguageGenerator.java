@@ -4,7 +4,8 @@ import com.ple.jerbil.data.LanguageGenerator;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
-import com.ple.util.IList;
+import com.ple.util.*;
+import org.jetbrains.annotations.NotNull;
 
 public class MysqlLanguageGenerator implements LanguageGenerator {
   public static LanguageGenerator make() {
@@ -30,7 +31,16 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   public String toSql(SelectQuery selectQuery) {
+    //FIXME: Ask if this is thread-safe or not. My guess is it's not because if another process uses this method and it changes the query, then that will affect all current processes.
+    //GeneratorQuery.set(selectQuery);  // The reason I made this was so I could access selectQuery.fromExpression in the findMatch() method.
+    IHashMap<Table, Column> matches = findMatches(selectQuery.fromExpression.tableList());
+    //After I successfully obtain the matches, I need to decide if it's worth passing into each method that needs it.
+    // Or if I should just use findMatch() inside those methods and pass in selectQuery.fromExpression.tableList() instead.
     return "select " + toSqlSelect(selectQuery.select) + "\n" + toSql(selectQuery.fromExpression) + "\n" + toSqlWhere(selectQuery.where) + "\n";
+  }
+
+  private IHashMap<Table, Column> findMatches(IList<Table> tableList) {
+    return null;
   }
 
 
@@ -44,6 +54,31 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       fullWhereClause = fullWhereClause.replaceAll("where \\(", "where ").replaceAll("\\)\\z", "");
     }
     return fullWhereClause;
+  }
+
+  private Boolean findMatch(Column column) {
+    // TODO: Figure out how to get Query.fromExpression here so I can check all the Columns from each table to make sure
+    // none of them match this column name and type.
+    IArrayList<IEntry<String, Column> entries =
+    if (fromList.length < 2) {
+      for (Table t : fromList) {
+        final IMap<String, Column> columns = t.columns;
+        for (IEntry<String, Column> entry : columns) {
+
+        }
+      }
+    }
+    return null;
+  }
+
+  private IArrayList<Table> getFromExpressionList(FromExpression fromExpression) {
+    if (fromExpression instanceof Join) {
+      Join join = (Join) fromExpression;
+      if (join.fe1 instanceof Join) {
+        getFromExpressionList(join.fe1);
+      }
+    }
+    return null;
   }
 
   private String toSqlBooleanExpression(BooleanExpression where) {
@@ -89,7 +124,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     if (e instanceof Column) {
       //TODO: Check if keyword or has space and put `backticks` around it. Once I add that feature.
       final Column s = (Column) e;
-      output = s.getName();
+      if(findMatch(s)) {
+        output = s.getTable().name + "." + s.getName();
+      } else {
+        output = s.getName();
+      }
     } else if (e instanceof LiteralString) {
       final LiteralString litStr = (LiteralString) e;
       output = "'" + litStr.value + "'";
@@ -103,12 +142,31 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(FromExpression fromExpression) {
-    String fullFromExpressionList = "";
+    String fullFromExpressionList = "from ";
     if (fromExpression instanceof Table) {
       Table table = (Table) fromExpression;
-      fullFromExpressionList += "from " + table.name + "";
+      fullFromExpressionList += table.name;
+    } else if (fromExpression instanceof Join) {
+      Join join = (Join) fromExpression;
+      fullFromExpressionList += getJoinString(join);
     }
     return fullFromExpressionList;
+  }
+
+  @NotNull
+  private String getJoinString(Join join) {
+    String result = "";
+    if (join.fe1 instanceof Join) {
+      result += getJoinString((Join) join.fe1);
+      Table t2 = (Table) join.fe2;
+      //FIXME: using needs to choose the name of the field based on primary key of the fromexpression and if a matching field exists in compared fromexpression. If not, this needs to throw an error.
+      result += "\ninner join " + t2.name + " using (" + t2.name + "Id)";
+    } else {
+      Table t1 = (Table) join.fe1;
+      Table t2 = (Table) join.fe2;
+      result += t1.name + "\ninner join " + t2.name + " using (" + t1.name + "Id)";
+    }
+    return result;
   }
 
   private String toSqlSelect(IList<SelectExpression> select) {

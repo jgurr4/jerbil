@@ -1,16 +1,17 @@
 package com.ple.util;
 
-public interface IMap<K, V> {
+public interface IMap<K, V> extends Iterable<IEntry<K, V>> {
 
-   IMap<K, V> putAll(Object... keyOrValue);
+  IMap<K, V> putAll(Object... keyOrValue);
 
-   IMap<K, V> put(K key, V value);
+  IMap<K, V> put(K key, V value);
 
   IMap<K, V> remove(K key);
 
   int size();
 
-   V get(K key);
+  V get(K key);
+
 
 
 }

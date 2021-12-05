@@ -42,8 +42,12 @@ public class Table extends FromExpression {
     return QueryWithFrom.make(this).where(condition);
   }
 
-  public CompleteQuery join(Table... tables) {
-    return null;
+  public QueryWithFrom join(FromExpression... tables) {
+    FromExpression result = this;
+    for (FromExpression table : tables) {
+      result = Join.make(result, table);
+    }
+    return QueryWithFrom.make(result);
   }
 
   public CompleteQuery create() {
@@ -80,6 +84,11 @@ public class Table extends FromExpression {
 
   @Override
   protected void diffJoin() {
+  }
+
+  @Override
+  public IList<Table> tableList() {
+    return IArrayList.make(this);
   }
 
 }

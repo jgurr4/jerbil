@@ -4,6 +4,7 @@ import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.PotentialQuery;
 import com.ple.jerbil.data.selectExpression.SelectExpression;
 import com.ple.util.IArrayList;
+import com.ple.util.IList;
 
 /**
  * All tables are FromExpressions, but not all FromExpressions are Tables.
@@ -15,18 +16,17 @@ public abstract class FromExpression extends PotentialQuery {
 
   abstract protected void diffJoin();
 
-  public String join() {
+  public FromExpression join() {
    //fill with 2 common parts.
    diffJoin();
    return null;
-  }
-
-  protected FromExpression getFromExpression() {
-    return this;
   }
 
   @Override
   public SelectQuery select(SelectExpression... selectExpressions) {
     return new SelectQuery(null, this, QueryType.select, IArrayList.make(selectExpressions), null, null, null, null, null, false, false, false, false);
   }
+
+  public abstract IList<Table> tableList();
+
 }

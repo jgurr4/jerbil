@@ -32,6 +32,11 @@ public class DateColumn extends DateExpression implements Column<DateColumn> {
     }
 
     @Override
+    public Table getTable() {
+        return this.table;
+    }
+
+    @Override
     public DateColumn primary() {
         return new DateColumn(this.name, this.table, this.dataSpec, this.indexed, true);
     }
