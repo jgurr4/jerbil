@@ -3,7 +3,6 @@ package com.ple.jerbil.data.selectExpression;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
@@ -24,11 +23,33 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
   }
 
   public static Column make(String name, Table table, int size) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, false);
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, false);
+    table.add(numericColumn);
+    return numericColumn;
   }
 
   public static NumericColumn make(String name, Table table) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, false);
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), false, false);
+    table.add(numericColumn);
+    return numericColumn;
+  }
+
+  public static NumericColumn make(String name, Table table, boolean primary) {
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary);
+    table.add(numericColumn);
+    return numericColumn;
+  }
+
+  public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), indexed, primary);
+    table.add(numericColumn);
+    return numericColumn;
+  }
+
+  public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+    final NumericColumn numericColumn = new NumericColumn(name, table, dataSpec, indexed, primary);
+    table.add(numericColumn);
+    return numericColumn;
   }
 
   @Override
@@ -41,10 +62,6 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
     return this.table;
   }
 
-  public static NumericColumn make(String name, Table table, boolean primary) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary);
-  }
-
   @Override
   public NumericColumn primary() {
     return new NumericColumn(this.name, this.table, this.dataSpec, this.indexed, true);
@@ -53,14 +70,6 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
   @Override
   public NumericColumn indexed() {
     return new NumericColumn(this.name, this.table, this.dataSpec, true, this.primary);
-  }
-
-  public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer), indexed, primary);
-  }
-
-  public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-    return new NumericColumn(name, table, dataSpec, indexed, primary);
   }
 
   public GreaterThan isGreaterThan(Expression value) {

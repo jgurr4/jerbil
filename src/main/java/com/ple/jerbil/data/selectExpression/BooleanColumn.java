@@ -26,7 +26,21 @@ public class BooleanColumn extends BooleanExpression implements Column<BooleanCo
     }
 
     public static Column make(String name, Table table) {
-        return new BooleanColumn(name, table, DataSpec.make(DataType.tinyint, 1), false, false);
+        final BooleanColumn booleanColumn = new BooleanColumn(name, table, DataSpec.make(DataType.tinyint, 1), false, false);
+        table.add(booleanColumn);
+        return booleanColumn;
+    }
+
+    public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
+        final BooleanColumn booleanColumn = new BooleanColumn(name, table, DataSpec.make(DataType.bool), indexed, primary);
+        table.add(booleanColumn);
+        return booleanColumn;
+    }
+
+    public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+        final BooleanColumn booleanColumn = new BooleanColumn(name, table, dataSpec, indexed, primary);
+        table.add(booleanColumn);
+        return booleanColumn;
     }
 
     @Override
@@ -47,13 +61,5 @@ public class BooleanColumn extends BooleanExpression implements Column<BooleanCo
     @Override
     public BooleanColumn indexed() {
         return new BooleanColumn(this.name, this.table, this.dataSpec, true, this.primary);
-    }
-
-    public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
-        return new BooleanColumn(name, table, DataSpec.make(DataType.bool), indexed, primary);
-    }
-
-    public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        return new BooleanColumn(name, table, dataSpec, indexed, primary);
     }
 }

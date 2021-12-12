@@ -18,7 +18,7 @@ public class Table extends FromExpression {
 
   public final StorageEngine engine;
   public final String name;
-  public final IMap<String, Column> columns;
+  public IMap<String, Column> columns;
 
   protected Table(String name) {
     this(StorageEngine.simple, name, IHashMap.empty);
@@ -89,6 +89,12 @@ public class Table extends FromExpression {
   @Override
   public IList<Table> tableList() {
     return IArrayList.make(this);
+  }
+
+  //TODO: Find out why this is called twice for each column.
+  public void add(Column column) {
+    final IMap<String, Column> newColumns = columns.put(column.getName(), column);
+    columns = newColumns;
   }
 
 }

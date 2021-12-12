@@ -103,17 +103,22 @@ public class IHashMap<K, V> implements IMap<K, V> {
   }
 
   /**
-   * .put() should never be placed in a loop of multiple values. This is because it will force Java to
-   * recreate the IHashMap object for each loop/entry. Instead you should use .putAll() method since that
+   * Avoid using .put() in a loop of adding multiple values. This is because it will force Java to
+   * recreate the IHashMap object for each loop/entry. Instead, you should use .putAll() method since that
    * will only recreate the IHashMap one time no matter how many entries you put in.
    *
    */
   @Override
   public IHashMap<K, V> put(K key, V value) {
-
     int newBucketCount = bucketCount;
-    IHashMapEntry<K, V>[] newEntries = new IHashMapEntry[entries.length];
+    IHashMapEntry<K, V>[] newEntries;
+    if (entries.length == 0) {
+      newEntries = new IHashMapEntry[bucketSize * 10];
+    } else {
+      newEntries = new IHashMapEntry[entries.length];
+    }
     int c = 0;
+    // Copy values from old entries[] to new entries[].
     while (c < entries.length) {
       newEntries[c] = entries[c];
       c++;
@@ -123,6 +128,7 @@ public class IHashMap<K, V> implements IMap<K, V> {
     final int bucketIndex = hashCode % newBucketCount;
     int entryIndex = bucketIndex * bucketSize;
     int newEntriesInUse = entriesInUse;
+    // Add new value to newEntries[] and resize bucket if necessary.
     while (c < newEntries.length) {
       if (newEntries[entryIndex] == null) {
         newEntries[entryIndex] = IHashMapEntry.from(key, value);

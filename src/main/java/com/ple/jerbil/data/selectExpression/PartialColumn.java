@@ -11,7 +11,7 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
  * For example Column.make('id', user).int().primary()
  * After Column.make() it's only a PartialColumn but after .int() it becomes a Column.
  */
-public class PartialColumn extends OrderedExpression implements Expression {
+public class PartialColumn extends OrderedExpression implements Expression, Column {
 
   public final String name;
   public final Table table;
@@ -65,4 +65,14 @@ public class PartialColumn extends OrderedExpression implements Expression {
   public NumericColumn id() {
     return NumericColumn.make(this.name, this.table, true);
   }
+
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public Table getTable() {
+    return this.getTable();
+  }
+
 }

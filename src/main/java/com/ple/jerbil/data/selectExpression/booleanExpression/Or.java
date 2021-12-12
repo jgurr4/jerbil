@@ -20,4 +20,8 @@ public class Or extends BooleanExpression {
     return new Or(IArrayList.make(conditions));
   }
 
+  public static Or make(IList<BooleanExpression> conditions) {
+    return new Or(conditions);
+  }
+
 }

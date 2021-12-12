@@ -42,6 +42,7 @@ public class SqlQueryTests {
 
   @Test
   void multipleWhereConditions() {
+
     final CompleteQuery q = user.where(
       and(
         userColumns.name.eq(make("john")),

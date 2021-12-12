@@ -8,6 +8,7 @@ import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
 public class MysqlLanguageGenerator implements LanguageGenerator {
+
   public static LanguageGenerator make() {
     return new MysqlLanguageGenerator();
   }
@@ -30,19 +31,82 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return sql;
   }
 
-  public String toSql(SelectQuery selectQuery) {
-    //FIXME: Ask if this is thread-safe or not. My guess is it's not because if another process uses this method and it changes the query, then that will affect all current processes.
-    //GeneratorQuery.set(selectQuery);  // The reason I made this was so I could access selectQuery.fromExpression in the findMatch() method.
-    IHashMap<Table, Column> matches = findMatches(selectQuery.fromExpression.tableList());
-    //After I successfully obtain the matches, I need to decide if it's worth passing into each method that needs it.
-    // Or if I should just use findMatch() inside those methods and pass in selectQuery.fromExpression.tableList() instead.
-    return "select " + toSqlSelect(selectQuery.select) + "\n" + toSql(selectQuery.fromExpression) + "\n" + toSqlWhere(selectQuery.where) + "\n";
+  private String toSql(SelectQuery selectQuery) {
+    IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select);
+    BooleanExpression transformedWhere = transformColumns(selectQuery.where, selectQuery.fromExpression.tableList());
+    return "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n" + toSqlWhere(transformedWhere) + "\n";
   }
 
-  private IHashMap<Table, Column> findMatches(IList<Table> tableList) {
-    return null;
+  private IList<SelectExpression> transformColumns(IList<SelectExpression> select) {
+    for (int i = 0; i < select.toArray().length; i++) {
+      final Column col = (Column) select.toArray()[i];
+      final IMap<String, Column> columns = col.getTable().columns;
+      for (int j = 0; j < select.toArray().length; j++) {
+        if (select.toArray()[i] instanceof Column && select.toArray()[i] == select.toArray()[j]) {
+          select.toArray()[i] = new QueriedColumn((Column) select.toArray()[i], true);
+        }
+      }
+      if (select.toArray()[i] instanceof QueriedColumn) {
+        continue;
+      } else {
+        select.toArray()[i] = new QueriedColumn((Column) select.toArray()[i], false);
+      }
+    }
+    return select;
   }
 
+  private BooleanExpression transformColumns(BooleanExpression be, IList<Table> tableList) {
+    final BooleanExpression result;
+    if (be instanceof Or) {
+      Or or = (Or) be;
+      final IArrayList<BooleanExpression> list = IArrayList.make();
+      for (BooleanExpression condition : or.conditions) {
+        list.add(transformColumns(condition, tableList));
+      }
+      result = Or.make(list);
+    } else if (be instanceof And) {
+      And and = (And) be;
+      //FIXME: find out if there is a better way to make IArrayList and actually add values to it while remaining immutable.
+      IList<BooleanExpression> list = IArrayList.make();
+      for (BooleanExpression condition : and.conditions) {
+        list = list.add(transformColumns(condition, tableList));
+      }
+      result = and.make(list);
+    } else if (be instanceof Equals) {
+      Equals eq = (Equals) be;
+      final Expression e1 = transformColumns(eq.e1, tableList);
+      final Expression e2 = transformColumns(eq.e2, tableList);
+      result = Equals.make(e1, e2);
+    } else if (be instanceof GreaterThan) {
+      GreaterThan gt = (GreaterThan) be;
+      final Expression e1 = transformColumns(gt.e1, tableList);
+      final Expression e2 = transformColumns(gt.e2, tableList);
+      result = GreaterThan.make(e1, e2);
+    } else {
+      result = be;
+    }
+    return result;
+  }
+
+  private Expression transformColumns(Expression e, IList<Table> tableList) {
+    // Expression e could be a Column, And/Or, but it could also be any expression like Literal.String etc...
+    // All we care about is whether it's a column or not. If it's a column we tranform into QueriedColumn after checking
+    // checking if a duplicate name exists in any other tables.
+    // Then we return either the unchanged expression, or in the case of columns we return a QueriedColumn.
+    Boolean requiresTable = false;
+    Column col;
+    if (e instanceof Column) {
+      col = (Column) e;
+      for (Table table : tableList) {
+        if (table.columns.get(col.getName()) != null && table.name != col.getTable().name) {
+          requiresTable = true;
+        }
+      }
+    } else {
+      return e;
+    }
+    return new QueriedColumn(col, requiresTable);
+  }
 
   private String toSqlWhere(BooleanExpression where) {
     if (where == null) {
@@ -56,75 +120,50 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return fullWhereClause;
   }
 
-  private Boolean findMatch(Column column) {
-    // TODO: Figure out how to get Query.fromExpression here so I can check all the Columns from each table to make sure
-    // none of them match this column name and type.
-    IArrayList<IEntry<String, Column> entries =
-    if (fromList.length < 2) {
-      for (Table t : fromList) {
-        final IMap<String, Column> columns = t.columns;
-        for (IEntry<String, Column> entry : columns) {
-
-        }
-      }
-    }
-    return null;
-  }
-
-  private IArrayList<Table> getFromExpressionList(FromExpression fromExpression) {
-    if (fromExpression instanceof Join) {
-      Join join = (Join) fromExpression;
-      if (join.fe1 instanceof Join) {
-        getFromExpressionList(join.fe1);
-      }
-    }
-    return null;
-  }
-
-  private String toSqlBooleanExpression(BooleanExpression where) {
-    String booleanExpressions = "";
-    if (where instanceof Equals) {
-      final Equals eq = (Equals) where;
-      booleanExpressions += toSql(eq.e1) + " = " + toSql(eq.e2);
-    } else if (where instanceof GreaterThan) {
-      final GreaterThan gt = (GreaterThan) where;
-      booleanExpressions += toSql(gt.e1) + " > " + toSql(gt.e2);
-    } else if (where instanceof And) {
-      final And and = (And) where;
-      final BooleanExpression[] boolExp = and.conditions.toArray();
-      booleanExpressions += "(";
-      for (int i = 0; i < boolExp.length; i++) {
-        if (i == boolExp.length - 1) {
-          booleanExpressions += toSqlBooleanExpression(boolExp[i]);
+  private String toSqlBooleanExpression(BooleanExpression booleanExpression) {
+    String boolExpString = "";
+    if (booleanExpression instanceof Equals) {
+      final Equals eq = (Equals) booleanExpression;
+      boolExpString += toSql(eq.e1) + " = " + toSql(eq.e2);
+    } else if (booleanExpression instanceof GreaterThan) {
+      final GreaterThan gt = (GreaterThan) booleanExpression;
+      boolExpString += toSql(gt.e1) + " > " + toSql(gt.e2);
+    } else if (booleanExpression instanceof And) {
+      final And and = (And) booleanExpression;
+      final BooleanExpression[] beArray = and.conditions.toArray();
+      boolExpString += "(";
+      for (int i = 0; i < beArray.length; i++) {
+        if (i == beArray.length - 1) {
+          boolExpString += toSqlBooleanExpression(beArray[i]);
         } else {
-          booleanExpressions += toSqlBooleanExpression(boolExp[i]) + "\nand ";
+          boolExpString += toSqlBooleanExpression(beArray[i]) + "\nand ";
         }
       }
-      booleanExpressions += ")";
-    } else if (where instanceof Or) {
-      final Or or = (Or) where;
+      boolExpString += ")";
+    } else if (booleanExpression instanceof Or) {
+      final Or or = (Or) booleanExpression;
       final BooleanExpression[] boolExp = or.conditions.toArray();
-      booleanExpressions += "(";
+      boolExpString += "(";
       for (int i = 0; i < boolExp.length; i++) {
         if (i == boolExp.length - 1) {
-          booleanExpressions += toSqlBooleanExpression(boolExp[i]);
+          boolExpString += toSqlBooleanExpression(boolExp[i]);
         } else {
-          booleanExpressions += toSqlBooleanExpression(boolExp[i]) + " or ";
+          boolExpString += toSqlBooleanExpression(boolExp[i]) + " or ";
         }
       }
-      booleanExpressions += ")";
+      boolExpString += ")";
     } else {
-      throw new IllegalStateException("Unexpected value: " + where.getClass().getSimpleName());
+      throw new IllegalStateException("Unexpected value: " + booleanExpression.getClass().getSimpleName());
     }
-    return booleanExpressions;
+    return boolExpString;
   }
 
   private String toSql(Expression e) {
     final String output;
     if (e instanceof Column) {
-      //TODO: Check if keyword or has space and put `backticks` around it. Once I add that feature.
-      final Column s = (Column) e;
-      if(findMatch(s)) {
+      //TODO: Check if column name has space and if so put `backticks` around it.
+      final QueriedColumn s = (QueriedColumn) e;
+      if (s.requiresTableName) {
         output = s.getTable().name + "." + s.getName();
       } else {
         output = s.getName();
@@ -199,4 +238,5 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   public String toSql(DeleteQuery deleteQuery) {
     return null;
   }
+
 }

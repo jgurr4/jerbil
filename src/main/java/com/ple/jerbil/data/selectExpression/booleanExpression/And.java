@@ -20,5 +20,8 @@ public class And extends BooleanExpression {
     return new And(IArrayList.make(conditions));
   }
 
+  public static And make(IList<BooleanExpression> conditions) {
+    return new And(conditions);
+  }
 
 }

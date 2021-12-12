@@ -1,8 +1,11 @@
 package com.ple.util;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 public class IArrayList<V> implements IList<V> {
   public final V[] values;
@@ -31,9 +34,27 @@ public class IArrayList<V> implements IList<V> {
 
   @Override
   public IList<V> add(V v) {
-    V[] result = Arrays.copyOf(this.values, this.values.length + 1);
-    result[result.length - 1] = v;
+    V[] result = Arrays.copyOf(values, values.length + 1);
+    result[values.length] = v;
     return IArrayList.make(result);
+  }
+
+  @NotNull
+  @Override
+  public Iterator<V> iterator() {
+    return new Iterator<>() {
+      private int currentIndex = 0;
+
+      @Override
+      public boolean hasNext() {
+        return currentIndex < values.length && values[currentIndex] != null;
+      }
+
+      @Override
+      public V next() {
+        return values[currentIndex++];
+      }
+    };
   }
 
 }

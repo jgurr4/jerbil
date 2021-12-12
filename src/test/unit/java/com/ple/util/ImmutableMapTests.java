@@ -47,4 +47,19 @@ public class ImmutableMapTests {
 
   }
 
+  @Test
+  void testEmpty() {
+
+    IMap<String, Integer> m1 = IHashMap.empty;
+    IMap<String, Integer> m2 = m1.put("apple", 1);
+    IMap<String, Integer> m3 = m1.putAll("apple", 1, "banana", 2, "orange", 3);
+
+    assertEquals(0, m1.size());
+    assertEquals(1, m2.size());
+    assertEquals(3, m3.size());
+    assertNull(m1.get("apple"));
+    assertEquals(1, m2.get("apple"));
+    assertEquals(3, m3.get("orange"));
+  }
+
 }

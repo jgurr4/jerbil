@@ -24,7 +24,27 @@ public class StringColumn extends StringExpression implements Column<StringColum
     }
 
     public static StringColumn make(String name, Table table) {
-        return new StringColumn(name, table, DataSpec.make(DataType.varchar), false, false);
+        final StringColumn stringColumn = new StringColumn(name, table, DataSpec.make(DataType.varchar), false, false);
+        table.add(stringColumn);
+        return stringColumn;
+    }
+
+    public static StringColumn make(String name, Table table, int size) {
+        final StringColumn stringColumn = new StringColumn(name, table, DataSpec.make(DataType.varchar, size), false, false);
+        table.add(stringColumn);
+        return stringColumn;
+    }
+
+    public static StringColumn make(String name, Table table, Boolean indexed, Boolean primary) {
+        final StringColumn stringColumn = new StringColumn(name, table, DataSpec.make(DataType.varchar), indexed, primary);
+        table.add(stringColumn);
+        return stringColumn;
+    }
+
+    public static StringColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+        final StringColumn stringColumn = new StringColumn(name, table, dataSpec, indexed, primary);
+        table.add(stringColumn);
+        return stringColumn;
     }
 
     @Override
@@ -45,18 +65,6 @@ public class StringColumn extends StringExpression implements Column<StringColum
     @Override
     public StringColumn indexed() {
         return new StringColumn(this.name, this.table, this.dataSpec, true, this.primary);
-    }
-
-    public static StringColumn make(String name, Table table, int size) {
-        return new StringColumn(name, table, DataSpec.make(DataType.varchar, size), false, false);
-    }
-
-    public static StringColumn make(String name, Table table, Boolean indexed, Boolean primary) {
-        return new StringColumn(name, table, DataSpec.make(DataType.varchar), indexed, primary);
-    }
-
-    public static StringColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        return new StringColumn(name, table, dataSpec, indexed, primary);
     }
 
     public Equals eq(Expression value) {
