@@ -32,24 +32,25 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(SelectQuery selectQuery) {
-    IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select);
-    BooleanExpression transformedWhere = transformColumns(selectQuery.where, selectQuery.fromExpression.tableList());
+    final IList<Table> tableList = selectQuery.fromExpression.tableList();
+    IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
+    BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
     return "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n" + toSqlWhere(transformedWhere) + "\n";
   }
 
-  private IList<SelectExpression> transformColumns(IList<SelectExpression> select) {
-    for (int i = 0; i < select.toArray().length; i++) {
-      final Column col = (Column) select.toArray()[i];
-      final IMap<String, Column> columns = col.getTable().columns;
-      for (int j = 0; j < select.toArray().length; j++) {
-        if (select.toArray()[i] instanceof Column && select.toArray()[i] == select.toArray()[j]) {
-          select.toArray()[i] = new QueriedColumn((Column) select.toArray()[i], true);
+  private IList<SelectExpression> transformColumns(IList<SelectExpression> select, IList<Table> tableList) {
+    final SelectExpression[] selectArr = select.toArray();
+    Boolean requiresTable = false;
+    for (int i = 0; i < selectArr.length; i++) {
+      if (selectArr[i] instanceof Column && !(selectArr[i] instanceof QueriedColumn)) {
+        final Column column = (Column) selectArr[i];
+        for (Table table : tableList) {
+          if (table.columns.get(column.getName()) == column && column.getTable() != table) {
+            requiresTable = true;
+          }
         }
-      }
-      if (select.toArray()[i] instanceof QueriedColumn) {
-        continue;
-      } else {
-        select.toArray()[i] = new QueriedColumn((Column) select.toArray()[i], false);
+        selectArr[i] = new QueriedColumn((Column) selectArr[i], requiresTable);
+        requiresTable = false;
       }
     }
     return select;
@@ -59,11 +60,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     final BooleanExpression result;
     if (be instanceof Or) {
       Or or = (Or) be;
-      final IArrayList<BooleanExpression> list = IArrayList.make();
+      IList<BooleanExpression> list = IArrayList.make();
       for (BooleanExpression condition : or.conditions) {
-        list.add(transformColumns(condition, tableList));
+        list = list.add(transformColumns(condition, tableList));
       }
-      result = Or.make(list);
+      result = or.make(list);
     } else if (be instanceof And) {
       And and = (And) be;
       //FIXME: find out if there is a better way to make IArrayList and actually add values to it while remaining immutable.
@@ -215,17 +216,18 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       return "*";
     }
     for (int i = 0; i < selectArr.length; i++) {
-      if (selectArr[i] instanceof NumericColumn) {
-        fullSelectList += ((NumericColumn) selectArr[i]).name;
-      } else if (selectArr[i] instanceof LiteralNumber) {
-        // TODO: Handle Literal values here.
+      if (selectArr[i] instanceof QueriedColumn) {
+        final Column column = ((QueriedColumn<?>) selectArr[i]).column;
+        if (column instanceof NumericColumn) {
+          fullSelectList += ((NumericColumn) column).name;
+        } else if (column instanceof LiteralNumber) {
+          // TODO: Handle Literal values here.
+        }
       } else if (selectArr[i] instanceof SelectAllExpression) {
         fullSelectList += "*";
       }
       if (selectArr.length != i + 1) {
         fullSelectList += ", ";
-      } else {
-        fullSelectList += "";
       }
     }
     return fullSelectList;
