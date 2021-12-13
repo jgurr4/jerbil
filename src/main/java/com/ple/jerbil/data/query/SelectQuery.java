@@ -21,6 +21,10 @@ public class SelectQuery extends CompleteQuery {
     return new SelectQuery(null, null, QueryType.select, selectExpressions, null, null, null, null, null, false, false, false, false);
   }
 
+  public static SelectQuery make(Table table, IArrayList<SelectExpression> selectExpressions) {
+    return new SelectQuery(null, table, QueryType.select, selectExpressions, null, null, null, null, null, false, false, false, false);
+  }
+
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType, IList<SelectExpression> selectExpressions, IList<SelectExpression> groupBy, IList<SelectExpression> orderBy, IList<BooleanExpression> having, Limit limit, IMap<Column, Expression> set, boolean mayInsert, boolean mayReplace, boolean triggerDeleteWhenReplacing, boolean mayThrowOnDuplicate) {
     return new SelectQuery(where, fromExpression, queryType, selectExpressions, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }

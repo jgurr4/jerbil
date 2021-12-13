@@ -4,6 +4,7 @@ import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.bridge.MysqlBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
@@ -99,38 +100,38 @@ public class SqlQueryTests {
         itemColumns.name.eq("sword")
       )
     ).select();
-    assertEquals(q.toSql(), """
+    assertEquals("""
         select *
         from player
         inner join inventory using (playerId)
         inner join item using (itemId)
         where player.name = 'bob'
         and item.name = 'sword'
-        """);
+        """, q.toSql());
+
+  }
+
+  @Test
+  void testAggregation() {
+
+    final CompleteQuery q = item.select(Agg.count);
+    assertEquals("""
+        select count(*)
+        from item
+        """, q.toSql());
 
   }
 
 /*
   @Test
-  void testAggregation() {
-
-    final CompleteQuery q = item.select(Agg.count);
-    assertEquals(q.toSql(), """
-        select count(*)
-        from item
-        """);
-
-  }
-
-  @Test
   void testGroupBy() {
 
     final CompleteQuery q = item.select(itemColumns.type.as("type"), Agg.count.as("total")).groupBy(itemColumns.type);
-    assertEquals(q.toSql(), """
+    assertEquals("""
         select item.type as type, count(*) as total
         from item
         group by item.type
-        """);
+        """, q.toSql());
 
   }
 
@@ -140,18 +141,18 @@ public class SqlQueryTests {
     final CompleteQuery q = item
         .select(itemColumns.price.times(make(42)).minus(make(1)).times(make(3)).plus(make(1)).as("adjustedPrice"))
         .where(itemColumns.price.dividedBy(make(4)).isGreaterThan(make(5)));
-    assertEquals(q.toSql(), """
+    assertEquals("""
         select (price * 42 - 1) * (3 + 1) as adjustedPrice
         from item
         where price / 4 > 5
-        """);
+        """, q.toSql());
 
   }
 
   @Test
   void testExpressionWithoutTable() {
     final CompleteQuery q = Literal.make(32).minus(make(15)).as("result").select();
-    assertEquals(q.toSql(), "select 32 - 15 as result");
+    assertEquals("select 32 - 15 as result", q.toSql());
   }
 */
 

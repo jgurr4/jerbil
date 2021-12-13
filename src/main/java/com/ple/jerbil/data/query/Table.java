@@ -75,7 +75,7 @@ public class Table extends FromExpression {
   }
 
   public CompleteQuery select(CountAgg agg) {
-    return null;
+    return SelectQuery.make(this, IArrayList.make(agg));
   }
 
   public CompleteQuery select(AliasedExpression... aliasedExpressions) {
@@ -91,7 +91,6 @@ public class Table extends FromExpression {
     return IArrayList.make(this);
   }
 
-  //TODO: Find out why this is called twice for each column.
   public void add(Column column) {
     final IMap<String, Column> newColumns = columns.put(column.getName(), column);
     columns = newColumns;

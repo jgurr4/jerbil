@@ -38,10 +38,6 @@ public class CompleteQuery extends Query {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
 
-  public static CompleteQuery make(Table table, IArrayList<SelectExpression> selectExpressions) {
-    return new CompleteQuery(null, table, null, selectExpressions, null, null, null, null, null, false, false, false, false);
-  }
-
   public static CompleteQuery make(IMap<Column, Expression> set) {
     return new CompleteQuery(null, null, null, null, null, null, null, null, set, false, false, false, false);
   }

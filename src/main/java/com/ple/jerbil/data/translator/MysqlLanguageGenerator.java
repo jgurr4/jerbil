@@ -34,8 +34,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   private String toSql(SelectQuery selectQuery) {
     final IList<Table> tableList = selectQuery.fromExpression.tableList();
     IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
-    BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
-    return "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n" + toSqlWhere(transformedWhere) + "\n";
+    if (selectQuery.where != null) {
+      BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
+      return "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n" + toSqlWhere(transformedWhere) + "\n";
+    }
+    return "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n";
   }
 
   private IList<SelectExpression> transformColumns(IList<SelectExpression> select, IList<Table> tableList) {
@@ -225,6 +228,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         }
       } else if (selectArr[i] instanceof SelectAllExpression) {
         fullSelectList += "*";
+      } else if (selectArr[i] instanceof CountAgg) {
+        fullSelectList += "count(*)";
       }
       if (selectArr.length != i + 1) {
         fullSelectList += ", ";

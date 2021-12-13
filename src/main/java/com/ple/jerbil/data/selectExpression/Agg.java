@@ -9,6 +9,6 @@ package com.ple.jerbil.data.selectExpression;
  */
 public class Agg {
 
-  public static CountAgg count;
+  public static CountAgg count = CountAgg.make();
 
 }
