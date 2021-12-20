@@ -3,6 +3,8 @@ package com.ple.jerbil.data.translator;
 import com.ple.jerbil.data.LanguageGenerator;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
+import com.ple.jerbil.data.selectExpression.NumericExpression.LiteralNumber;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -34,11 +36,19 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   private String toSql(SelectQuery selectQuery) {
     final IList<Table> tableList = selectQuery.fromExpression.tableList();
     IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
+    String sql = "select " + toSqlSelect(transformedSelect) + "\n";
+    if (selectQuery.fromExpression != null) {
+      sql += toSql(selectQuery.fromExpression) + "\n";
+    }
     if (selectQuery.where != null) {
       BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
-      return "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n" + toSqlWhere(transformedWhere) + "\n";
+      sql += toSqlWhere(transformedWhere) + "\n";
     }
-    return "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n";
+    if (selectQuery.groupBy != null) {
+      IList<SelectExpression> transformedGroupBy = transformColumns(selectQuery.groupBy, tableList);
+      sql += "group by " + toSqlSelect(transformedGroupBy) + "\n";
+    }
+    return sql;
   }
 
   private IList<SelectExpression> transformColumns(IList<SelectExpression> select, IList<Table> tableList) {
@@ -55,6 +65,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         selectArr[i] = new QueriedColumn((Column) selectArr[i], requiresTable);
         requiresTable = false;
       }
+/*
+      if (selectArr[i] instanceof AliasedExpression) {
+        final AliasedExpression ae = (AliasedExpression) selectArr[i];
+        if (ae.expression instanceof Column) {
+          selectArr[i] = new QueriedColumn((Column) ae.expression, true);
+        }
+      }
+*/
     }
     return select;
   }
@@ -223,6 +241,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         final Column column = ((QueriedColumn<?>) selectArr[i]).column;
         if (column instanceof NumericColumn) {
           fullSelectList += ((NumericColumn) column).name;
+        } else if (column instanceof StringColumn) {
+          fullSelectList += ((StringColumn) column).name;
         } else if (column instanceof LiteralNumber) {
           // TODO: Handle Literal values here.
         }
@@ -230,6 +250,15 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         fullSelectList += "*";
       } else if (selectArr[i] instanceof CountAgg) {
         fullSelectList += "count(*)";
+      } else if (selectArr[i] instanceof AliasedExpression) {
+        final AliasedExpression ae = (AliasedExpression) selectArr[i];
+        if (ae.countAgg != null) {
+          fullSelectList += "count(*) as " + ae.alias;
+        }
+        if (ae.expression != null) {
+          final Column column = (Column) ae.expression;
+          fullSelectList += column.getName() + " as " + ae.alias;
+        }
       }
       if (selectArr.length != i + 1) {
         fullSelectList += ", ";

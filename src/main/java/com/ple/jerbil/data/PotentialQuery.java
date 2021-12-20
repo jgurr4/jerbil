@@ -1,7 +1,9 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.SelectExpression;
+import com.ple.jerbil.data.selectExpression.StringColumn;
 
 /**
  * Potential Query represents any type of query, but adds the important 'select' method.
@@ -17,4 +19,5 @@ import com.ple.jerbil.data.selectExpression.SelectExpression;
 @Immutable
 public abstract class PotentialQuery {
     abstract public SelectQuery select(SelectExpression... selectExpressions);
+
 }

@@ -78,8 +78,8 @@ public class Table extends FromExpression {
     return SelectQuery.make(this, IArrayList.make(agg));
   }
 
-  public CompleteQuery select(AliasedExpression... aliasedExpressions) {
-    return null;
+  public SelectQuery select(AliasedExpression... aliasedExpressions) {
+    return SelectQuery.make(this, IArrayList.make(aliasedExpressions));
   }
 
   @Override

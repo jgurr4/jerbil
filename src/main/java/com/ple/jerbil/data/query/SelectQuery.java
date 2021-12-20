@@ -28,4 +28,8 @@ public class SelectQuery extends CompleteQuery {
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType, IList<SelectExpression> selectExpressions, IList<SelectExpression> groupBy, IList<SelectExpression> orderBy, IList<BooleanExpression> having, Limit limit, IMap<Column, Expression> set, boolean mayInsert, boolean mayReplace, boolean triggerDeleteWhenReplacing, boolean mayThrowOnDuplicate) {
     return new SelectQuery(where, fromExpression, queryType, selectExpressions, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
+
+  public SelectQuery groupBy(SelectExpression... groupBy) {
+    return SelectQuery.make(where, fromExpression, queryType, select, IArrayList.make(groupBy), orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+  }
 }

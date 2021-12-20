@@ -9,14 +9,26 @@ import com.ple.jerbil.data.Immutable;
  */
 @Immutable
 public class AliasedExpression implements SelectExpression {
-  public final String name;
+  public final String alias;
+  public final CountAgg countAgg;
+  public final Expression expression;
 
-  protected AliasedExpression(String name) {
-    this.name = name;
+  protected AliasedExpression(String alias, CountAgg countAgg, Expression expression) {
+    this.alias = alias;
+    this.countAgg = countAgg;
+    this.expression = expression;
   }
 
-  public static AliasedExpression make(String name) {
-    return new AliasedExpression(name);
+  public static AliasedExpression make(String alias, CountAgg countAgg) {
+    return new AliasedExpression(alias, countAgg, null);
+  }
+
+  public static AliasedExpression make(String alias, Expression expression) {
+    return new AliasedExpression(alias, null, expression);
+  }
+
+  public static AliasedExpression make(String alias) {
+    return new AliasedExpression(alias, null, null);
   }
 
 }

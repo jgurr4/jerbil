@@ -1,6 +1,8 @@
-package com.ple.jerbil.data.selectExpression;
+package com.ple.jerbil.data.selectExpression.NumericExpression;
 
 import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.selectExpression.Expression;
+import com.ple.jerbil.data.selectExpression.OrderedExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 /**
@@ -14,7 +16,7 @@ public class NumericExpression extends OrderedExpression {
     }
 
     public static NumericExpression make() {
-        return new NumericExpression();
+        return null;
     }
 
     public NumericExpression plus(NumericExpression i) {
@@ -26,7 +28,7 @@ public class NumericExpression extends OrderedExpression {
     }
 
     public NumericExpression times(NumericExpression i) {
-        return null;
+        return new NumericExpression();
     }
 
     public NumericExpression dividedBy(NumericExpression i) {

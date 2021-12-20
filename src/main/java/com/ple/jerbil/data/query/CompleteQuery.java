@@ -42,6 +42,10 @@ public class CompleteQuery extends Query {
     return new CompleteQuery(null, null, null, null, null, null, null, null, set, false, false, false, false);
   }
 
+  public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType, IList<SelectExpression> select, IList<SelectExpression> groupBy, IList<SelectExpression> orderBy, IList<BooleanExpression> having, Limit limit, IMap<Column, Expression> set, boolean mayInsert, boolean mayReplace, boolean triggerDeleteWhenReplacing, boolean mayThrowOnDuplicate) {
+    return new CompleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+  }
+
   public String toSql() {
     if (DataGlobal.bridge == null) {
       throw new NullPointerException("Global.sqlGenerator not set.");
@@ -61,14 +65,9 @@ public class CompleteQuery extends Query {
     return null;
   }
 
-  public CompleteQuery groupBy(Column name) {
-    return null;
-  }
-
   public Expression minus(int i) {
     return null;
   }
-
 
   public CompleteQuery set(Column column, Literal value) {
     return null;

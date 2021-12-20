@@ -15,7 +15,7 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 public interface Expression extends SelectExpression {
 
   public default AliasedExpression as(String name) {
-    return null;
+    return AliasedExpression.make(name, this);
   }
 
   public BooleanExpression isGreaterThan(Expression i);

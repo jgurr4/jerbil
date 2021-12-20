@@ -3,6 +3,7 @@ package com.ple.jerbil.testcommon;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 
 @Immutable
 public class UserTableColumns {

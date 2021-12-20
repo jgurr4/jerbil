@@ -1,5 +1,7 @@
-package com.ple.jerbil.data.selectExpression;
+package com.ple.jerbil.data.selectExpression.NumericExpression;
 
+import com.ple.jerbil.data.selectExpression.Expression;
+import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 /**

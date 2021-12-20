@@ -1,5 +1,7 @@
 package com.ple.jerbil.data.selectExpression;
 
+import com.ple.jerbil.data.selectExpression.NumericExpression.LiteralNumber;
+
 import java.time.LocalDateTime;
 
 /**
