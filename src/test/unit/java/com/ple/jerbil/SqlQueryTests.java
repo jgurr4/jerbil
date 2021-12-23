@@ -124,24 +124,27 @@ public class SqlQueryTests {
   @Test
   void testGroupBy() {
 
-    final CompleteQuery q = item.select(itemColumns.type.as("type"), Agg.count.as("total")).groupBy(itemColumns.type);
+    final CompleteQuery q = item.select(itemColumns.type, Agg.count.as("total")).groupBy(itemColumns.type);
     assertEquals("""
-        select type as type, count(*) as total
+        select type, count(*) as total
         from item
         group by type
         """, q.toSql());
 
   }
-  //TODO: Ask if this is the way above test is really supposed to go and why.
-//  select item.type as type, count(*) as total
-//  from item
-//  group by item.type
 
   @Test
   void testComplexExpressions() {
 
     final CompleteQuery q = item
-        .select(itemColumns.price.times(make(42)).minus(make(1)).times(make(3)).plus(make(1)).as("adjustedPrice"))
+        .select(itemColumns.price
+          .times(make(42))
+          .minus(make(1))
+          .times(
+            make(3)
+            .plus(make(1))
+          )
+          .as("adjustedPrice"))
         .where(itemColumns.price.dividedBy(make(4)).isGreaterThan(make(5)));
     assertEquals("""
         select (price * 42 - 1) * (3 + 1) as adjustedPrice

@@ -285,13 +285,17 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       } else if (arExp.type == Operator.modulus) {
         operator = " % ";
       }
-      if (arExp.e1 instanceof ArithmeticExpression) {
+      if (arExp.e1 instanceof ArithmeticExpression && !(arExp.e2 instanceof ArithmeticExpression)) {
         fullSelectList += toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e1);
+        fullSelectList += operator + getNumericExpression((NumericExpression) arExp.e2);
+      } else if (arExp.e2 instanceof ArithmeticExpression && !(arExp.e1 instanceof ArithmeticExpression)) {
+        fullSelectList += getNumericExpression((NumericExpression) arExp.e1) + operator + "(" + toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e2) + ")";
+      } else if (arExp.e1 instanceof ArithmeticExpression && arExp.e2 instanceof ArithmeticExpression) {
+        fullSelectList += "(" + toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e1) + ")" + operator + "(" + toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e2) + ")";
       } else {
         fullSelectList += getNumericExpression((NumericExpression) arExp.e1) + operator + getNumericExpression((NumericExpression) arExp.e2);
-        return fullSelectList;
       }
-      fullSelectList += operator + getNumericExpression((NumericExpression) arExp.e2);
+      return fullSelectList;
     } catch (Exception e) {
       //TODO: Ask if this is good practice to do these types of error messages and catching of exceptions in framework.
       System.out.println(e.getMessage());
