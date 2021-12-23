@@ -15,24 +15,20 @@ public class NumericExpression extends OrderedExpression {
     protected NumericExpression() {
     }
 
-    public static NumericExpression make() {
-        return null;
-    }
-
     public NumericExpression plus(NumericExpression i) {
-       return null;
+        return ArithmeticExpression.make(this, i, Operator.plus);
     }
 
     public NumericExpression minus(NumericExpression i) {
-        return null;
+        return ArithmeticExpression.make(this, i, Operator.minus);
     }
 
     public NumericExpression times(NumericExpression i) {
-        return new NumericExpression();
+        return ArithmeticExpression.make(this, i, Operator.times);
     }
 
     public NumericExpression dividedBy(NumericExpression i) {
-        return null;
+        return ArithmeticExpression.make(this, i, Operator.dividedby);
     }
 
     @Override

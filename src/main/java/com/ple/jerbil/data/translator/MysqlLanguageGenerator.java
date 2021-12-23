@@ -3,8 +3,7 @@ package com.ple.jerbil.data.translator;
 import com.ple.jerbil.data.LanguageGenerator;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
-import com.ple.jerbil.data.selectExpression.NumericExpression.LiteralNumber;
-import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
+import com.ple.jerbil.data.selectExpression.NumericExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
@@ -51,6 +50,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return sql;
   }
 
+  //TODO: Make transformColumns work for ArithmeticExpressions or BooleanExpressions that contain columns
   private IList<SelectExpression> transformColumns(IList<SelectExpression> select, IList<Table> tableList) {
     final SelectExpression[] selectArr = select.toArray();
     Boolean requiresTable = false;
@@ -65,14 +65,6 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         selectArr[i] = new QueriedColumn((Column) selectArr[i], requiresTable);
         requiresTable = false;
       }
-/*
-      if (selectArr[i] instanceof AliasedExpression) {
-        final AliasedExpression ae = (AliasedExpression) selectArr[i];
-        if (ae.expression instanceof Column) {
-          selectArr[i] = new QueriedColumn((Column) ae.expression, true);
-        }
-      }
-*/
     }
     return select;
   }
@@ -149,7 +141,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       boolExpString += toSql(eq.e1) + " = " + toSql(eq.e2);
     } else if (booleanExpression instanceof GreaterThan) {
       final GreaterThan gt = (GreaterThan) booleanExpression;
-      boolExpString += toSql(gt.e1) + " > " + toSql(gt.e2);
+      if (gt.e1 instanceof ArithmeticExpression) {
+        boolExpString += toSqlArithmetic("", (ArithmeticExpression) gt.e1) + " > " + toSql(gt.e2);
+      } else {
+        boolExpString += toSql(gt.e1) + " > " + toSql(gt.e2);
+      }
     } else if (booleanExpression instanceof And) {
       final And and = (And) booleanExpression;
       final BooleanExpression[] beArray = and.conditions.toArray();
@@ -250,14 +246,22 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         fullSelectList += "*";
       } else if (selectArr[i] instanceof CountAgg) {
         fullSelectList += "count(*)";
+      } else if (selectArr[i] instanceof ArithmeticExpression) {
+        final ArithmeticExpression arExp = (ArithmeticExpression) selectArr[i];
+        fullSelectList += toSqlArithmetic(fullSelectList, arExp);
       } else if (selectArr[i] instanceof AliasedExpression) {
         final AliasedExpression ae = (AliasedExpression) selectArr[i];
         if (ae.countAgg != null) {
           fullSelectList += "count(*) as " + ae.alias;
         }
         if (ae.expression != null) {
-          final Column column = (Column) ae.expression;
-          fullSelectList += column.getName() + " as " + ae.alias;
+          if (ae.expression instanceof Column) {
+            final Column column = (Column) ae.expression;
+            fullSelectList += column.getName() + " as " + ae.alias;
+          } else if (ae.expression instanceof ArithmeticExpression) {
+            final ArithmeticExpression arExp = (ArithmeticExpression) ae.expression;
+            fullSelectList += toSqlArithmetic(fullSelectList, arExp) + " as " + ae.alias;
+          }
         }
       }
       if (selectArr.length != i + 1) {
@@ -265,6 +269,44 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       }
     }
     return fullSelectList;
+  }
+
+  private String toSqlArithmetic(String fullSelectList, ArithmeticExpression arExp) {
+    String operator = "";
+    try {
+      if (arExp.type == Operator.plus) {
+        operator = " + ";
+      } else if (arExp.type == Operator.minus) {
+        operator = " - ";
+      } else if (arExp.type == Operator.times) {
+        operator = " * ";
+      } else if (arExp.type == Operator.dividedby) {
+        operator = " / ";
+      } else if (arExp.type == Operator.modulus) {
+        operator = " % ";
+      }
+      if (arExp.e1 instanceof ArithmeticExpression) {
+        fullSelectList += toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e1);
+      } else {
+        fullSelectList += getNumericExpression((NumericExpression) arExp.e1) + operator + getNumericExpression((NumericExpression) arExp.e2);
+        return fullSelectList;
+      }
+      fullSelectList += operator + getNumericExpression((NumericExpression) arExp.e2);
+    } catch (Exception e) {
+      //TODO: Ask if this is good practice to do these types of error messages and catching of exceptions in framework.
+      System.out.println(e.getMessage());
+    }
+    return fullSelectList;
+  }
+
+  private String getNumericExpression(NumericExpression e) throws ClassNotFoundException {
+    if (e instanceof NumericColumn) {
+      return ((NumericColumn) e).name;
+    } else if (e instanceof LiteralNumber) {
+      return ((LiteralNumber) e).value.toString();
+    } else {
+      throw new ClassNotFoundException("This class " + e.getClass() + " is not supported in getNumericExpression() method. Must be added in order to support it's use.");
+    }
   }
 
   public String toSql(UpdateQuery updateQuery) {

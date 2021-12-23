@@ -9,7 +9,7 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 public abstract class OrderedExpression implements Expression {
     @Override
     public GreaterThan isGreaterThan(Expression i) {
-        return null;
+        return GreaterThan.make(this, i);
     }
 
     @Override

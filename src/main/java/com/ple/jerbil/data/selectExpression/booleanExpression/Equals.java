@@ -2,8 +2,6 @@ package com.ple.jerbil.data.selectExpression.booleanExpression;
 
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.Expression;
-import com.ple.jerbil.data.selectExpression.Literal;
-import com.ple.jerbil.data.selectExpression.StringColumn;
 
 /**
  * Every single operator for booleanExpression is a class. So =, >, <, like, regexp.
