@@ -2,6 +2,8 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.SelectQuery;
+import com.ple.util.IArrayList;
 
 /**
  * SelectExpressions take many forms in sql. They can be included in various places in the statement. Such as following
@@ -16,9 +18,8 @@ public interface SelectExpression {
 
   SelectExpression selectAll = SelectAllExpression.make();
 
-  //TODO: Figure out how to use this method to return a "select *" statement when no select() parameters are used.
-  default CompleteQuery select() {
-    return null;
+  default SelectQuery select() {
+    return SelectQuery.make(IArrayList.make(this));
   }
 
 }

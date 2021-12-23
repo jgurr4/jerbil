@@ -154,13 +154,11 @@ public class SqlQueryTests {
 
   }
 
-/*
   @Test
   void testExpressionWithoutTable() {
-    final CompleteQuery q = Literal.make(32).minus(make(15)).as("result").select();
+    final CompleteQuery q = make(32).minus(make(15)).as("result").select();
     assertEquals("select 32 - 15 as result", q.toSql());
   }
-*/
 
 
 }

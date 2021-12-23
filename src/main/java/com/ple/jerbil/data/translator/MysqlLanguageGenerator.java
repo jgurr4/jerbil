@@ -33,19 +33,22 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(SelectQuery selectQuery) {
-    final IList<Table> tableList = selectQuery.fromExpression.tableList();
-    IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
-    String sql = "select " + toSqlSelect(transformedSelect) + "\n";
+    String sql = "";
+    final IList<Table> tableList;
     if (selectQuery.fromExpression != null) {
-      sql += toSql(selectQuery.fromExpression) + "\n";
-    }
-    if (selectQuery.where != null) {
-      BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
-      sql += toSqlWhere(transformedWhere) + "\n";
-    }
-    if (selectQuery.groupBy != null) {
-      IList<SelectExpression> transformedGroupBy = transformColumns(selectQuery.groupBy, tableList);
-      sql += "group by " + toSqlSelect(transformedGroupBy) + "\n";
+      tableList = selectQuery.fromExpression.tableList();
+      IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
+      sql += "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n";
+      if (selectQuery.where != null) {
+        BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
+        sql += toSqlWhere(transformedWhere) + "\n";
+      }
+      if (selectQuery.groupBy != null) {
+        IList<SelectExpression> transformedGroupBy = transformColumns(selectQuery.groupBy, tableList);
+        sql += "group by " + toSqlSelect(transformedGroupBy) + "\n";
+      }
+    } else {
+      sql += "select " + toSqlSelect(selectQuery.select);
     }
     return sql;
   }
