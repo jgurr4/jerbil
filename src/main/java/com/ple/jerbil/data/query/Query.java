@@ -1,6 +1,7 @@
 package com.ple.jerbil.data.query;
 
 
+import com.ple.jerbil.data.DelayedImmutable;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.PotentialQuery;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -12,7 +13,7 @@ import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
 
-@Immutable
+@DelayedImmutable
 public class Query extends PotentialQuery {
 
     @Nullable public final BooleanExpression where;

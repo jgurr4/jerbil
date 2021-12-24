@@ -38,8 +38,8 @@ public class CompleteQuery extends Query {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
 
-  public static CompleteQuery make(IMap<Column, Expression> set) {
-    return new CompleteQuery(null, null, null, null, null, null, null, null, set, false, false, false, false);
+  public static CompleteQuery make(IMap<Column, Expression> set, FromExpression fromExpression) {
+    return new CompleteQuery(null, fromExpression, null, null, null, null, null, null, set, false, false, false, false);
   }
 
   public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType, IList<SelectExpression> select, IList<SelectExpression> groupBy, IList<SelectExpression> orderBy, IList<BooleanExpression> having, Limit limit, IMap<Column, Expression> set, boolean mayInsert, boolean mayReplace, boolean triggerDeleteWhenReplacing, boolean mayThrowOnDuplicate) {
@@ -69,8 +69,11 @@ public class CompleteQuery extends Query {
     return null;
   }
 
-  public CompleteQuery set(Column column, Literal value) {
-    return null;
+  public InsertQuery set(Column column, Literal value) {
+    if (this.set == null) {
+      return InsertQuery.make(column, value, this.fromExpression);
+    }
+    return InsertQuery.make(set.put(column, value), this.fromExpression);
   }
 
 }

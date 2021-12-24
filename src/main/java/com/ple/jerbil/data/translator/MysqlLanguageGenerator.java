@@ -27,6 +27,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       case update -> {
         sql = toSql((UpdateQuery) completeQuery);
       }
+      case insert -> {
+        sql = toSql((InsertQuery) completeQuery);
+      }
       default -> throw new IllegalStateException("Unexpected value: " + completeQuery.queryType);
     }
     return sql;
@@ -38,7 +41,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     if (selectQuery.fromExpression != null) {
       tableList = selectQuery.fromExpression.tableList();
       IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
-      sql += "select " + toSqlSelect(transformedSelect) + "\n" + toSql(selectQuery.fromExpression) + "\n";
+      sql += "select " + toSqlSelect(transformedSelect) + "\n" + "from " + toSql(selectQuery.fromExpression) + "\n";
       if (selectQuery.where != null) {
         BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
         sql += toSqlWhere(transformedWhere) + "\n";
@@ -202,7 +205,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(FromExpression fromExpression) {
-    String fullFromExpressionList = "from ";
+    String fullFromExpressionList = "";
     if (fromExpression instanceof Table) {
       Table table = (Table) fromExpression;
       fullFromExpressionList += table.name;
@@ -322,6 +325,25 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   public String toSql(DeleteQuery deleteQuery) {
     return null;
+  }
+
+  public String toSql(InsertQuery insertQuery) {
+    String sql = "insert into " + toSql(insertQuery.fromExpression) + " (";
+//    final Set<Column> columns = insertQuery.set.keySet();
+//    final String keyString = columns.toString();
+    String separator = "";
+    for (Column column : insertQuery.set.keySet()) {
+      sql += separator + column.getName();
+      separator = ", ";
+    }
+    sql += ")\n" + "values (";
+    separator = "";
+    for (Expression value : insertQuery.set.values()) {
+      sql += separator + toSql(value);
+      separator = ", ";
+    }
+    sql += ")\n";
+    return sql;
   }
 
 }

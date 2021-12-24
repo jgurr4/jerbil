@@ -3,9 +3,7 @@ package com.ple.util;
 import com.ple.jerbil.data.Immutable;
 import org.jetbrains.annotations.NotNull;
 
-import java.rmi.NoSuchObjectException;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Immutable
 public class IHashMap<K, V> implements IMap<K, V> {
@@ -181,6 +179,32 @@ public class IHashMap<K, V> implements IMap<K, V> {
       entryIndex++;
     }
     return null;
+  }
+
+  @Override
+  public List<K> keySet() {
+    //TODO: Consider replacing this with AbstractSet with implementation methods.
+    ArrayList<K> ks = new ArrayList<>();
+    for (IHashMapEntry<K, V> entry : entries) {
+      if (entry == null) {
+        return ks;
+      }
+      ks.add(entry.getKey());
+    }
+    return ks;
+  }
+
+  @Override
+  public List<V> values() {
+    //TODO: Consider replacing this with AbstractCollection with implementation methods.
+    final ArrayList<V> v = new ArrayList<>();
+    for (IHashMapEntry<K, V> entry : entries) {
+      if (entry == null) {
+        return v;
+      }
+      v.add(entry.getValue());
+    }
+    return v;
   }
 
   public IHashMap<K, V> setBucketSize(int newBucketSize) {

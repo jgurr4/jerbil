@@ -1,9 +1,16 @@
 package com.ple.jerbil;
 
+import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.bridge.MysqlBridge;
+import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.selectExpression.Literal;
+import com.ple.jerbil.testcommon.*;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStatementTests {
-/*
 
   final UserTable user = new UserTable();
   final UserTableColumns userColumns = new UserTableColumns(user);
@@ -16,21 +23,35 @@ public class SqlStatementTests {
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
+  public SqlStatementTests() {
+    DataGlobal.bridge = MysqlBridge.make();
+  }
+
   @Test
   void testInsertSingle() {
 
-*/
-/* for (int i = 0; i < records.length; i++) { // This is bad because it makes multiple insert statements. You should be able to do bulk insert statements. Like 'insert into table values (val1, val2),(val1,val2)...' item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.type, Literal.make(ItemType.weapon.toString())); } *//*
+/* for (int i = 0; i < records.length; i++) { // This is bad because it makes multiple insert statements.
+You should be able to do bulk insert statements. Like 'insert into table values (val1, val2),(val1,val2)...'
+item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.type, Literal.make(ItemType.weapon.toString())); } */
 
-    final CompleteQuery q = item.insert().set(itemColumns.name, Literal.make("sword of spirit")).set(itemColumns.type, Literal.make(ItemType.weapon.toString()));
+    final CompleteQuery q = item.insert().set(itemColumns.name, Literal.make("sword of spirit")).set(
+      itemColumns.type,
+      Literal.make(ItemType.weapon.toString())
+    );
+    assertEquals("""
+      insert into item (name, type)
+      values ('sword of spirit', 'weapon')
+      """, q.toSql());
+
+/*  Ask what is the thinking behind this?
     assertEquals(q.toString(), """
       insert into item
       set name='sword of spirit',
       type='weapon'
       """);
-
+*/
   }
-
+/*
   @Test
   void testInsertMulti() {
 

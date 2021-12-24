@@ -27,7 +27,7 @@ public class PartialQueryWithValues extends PartialQuery {
   }
 
   public CompleteQuery set(Column column, Literal value) {
-    return CompleteQuery.make(IHashMap.from(column, value));
+    return CompleteQuery.make(IHashMap.from(column, value), this.fromExpression);
   }
 
 }
