@@ -66,6 +66,16 @@ public class StringColumn extends StringExpression implements Column<StringColum
         return new StringColumn(this.name, this.table, this.dataSpec, true, this.primary);
     }
 
+    @Override
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    @Override
+    public boolean isIndexed() {
+        return indexed;
+    }
+
     public Equals eq(Expression value) {
         return Equals.make(this, value);
     }

@@ -10,12 +10,15 @@ public interface Column <T extends Column> {
         return PartialColumn.make(name, table);
     }
 
-    public String getName();
+    String getName();
 
-    public Table getTable();
+    Table getTable();
 
-    public T primary();
+    T primary();
 
-    public T indexed();
+    T indexed();
 
+    boolean isPrimary();
+
+    boolean isIndexed();
 }

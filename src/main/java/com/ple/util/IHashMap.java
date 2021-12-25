@@ -187,7 +187,7 @@ public class IHashMap<K, V> implements IMap<K, V> {
     ArrayList<K> ks = new ArrayList<>();
     for (IHashMapEntry<K, V> entry : entries) {
       if (entry == null) {
-        return ks;
+        continue;
       }
       ks.add(entry.getKey());
     }

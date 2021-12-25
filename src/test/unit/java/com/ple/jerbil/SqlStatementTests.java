@@ -63,21 +63,22 @@ public class SqlStatementTests {
 
   }
 
-/*
   @Test
   void testTableCreate() {
 
     final CompleteQuery q = item.create();
     assertEquals("""
       create table item (
-        itemId long not null primary key,
+        itemId bigint not null primary key,
         name varchar(255) not null,
-        type enum('weapon', 'armor', 'shield',  'accessory') not null
+        type enum('weapon', 'armor', 'shield', 'accessory') not null,
+        price int not null
       ) ENGINE=Aria
       """, q.toSql());
 
   }
 
+/*
   @Test
   void testMultiColumnPrimaryKey() {
 

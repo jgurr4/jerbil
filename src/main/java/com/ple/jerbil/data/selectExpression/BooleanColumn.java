@@ -62,4 +62,15 @@ public class BooleanColumn extends BooleanExpression implements Column<BooleanCo
     public BooleanColumn indexed() {
         return new BooleanColumn(this.name, this.table, this.dataSpec, true, this.primary);
     }
+
+    @Override
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    @Override
+    public boolean isIndexed() {
+        return indexed;
+    }
+
 }

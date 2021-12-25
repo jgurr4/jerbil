@@ -1,5 +1,7 @@
 package com.ple.jerbil.data;
 
+import java.util.EnumSet;
+
 /**
  * DataSpec represents any datatype and it's parameter definitions for defining specific columns in tables. For example:
  * create table example (
@@ -20,24 +22,40 @@ public class DataSpec {
   public final static DataSpec varchar = new DataSpec(DataType.varchar, 0);
   public final DataType dataType;
   public final int size;
+  /* It's important to note that defaultMaxSize for sql databases refers to default max DISPLAY size.
+  * Which for most values is 255. This is a constant used instead of 0 value for unspecified datatype sizes. */
+  public final static int defaultMaxSize = 255;
 
   protected DataSpec(DataType dataType, int size) {
     this.dataType = dataType;
     this.size = size;
   }
 
-  //TODO: Add a default arguement which allows users to specify a default value for a column.
   public static DataSpec make(DataType type, int size) {
-    return null;
+    return new DataSpec(type, size);
   }
 
-  public static DataSpec make(DataType type, Object enumObj) {
-    return null;
+  public static DataSpec make(DataType type, Class enumObj) {
+    final EnumSet enumSet = EnumSet.allOf(enumObj);
+    String enumStr = "(";
+    String separator = "";
+    int size = 0;
+    for (Object e : enumSet) {
+      enumStr += separator + "'" + ((Enum) e).name() + "'";
+      separator = ", ";
+      size++;
+    }
+    enumStr += ")";
+    return EnumSpec.make(type, size, enumStr);
   }
 
   public static DataSpec make(DataType type) {
-    // depending on the datatype, it will return different default sizes for constructor.
-    return null;
+/*
+    if (type == DataType.varchar || type == DataType.bigint || type == DataType.integer) {
+      return new DataSpec(type, defaultMaxSize);
+    }
+*/
+    return new DataSpec(type, defaultMaxSize);
   }
 
 }

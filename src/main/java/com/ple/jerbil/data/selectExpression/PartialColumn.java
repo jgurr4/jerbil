@@ -51,7 +51,7 @@ public class PartialColumn extends OrderedExpression implements Expression, Colu
     return StringColumn.make(this.name, this.table, size);
   }
 
-  public StringColumn asEnum(Object enumObj) {
+  public StringColumn asEnum(Class enumObj) {
     return StringColumn.make(this.name, this.table, DataSpec.make(DataType.enumeration, enumObj), this.indexed, this.primary);
   }
 
@@ -61,6 +61,16 @@ public class PartialColumn extends OrderedExpression implements Expression, Colu
 
   public PartialColumn indexed() {
     return PartialColumn.make(this.name, this.table, true, this.primary);
+  }
+
+  @Override
+  public boolean isPrimary() {
+    return primary;
+  }
+
+  @Override
+  public boolean isIndexed() {
+    return indexed;
   }
 
   public NumericColumn id() {

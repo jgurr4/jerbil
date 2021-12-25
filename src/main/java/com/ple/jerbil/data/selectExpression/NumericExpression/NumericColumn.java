@@ -37,7 +37,7 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
   }
 
   public static NumericColumn make(String name, Table table, boolean primary) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary);
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.bigint), false, primary);
     table.add(numericColumn);
     return numericColumn;
   }
@@ -72,6 +72,16 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
   @Override
   public NumericColumn indexed() {
     return new NumericColumn(this.name, this.table, this.dataSpec, true, this.primary);
+  }
+
+  @Override
+  public boolean isPrimary() {
+    return primary;
+  }
+
+  @Override
+  public boolean isIndexed() {
+    return indexed;
   }
 
   public GreaterThan isGreaterThan(Expression value) {

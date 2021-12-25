@@ -50,24 +50,16 @@ public class Table extends FromExpression {
     return QueryWithFrom.make(result);
   }
 
-  public CompleteQuery create() {
-    return null;
+  public CreateQuery create() {
+    return CreateQuery.make(this);
   }
 
   public Table set(Column column) {
     return null;
-/*
-    final IMap<String, Column> newColumns = columns.put(column.name, column);
-    return new Table(engine, name, newColumns);
-*/
   }
 
   public Table remove(Column column) {
     return null;
-/*
-    final IMap<String, Column> newColumns = columns.remove(column.name);
-    return new Table(engine, name, newColumns);
-*/
   }
 
   public PartialInsertQuery insert() {

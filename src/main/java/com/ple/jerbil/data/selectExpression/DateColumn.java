@@ -59,4 +59,15 @@ public class DateColumn extends DateExpression implements Column<DateColumn> {
     public DateColumn indexed() {
         return new DateColumn(this.name, this.table, this.dataSpec, true, this.primary);
     }
+
+    @Override
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    @Override
+    public boolean isIndexed() {
+        return indexed;
+    }
+
 }

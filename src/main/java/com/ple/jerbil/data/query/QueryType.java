@@ -4,5 +4,7 @@ public enum QueryType {
     select,
     delete,
     insert,
-    update
+    update,
+    create,
+    alter
 }

@@ -42,6 +42,16 @@ public class QueriedColumn<T extends Column> implements Column<T>, Expression {
   }
 
   @Override
+  public boolean isPrimary() {
+    return false;
+  }
+
+  @Override
+  public boolean isIndexed() {
+    return false;
+  }
+
+  @Override
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }

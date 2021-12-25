@@ -44,7 +44,7 @@ public class SqlStructureTests {
   @Test
   void testAddColumn() {
     Column newColumn = Column.make("quantity", item).integer(); //When translator sees that this column doesn't
-    // already exist in the table inside mysql when it communicates to mysql, it will create this column using the add
+    // already exist in the item table inside mysql when it communicates to mysql, it will create this column using the add
     // column command, rather than dropping table or creating a new table, because we don't want users to lose their
     // data. It should never auto-drop or create new tables unless the table doesn't exist.
   }

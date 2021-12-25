@@ -13,7 +13,7 @@ public class ItemTableColumns {
   public final StringColumn name;
   public final StringColumn type;
   public final NumericColumn price;
-  public final NumericColumn add;
+//  public final NumericColumn add;
 
   public ItemTableColumns(Table table) {
 
@@ -21,7 +21,7 @@ public class ItemTableColumns {
     name = Column.make("name", table).indexed().asVarchar(20);
     type = Column.make("type", table).asEnum(ItemType.class);
     price = Column.make("price", table).asInt();
-    add = Column.make("add", table).asInt(); // Tests if our translator checks reserved words correctly and puts backticks around it.
+//    add = Column.make("add", table).asInt(); // Tests if our translator checks reserved words correctly and puts backticks around it.
   }
   //  example of using .def() to set default value for column. Also how to use decimal or other numeric data types with precision and specific options like unsigned or zerofill.
 //  public final Column price = Column.make("price", Column.name, Column.table, Column.dataSpec, Column.indexed, Column.primary).decimal(9, 2, unsigned, zerofill).def(1.00);

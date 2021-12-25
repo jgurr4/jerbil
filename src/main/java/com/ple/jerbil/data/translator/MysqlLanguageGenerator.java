@@ -1,6 +1,9 @@
 package com.ple.jerbil.data.translator;
 
+import com.ple.jerbil.data.DataType;
+import com.ple.jerbil.data.EnumSpec;
 import com.ple.jerbil.data.LanguageGenerator;
+import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
@@ -31,6 +34,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       }
       case insert -> {
         sql = toSql((InsertQuery) completeQuery);
+      }
+      case create -> {
+        sql = toSql((CreateQuery) completeQuery);
       }
       default -> throw new IllegalStateException("Unexpected value: " + completeQuery.queryType);
     }
@@ -321,6 +327,31 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
   }
 
+  private String toSql(Column column) {
+    String sql = "";
+    String primary = "";
+    if (column.isPrimary()) {
+      primary = " primary key";
+    }
+    if (column instanceof NumericColumn) {
+      final NumericColumn numCol = (NumericColumn) column;
+      if (numCol.dataSpec.dataType == DataType.integer) {
+        sql += "int not null" + primary;
+      } else if (numCol.dataSpec.dataType == DataType.bigint) {
+        sql += numCol.dataSpec.dataType.name() + " not null" + primary;
+      }
+    } else if (column instanceof StringColumn) {
+      final StringColumn strCol = (StringColumn) column;
+      if (strCol.dataSpec.dataType == DataType.varchar) {
+        sql += strCol.dataSpec.dataType.name() + "(" + strCol.dataSpec.size + ")" + " not null" + primary;
+      } else if (strCol.dataSpec.dataType == DataType.enumeration) {
+        final EnumSpec enumSpec = (EnumSpec) strCol.dataSpec;
+        sql += "enum" + enumSpec.enumStr + " not null" + primary;
+      }
+    }
+    return sql;
+  }
+
   public String toSql(UpdateQuery updateQuery) {
     return null;
   }
@@ -352,6 +383,22 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         i++;
       }
     }
+    return sql;
+  }
+
+  public String toSql(CreateQuery createQuery) {
+    String engine = "";
+    if (createQuery.fromExpression.tableList().get(0).engine == StorageEngine.simple) {
+      engine = "Aria";
+    }
+    String sql = "create table " + toSql(createQuery.fromExpression) + " (\n";
+    final IMap<String, Column> columns = createQuery.fromExpression.tableList().get(0).columns;
+    String separator = "  ";
+    for (String colName : columns.keySet()) {
+      sql += separator + colName + " " + toSql(columns.get(colName));
+      separator = ",\n  ";
+    }
+    sql += "\n) ENGINE=" + engine + "\n";
     return sql;
   }
 
