@@ -8,4 +8,6 @@ public interface IList<T> extends Iterable<T>{
 
   public IList<T> add(T t);
 
+  T get(int i);
+
 }

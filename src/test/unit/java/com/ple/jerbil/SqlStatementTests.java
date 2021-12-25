@@ -8,6 +8,8 @@ import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStatementTests {
@@ -30,28 +32,16 @@ public class SqlStatementTests {
   @Test
   void testInsertSingle() {
 
-/* for (int i = 0; i < records.length; i++) { // This is bad because it makes multiple insert statements.
-You should be able to do bulk insert statements. Like 'insert into table values (val1, val2),(val1,val2)...'
-item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.type, Literal.make(ItemType.weapon.toString())); } */
-
     final CompleteQuery q = item.insert().set(itemColumns.name, Literal.make("sword of spirit")).set(
       itemColumns.type,
       Literal.make(ItemType.weapon.toString())
     );
     assertEquals("""
-      insert into item (name, type)
-      values ('sword of spirit', 'weapon')
-      """, q.toSql());
-
-/*  Ask what is the thinking behind this?
-    assertEquals(q.toString(), """
       insert into item
-      set name='sword of spirit',
-      type='weapon'
-      """);
-*/
+      (name, type) values
+      ('sword of spirit', 'weapon')
+      """, q.toSql());
   }
-/*
   @Test
   void testInsertMulti() {
 
@@ -63,27 +53,28 @@ item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.ty
         List.of("breastplate of righteousness", ItemType.armor.toString())
       )
     );
-    assertEquals(q.toString(), """
+    assertEquals("""
       insert into item
-      (name, type) values 
+      (name, type) values
       ('sword of spirit', 'weapon'),
       ('shield of faith', 'shield'),
       ('breastplate of righteousness', 'armor')
-      """);
+      """, q.toSql());
 
   }
 
+/*
   @Test
   void testTableCreate() {
 
     final CompleteQuery q = item.create();
-    assertEquals(q.toString(), """
+    assertEquals("""
       create table item (
         itemId long not null primary key,
         name varchar(255) not null,
         type enum('weapon', 'armor', 'shield',  'accessory') not null
       ) ENGINE=Aria
-      """);
+      """, q.toSql());
 
   }
 
@@ -91,13 +82,13 @@ item.insert().set(itemColumns.name, Literal.make(someString)).set(itemColumns.ty
   void testMultiColumnPrimaryKey() {
 
     final CompleteQuery q = inventory.create();
-    assertEquals(q.toString(), """
+    assertEquals("""
       create table inventory (
         player long not null,
         itemId long not null,
         primary key (player, itemId)
       ) ENGINE=Aria
-      """);
+      """, q.toSql());
 
   }
 

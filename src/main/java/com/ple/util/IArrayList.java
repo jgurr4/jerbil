@@ -37,6 +37,11 @@ public class IArrayList<V> implements IList<V> {
     return IArrayList.make(result);
   }
 
+  @Override
+  public V get(int i) {
+    return values[i];
+  }
+
   @NotNull
   @Override
   public Iterator<V> iterator() {

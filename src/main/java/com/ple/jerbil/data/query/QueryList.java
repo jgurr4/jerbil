@@ -47,6 +47,11 @@ public class QueryList<T> implements IList<T> {
     return QueryList.make(result);
   }
 
+  @Override
+  public T get(int i) {
+    return values[i];
+  }
+
   @NotNull
   @Override
   public Iterator iterator() {

@@ -8,6 +8,8 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 public class MysqlLanguageGenerator implements LanguageGenerator {
 
   public static LanguageGenerator make() {
@@ -328,21 +330,28 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   public String toSql(InsertQuery insertQuery) {
-    String sql = "insert into " + toSql(insertQuery.fromExpression) + " (";
-//    final Set<Column> columns = insertQuery.set.keySet();
-//    final String keyString = columns.toString();
+    String sql = "insert into " + toSql(insertQuery.fromExpression) + "\n(";
     String separator = "";
-    for (Column column : insertQuery.set.keySet()) {
+    for (Column column : insertQuery.set.get(0).keySet()) {
       sql += separator + column.getName();
       separator = ", ";
     }
-    sql += ")\n" + "values (";
-    separator = "";
-    for (Expression value : insertQuery.set.values()) {
-      sql += separator + toSql(value);
-      separator = ", ";
+    sql += ")" + " values\n";
+    int i = 0;
+    for (IMap<Column, Expression> entry : insertQuery.set) {
+      separator = "";
+      sql += "(";
+      for (Expression value : entry.values()) {
+        sql += separator + toSql(value);
+        separator = ", ";
+      }
+      if (i >= insertQuery.set.toArray().length - 1) {
+        sql += ")\n";
+      } else {
+        sql += "),\n";
+        i++;
+      }
     }
-    sql += ")\n";
     return sql;
   }
 

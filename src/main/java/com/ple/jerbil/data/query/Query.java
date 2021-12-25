@@ -24,7 +24,7 @@ public class Query extends PotentialQuery {
     @Nullable public final IList<SelectExpression> orderBy;
     @Nullable public final IList<BooleanExpression> having;
     @Nullable public final Limit limit;
-    @Nullable public final IMap<Column, Expression> set;
+    @Nullable public final IList<IMap<Column, Expression>> set;
     @Nullable public final boolean mayInsert;
     @Nullable public final boolean mayReplace;
     @Nullable public final boolean triggerDeleteWhenReplacing;
@@ -36,7 +36,7 @@ public class Query extends PotentialQuery {
     // Replace = mayInsert : true; mayReplace : true; mayThrowOnDuplicate : false; triggerDeleteWhenReplacing : false; //Instead of deleting a duplicate it updates it, causing the update trigger to go off.
     // update = mayInsert : false; mayReplace : true; mayThrowOnDuplicate : false; triggerDeleteWhenReplacing : false;
 
-    protected Query(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IMap<Column, Expression> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
+    protected Query(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
         this.where = where;
         this.fromExpression = fromExpression;
         this.queryType = queryType;

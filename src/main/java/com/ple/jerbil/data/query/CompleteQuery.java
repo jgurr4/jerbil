@@ -9,6 +9,7 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
+import com.ple.util.IHashMap;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
@@ -19,30 +20,30 @@ import org.jetbrains.annotations.Nullable;
  * For select to be considered complete make sure values and/or columns from table are plugged in.
  * select 2 + 2;   //select 3 also works.
  * select name from user;
- *
+ * <p>
  * For update to be considered complete a table and set clause must be specified:
  * update user set name = 'bonny';  //Note that using update without where clause will update every record, so only do
  * this if you want to replace every row's value for a specific column.
- *
+ * <p>
  * For delete to be considered complete the minimum requirements are that a table is specified.
  * delete from user;  //Note that delete without where clause will delete every record. So always use where clause unless
  * you want to erase your entire table.
- *
+ * <p>
  * For insert to be considered complete, the minimum requirements are that a table, and the values are specified.
  * insert into user values (default, 'bonny', null, '10-13-22', 5);
  */
 @Immutable
 public class CompleteQuery extends Query {
 
-  protected CompleteQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IMap<Column, Expression> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
+  protected CompleteQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
 
-  public static CompleteQuery make(IMap<Column, Expression> set, FromExpression fromExpression) {
+  public static CompleteQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
     return new CompleteQuery(null, fromExpression, null, null, null, null, null, null, set, false, false, false, false);
   }
 
-  public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType, IList<SelectExpression> select, IList<SelectExpression> groupBy, IList<SelectExpression> orderBy, IList<BooleanExpression> having, Limit limit, IMap<Column, Expression> set, boolean mayInsert, boolean mayReplace, boolean triggerDeleteWhenReplacing, boolean mayThrowOnDuplicate) {
+  public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType, IList<SelectExpression> select, IList<SelectExpression> groupBy, IList<SelectExpression> orderBy, IList<BooleanExpression> having, Limit limit, IList<IMap<Column, Expression>> set, boolean mayInsert, boolean mayReplace, boolean triggerDeleteWhenReplacing, boolean mayThrowOnDuplicate) {
     return new CompleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
 
@@ -70,10 +71,12 @@ public class CompleteQuery extends Query {
   }
 
   public InsertQuery set(Column column, Literal value) {
-    if (this.set == null) {
-      return InsertQuery.make(column, value, this.fromExpression);
+    if (set == null) {
+      return InsertQuery.make(IArrayList.make(IHashMap.from(column, value)), fromExpression);
     }
-    return InsertQuery.make(set.put(column, value), this.fromExpression);
+    final IMap<Column, Expression> map = set.get(0).put(column, value);
+    final IList<IMap<Column, Expression>> records = IArrayList.make(map);
+    return InsertQuery.make(records, fromExpression);
   }
 
 }
