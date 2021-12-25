@@ -72,8 +72,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       if (selectArr[i] instanceof Column && !(selectArr[i] instanceof QueriedColumn)) {
         final Column column = (Column) selectArr[i];
         for (Table table : tableList) {
-          if (table.columns.get(column.getName()) == column && column.getTable() != table) {
-            requiresTable = true;
+          for (int j = 0; j < table.columns.toArray().length; j++) {
+            if (table.columns.get(j) == column && column.getTable() != table) {
+              requiresTable = true;
+            }
           }
         }
         selectArr[i] = new QueriedColumn((Column) selectArr[i], requiresTable);
@@ -126,8 +128,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     if (e instanceof Column) {
       col = (Column) e;
       for (Table table : tableList) {
-        if (table.columns.get(col.getName()) != null && table.name != col.getTable().name) {
-          requiresTable = true;
+        for (int i = 0; i < table.columns.toArray().length; i++) {
+          if (table.columns.get(i) != null && table.name != col.getTable().name) {
+            requiresTable = true;
+          }
         }
       }
     } else {
@@ -392,10 +396,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       engine = "Aria";
     }
     String sql = "create table " + toSql(createQuery.fromExpression) + " (\n";
-    final IMap<String, Column> columns = createQuery.fromExpression.tableList().get(0).columns;
+    final IList<Column> columns = createQuery.fromExpression.tableList().get(0).columns;
     String separator = "  ";
-    for (String colName : columns.keySet()) {
-      sql += separator + colName + " " + toSql(columns.get(colName));
+    for (int i = 0; i < columns.toArray().length; i++) {
+      sql += separator + columns.get(i).getName() + " " + toSql(columns.get(i));
       separator = ",\n  ";
     }
     sql += "\n) ENGINE=" + engine + "\n";

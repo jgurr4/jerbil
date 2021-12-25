@@ -5,9 +5,7 @@ import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
-import com.ple.util.IHashMap;
 import com.ple.util.IList;
-import com.ple.util.IMap;
 
 
 /**
@@ -18,19 +16,19 @@ public class Table extends FromExpression {
 
   public final StorageEngine engine;
   public final String name;
-  public IMap<String, Column> columns;
+  public IList<Column> columns;
 
   protected Table(String name) {
-    this(StorageEngine.simple, name, IHashMap.empty);
+    this(StorageEngine.simple, name, IArrayList.make());
   }
 
-  protected Table(StorageEngine engine, String name, IMap<String, Column> columns) {
+  protected Table(StorageEngine engine, String name, IList<Column> columns) {
     this.engine = engine;
     this.name = name;
     this.columns = columns;
   }
 
-  private static Table make(StorageEngine engine, String name, IMap<String, Column> columns) {
+  private static Table make(StorageEngine engine, String name, IList<Column> columns) {
     return new Table(engine, name, columns);
   }
 
@@ -84,7 +82,7 @@ public class Table extends FromExpression {
   }
 
   public void add(Column column) {
-    final IMap<String, Column> newColumns = columns.put(column.getName(), column);
+    final IList<Column> newColumns = columns.add(column);
     columns = newColumns;
   }
 
