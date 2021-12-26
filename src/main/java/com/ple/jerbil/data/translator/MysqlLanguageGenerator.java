@@ -11,8 +11,6 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-
 public class MysqlLanguageGenerator implements LanguageGenerator {
 
   public static LanguageGenerator make() {
@@ -23,21 +21,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   public String toSql(CompleteQuery completeQuery) {
     final String sql;
     switch (completeQuery.queryType) {
-      case select -> {
-        sql = toSql((SelectQuery) completeQuery);
-      }
-      case delete -> {
-        sql = toSql((DeleteQuery) completeQuery);
-      }
-      case update -> {
-        sql = toSql((UpdateQuery) completeQuery);
-      }
-      case insert -> {
-        sql = toSql((InsertQuery) completeQuery);
-      }
-      case create -> {
-        sql = toSql((CreateQuery) completeQuery);
-      }
+      case select -> sql = toSql((SelectQuery) completeQuery);
+      case delete -> sql = toSql((DeleteQuery) completeQuery);
+      case update -> sql = toSql((UpdateQuery) completeQuery);
+      case insert -> sql = toSql((InsertQuery) completeQuery);
+      case create -> sql = toSql((CreateQuery) completeQuery);
       default -> throw new IllegalStateException("Unexpected value: " + completeQuery.queryType);
     }
     return sql;
@@ -391,9 +379,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   public String toSql(CreateQuery createQuery) {
+    if (createQuery.db != null) {
+      return "create database " + createQuery.db.name;
+    }
     String engine = "";
     if (createQuery.fromExpression.tableList().get(0).engine == StorageEngine.simple) {
       engine = "Aria";
+    } else if (createQuery.fromExpression.tableList().get(0).engine == StorageEngine.transactional) {
+      engine = "Innodb";
     }
     String sql = "create table " + toSql(createQuery.fromExpression) + " (\n";
     final IList<Column> columns = createQuery.fromExpression.tableList().get(0).columns;

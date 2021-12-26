@@ -71,7 +71,7 @@ public class SqlStatementTests {
       create table item (
         itemId bigint not null primary key,
         name varchar(20) not null,
-        type enum('weapon', 'armor', 'shield', 'accessory') not null,
+        type enum('weapon','armor','shield','accessory') not null,
         price int not null
       ) ENGINE=Aria
       """, q.toSql());

@@ -2,7 +2,6 @@ package com.ple.jerbil.data.query;
 
 
 import com.ple.jerbil.data.DelayedImmutable;
-import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.PotentialQuery;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;

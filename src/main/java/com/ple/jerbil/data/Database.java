@@ -1,7 +1,11 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.query.Table;
+import com.ple.util.IArrayList;
+import com.ple.util.IList;
 
 /**
  * Database is a object representing the database and it's tables.
@@ -9,18 +13,20 @@ import com.ple.jerbil.data.query.Table;
 @DelayedImmutable
 public class Database {
 
-  private final String name;
+  public final String name;
+  public final IList<Table> tables;
 
-  public Database(String name) {
+  public Database(String name, IList<Table> tables) {
     this.name = name;
+    this.tables = tables;
   }
 
   public static Database make(String name) {
-    return new Database(name);
+    return new Database(name, null);
   }
 
   public Database add(Table... tables) {
-    return null;
+    return new Database(name, IArrayList.make(tables));
   }
 
   public String toSql() {
@@ -28,7 +34,11 @@ public class Database {
   }
 
   public QueryList createAll() {
-    return null;
+    QueryList<CompleteQuery> completeQueries = QueryList.make(CreateQuery.make(this));
+    for (Table table : this.tables) {
+      completeQueries = completeQueries.add(CreateQuery.make(table));
+    }
+    return completeQueries;
   }
 
 }

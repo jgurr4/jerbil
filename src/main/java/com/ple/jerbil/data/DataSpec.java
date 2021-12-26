@@ -42,7 +42,7 @@ public class DataSpec {
     int size = 0;
     for (Object e : enumSet) {
       enumStr += separator + "'" + ((Enum) e).name() + "'";
-      separator = ", ";
+      separator = ",";
       size++;
     }
     enumStr += ")";

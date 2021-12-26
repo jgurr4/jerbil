@@ -1,10 +1,17 @@
 package com.ple.jerbil;
 
+import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.bridge.MysqlBridge;
+import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.QueryList;
+import com.ple.jerbil.testcommon.*;
+import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStructureTests {
 
-/*
   final UserTable user = new UserTable();
   final UserTableColumns userColumns = new UserTableColumns(user);
   final PlayerTable player = new PlayerTable();
@@ -16,31 +23,41 @@ public class SqlStructureTests {
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
-  @BeforeAll
-  @Test
-  void testDatabaseCreateAll() {
-    final QueryList testCreateAll = testDb.createAll();
-    assertEquals(testCreateAll.toSql(), """
-       create database test;
-       create table user ( 
-       userId int primary key auto_increment,
-       name varchar(20),
-       key (name)); 
-       create table player (
-       playerId int primary key auto_increment,
-       userId int,
-       name varchar(20));
-       create table item (
-       itemId int primary key auto_increment,
-       name varchar(255),
-       type enum('weapon','armor','shield','accessory'),
-       price int,
-       `add` int ));
-       create table inventory (
-       playerId int,
-       itemId int ));""");
+  public SqlStructureTests() {
+    DataGlobal.bridge = MysqlBridge.make();
   }
 
+  @Test
+  void testDatabaseCreateAll() {
+    final QueryList<CompleteQuery> testCreateAll = testDb.createAll();
+    assertEquals("""
+       create database test;
+       create table user (
+         userId bigint primary key auto_increment,
+         name varchar(255) not null,
+         age int not null,
+         key (name)
+       ) ENGINE=Aria;
+       create table player (
+         playerId bigint primary key auto_increment,
+         userId bigint not null,
+         name varchar(20) not null
+       ) ENGINE=Innodb;
+       create table item (
+         itemId bigint primary key auto_increment,
+         name varchar(255) not null,
+         type enum('weapon','armor','shield','accessory') not null,
+         price int not null
+       ) ENGINE=Aria;
+       create table inventory (
+         playerId bigint,
+         itemId bigint,
+         primary key (playerId, itemId)
+       ) ENGINE=Aria;
+       """, testCreateAll.toSql());
+  }
+
+/*
   @Test
   void testAddColumn() {
     Column newColumn = Column.make("quantity", item).integer(); //When translator sees that this column doesn't
