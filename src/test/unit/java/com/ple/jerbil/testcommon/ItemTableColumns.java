@@ -22,10 +22,7 @@ public class ItemTableColumns {
     type = Column.make("type", table).asEnum(ItemType.class);
     price = Column.make("price", table).asInt();
 //    add = Column.make("add", table).asInt(); // Tests if our translator checks reserved words correctly and puts backticks around it.
-    table.add(itemId);
-    table.add(name);
-    table.add(type);
-    table.add(price);
+    table.add(itemId, name, type, price);
   }
   //  example of using .def() to set default value for column. Also how to use decimal or other numeric data types with precision and specific options like unsigned or zerofill.
 //  public final Column price = Column.make("price", Column.name, Column.table, Column.dataSpec, Column.indexed, Column.primary).decimal(9, 2, unsigned, zerofill).def(1.00);

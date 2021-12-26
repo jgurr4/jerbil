@@ -16,9 +16,7 @@ public class UserTableColumns {
     userId = Column.make("userId", table).id();
     name = Column.make("name", table).asVarchar().indexed();
     age = Column.make("age", table).asInt();
-    table.add(userId);
-    table.add(name);
-    table.add(age);
+    table.add(userId, name, age);
   }
 }
 // consider adding .ai() method if people want to use that on a primary key that is not tinyint.

@@ -81,6 +81,12 @@ public class Table extends FromExpression {
     return IArrayList.make(this);
   }
 
+  public void add(Column... columnArr) {
+    for (Column column : columnArr) {
+      columns = columns.add(column);
+    }
+  }
+
   public void add(Column column) {
     final IList<Column> newColumns = columns.add(column);
     columns = newColumns;
