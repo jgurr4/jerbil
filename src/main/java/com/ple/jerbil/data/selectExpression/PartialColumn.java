@@ -59,10 +59,6 @@ public class PartialColumn extends OrderedExpression implements Expression, Colu
     return StringColumn.make(this.name, this.table, DataSpec.make(DataType.enumeration, enumObj), this.indexed, this.primary);
   }
 
-  public NumericColumn primary() {
-    return NumericColumn.make(this.name, this.table, true);
-  }
-
   public PartialColumn indexed() {
     return PartialColumn.make(this.name, this.table, true, this.primary);
   }
@@ -77,8 +73,12 @@ public class PartialColumn extends OrderedExpression implements Expression, Colu
     return indexed;
   }
 
-  public NumericColumn id() {
+  public NumericColumn bigId() {
     return NumericColumn.make(this.name, this.table, DataSpec.make(DataType.bigint), false, true, true);
+  }
+
+  public NumericColumn id() {
+    return NumericColumn.make(this.name, this.table, DataSpec.make(DataType.integer), false, true, true);
   }
 
   public String getName() {
@@ -88,6 +88,11 @@ public class PartialColumn extends OrderedExpression implements Expression, Colu
   @Override
   public Table getTable() {
     return this.getTable();
+  }
+
+  @Override
+  public Column primary() {
+    return null;
   }
 
 }

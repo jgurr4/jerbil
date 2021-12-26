@@ -332,7 +332,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         autoIncrement = " auto_increment";
       }
       if (numCol.dataSpec.dataType == DataType.integer) {
-        sql += "int not null" + primary;
+        sql += "int not null" + primary + autoIncrement;
       } else if (numCol.dataSpec.dataType == DataType.bigint) {
         sql += numCol.dataSpec.dataType.name() + " not null" + primary + autoIncrement;
       }

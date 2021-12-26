@@ -45,7 +45,7 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
   }
 
   public static NumericColumn make(String name, Table table, boolean primary) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.bigint), false, primary, false);
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary, false);
     table.add(numericColumn);
     return numericColumn;
   }

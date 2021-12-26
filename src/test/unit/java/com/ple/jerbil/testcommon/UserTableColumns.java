@@ -18,8 +18,8 @@ public class UserTableColumns {
     age = Column.make("age", table).asInt();
   }
 }
-//.id() should make bigint auto increment primary key NumericColumn automatically without needing to say .asBigInt().primary()
-// Add a .ai() method if people want to use that on a primary key that is not bigint.
+// change .id() into .bigId() for bigints, and make regular .id() use int.
+// consider adding .ai() method if people want to use that on a primary key that is not tinyint.
 /* Alternative style that we may decide to support as well
   public final Column userId;
   public final StringColumn name;

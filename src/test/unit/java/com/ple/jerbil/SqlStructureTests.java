@@ -33,25 +33,25 @@ public class SqlStructureTests {
     assertEquals("""
        create database test;
        create table user (
-         userId bigint primary key auto_increment,
+         userId int primary key auto_increment,
          name varchar(255) not null,
          age int not null,
          key (name)
        ) ENGINE=Aria;
        create table player (
-         playerId bigint primary key auto_increment,
-         userId bigint not null,
+         playerId int primary key auto_increment,
+         userId int not null,
          name varchar(20) not null
        ) ENGINE=Innodb;
        create table item (
-         itemId bigint primary key auto_increment,
+         itemId int primary key auto_increment,
          name varchar(20) not null,
          type enum('weapon','armor','shield','accessory') not null,
          price int not null
        ) ENGINE=Aria;
        create table inventory (
-         playerId bigint,
-         itemId bigint,
+         playerId int,
+         itemId int,
          primary key (playerId, itemId)
        ) ENGINE=Aria;
        """, testCreateAll.toSql());
