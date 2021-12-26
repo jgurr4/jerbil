@@ -78,20 +78,18 @@ public class SqlStatementTests {
 
   }
 
-/*
   @Test
   void testMultiColumnPrimaryKey() {
 
     final CompleteQuery q = inventory.create();
     assertEquals("""
       create table inventory (
-        player long not null,
-        itemId long not null,
-        primary key (player, itemId)
+        playerId bigint not null,
+        itemId bigint not null,
+        primary key (playerId, itemId)
       ) ENGINE=Aria
       """, q.toSql());
 
   }
 
-*/
 }

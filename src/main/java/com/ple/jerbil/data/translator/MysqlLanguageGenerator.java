@@ -402,8 +402,36 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       sql += separator + columns.get(i).getName() + " " + toSql(columns.get(i));
       separator = ",\n  ";
     }
-    sql += "\n) ENGINE=" + engine + "\n";
+    String multiIndex = getMultiIndex(columns);
+    if (multiIndex != "") {
+      if (multiIndex.contains("primary")) {
+        sql = sql.replaceAll(" primary key", "");
+      }
+    }
+    sql += multiIndex + "\n) ENGINE=" + engine + "\n";
     return sql;
+  }
+
+  private String getMultiIndex(IList<Column> columns) {
+    String multiIndex = "";
+    String separator = "";
+    int counter = 0;
+    for (Column column : columns) {
+      if (column.isPrimary()) {
+        counter++;
+      }
+    }
+    if (counter > 1) {
+      multiIndex += ",\n  primary key (";
+      for (Column column : columns) {
+        if (column.isPrimary()) {
+          multiIndex += separator + column.getName();
+          separator = ", ";
+        }
+      }
+      multiIndex += ")";
+    }
+    return multiIndex;
   }
 
 }
