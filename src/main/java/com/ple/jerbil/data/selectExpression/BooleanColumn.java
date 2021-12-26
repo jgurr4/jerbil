@@ -26,21 +26,15 @@ public class BooleanColumn extends BooleanExpression implements Column<BooleanCo
     }
 
     public static Column make(String name, Table table) {
-        final BooleanColumn booleanColumn = new BooleanColumn(name, table, DataSpec.make(DataType.tinyint, 1), false, false);
-        table.add(booleanColumn);
-        return booleanColumn;
+        return new BooleanColumn(name, table, DataSpec.make(DataType.tinyint, 1), false, false);
     }
 
     public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
-        final BooleanColumn booleanColumn = new BooleanColumn(name, table, DataSpec.make(DataType.bool), indexed, primary);
-        table.add(booleanColumn);
-        return booleanColumn;
+        return new BooleanColumn(name, table, DataSpec.make(DataType.bool), indexed, primary);
     }
 
     public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        final BooleanColumn booleanColumn = new BooleanColumn(name, table, dataSpec, indexed, primary);
-        table.add(booleanColumn);
-        return booleanColumn;
+        return new BooleanColumn(name, table, dataSpec, indexed, primary);
     }
 
     @Override

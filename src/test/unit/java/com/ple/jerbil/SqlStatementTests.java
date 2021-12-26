@@ -69,7 +69,7 @@ public class SqlStatementTests {
     final CompleteQuery q = item.create();
     assertEquals("""
       create table item (
-        itemId bigint not null primary key,
+        itemId int primary key auto_increment,
         name varchar(20) not null,
         type enum('weapon','armor','shield','accessory') not null,
         price int not null
@@ -84,8 +84,8 @@ public class SqlStatementTests {
     final CompleteQuery q = inventory.create();
     assertEquals("""
       create table inventory (
-        playerId bigint not null,
-        itemId bigint not null,
+        playerId int,
+        itemId int,
         primary key (playerId, itemId)
       ) ENGINE=Aria
       """, q.toSql());

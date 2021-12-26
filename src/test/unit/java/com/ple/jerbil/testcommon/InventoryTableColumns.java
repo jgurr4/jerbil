@@ -14,6 +14,8 @@ public class InventoryTableColumns {
   public InventoryTableColumns(Table table) {
     playerId = Column.make("playerId", table).asInt().primary();
     itemId = Column.make("itemId", table).asInt().primary();
+    table.add(playerId);
+    table.add(itemId);
   }
 
 }

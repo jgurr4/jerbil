@@ -16,9 +16,11 @@ public class UserTableColumns {
     userId = Column.make("userId", table).id();
     name = Column.make("name", table).asVarchar().indexed();
     age = Column.make("age", table).asInt();
+    table.add(userId);
+    table.add(name);
+    table.add(age);
   }
 }
-// change .id() into .bigId() for bigints, and make regular .id() use int.
 // consider adding .ai() method if people want to use that on a primary key that is not tinyint.
 /* Alternative style that we may decide to support as well
   public final Column userId;

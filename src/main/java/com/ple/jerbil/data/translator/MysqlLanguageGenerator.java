@@ -434,13 +434,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       separator = "";
     }
     if (indexCount > 0) {
-      multiIndex += ",\n key (";
+      multiIndex += ",\n  key (";
       for (Column column : columns) {
         if (column.isIndexed()) {
           multiIndex += separator + column.getName();
           separator = ", ";
         }
       }
+      multiIndex += ")";
     }
     return multiIndex;
   }

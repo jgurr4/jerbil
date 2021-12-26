@@ -23,27 +23,19 @@ public class StringColumn extends StringExpression implements Column<StringColum
     }
 
     public static StringColumn make(String name, Table table) {
-        final StringColumn stringColumn = new StringColumn(name, table, DataSpec.make(DataType.varchar), false, false);
-        table.add(stringColumn);
-        return stringColumn;
+        return new StringColumn(name, table, DataSpec.make(DataType.varchar), false, false);
     }
 
     public static StringColumn make(String name, Table table, int size) {
-        final StringColumn stringColumn = new StringColumn(name, table, DataSpec.make(DataType.varchar, size), false, false);
-        table.add(stringColumn);
-        return stringColumn;
+        return new StringColumn(name, table, DataSpec.make(DataType.varchar, size), false, false);
     }
 
     public static StringColumn make(String name, Table table, Boolean indexed, Boolean primary) {
-        final StringColumn stringColumn = new StringColumn(name, table, DataSpec.make(DataType.varchar), indexed, primary);
-        table.add(stringColumn);
-        return stringColumn;
+        return new StringColumn(name, table, DataSpec.make(DataType.varchar), indexed, primary);
     }
 
     public static StringColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        final StringColumn stringColumn = new StringColumn(name, table, dataSpec, indexed, primary);
-        table.add(stringColumn);
-        return stringColumn;
+        return new StringColumn(name, table, dataSpec, indexed, primary);
     }
 
     @Override

@@ -23,21 +23,15 @@ public class DateColumn extends DateExpression implements Column<DateColumn> {
     }
 
     public static Column make(String name, Table table) {
-        final DateColumn dateColumn = new DateColumn(name, table, DataSpec.make(DataType.datetime), false, false);
-        table.add(dateColumn);
-        return dateColumn;
+        return new DateColumn(name, table, DataSpec.make(DataType.datetime), false, false);
     }
 
     public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
-        final DateColumn dateColumn = new DateColumn(name, table, DataSpec.make(DataType.datetime), indexed, primary);
-        table.add(dateColumn);
-        return dateColumn;
+        return new DateColumn(name, table, DataSpec.make(DataType.datetime), indexed, primary);
     }
 
     public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        final DateColumn dateColumn = new DateColumn(name, table, dataSpec, indexed, primary);
-        table.add(dateColumn);
-        return dateColumn;
+        return new DateColumn(name, table, dataSpec, indexed, primary);
     }
 
     @Override

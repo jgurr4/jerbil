@@ -27,45 +27,31 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
   }
 
   public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement);
-    table.add(numericColumn);
-    return numericColumn;
+    return new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement);
   }
 
   public static NumericColumn make(String name, Table table, int size) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, false, false);
-    table.add(numericColumn);
-    return numericColumn;
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, false, false);
   }
 
   public static NumericColumn make(String name, Table table) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), false, false, false);
-    table.add(numericColumn);
-    return numericColumn;
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, false, false);
   }
 
   public static NumericColumn make(String name, Table table, boolean primary) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary, false);
-    table.add(numericColumn);
-    return numericColumn;
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary, false);
   }
 
   public static NumericColumn make(String name, Table table, Boolean indexed, Boolean primary) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), indexed, primary, false);
-    table.add(numericColumn);
-    return numericColumn;
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer), indexed, primary, false);
   }
 
   public static NumericColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, dataSpec, indexed, primary, false);
-    table.add(numericColumn);
-    return numericColumn;
+    return new NumericColumn(name, table, dataSpec, indexed, primary, false);
   }
 
   public static NumericColumn make(String name, Table table, DataSpec dataSpec) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, dataSpec, false, false, false);
-    table.add(numericColumn);
-    return numericColumn;
+    return new NumericColumn(name, table, dataSpec, false, false, false);
   }
 
   @Override
