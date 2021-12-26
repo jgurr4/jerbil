@@ -322,15 +322,19 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   private String toSql(Column column) {
     String sql = "";
     String primary = "";
+    String autoIncrement = "";
     if (column.isPrimary()) {
       primary = " primary key";
     }
     if (column instanceof NumericColumn) {
       final NumericColumn numCol = (NumericColumn) column;
+      if (numCol.isAutoIncrement()) {
+        autoIncrement = " auto_increment";
+      }
       if (numCol.dataSpec.dataType == DataType.integer) {
         sql += "int not null" + primary;
       } else if (numCol.dataSpec.dataType == DataType.bigint) {
-        sql += numCol.dataSpec.dataType.name() + " not null" + primary;
+        sql += numCol.dataSpec.dataType.name() + " not null" + primary + autoIncrement;
       }
     } else if (column instanceof StringColumn) {
       final StringColumn strCol = (StringColumn) column;
@@ -341,6 +345,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         sql += "enum" + enumSpec.enumStr + " not null" + primary;
       }
     }
+    sql = sql.replaceAll("not null primary key", "primary key");
     return sql;
   }
 
@@ -408,13 +413,16 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   private String getMultiIndex(IList<Column> columns) {
     String multiIndex = "";
     String separator = "";
-    int counter = 0;
+    int primaryCount = 0;
+    int indexCount = 0;
     for (Column column : columns) {
       if (column.isPrimary()) {
-        counter++;
+        primaryCount++;
+      } else if (column.isIndexed()) {
+        indexCount++;
       }
     }
-    if (counter > 1) {
+    if (primaryCount > 1) {
       multiIndex += ",\n  primary key (";
       for (Column column : columns) {
         if (column.isPrimary()) {
@@ -423,6 +431,16 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         }
       }
       multiIndex += ")";
+      separator = "";
+    }
+    if (indexCount > 0) {
+      multiIndex += ",\n key (";
+      for (Column column : columns) {
+        if (column.isIndexed()) {
+          multiIndex += separator + column.getName();
+          separator = ", ";
+        }
+      }
     }
     return multiIndex;
   }

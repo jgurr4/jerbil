@@ -15,41 +15,55 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
   public final DataSpec dataSpec;
   public final boolean indexed;
   public final boolean primary;
+  public final boolean autoIncrement;
 
-  protected NumericColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
+  protected NumericColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement) {
     this.name = name;
     this.table = table;
     this.dataSpec = dataSpec;
     this.indexed = indexed;
     this.primary = primary;
+    this.autoIncrement = autoIncrement;
   }
 
-  public static Column make(String name, Table table, int size) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, false);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement) {
+    final NumericColumn numericColumn = new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement);
+    table.add(numericColumn);
+    return numericColumn;
+  }
+
+  public static NumericColumn make(String name, Table table, int size) {
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, false, false);
     table.add(numericColumn);
     return numericColumn;
   }
 
   public static NumericColumn make(String name, Table table) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), false, false);
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), false, false, false);
     table.add(numericColumn);
     return numericColumn;
   }
 
   public static NumericColumn make(String name, Table table, boolean primary) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.bigint), false, primary);
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.bigint), false, primary, false);
     table.add(numericColumn);
     return numericColumn;
   }
 
-  public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), indexed, primary);
+  public static NumericColumn make(String name, Table table, Boolean indexed, Boolean primary) {
+    final NumericColumn numericColumn = new NumericColumn(name, table, DataSpec.make(DataType.integer), indexed, primary, false);
     table.add(numericColumn);
     return numericColumn;
   }
 
-  public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-    final NumericColumn numericColumn = new NumericColumn(name, table, dataSpec, indexed, primary);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+    final NumericColumn numericColumn = new NumericColumn(name, table, dataSpec, indexed, primary, false);
+    table.add(numericColumn);
+    return numericColumn;
+  }
+
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec) {
+    final NumericColumn numericColumn = new NumericColumn(name, table, dataSpec, false, false, false);
     table.add(numericColumn);
     return numericColumn;
   }
@@ -66,12 +80,12 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
 
   @Override
   public NumericColumn primary() {
-    return new NumericColumn(this.name, this.table, this.dataSpec, this.indexed, true);
+    return new NumericColumn(this.name, this.table, this.dataSpec, this.indexed, true, false);
   }
 
   @Override
   public NumericColumn indexed() {
-    return new NumericColumn(this.name, this.table, this.dataSpec, true, this.primary);
+    return new NumericColumn(this.name, this.table, this.dataSpec, true, this.primary, false);
   }
 
   @Override
@@ -82,6 +96,10 @@ public class NumericColumn extends NumericExpression implements Column<NumericCo
   @Override
   public boolean isIndexed() {
     return indexed;
+  }
+
+  public boolean isAutoIncrement() {
+    return autoIncrement;
   }
 
   public GreaterThan isGreaterThan(Expression value) {

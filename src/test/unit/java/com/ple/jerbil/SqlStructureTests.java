@@ -45,7 +45,7 @@ public class SqlStructureTests {
        ) ENGINE=Innodb;
        create table item (
          itemId bigint primary key auto_increment,
-         name varchar(255) not null,
+         name varchar(20) not null,
          type enum('weapon','armor','shield','accessory') not null,
          price int not null
        ) ENGINE=Aria;

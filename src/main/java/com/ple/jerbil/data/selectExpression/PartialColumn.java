@@ -51,6 +51,10 @@ public class PartialColumn extends OrderedExpression implements Expression, Colu
     return StringColumn.make(this.name, this.table, size);
   }
 
+  public NumericColumn asBigInt() {
+    return NumericColumn.make(this.name, this.table, DataSpec.make(DataType.bigint));
+  }
+
   public StringColumn asEnum(Class enumObj) {
     return StringColumn.make(this.name, this.table, DataSpec.make(DataType.enumeration, enumObj), this.indexed, this.primary);
   }
@@ -74,7 +78,7 @@ public class PartialColumn extends OrderedExpression implements Expression, Colu
   }
 
   public NumericColumn id() {
-    return NumericColumn.make(this.name, this.table, true);
+    return NumericColumn.make(this.name, this.table, DataSpec.make(DataType.bigint), false, true, true);
   }
 
   public String getName() {

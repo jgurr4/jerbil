@@ -75,6 +75,7 @@ public class QueryList<T> implements IList<T> {
         sql += ((CreateQuery) query).toSql() + ";\n";
       }
     }
+    sql = sql.replaceAll("\n;", ";");
     return sql;
   }
 

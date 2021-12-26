@@ -10,14 +10,16 @@ public class UserTableColumns {
 
   public final NumericColumn userId;
   public final StringColumn name;
-  public NumericColumn age;
+  public final NumericColumn age;
 
   public UserTableColumns(Table table) {
-    userId = Column.make("userId", table).asInt().primary();
+    userId = Column.make("userId", table).id();
     name = Column.make("name", table).asVarchar().indexed();
     age = Column.make("age", table).asInt();
   }
 }
+//.id() should make bigint auto increment primary key NumericColumn automatically without needing to say .asBigInt().primary()
+// Add a .ai() method if people want to use that on a primary key that is not bigint.
 /* Alternative style that we may decide to support as well
   public final Column userId;
   public final StringColumn name;
