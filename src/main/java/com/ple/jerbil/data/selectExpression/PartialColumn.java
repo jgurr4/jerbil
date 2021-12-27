@@ -55,6 +55,10 @@ public class PartialColumn extends OrderedExpression implements Expression, Colu
     return NumericColumn.make(this.name, this.table, DataSpec.make(DataType.bigint));
   }
 
+  public NumericColumn asDecimal(int precision, int scale) {
+    return NumericColumn.make(this.name, this.table, DataSpec.make(DataType.decimal, precision, scale));
+  }
+
   public StringColumn asEnum(Class enumObj) {
     return StringColumn.make(this.name, this.table, DataSpec.make(DataType.enumeration, enumObj), this.indexed, this.primary);
   }

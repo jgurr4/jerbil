@@ -6,6 +6,7 @@ import com.ple.jerbil.data.bridge.MysqlBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
@@ -95,4 +96,22 @@ public class SqlStructureTests {
   }
 
 */
+  @Test
+  void testGeneratedColumn() {
+    NumericColumn quantity = Column.make("quantity", item).asInt();
+    item.add(quantity);
+    Column total = Column.make("total", item).asDecimal(14, 2).generatedFrom(itemColumns.price.times(quantity));
+    item.add(total);
+    final CompleteQuery q = item.create();
+    assertEquals("""
+      create table item (
+        itemId int primary key auto_increment,
+        name varchar(20) not null,
+        type enum('weapon','armor','shield','accessory') not null,
+        price int not null,
+        quantity int not null,
+        total decimal(14, 2) as (price * quantity)
+      ) ENGINE=Aria
+      """, q.toSql());
+  }
 }

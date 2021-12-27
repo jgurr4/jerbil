@@ -33,8 +33,8 @@ public class SqlQueryTests {
   void testSelect() {
     final CompleteQuery q = user.where(userColumns.name.eq(make("john"))).select(userColumns.userId);
     assertEquals("""
-      select userId 
-      from user 
+      select userId
+      from user
       where name = 'john'
       """, q.toSql());
   }
@@ -68,14 +68,14 @@ public class SqlQueryTests {
     final CompleteQuery q1 = base.where(userColumns.name.eq(make("john")));
     final CompleteQuery q2 = base.where(userColumns.name.eq(make("james")));
     assertEquals("""
-        select userId 
-        from user 
+        select userId
+        from user
         where name = 'john'
         """, q1.toSql());
 
     assertEquals("""
-        select userId 
-        from user 
+        select userId
+        from user
         where name = 'james'
         """, q2.toSql());
   }
@@ -84,8 +84,8 @@ public class SqlQueryTests {
   void testSelectEnum() {
     final CompleteQuery q = item.where(itemColumns.type.eq(ItemType.weapon.toString())).selectAll();
     assertEquals("""
-        select * 
-        from item 
+        select *
+        from item
         where type = 'weapon'
         """, q.toSql());
 

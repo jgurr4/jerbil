@@ -8,4 +8,5 @@ public enum DataType {
   tinyint,
   bool,
   enumeration,
+  decimal,
 }

@@ -277,7 +277,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return fullSelectList;
   }
 
-  private String toSqlArithmetic(String fullSelectList, ArithmeticExpression arExp) {
+  private String toSqlArithmetic(String sql, ArithmeticExpression arExp) {
     String operator = "";
     try {
       if (arExp.type == Operator.plus) {
@@ -292,21 +292,21 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         operator = " % ";
       }
       if (arExp.e1 instanceof ArithmeticExpression && !(arExp.e2 instanceof ArithmeticExpression)) {
-        fullSelectList += toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e1);
-        fullSelectList += operator + getNumericExpression((NumericExpression) arExp.e2);
+        sql += toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1);
+        sql += operator + getNumericExpression((NumericExpression) arExp.e2);
       } else if (arExp.e2 instanceof ArithmeticExpression && !(arExp.e1 instanceof ArithmeticExpression)) {
-        fullSelectList += getNumericExpression((NumericExpression) arExp.e1) + operator + "(" + toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e2) + ")";
+        sql += getNumericExpression((NumericExpression) arExp.e1) + operator + "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e2) + ")";
       } else if (arExp.e1 instanceof ArithmeticExpression && arExp.e2 instanceof ArithmeticExpression) {
-        fullSelectList += "(" + toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e1) + ")" + operator + "(" + toSqlArithmetic(fullSelectList, (ArithmeticExpression) arExp.e2) + ")";
+        sql += "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1) + ")" + operator + "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e2) + ")";
       } else {
-        fullSelectList += getNumericExpression((NumericExpression) arExp.e1) + operator + getNumericExpression((NumericExpression) arExp.e2);
+        sql += getNumericExpression((NumericExpression) arExp.e1) + operator + getNumericExpression((NumericExpression) arExp.e2);
       }
-      return fullSelectList;
+      return sql;
     } catch (Exception e) {
       //TODO: Ask if this is good practice to do these types of error messages and catching of exceptions in framework.
       System.out.println(e.getMessage());
     }
-    return fullSelectList;
+    return sql;
   }
 
   private String getNumericExpression(NumericExpression e) throws ClassNotFoundException {
@@ -323,18 +323,22 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String sql = "";
     String primary = "";
     String autoIncrement = "";
+    String preciseScale = "";
     if (column.isPrimary()) {
       primary = " primary key";
     }
     if (column instanceof NumericColumn) {
       final NumericColumn numCol = (NumericColumn) column;
+      if (numCol.dataSpec.preciseScale != null) {
+        preciseScale = "(" + numCol.dataSpec.preciseScale[0] + ", " + numCol.dataSpec.preciseScale[1] + ")";
+      }
       if (numCol.isAutoIncrement()) {
         autoIncrement = " auto_increment";
       }
-      if (numCol.dataSpec.dataType == DataType.integer) {
-        sql += "int not null" + primary + autoIncrement;
-      } else if (numCol.dataSpec.dataType == DataType.bigint) {
-        sql += numCol.dataSpec.dataType.name() + " not null" + primary + autoIncrement;
+      if (numCol.generatedFrom != null) {
+        sql += numCol.dataSpec.getSqlName() + preciseScale + " as (" + toSqlArithmetic(sql, (ArithmeticExpression) numCol.generatedFrom) + ")";
+      } else {
+        sql += numCol.dataSpec.getSqlName() + preciseScale + " not null" + primary + autoIncrement;
       }
     } else if (column instanceof StringColumn) {
       final StringColumn strCol = (StringColumn) column;

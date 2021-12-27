@@ -1,5 +1,7 @@
 package com.ple.jerbil.data;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.EnumSet;
 
 /**
@@ -18,21 +20,31 @@ import java.util.EnumSet;
 @Immutable
 public class DataSpec {
 
-  public final static DataSpec integer = new DataSpec(DataType.integer, 0);
-  public final static DataSpec varchar = new DataSpec(DataType.varchar, 0);
+  public final static DataSpec integer = new DataSpec(DataType.integer, 0, null);
+  public final static DataSpec varchar = new DataSpec(DataType.varchar, 0, null);
   public final DataType dataType;
   public final int size;
-  /* It's important to note that defaultMaxSize for sql databases refers to default max DISPLAY size.
-  * Which for most values is 255. This is a constant used instead of 0 value for unspecified datatype sizes. */
+  @Nullable public final int[] preciseScale;
   public final static int defaultMaxSize = 255;
 
-  protected DataSpec(DataType dataType, int size) {
+  protected DataSpec(DataType dataType, int size, int[] preciseScale) {
     this.dataType = dataType;
     this.size = size;
+    this.preciseScale = preciseScale;
+  }
+
+  public DataSpec(DataType dataType, int size) {
+    this.dataType = dataType;
+    this.size = size;
+    this.preciseScale = null;
   }
 
   public static DataSpec make(DataType type, int size) {
-    return new DataSpec(type, size);
+    return new DataSpec(type, size, null);
+  }
+
+  public static DataSpec make(DataType type, int precision, int scale) {
+    return new DataSpec(type, defaultMaxSize, new int[]{precision, scale});
   }
 
   public static DataSpec make(DataType type, Class enumObj) {
@@ -55,7 +67,18 @@ public class DataSpec {
       return new DataSpec(type, defaultMaxSize);
     }
 */
-    return new DataSpec(type, defaultMaxSize);
+    return new DataSpec(type, defaultMaxSize, null);
+  }
+
+  public String getSqlName() {
+    if (this.dataType.name() == "integer") {
+      return "int";
+    } else if (this.dataType.name() == "bool") {
+      return "boolean";
+    } else if (this.dataType.name() == "enumeration") {
+      return "enum";
+    }
+    return this.dataType.name();
   }
 
 }
