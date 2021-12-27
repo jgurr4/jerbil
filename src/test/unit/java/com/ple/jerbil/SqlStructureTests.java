@@ -5,6 +5,7 @@ import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.bridge.MysqlBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.QueryList;
+import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
@@ -57,15 +58,27 @@ public class SqlStructureTests {
        """, testCreateAll.toSql());
   }
 
-/*
   @Test
   void testAddColumn() {
-    Column newColumn = Column.make("quantity", item).integer(); //When translator sees that this column doesn't
+    Column newColumn = Column.make("quantity", item).asInt();
+    item.add(newColumn);
+    final CompleteQuery q = item.create();
+    assertEquals("""
+      create table item (
+        itemId int primary key auto_increment,
+        name varchar(20) not null,
+        type enum('weapon','armor','shield','accessory') not null,
+        price int not null,
+        quantity int not null
+      ) ENGINE=Aria
+      """, q.toSql());
+    //When translator sees that this column doesn't
     // already exist in the item table inside mysql when it communicates to mysql, it will create this column using the add
     // column command, rather than dropping table or creating a new table, because we don't want users to lose their
     // data. It should never auto-drop or create new tables unless the table doesn't exist.
   }
 
+/*
   @Test
   void testModifyColumn() {
     Column newColumn = Column.make("quantity", item).integer(5); //When translator sees that the column is not
@@ -80,5 +93,6 @@ public class SqlStructureTests {
     item.remove(itemColumns.name).set(Column.make("userName", item).indexed().varchar());
     // the column is being recreated. This means the translator must change the column rather than dropping it.
   }
+
 */
 }

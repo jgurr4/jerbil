@@ -21,4 +21,5 @@ public interface Column <T extends Column> {
     boolean isPrimary();
 
     boolean isIndexed();
+
 }

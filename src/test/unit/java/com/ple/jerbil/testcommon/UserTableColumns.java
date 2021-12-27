@@ -20,6 +20,7 @@ public class UserTableColumns {
   }
 }
 // consider adding .ai() method if people want to use that on a primary key that is not tinyint.
+// Or alternatively do .smallId().
 /* Alternative style that we may decide to support as well
   public final Column userId;
   public final StringColumn name;
