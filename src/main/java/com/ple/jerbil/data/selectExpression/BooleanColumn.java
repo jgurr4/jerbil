@@ -11,25 +11,25 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
  */
 public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression  {
 
-    protected BooleanColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
-        super(name, table, dataSpec, indexed, primary);
+    protected BooleanColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
+        super(name, table, dataSpec, indexed, primary, generatedFrom);
     }
 
     @Override
-    public BooleanColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
-        return new BooleanColumn(name, table, dataSpec, indexed, primary);
+    public BooleanColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
+        return new BooleanColumn(name, table, dataSpec, indexed, primary, generatedFrom);
     }
 
     public static Column make(String name, Table table, DataSpec dataSpec) {
-        return new BooleanColumn(name, table, dataSpec, false, false);
+        return new BooleanColumn(name, table, dataSpec, false, false, null);
     }
 
     public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
-        return new BooleanColumn(name, table, DataSpec.make(DataType.bool), indexed, primary);
+        return new BooleanColumn(name, table, DataSpec.make(DataType.bool), indexed, primary, null);
     }
 
     public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        return new BooleanColumn(name, table, dataSpec, indexed, primary);
+        return new BooleanColumn(name, table, dataSpec, indexed, primary, null);
     }
 
     @Override

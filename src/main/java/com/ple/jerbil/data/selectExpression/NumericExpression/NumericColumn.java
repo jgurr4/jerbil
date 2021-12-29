@@ -15,16 +15,14 @@ import org.jetbrains.annotations.Nullable;
 public class NumericColumn extends Column<NumericColumn> implements NumericExpression {
 
   public final boolean autoIncrement;
-  @Nullable public final NumericExpression generatedFrom;
 
-  protected NumericColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, @Nullable NumericExpression generatedFrom) {
-    super(name, table, dataSpec, indexed, primary);
+  protected NumericColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, @Nullable Expression generatedFrom) {
+    super(name, table, dataSpec, indexed, primary, generatedFrom);
     this.autoIncrement = autoIncrement;
-    this.generatedFrom = generatedFrom;
   }
 
   @Override
-  public NumericColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
+  public NumericColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
     return new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement, generatedFrom);
   }
 

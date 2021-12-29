@@ -6,6 +6,7 @@ import com.ple.jerbil.data.bridge.MysqlBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
@@ -98,6 +99,7 @@ public class SqlStructureTests {
       // the column is being recreated. This means the translator must change the column rather than dropping it.
     }
 
+  */
   @Test
   void testGeneratedColumn() {
     NumericColumn quantity = Column.make("quantity", item).asInt();
@@ -112,10 +114,10 @@ public class SqlStructureTests {
         type enum('weapon','armor','shield','accessory') not null,
         price int not null,
         quantity int not null,
-        total decimal(14, 2) as (price * quantity)
+        total decimal(14, 2) as (price * quantity),
+        key (name)
       ) ENGINE=Aria
       """, q.toSql());
   }
-  */
 
 }
