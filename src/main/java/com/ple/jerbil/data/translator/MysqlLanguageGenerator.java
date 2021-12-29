@@ -66,7 +66,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
             }
           }
         }
-        selectArr[i] = new QueriedColumn((Column) selectArr[i], requiresTable);
+        selectArr[i] = QueriedColumn.make((Column) selectArr[i], requiresTable);
         requiresTable = false;
       }
     }
@@ -125,7 +125,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else {
       return e;
     }
-    return new QueriedColumn(col, requiresTable);
+    return QueriedColumn.make(col, requiresTable);
   }
 
   private String toSqlWhere(BooleanExpression where) {
@@ -184,13 +184,13 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private String toSql(Expression e) {
     final String output;
-    if (e instanceof Column) {
+    if (e instanceof QueriedColumn) {
       //TODO: Check if column name has space and if so put `backticks` around it.
       final QueriedColumn s = (QueriedColumn) e;
       if (s.requiresTableName) {
-        output = s.getTable().name + "." + s.getName();
+        output = s.column.getTable().name + "." + s.column.getName();
       } else {
-        output = s.getName();
+        output = s.column.getName();
       }
     } else if (e instanceof LiteralString) {
       final LiteralString litStr = (LiteralString) e;
@@ -240,13 +240,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
     for (int i = 0; i < selectArr.length; i++) {
       if (selectArr[i] instanceof QueriedColumn) {
-        final Column column = ((QueriedColumn<?>) selectArr[i]).column;
-        if (column instanceof NumericColumn) {
-          fullSelectList += ((NumericColumn) column).name;
-        } else if (column instanceof StringColumn) {
-          fullSelectList += ((StringColumn) column).name;
-        } else if (column instanceof LiteralNumber) {
-          // TODO: Handle Literal values here.
+        final Column column = ((QueriedColumn) selectArr[i]).column;
+        if (column instanceof NumericColumn || column instanceof StringColumn) {
+          fullSelectList += column.name;
         }
       } else if (selectArr[i] instanceof SelectAllExpression) {
         fullSelectList += "*";
@@ -419,11 +415,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String separator = "";
     int primaryCount = 0;
     int indexCount = 0;
+    String indexedColumnName = "";
     for (Column column : columns) {
       if (column.isPrimary()) {
         primaryCount++;
       } else if (column.isIndexed()) {
         indexCount++;
+        indexedColumnName = separator + column.getName();
+        separator = ", ";
       }
     }
     if (primaryCount > 1) {
@@ -435,16 +434,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         }
       }
       multiIndex += ")";
-      separator = "";
     }
     if (indexCount > 0) {
       multiIndex += ",\n  key (";
-      for (Column column : columns) {
-        if (column.isIndexed()) {
-          multiIndex += separator + column.getName();
-          separator = ", ";
-        }
-      }
+      multiIndex += indexedColumnName;
       multiIndex += ")";
     }
     return multiIndex;

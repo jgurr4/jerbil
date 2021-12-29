@@ -9,24 +9,19 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
  * BooleanColumn is for compile-time checking to ensure people use a BooleanColumn in the
  * rare cases where a booleanExpression is a Boolean Column. For example: Select * from table where isTrue; // isTrue could be a column with boolean values.
  */
-public class BooleanColumn extends BooleanExpression implements Column<BooleanColumn> {
-
-    public final String name;
-    public final Table table;
-    public final DataSpec dataSpec;
-    public final boolean indexed;
-    public final boolean primary;
+public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression  {
 
     protected BooleanColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
-        this.name = name;
-        this.table = table;
-        this.dataSpec = dataSpec;
-        this.indexed = indexed;
-        this.primary = primary;
+        super(name, table, dataSpec, indexed, primary);
     }
 
-    public static Column make(String name, Table table) {
-        return new BooleanColumn(name, table, DataSpec.make(DataType.tinyint, 1), false, false);
+    @Override
+    public BooleanColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
+        return new BooleanColumn(name, table, dataSpec, indexed, primary);
+    }
+
+    public static Column make(String name, Table table, DataSpec dataSpec) {
+        return new BooleanColumn(name, table, dataSpec, false, false);
     }
 
     public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
@@ -38,33 +33,18 @@ public class BooleanColumn extends BooleanExpression implements Column<BooleanCo
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public BooleanExpression isGreaterThan(Expression i) {
+        return null;
     }
 
     @Override
-    public Table getTable() {
-        return this.table;
+    public BooleanExpression isLessThan(Expression i) {
+        return null;
     }
 
     @Override
-    public BooleanColumn primary() {
-        return new BooleanColumn(this.name, this.table, this.dataSpec, this.indexed, true);
-    }
-
-    @Override
-    public BooleanColumn indexed() {
-        return new BooleanColumn(this.name, this.table, this.dataSpec, true, this.primary);
-    }
-
-    @Override
-    public boolean isPrimary() {
-        return primary;
-    }
-
-    @Override
-    public boolean isIndexed() {
-        return indexed;
+    public BooleanExpression eq(Expression item) {
+        return null;
     }
 
 }

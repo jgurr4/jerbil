@@ -8,7 +8,7 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
  * Contrast that with selecting boolean columns:
  * select isTrue, isFalse from tablename;
  */
-public class LiteralBoolean extends BooleanExpression {
+public class LiteralBoolean implements BooleanExpression {
 
     public Boolean bool;
 
@@ -18,6 +18,21 @@ public class LiteralBoolean extends BooleanExpression {
 
     public LiteralBoolean make(Boolean bool) {
         return new LiteralBoolean(bool);
+    }
+
+    @Override
+    public BooleanExpression isGreaterThan(Expression i) {
+        return null;
+    }
+
+    @Override
+    public BooleanExpression isLessThan(Expression i) {
+        return null;
+    }
+
+    @Override
+    public BooleanExpression eq(Expression item) {
+        return null;
     }
 
 }

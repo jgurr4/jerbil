@@ -8,7 +8,7 @@ import com.ple.jerbil.data.selectExpression.Expression;
  *
  */
 @Immutable
-public class GreaterThan extends BooleanExpression {
+public class GreaterThan implements BooleanExpression {
 
   public final Expression e1;
   public final Expression e2;
@@ -22,5 +22,20 @@ public class GreaterThan extends BooleanExpression {
     return new GreaterThan(e1, e2);
   }
 
+
+  @Override
+  public BooleanExpression isGreaterThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression isLessThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression eq(Expression item) {
+    return null;
+  }
 
 }

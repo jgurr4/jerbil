@@ -1,6 +1,7 @@
 package com.ple.jerbil.data.selectExpression.booleanExpression;
 
 import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 
@@ -8,7 +9,7 @@ import com.ple.util.IList;
  * Adds ability for Either-Or conditionals in 'where' + 'and' methods.
  */
 @Immutable
-public class Or extends BooleanExpression {
+public class Or implements BooleanExpression {
 
   public final IList<BooleanExpression> conditions;
 
@@ -22,6 +23,21 @@ public class Or extends BooleanExpression {
 
   public static Or make(IList<BooleanExpression> conditions) {
     return new Or(conditions);
+  }
+
+  @Override
+  public BooleanExpression isGreaterThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression isLessThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression eq(Expression item) {
+    return null;
   }
 
 }

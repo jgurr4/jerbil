@@ -18,7 +18,7 @@ public class ItemTableColumns {
   public ItemTableColumns(Table table) {
 
     itemId = Column.make("itemId", table).id();
-    name = Column.make("name", table).indexed().asVarchar(20);
+    name = Column.make("name", table).asVarchar(20).indexed();
     type = Column.make("type", table).asEnum(ItemType.class);
     price = Column.make("price", table).asInt();
 //    add = Column.make("add", table).asInt(); // Tests if our translator checks reserved words correctly and puts backticks around it.

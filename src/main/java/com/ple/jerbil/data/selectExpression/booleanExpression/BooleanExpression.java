@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.selectExpression.booleanExpression;
+
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.OrderedExpression;
 
 /**
@@ -18,19 +18,7 @@ import com.ple.jerbil.data.selectExpression.OrderedExpression;
  * For cases where a column is used as a boolean, for example: 'select * from table where isTrue;') see BooleanColumn.
  */
 @Immutable
-public class BooleanExpression extends OrderedExpression {
-
-    protected BooleanExpression() {
-    }
-
-    @Override
-    public BooleanExpression eq(Expression item) {
-        return null;
-    }
-
-    public static BooleanExpression make() {
-        return new BooleanExpression();
-    }
+public interface BooleanExpression extends OrderedExpression {
 
 }
 

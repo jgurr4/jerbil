@@ -1,7 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 
 /**
@@ -10,17 +9,9 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
  * important note: "string" + "string" does not concat in mysql, use the concat() function instead.
  */
 @Immutable
-public class StringExpression extends OrderedExpression {
+public interface StringExpression extends OrderedExpression {
 
-    protected StringExpression() {
-    }
-
-    public static StringExpression make() {
-        return new StringExpression();
-    }
-
-    @Override
-    public Equals eq(Expression item) {
+    public default Equals eq(Expression item) {
         return Equals.make(this, item);
     }
 

@@ -3,6 +3,7 @@ package com.ple.jerbil.data.selectExpression.NumericExpression;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
 /**
  * LiteralNumber looks like this in a normal query:
@@ -10,7 +11,7 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
  * Contrast that with selecting Numeric columns:
  * select price, amount from tablename;
  */
-public class LiteralNumber extends NumericExpression implements Literal {
+public class LiteralNumber implements Literal, NumericExpression {
 
     public Integer value;
 
@@ -21,6 +22,16 @@ public class LiteralNumber extends NumericExpression implements Literal {
     public static LiteralNumber make(Integer value) {
         return new LiteralNumber(value);
     }
+
+  @Override
+  public GreaterThan isGreaterThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression isLessThan(Expression i) {
+    return null;
+  }
 
   @Override
   public BooleanExpression eq(Expression item) {

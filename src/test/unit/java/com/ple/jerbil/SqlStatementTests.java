@@ -72,7 +72,8 @@ public class SqlStatementTests {
         itemId int primary key auto_increment,
         name varchar(20) not null,
         type enum('weapon','armor','shield','accessory') not null,
-        price int not null
+        price int not null,
+        key (name)
       ) ENGINE=Aria
       """, q.toSql());
 

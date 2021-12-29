@@ -3,27 +3,27 @@ package com.ple.jerbil.data.selectExpression;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
-public class StringColumn extends StringExpression implements Column<StringColumn> {
-
-    public final String name;
-    public final Table table;
-    public final DataSpec dataSpec;
-    public final boolean indexed;
-    public final boolean primary;
+public class StringColumn extends Column<StringColumn> implements StringExpression {
 
     protected StringColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
-        this.name = name;
-        this.table = table;
-        this.dataSpec = dataSpec;
-        this.indexed = indexed;
-        this.primary = primary;
+        super(name, table, dataSpec, indexed, primary);
     }
 
-    public static StringColumn make(String name, Table table) {
-        return new StringColumn(name, table, DataSpec.make(DataType.varchar), false, false);
+    @Override
+    public StringColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
+        return new StringColumn(name, table, dataSpec, indexed, primary);
+    }
+
+    public static StringColumn make(String name, Table table, DataSpec dataSpec, boolean indexed) {
+        return new StringColumn(name, table, dataSpec, indexed, false);
+    }
+
+    public static StringColumn make(String name, Table table, DataSpec dataSpec) {
+        return new StringColumn(name, table, dataSpec, false, false);
     }
 
     public static StringColumn make(String name, Table table, int size) {
@@ -38,36 +38,6 @@ public class StringColumn extends StringExpression implements Column<StringColum
         return new StringColumn(name, table, dataSpec, indexed, primary);
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Table getTable() {
-        return this.table;
-    }
-
-    @Override
-    public StringColumn primary() {
-        return new StringColumn(this.name, this.table, this.dataSpec, this.indexed, true);
-    }
-
-    @Override
-    public StringColumn indexed() {
-        return new StringColumn(this.name, this.table, this.dataSpec, true, this.primary);
-    }
-
-    @Override
-    public boolean isPrimary() {
-        return primary;
-    }
-
-    @Override
-    public boolean isIndexed() {
-        return indexed;
-    }
-
     public Equals eq(Expression value) {
         return Equals.make(this, value);
     }
@@ -79,4 +49,10 @@ public class StringColumn extends StringExpression implements Column<StringColum
     public GreaterThan isGreaterThan(Expression value) {
         return GreaterThan.make(this, value);
     }
+
+    @Override
+    public BooleanExpression isLessThan(Expression i) {
+        return null;
+    }
+
 }

@@ -1,25 +1,33 @@
 package com.ple.jerbil.data.selectExpression;
 
-import com.ple.jerbil.data.DelayedImmutable;
+import com.ple.jerbil.data.DataSpec;
+import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.query.Table;
 
-@DelayedImmutable
-public interface Column <T extends Column> {
+@Immutable
+public abstract class Column <T extends Column> extends PartialColumn{
 
-    static PartialColumn make(String name, Table table) {
+    public final DataSpec dataSpec;
+
+    protected Column(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
+        super(name, table, indexed, primary);
+        this.dataSpec = dataSpec;
+    }
+
+    public static PartialColumn make(String name, Table table) {
         return PartialColumn.make(name, table);
     }
 
-    String getName();
+    public abstract T make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary);
 
-    Table getTable();
+    public T primary() {
+        return make(name, table, dataSpec, indexed, true);
+    }
 
-    T primary();
+    public T indexed() {
+        return make(name, table, dataSpec, true, primary);
+    }
 
-    T indexed();
-
-    boolean isPrimary();
-
-    boolean isIndexed();
+//    public abstract T generatedFrom(Expression expression);
 
 }

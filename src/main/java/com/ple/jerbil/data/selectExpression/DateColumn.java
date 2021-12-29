@@ -2,66 +2,58 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
+import com.ple.jerbil.data.DateInterval;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 @Immutable
-public class DateColumn extends DateExpression implements Column<DateColumn> {
-
-    public final String name;
-    public final Table table;
-    public final DataSpec dataSpec;
-    public final boolean indexed;
-    public final boolean primary;
+public class DateColumn extends Column<DateColumn> implements DateExpression {
 
     protected DateColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
-        this.name = name;
-        this.table = table;
-        this.dataSpec = dataSpec;
-        this.indexed = indexed;
-        this.primary = primary;
+        super(name, table, dataSpec, indexed, primary);
     }
 
-    public static Column make(String name, Table table) {
-        return new DateColumn(name, table, DataSpec.make(DataType.datetime), false, false);
+    @Override
+    public DateColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary) {
+        return new DateColumn(name, table, dataSpec, indexed, primary);
     }
 
-    public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
+    public static DateColumn make(String name, Table table, DataSpec dataSpec) {
+        return new DateColumn(name, table, dataSpec, false, false);
+    }
+
+    public static DateColumn make(String name, Table table, Boolean indexed, Boolean primary) {
         return new DateColumn(name, table, DataSpec.make(DataType.datetime), indexed, primary);
     }
 
-    public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+    public static DateColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
         return new DateColumn(name, table, dataSpec, indexed, primary);
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public DateExpression plus(DateInterval dateInterval) {
+        return null;
     }
 
     @Override
-    public Table getTable() {
-        return this.table;
+    public DateExpression minus(DateInterval dateInterval) {
+        return null;
     }
 
     @Override
-    public DateColumn primary() {
-        return new DateColumn(this.name, this.table, this.dataSpec, this.indexed, true);
+    public BooleanExpression isGreaterThan(Expression i) {
+        return null;
     }
 
     @Override
-    public DateColumn indexed() {
-        return new DateColumn(this.name, this.table, this.dataSpec, true, this.primary);
+    public BooleanExpression isLessThan(Expression i) {
+        return null;
     }
 
     @Override
-    public boolean isPrimary() {
-        return primary;
-    }
-
-    @Override
-    public boolean isIndexed() {
-        return indexed;
+    public BooleanExpression eq(Expression item) {
+        return null;
     }
 
 }

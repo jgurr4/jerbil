@@ -9,7 +9,7 @@ import com.ple.jerbil.data.selectExpression.Expression;
  * select where 5 = false;
  */
 @Immutable
-public class Equals extends BooleanExpression {
+public class Equals implements BooleanExpression {
 
   public final Expression e1;
   public final Expression e2;
@@ -21,6 +21,21 @@ public class Equals extends BooleanExpression {
 
   public static Equals make(Expression e1, Expression e2) {
    return new Equals(e1, e2);
+  }
+
+  @Override
+  public BooleanExpression isGreaterThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression isLessThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression eq(Expression item) {
+    return null;
   }
 
 }

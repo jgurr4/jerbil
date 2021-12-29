@@ -2,7 +2,6 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.DateInterval;
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 /**
  * DateExpression is any expression which evaluates to a date. For example:
@@ -16,26 +15,10 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
  * Example #2: select now(), now() + interval 1 day;  //The result is 1 day difference between the two returned columns.
  */
 @Immutable
-public class DateExpression extends OrderedExpression {
+public interface DateExpression extends OrderedExpression {
 
-    protected DateExpression() {
-    }
+    public DateExpression plus(DateInterval dateInterval);
 
-    public static DateExpression make() {
-        return new DateExpression();
-    }
-
-    public DateExpression plus(DateInterval dateInterval) {
-        return null;
-    }
-
-    public DateExpression minus(DateInterval dateInterval) {
-        return null;
-    }
-
-    @Override
-    public BooleanExpression eq(Expression item) {
-        return null;
-    }
+    public DateExpression minus(DateInterval dateInterval);
 
 }
