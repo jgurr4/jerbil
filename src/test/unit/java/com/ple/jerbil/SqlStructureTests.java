@@ -1,8 +1,6 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.bridge.MysqlBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -24,10 +22,6 @@ public class SqlStructureTests {
   final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
-
-  public SqlStructureTests() {
-    DataGlobal.bridge = MysqlBridge.make();
-  }
 
   @Test
   void testDatabaseCreateAll() {
@@ -62,6 +56,8 @@ public class SqlStructureTests {
 
   @Test
   void testAddColumn() {
+    final CompleteQuery q2 = item.create();
+    q2.executeQuery();
     Column newColumn = Column.make("quantity", item).asInt();
     item.add(newColumn);
     final CompleteQuery q = item.create();

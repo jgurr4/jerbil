@@ -1,8 +1,6 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.bridge.MysqlBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.testcommon.*;
@@ -24,10 +22,6 @@ public class SqlStatementTests {
   final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
-
-  public SqlStatementTests() {
-    DataGlobal.bridge = MysqlBridge.make();
-  }
 
   @Test
   void testInsertSingle() {

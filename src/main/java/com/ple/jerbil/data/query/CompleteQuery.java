@@ -1,18 +1,22 @@
 package com.ple.jerbil.data.query;
 
+import com.ple.jerbil.data.DataBridge;
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.LanguageGenerator;
+import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.data.selectExpression.SelectExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
-import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
+import org.mariadb.r2dbc.api.MariadbResult;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * CompleteQuery represents any query that can be considered a full query without any additional clauses or values added.
@@ -77,6 +81,45 @@ public class CompleteQuery extends Query {
     final IMap<Column, Expression> map = set.get(0).put(column, value);
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);
     return InsertQuery.make(records, fromExpression);
+  }
+
+  /**
+   * For executing select query statements.
+   * @return ResultSet of the selected data.
+   * This is based on the JDBC Reactive Extensions api: https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/jdbc-reactive-extensions.html#GUID-7B3E9468-D53C-48AE-B31A-63B0EE22AAF7
+   */
+  public Flux<MariadbResult> executeQuery() {
+    return executeQuery(DataGlobal.bridge);
+  }
+
+  /**
+   * For executing insert/update statements.
+   * @return number of rows affected.
+   * This is based on the JDBC Reactive Extensions api: https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/jdbc-reactive-extensions.html#GUID-7B3E9468-D53C-48AE-B31A-63B0EE22AAF7
+   */
+  public Mono<Long> executeUpdate() {
+    return executeUpdate(DataGlobal.bridge);
+  }
+
+  /**
+   * For executing ddl statements like create table, create database, alter table etc...
+   * @return true or false for each statements' success.
+   * This is based on the JDBC Reactive Extensions api: https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/jdbc-reactive-extensions.html#GUID-7B3E9468-D53C-48AE-B31A-63B0EE22AAF7
+   */
+  public Flux<Boolean> execute() {
+    return execute(DataGlobal.bridge);
+  }
+
+  private Flux<Boolean> execute(DataBridge bridge) {
+    return bridge.execute(toSql());
+  }
+
+  private Flux<MariadbResult> executeQuery(DataBridge bridge) {
+    return bridge.executeQuery(toSql());
+  }
+
+  private Mono<Long> executeUpdate(DataBridge bridge) {
+    return bridge.executeUpdate(toSql());
   }
 
 }
