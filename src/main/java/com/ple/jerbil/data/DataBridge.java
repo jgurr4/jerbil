@@ -16,6 +16,6 @@ public interface DataBridge {
 
   Mono<Long> executeUpdate(String toSql);
 
-  Flux<Boolean> execute(String toSql);
+  Mono<MariadbResult> execute(String toSql);
 
 }

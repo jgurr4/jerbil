@@ -106,11 +106,11 @@ public class CompleteQuery extends Query {
    * @return true or false for each statements' success.
    * This is based on the JDBC Reactive Extensions api: https://docs.oracle.com/en/database/oracle/oracle-database/21/jjdbc/jdbc-reactive-extensions.html#GUID-7B3E9468-D53C-48AE-B31A-63B0EE22AAF7
    */
-  public Flux<Boolean> execute() {
+  public Mono<MariadbResult> execute() {
     return execute(DataGlobal.bridge);
   }
 
-  private Flux<Boolean> execute(DataBridge bridge) {
+  private Mono<MariadbResult> execute(DataBridge bridge) {
     return bridge.execute(toSql());
   }
 

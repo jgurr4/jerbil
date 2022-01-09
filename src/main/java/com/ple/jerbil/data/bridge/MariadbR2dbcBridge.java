@@ -64,8 +64,11 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @Override
-  public Flux<Boolean> execute(String toSql) {
-    return null;
+  public Mono<MariadbResult> execute(String toSql) {
+    final MariadbConnection conn = getConnection();
+    final MariadbStatement statement = conn.createStatement(toSql);
+    return Mono.from(statement.execute());
+//    return Mono.from(statement.execute().all(mariadbResult -> mariadbResult.map((row, rowMetadata) -> row.get(0))));
   }
 
   //TODO: See if I need to have this here, or if I should only instantiate connection once, and reuse it in multiple methods.

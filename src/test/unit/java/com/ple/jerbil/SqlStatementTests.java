@@ -1,12 +1,15 @@
 package com.ple.jerbil;
 
+import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -22,6 +25,11 @@ public class SqlStatementTests {
   final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
 
   final Database testDb = Database.make("test").add(user, player, item, inventory);
+
+  public SqlStatementTests() {
+    final Properties props = ConfigProps.getProperties();
+    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
+  }
 
   @Test
   void testInsertSingle() {
