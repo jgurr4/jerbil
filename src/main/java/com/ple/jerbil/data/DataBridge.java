@@ -2,7 +2,6 @@ package com.ple.jerbil.data;
 
 import org.mariadb.r2dbc.api.MariadbResult;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * Bridge is responsible for connecting and sending data to and from a database.
@@ -12,10 +11,6 @@ import reactor.core.publisher.Mono;
 public interface DataBridge {
   LanguageGenerator getGenerator();
 
-  Flux<MariadbResult> executeQuery(String toSql);
-
-  Mono<Long> executeUpdate(String toSql);
-
-  Mono<MariadbResult> execute(String toSql);
+  Flux<MariadbResult> execute(String toSql);
 
 }

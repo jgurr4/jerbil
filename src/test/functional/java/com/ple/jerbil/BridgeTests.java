@@ -6,31 +6,29 @@ import com.ple.jerbil.testcommon.ConfigProps;
 import org.junit.jupiter.api.Test;
 import org.mariadb.r2dbc.api.MariadbResult;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
-import java.util.List;
 import java.util.Properties;
-import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BridgeTests {
-
 
   public BridgeTests() {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
   }
 
+  //TODO: Make it so the tests will drop the database and recreate it every time.
   @Test
   void createDbTest() {
-    final Mono<MariadbResult> result = DataGlobal.bridge.execute("create database test");
-    result.doOnSuccess(bool -> assertTrue(true)).subscribe();
+    final Flux<MariadbResult> result = DataGlobal.bridge.execute("create database test");
+    result.subscribe();
+    StepVerifier.create(result.log()).expectComplete();
   }
 
   @Test
   void createMultipleTablesTest() {
-    final Mono<MariadbResult> result = DataGlobal.bridge.execute("""
+    final Flux<MariadbResult> result = DataGlobal.bridge.execute("""
+        use test;
         create table user (
           userId int primary key auto_increment,
           name varchar(255) not null,
@@ -55,44 +53,39 @@ public class BridgeTests {
           primary key (playerId, itemId)
         ) ENGINE=Aria;
       """);
-    result.doOnSuccess(bool -> assertTrue(true)).subscribe();
+    result.doOnNext(mariadbResult -> System.out.println("Statement successful!")).subscribe();
   }
 
   @Test
   void selectQueryTest() {
-    final Flux<MariadbResult> result = DataGlobal.bridge.executeQuery("select itemId, name, type, price from item");
-    List<String> results = List.of();
-    for (MariadbResult mariadbResult : result.toIterable()) {
-      results = mariadbResult.map((row, metadata) -> String.format("- %s %s <%s>",
-          // Get itemId
-          row.get(0, Long.class),
+    final Flux<MariadbResult> result = DataGlobal.bridge.execute("use test; select itemId, name, type, price from item;");
+    result.flatMap(mariadbResult -> mariadbResult.map((row, rowMetadata) -> String.format( "%d | %s | %s | %d",
+      row.get("itemId", Long.class),
+      row.get("name", String.class),
+      row.get("type", String.class),
+      row.get("price", Integer.class))))
+      .doOnNext(System.out::println)
+      .subscribe();
 
-          //  Get name
-          row.get(1, String.class),
-
-          //  Get type
-          row.get(2, String.class),
-
-          //Get price
-          row.get(3, Integer.class))
-        //TODO: See if this needs to be changed to .subscribe or some other Reactive Streams method. Since this looks like it is turning back to normal streams. Which might break things possibly.
-        ).toStream()
-        .peek(e -> System.out.println(e))
-        .collect(Collectors.toList());
+/* Alternative method:
+    for (String item_entry : result.flatMap( res ->
+      res.map((row, metadata) -> String.format( "%d | %s | %s | %d",
+      row.get("itemId", Long.class),
+      row.get("name", String.class),
+      row.get("type", String.class),
+      row.get("price", Integer.class)))).toIterable()) {
+      System.out.println(item_entry);
     }
-    System.out.println(results);
+*/
   }
 
+  //FIXME: Currently this says "MonoSingle" instead of "1 row updated".
   @Test
   void insertRowTest() {
-    final Flux<MariadbResult> result = DataGlobal.bridge.executeQuery("insert into item values (0, 'ice sword', 'weapon', 200)");
-    //TODO: Find a way to do this with different result.method(), like result.map().subscribe().
-    for (MariadbResult mariadbResult : result.toIterable()) {
-      System.out.println(mariadbResult.getRowsUpdated());
-    }
-    //TODO: Decide if I need to remove the executeUpdate method since it seems R2dbc works fine with just using executeQuery for everything including updates.
-//    final Mono<Long> result = dataBridge.executeUpdate("insert into item values (0, 'ice sword', 'weapon', 200)");
-
+    final Flux<MariadbResult> result = DataGlobal.bridge.execute("use test; insert into item values (0, 'fire sword', 'weapon', 200)");
+    result.map(MariadbResult::getRowsUpdated)
+      .doOnNext(System.out::println)
+      .subscribe();
   }
 
 }

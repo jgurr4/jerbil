@@ -66,7 +66,6 @@ public class SqlStructureTests {
   @Test
   void testAddColumn() {
     final CompleteQuery q2 = item.create();
-    q2.executeQuery();
     Column newColumn = Column.make("quantity", item).asInt();
     item.add(newColumn);
     final CompleteQuery q = item.create();

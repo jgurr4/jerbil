@@ -11,7 +11,6 @@ import org.mariadb.r2dbc.api.MariadbConnection;
 import org.mariadb.r2dbc.api.MariadbResult;
 import org.mariadb.r2dbc.api.MariadbStatement;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @Immutable
 public class MariadbR2dbcBridge implements DataBridge {
@@ -22,7 +21,8 @@ public class MariadbR2dbcBridge implements DataBridge {
   public final int port;
   public final String username;
   public final String password;
-  @Nullable public final String database;
+  @Nullable
+  public final String database;
 
   //TODO: Consider creating another make() method that allows developers to skip using the driver parameter. Since it's not required for MariadbR2dbc connector. Or just get rid of the driver parameter entirely unless I find a use for it.
   protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password, @Nullable String database) {
@@ -47,28 +47,14 @@ public class MariadbR2dbcBridge implements DataBridge {
     return generator;
   }
 
+  //TODO: Figure out how to catch/throw mysql errors that are logged inside reactor but are only shown as warnings.
   @Override
-  public Flux<MariadbResult> executeQuery(String toSql) {
+  public Flux<MariadbResult> execute(String toSql) {
     final MariadbConnection conn = getConnection();
     final MariadbStatement statement = conn.createStatement(toSql);
-    final Flux<MariadbResult> result = statement.execute();
-    return result;
-  }
-
-  @Override
-  public Mono<Long> executeUpdate(String toSql) {
-    final MariadbConnection conn = getConnection();
-    final MariadbStatement statement = conn.createStatement(toSql);
-    final Flux<MariadbResult> result = statement.execute();
-    return result.count();
-  }
-
-  @Override
-  public Mono<MariadbResult> execute(String toSql) {
-    final MariadbConnection conn = getConnection();
-    final MariadbStatement statement = conn.createStatement(toSql);
-    return Mono.from(statement.execute());
-//    return Mono.from(statement.execute().all(mariadbResult -> mariadbResult.map((row, rowMetadata) -> row.get(0))));
+    return statement.execute().doOnError(throwable -> {
+      throw new RuntimeException(throwable.getMessage());
+    });
   }
 
   //TODO: See if I need to have this here, or if I should only instantiate connection once, and reuse it in multiple methods.
@@ -76,10 +62,11 @@ public class MariadbR2dbcBridge implements DataBridge {
   // Also add try-catch if needed.
   private MariadbConnection getConnection() {
     MariadbConnectionConfiguration.Builder builder = MariadbConnectionConfiguration.builder()
-        .host(host)
-        .port(port)
-        .username(username)
-        .password(password);
+      .host(host)
+      .port(port)
+      .username(username)
+      .allowMultiQueries(true)
+      .password(password);
     if (database != null) {
       builder.database(database);
     }
