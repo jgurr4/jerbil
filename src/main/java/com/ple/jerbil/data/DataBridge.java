@@ -1,6 +1,6 @@
 package com.ple.jerbil.data;
 
-import org.mariadb.r2dbc.api.MariadbResult;
+import io.r2dbc.spi.Result;
 import reactor.core.publisher.Flux;
 
 /**
@@ -11,6 +11,6 @@ import reactor.core.publisher.Flux;
 public interface DataBridge {
   LanguageGenerator getGenerator();
 
-  Flux<MariadbResult> execute(String toSql);
+  Flux<Result> execute(String toSql);
 
 }

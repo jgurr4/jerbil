@@ -13,8 +13,8 @@ import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
 import com.ple.util.IList;
 import com.ple.util.IMap;
+import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.Nullable;
-import org.mariadb.r2dbc.api.MariadbResult;
 import reactor.core.publisher.Flux;
 
 /**
@@ -82,11 +82,11 @@ public class CompleteQuery extends Query {
     return InsertQuery.make(records, fromExpression);
   }
 
-  public Flux<MariadbResult> execute() {
+  public Flux<Result> execute() {
     return execute(DataGlobal.bridge);
   }
 
-  private Flux<MariadbResult> execute(DataBridge bridge) {
+  private Flux<Result> execute(DataBridge bridge) {
     return bridge.execute(toSql());
   }
 

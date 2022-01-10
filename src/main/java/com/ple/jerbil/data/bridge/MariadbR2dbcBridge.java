@@ -4,13 +4,17 @@ import com.ple.jerbil.data.DataBridge;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.LanguageGenerator;
 import com.ple.jerbil.data.translator.MysqlLanguageGenerator;
+import io.r2dbc.pool.ConnectionPool;
+import io.r2dbc.pool.ConnectionPoolConfiguration;
+import io.r2dbc.spi.Connection;
+import io.r2dbc.spi.Result;
+import io.r2dbc.spi.Statement;
 import org.jetbrains.annotations.Nullable;
 import org.mariadb.r2dbc.MariadbConnectionConfiguration;
 import org.mariadb.r2dbc.MariadbConnectionFactory;
-import org.mariadb.r2dbc.api.MariadbConnection;
-import org.mariadb.r2dbc.api.MariadbResult;
-import org.mariadb.r2dbc.api.MariadbStatement;
 import reactor.core.publisher.Flux;
+
+import java.time.Duration;
 
 @Immutable
 public class MariadbR2dbcBridge implements DataBridge {
@@ -21,25 +25,30 @@ public class MariadbR2dbcBridge implements DataBridge {
   public final int port;
   public final String username;
   public final String password;
-  @Nullable
-  public final String database;
+  @Nullable public final String database;
+  @Nullable public final ConnectionPool pool;
 
-  //TODO: Consider creating another make() method that allows developers to skip using the driver parameter. Since it's not required for MariadbR2dbc connector. Or just get rid of the driver parameter entirely unless I find a use for it.
-  protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password, @Nullable String database) {
+  protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password, @Nullable String database, @Nullable ConnectionPool pool) {
     this.driver = driver;
     this.host = host;
     this.port = port;
     this.username = username;
     this.password = password;
     this.database = database;
+    this.pool = pool;
+  }
+
+  //TODO: Consider creating another make() method that allows developers to skip using the driver parameter. Since it's not required for MariadbR2dbc connector. Or just get rid of the driver parameter entirely unless I find a use for it.
+  public static MariadbR2dbcBridge make(String driver, String host, int port, String username, String password, String database, ConnectionPool pool) {
+    return new MariadbR2dbcBridge(driver, host, port, username, password, database, pool);
   }
 
   public static DataBridge make(String driver, String host, int port, String username, String password, String database) {
-    return new MariadbR2dbcBridge(driver, host, port, username, password, database);
+    return new MariadbR2dbcBridge(driver, host, port, username, password, database, null);
   }
 
   public static DataBridge make(String driver, String host, int port, String username, String password) {
-    return new MariadbR2dbcBridge(driver, host, port, username, password, null);
+    return new MariadbR2dbcBridge(driver, host, port, username, password, null, null);
   }
 
   @Override
@@ -47,32 +56,44 @@ public class MariadbR2dbcBridge implements DataBridge {
     return generator;
   }
 
-  //TODO: Figure out how to catch/throw mysql errors that are logged inside reactor but are only shown as warnings.
+  // TODO: Figure out how to catch/throw mysql errors/responses that are logged inside reactor but are only shown as warnings.
+  // This is how to get mysql errors/responses. View the interfaces defined inside Result interface.
+  // Ask if this class must become a publisher in order for the MariadbSubscriber class to work.
   @Override
-  public Flux<MariadbResult> execute(String toSql) {
-    final MariadbConnection conn = getConnection();
-    final MariadbStatement statement = conn.createStatement(toSql);
-    return statement.execute().doOnError(throwable -> {
-      throw new RuntimeException(throwable.getMessage());
-    });
+  public Flux<Result> execute(String toSql) {
+    final MariadbR2dbcBridge bridge = this.createConnectionPool();
+    final Connection connection = bridge.pool.create().block();
+    final Statement statement = connection.createStatement(toSql);
+    return Flux.from(statement.execute());
   }
 
-  //TODO: See if I need to have this here, or if I should only instantiate connection once, and reuse it in multiple methods.
-  //See https://mariadb.com/docs/clients/mariadb-connectors/connector-r2dbc/native/dml/
-  // Also add try-catch if needed.
-  private MariadbConnection getConnection() {
-    MariadbConnectionConfiguration.Builder builder = MariadbConnectionConfiguration.builder()
-      .host(host)
-      .port(port)
-      .username(username)
-      .allowMultiQueries(true)
-      .password(password);
-    if (database != null) {
-      builder.database(database);
+  private MariadbR2dbcBridge createConnectionPool() {
+    MariadbR2dbcBridge bridge = null;
+    try {
+      final MariadbConnectionConfiguration.Builder builder = MariadbConnectionConfiguration.builder()
+        .host(host)
+        .port(port)
+        .username(username)
+        .allowMultiQueries(true)
+        .password(password);
+      if (database != null) {
+        builder.database(database);
+      }
+      final MariadbConnectionConfiguration conf = builder.build();
+      final MariadbConnectionFactory factory = MariadbConnectionFactory.from(conf);
+      final ConnectionPoolConfiguration poolConfig = ConnectionPoolConfiguration
+        .builder(factory)
+        .maxIdleTime(Duration.ofMillis(1000))
+        .maxSize(20)
+        .build();
+      bridge = MariadbR2dbcBridge.make(driver, host, port, username, password, database, new ConnectionPool(poolConfig));
+    } catch (IllegalArgumentException e) {
+      System.err.println("Issue creating connection pool");
+      e.printStackTrace();
+    } finally {
+      bridge.pool.close();
     }
-    MariadbConnectionConfiguration conf = builder.build();
-    final MariadbConnectionFactory factory = MariadbConnectionFactory.from(conf);
-    return factory.create().block();
+    return bridge;
   }
 
 }

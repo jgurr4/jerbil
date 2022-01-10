@@ -3,12 +3,13 @@ package com.ple.jerbil;
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.ConfigProps;
+import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.mariadb.r2dbc.api.MariadbResult;
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import java.util.Properties;
@@ -26,23 +27,22 @@ public class BridgeTests {
   void dropDbTest() {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
-    final Flux<MariadbResult> result = DataGlobal.bridge.execute("drop database test");
+    final Flux<Result> result = DataGlobal.bridge.execute("drop database test");
     result.subscribe();
   }
 
-  //TODO: Make it so the tests will drop the database and recreate it every time.
   @Test
   @Order(2)
   void createDbTest() {
-    final Flux<MariadbResult> result = DataGlobal.bridge.execute("create database test");
-    result.subscribe();
+    final Flux<Result> result = DataGlobal.bridge.execute("create database test");
     StepVerifier.create(result.log()).expectComplete();
+    result.subscribe();
   }
 
   @Test
   @Order(3)
   void createMultipleTablesTest() {
-    final Flux<MariadbResult> result = DataGlobal.bridge.execute("""
+    final Flux<Result> result = DataGlobal.bridge.execute("""
         use test;
         create table user (
           userId int primary key auto_increment,
@@ -75,8 +75,8 @@ public class BridgeTests {
   @Test
   @Order(4)
   void insertRowTest() {
-    final Flux<MariadbResult> result = DataGlobal.bridge.execute("use test; insert into item values (0, 'fire sword', 'weapon', 200), (0, 'robe', 'armor', 300)");
-    result.map(MariadbResult::getRowsUpdated)
+    final Flux<Result> result = DataGlobal.bridge.execute("use test; insert into item values (0, 'fire sword', 'weapon', 200), (0, 'robe', 'armor', 300)");
+    result.map(Result::getRowsUpdated)
       .doOnNext(System.out::println)
       .subscribe();
   }
@@ -84,14 +84,26 @@ public class BridgeTests {
   @Test
   @Order(5)
   void selectQueryTest() {
-    final Flux<MariadbResult> result = DataGlobal.bridge.execute("use test; select itemId, name, type, price from item;");
-    result.flatMap(mariadbResult -> mariadbResult.map((row, rowMetadata) -> String.format( "%d | %s | %s | %d",
-      row.get("itemId", Long.class),
-      row.get("name", String.class),
-      row.get("type", String.class),
-      row.get("price", Integer.class))))
+    final Flux<Result> result = DataGlobal.bridge.execute("use test; select itemId, name, type, price from item;");
+    result
+      .publishOn(Schedulers.single()).flatMap(results -> results.map((row, rowMetadata) -> String.format("%d | %s | %s | %d",
+        row.get("itemId", Long.class),
+        row.get("name", String.class),
+        row.get("type", String.class),
+        row.get("price", Integer.class))))
       .doOnNext(System.out::println)
       .subscribe();
+
+/*
+    // This was the old way to subscribe to an object. But now instead of using subscribe with arguments, we use .methods()
+    // and operators on the publisher and use subscribe at the end. See https://www.woolha.com/tutorials/project-reactor-using-subscribe-on-mono-and-flux
+    result.subscribe(
+      result1 -> System.out.println(result1),
+      error -> System.err.println("Error: " + error),
+      () -> System.out.println("Done"),   //
+      subscription -> subscription.request(2)   //pass on two elements from the source to a new consumer that will be invoked on subscribe signal.
+    )
+*/
 
 /* Alternative method:
     for (String item_entry : result.flatMap( res ->
