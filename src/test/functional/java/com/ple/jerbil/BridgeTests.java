@@ -28,15 +28,22 @@ public class BridgeTests {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
     final Flux<Result> result = DataGlobal.bridge.execute("drop database test");
-    result.subscribe();
+    StepVerifier.create(result
+        .doOnSubscribe(n -> System.out.println("Successfully dropped database")))
+      .expectNextCount(1)
+      .verifyComplete();
   }
 
   @Test
   @Order(2)
   void createDbTest() {
     final Flux<Result> result = DataGlobal.bridge.execute("create database test");
-    StepVerifier.create(result.log()).expectComplete();
-    result.subscribe();
+    StepVerifier.create(
+        result
+          .flatMap(Result::getRowsUpdated)
+          .doOnNext(n -> System.out.println("Successfully created " + n + " database.")))
+      .expectNext(1)
+      .verifyComplete();
   }
 
   @Test
@@ -68,31 +75,41 @@ public class BridgeTests {
           primary key (playerId, itemId)
         ) ENGINE=Aria;
       """);
-    result.doOnNext(mariadbResult -> System.out.println("Statement successful!")).subscribe();
+    StepVerifier.create(result
+        .flatMap(Result::getRowsUpdated)
+        .doFinally(n -> System.out.println("Successfully created all tables.")))
+      .expectNext(0, 0, 0, 0, 0)
+      .verifyComplete();
   }
 
-  //FIXME: Currently this says "MonoSingle" instead of "1 row updated".
   @Test
   @Order(4)
   void insertRowTest() {
     final Flux<Result> result = DataGlobal.bridge.execute("use test; insert into item values (0, 'fire sword', 'weapon', 200), (0, 'robe', 'armor', 300)");
-    result.map(Result::getRowsUpdated)
-      .doOnNext(System.out::println)
-      .subscribe();
+    StepVerifier.create(
+        result
+          .flatMap(Result::getRowsUpdated)
+          .filter(n -> n > 0)
+          .doOnNext(n -> System.out.println("Successfully inserted " + n + " rows")))
+      .expectNext(2)
+      .verifyComplete();
   }
 
   @Test
   @Order(5)
   void selectQueryTest() {
     final Flux<Result> result = DataGlobal.bridge.execute("use test; select itemId, name, type, price from item;");
-    result
-      .publishOn(Schedulers.single()).flatMap(results -> results.map((row, rowMetadata) -> String.format("%d | %s | %s | %d",
-        row.get("itemId", Long.class),
-        row.get("name", String.class),
-        row.get("type", String.class),
-        row.get("price", Integer.class))))
-      .doOnNext(System.out::println)
-      .subscribe();
+    StepVerifier.create(result
+        .publishOn(Schedulers.single())
+        .flatMap(results -> results.map((row, rowMetadata) -> String.format("%d | %s | %s | %d",
+          row.get("itemId", Long.class),
+          row.get("name", String.class),
+          row.get("type", String.class),
+          row.get("price", Integer.class))))
+        .doOnNext(System.out::println)
+        .map(s -> s.substring(s.length()-3)))
+      .expectNext("200", "300")
+      .verifyComplete();
 
 /*
     // This was the old way to subscribe to an object. But now instead of using subscribe with arguments, we use .methods()
