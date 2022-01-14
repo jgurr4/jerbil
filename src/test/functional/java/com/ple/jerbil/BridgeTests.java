@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 import java.util.Properties;
@@ -48,8 +47,8 @@ public class BridgeTests {
 
   @Test
   @Order(3)
-  void createMultipleTablesTest() {
-    final Flux<Result> result = DataGlobal.bridge.execute("""
+  void createMultipleTablesTest() throws InterruptedException {
+    DataGlobal.bridge.execute("""
         use test;
         create table user (
           userId int primary key auto_increment,
@@ -74,11 +73,14 @@ public class BridgeTests {
           itemId int,
           primary key (playerId, itemId)
         ) ENGINE=Aria;
-      """);
+      """).subscribe();
+    Thread.sleep(10);
+    final Flux<Result> result = DataGlobal.bridge.execute("use test; show tables;");
     StepVerifier.create(result
-        .flatMap(Result::getRowsUpdated)
-        .doFinally(n -> System.out.println("Successfully created all tables.")))
-      .expectNext(0, 0, 0, 0, 0)
+        .flatMap(results -> results.map((row, rowMetadata) -> String.format("%s",
+          row.get("tables_in_test", String.class))))
+        .doOnNext(s -> System.out.println("Successfully created table: " + s)))
+      .expectNext("inventory", "item", "player", "user")
       .verifyComplete();
   }
 
@@ -100,14 +102,13 @@ public class BridgeTests {
   void selectQueryTest() {
     final Flux<Result> result = DataGlobal.bridge.execute("use test; select itemId, name, type, price from item;");
     StepVerifier.create(result
-        .publishOn(Schedulers.single())
         .flatMap(results -> results.map((row, rowMetadata) -> String.format("%d | %s | %s | %d",
           row.get("itemId", Long.class),
           row.get("name", String.class),
           row.get("type", String.class),
           row.get("price", Integer.class))))
         .doOnNext(System.out::println)
-        .map(s -> s.substring(s.length()-3)))
+        .map(s -> s.substring(s.length() - 3)))
       .expectNext("200", "300")
       .verifyComplete();
 
