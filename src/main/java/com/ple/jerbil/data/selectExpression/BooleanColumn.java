@@ -2,7 +2,6 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
-import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 /**
@@ -11,25 +10,25 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
  */
 public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression  {
 
-    protected BooleanColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-        super(name, table, dataSpec, indexed, primary, generatedFrom);
+    protected BooleanColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
+        super(name, dataSpec, indexed, primary, generatedFrom);
     }
 
     @Override
-    public BooleanColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-        return new BooleanColumn(name, table, dataSpec, indexed, primary, generatedFrom);
+    public BooleanColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
+        return new BooleanColumn(name, dataSpec, indexed, primary, generatedFrom);
     }
 
-    public static Column make(String name, Table table, DataSpec dataSpec) {
-        return new BooleanColumn(name, table, dataSpec, false, false, null);
+    public static Column make(String name, DataSpec dataSpec) {
+        return new BooleanColumn(name, dataSpec, false, false, null);
     }
 
-    public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
-        return new BooleanColumn(name, table, DataSpec.make(DataType.bool), indexed, primary, null);
+    public static Column make(String name, Boolean indexed, Boolean primary) {
+        return new BooleanColumn(name, DataSpec.make(DataType.bool), indexed, primary, null);
     }
 
-    public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        return new BooleanColumn(name, table, dataSpec, indexed, primary, null);
+    public static Column make(String name, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+        return new BooleanColumn(name, dataSpec, indexed, primary, null);
     }
 
     @Override

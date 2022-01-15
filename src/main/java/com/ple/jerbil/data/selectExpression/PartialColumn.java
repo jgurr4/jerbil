@@ -2,7 +2,6 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
-import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
@@ -15,19 +14,17 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 public class PartialColumn implements Expression, OrderedExpression {
 
   public final String name;
-  public final Table table;
   public final boolean indexed;
   public final boolean primary;
 
-  protected PartialColumn(String name, Table table, boolean indexed, boolean primary) {
+  protected PartialColumn(String name, boolean indexed, boolean primary) {
     this.name = name;
-    this.table = table;
     this.indexed = indexed;
     this.primary = primary;
   }
 
-  public static PartialColumn make(String name, Table table) {
-    return new PartialColumn(name, table, false, false);
+  public static PartialColumn make(String name) {
+    return new PartialColumn(name, false, false);
   }
 
   @Override
@@ -46,34 +43,34 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn asInt() {
-    return NumericColumn.make(name, table, DataSpec.make(DataType.integer));
+    return NumericColumn.make(name, DataSpec.make(DataType.integer));
   }
 
   public StringColumn asVarchar() {
-    return StringColumn.make(name, table, DataSpec.make(DataType.varchar, 255));
+    return StringColumn.make(name, DataSpec.make(DataType.varchar, 255));
   }
 
   public StringColumn asVarchar(int size) {
-    return StringColumn.make(name, table, size);
+    return StringColumn.make(name, size);
   }
 
   public NumericColumn asBigInt() {
-    return NumericColumn.make(name, table, DataSpec.make(DataType.bigint));
+    return NumericColumn.make(name, DataSpec.make(DataType.bigint));
   }
 
   public NumericColumn asDecimal(int precision, int scale) {
-    return NumericColumn.make(name, table, DataSpec.make(DataType.decimal, precision, scale));
+    return NumericColumn.make(name, DataSpec.make(DataType.decimal, precision, scale));
   }
 
   public StringColumn asEnum(Class enumObj) {
-    return StringColumn.make(name, table, DataSpec.make(DataType.enumeration, enumObj), indexed);
+    return StringColumn.make(name, DataSpec.make(DataType.enumeration, enumObj), indexed);
   }
   public NumericColumn bigId() {
-    return NumericColumn.make(name, table, DataSpec.make(DataType.bigint), false, true, true);
+    return NumericColumn.make(name, DataSpec.make(DataType.bigint), false, true, true);
   }
 
   public NumericColumn id() {
-    return NumericColumn.make(name, table, DataSpec.make(DataType.integer), false, true, true);
+    return NumericColumn.make(name, DataSpec.make(DataType.integer), false, true, true);
   }
 
   public boolean isPrimary() {
@@ -86,10 +83,6 @@ public class PartialColumn implements Expression, OrderedExpression {
 
   public String getName() {
     return name;
-  }
-
-  public Table getTable() {
-    return table;
   }
 
 }

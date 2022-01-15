@@ -13,9 +13,9 @@ public class UserTableColumns {
   public final NumericColumn age;
 
   public UserTableColumns(Table table) {
-    userId = Column.make("userId", table).id();
-    name = Column.make("name", table).asVarchar().indexed();
-    age = Column.make("age", table).asInt();
+    userId = Column.make("userId").id();
+    name = Column.make("name").asVarchar().indexed();
+    age = Column.make("age").asInt();
     table.add(userId, name, age);
   }
 }

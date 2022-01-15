@@ -14,9 +14,9 @@ public class PlayerTableColumns {
   public final StringColumn name;
 
   public PlayerTableColumns(Table table) {
-    playerId = Column.make("playerId", table).id();
-    userId = Column.make("userId", table).asInt();
-    name = Column.make("name", table).asVarchar(20);
+    playerId = Column.make("playerId").id();
+    userId = Column.make("userId").asInt();
+    name = Column.make("name").asVarchar(20);
     table.add(playerId, userId, name);
   }
 

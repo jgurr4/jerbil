@@ -17,10 +17,10 @@ public class ItemTableColumns {
 
   public ItemTableColumns(Table table) {
 
-    itemId = Column.make("itemId", table).id();
-    name = Column.make("name", table).asVarchar(20).indexed();
-    type = Column.make("type", table).asEnum(ItemType.class);
-    price = Column.make("price", table).asInt();
+    itemId = Column.make("itemId").id();
+    name = Column.make("name").asVarchar(20).indexed();
+    type = Column.make("type").asEnum(ItemType.class);
+    price = Column.make("price").asInt();
 //    add = Column.make("add", table).asInt(); // Tests if our translator checks reserved words correctly and puts backticks around it.
     table.add(itemId, name, type, price);
   }

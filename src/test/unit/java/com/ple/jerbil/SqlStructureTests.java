@@ -65,7 +65,7 @@ public class SqlStructureTests {
   @Test
   void testAddColumn() {
     final CompleteQuery q2 = item.create();
-    Column newColumn = Column.make("quantity", item).asInt();
+    Column newColumn = Column.make("quantity").asInt();
     item.add(newColumn);
     final CompleteQuery q = item.create();
     assertEquals("""
@@ -105,9 +105,9 @@ public class SqlStructureTests {
   */
   @Test
   void testGeneratedColumn() {
-    NumericColumn quantity = Column.make("quantity", item).asInt();
+    NumericColumn quantity = Column.make("quantity").asInt();
     item.add(quantity);
-    Column total = Column.make("total", item).asDecimal(14, 2).generatedFrom(itemColumns.price.times(quantity));
+    Column total = Column.make("total").asDecimal(14, 2).generatedFrom(itemColumns.price.times(quantity));
     item.add(total);
     final CompleteQuery q = item.create();
     assertEquals("""

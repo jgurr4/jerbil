@@ -55,19 +55,24 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   //TODO: Make transformColumns work for ArithmeticExpressions or BooleanExpressions that contain columns
   private IList<SelectExpression> transformColumns(IList<SelectExpression> select, IList<Table> tableList) {
     final SelectExpression[] selectArr = select.toArray();
-    Boolean requiresTable = false;
+    String tableName = "";
+    int matchingColumns = 0;
     for (int i = 0; i < selectArr.length; i++) {
       if (selectArr[i] instanceof Column && !(selectArr[i] instanceof QueriedColumn)) {
         final Column column = (Column) selectArr[i];
         for (Table table : tableList) {
           for (int j = 0; j < table.columns.toArray().length; j++) {
-            if (table.columns.get(j) == column && column.getTable() != table) {
-              requiresTable = true;
+            if (table.columns.get(j).getName() == column.getName()) {
+              matchingColumns++;
             }
           }
+          if (matchingColumns > 1) {
+            tableName = table.name;
+          }
+          matchingColumns = 0;
         }
-        selectArr[i] = QueriedColumn.make((Column) selectArr[i], requiresTable);
-        requiresTable = false;
+        selectArr[i] = QueriedColumn.make((Column) selectArr[i], tableName);
+        tableName = "";
       }
     }
     return select;
@@ -107,25 +112,32 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private Expression transformColumns(Expression e, IList<Table> tableList) {
-    // Expression e could be a Column, And/Or, but it could also be any expression like Literal.String etc...
-    // All we care about is whether it's a column or not. If it's a column we tranform into QueriedColumn after checking
-    // checking if a duplicate name exists in any other tables.
-    // Then we return either the unchanged expression, or in the case of columns we return a QueriedColumn.
-    Boolean requiresTable = false;
+    String tableName = "";
     Column col;
+    Boolean requiresTableName = false;
+    int matchingColumns = 0;
     if (e instanceof Column) {
       col = (Column) e;
       for (Table table : tableList) {
         for (int i = 0; i < table.columns.toArray().length; i++) {
-          if (table.columns.get(i) != null && table.name != col.getTable().name) {
-            requiresTable = true;
+          if (table.columns.get(i).getName() == col.getName()) {
+            matchingColumns++;
+            if (table.columns.get(i) == col) {
+              tableName = table.name;
+            }
+            if (matchingColumns > 1) {
+              requiresTableName = true;
+            }
           }
         }
       }
     } else {
       return e;
     }
-    return QueriedColumn.make(col, requiresTable);
+    if (requiresTableName == false) {
+      tableName = "";
+    }
+    return QueriedColumn.make(col, tableName);
   }
 
   private String toSqlWhere(BooleanExpression where) {
@@ -187,8 +199,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     if (e instanceof QueriedColumn) {
       //TODO: Check if column name has space and if so put `backticks` around it.
       final QueriedColumn s = (QueriedColumn) e;
-      if (s.requiresTableName) {
-        output = s.column.getTable().name + "." + s.column.getName();
+      if (s.tableName != "") {
+        output = s.tableName + "." + s.column.getName();
       } else {
         output = s.column.getName();
       }

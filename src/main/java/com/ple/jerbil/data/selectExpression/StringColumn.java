@@ -2,40 +2,39 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
-import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
 public class StringColumn extends Column<StringColumn> implements StringExpression {
 
-    protected StringColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-        super(name, table, dataSpec, indexed, primary, generatedFrom);
+    protected StringColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
+        super(name, dataSpec, indexed, primary, generatedFrom);
     }
 
     @Override
-    public StringColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-        return new StringColumn(name, table, dataSpec, indexed, primary, generatedFrom);
+    public StringColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
+        return new StringColumn(name, dataSpec, indexed, primary, generatedFrom);
     }
 
-    public static StringColumn make(String name, Table table, DataSpec dataSpec, boolean indexed) {
-        return new StringColumn(name, table, dataSpec, indexed, false, null);
+    public static StringColumn make(String name, DataSpec dataSpec, boolean indexed) {
+        return new StringColumn(name, dataSpec, indexed, false, null);
     }
 
-    public static StringColumn make(String name, Table table, DataSpec dataSpec) {
-        return new StringColumn(name, table, dataSpec, false, false, null);
+    public static StringColumn make(String name, DataSpec dataSpec) {
+        return new StringColumn(name, dataSpec, false, false, null);
     }
 
-    public static StringColumn make(String name, Table table, int size) {
-        return new StringColumn(name, table, DataSpec.make(DataType.varchar, size), false, false, null);
+    public static StringColumn make(String name, int size) {
+        return new StringColumn(name, DataSpec.make(DataType.varchar, size), false, false, null);
     }
 
-    public static StringColumn make(String name, Table table, Boolean indexed, Boolean primary) {
-        return new StringColumn(name, table, DataSpec.make(DataType.varchar), indexed, primary, null);
+    public static StringColumn make(String name, Boolean indexed, Boolean primary) {
+        return new StringColumn(name, DataSpec.make(DataType.varchar), indexed, primary, null);
     }
 
-    public static StringColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        return new StringColumn(name, table, dataSpec, indexed, primary, null);
+    public static StringColumn make(String name, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+        return new StringColumn(name, dataSpec, indexed, primary, null);
     }
 
     public Equals eq(Expression value) {

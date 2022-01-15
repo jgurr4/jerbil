@@ -19,15 +19,15 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 public class QueriedColumn implements Expression {
 
   public final Column column;
-  public final Boolean requiresTableName;
+  public final String tableName;
 
-  protected QueriedColumn(Column column, boolean requiresTableName) {
+  protected QueriedColumn(Column column, String tableName) {
     this.column = column;
-    this.requiresTableName = requiresTableName;
+    this.tableName = tableName;
   }
 
-  public static QueriedColumn make(Column column, boolean requiresTableName) {
-    return new QueriedColumn(column, requiresTableName);
+  public static QueriedColumn make(Column column, String tableName) {
+    return new QueriedColumn(column, tableName);
   }
 
   @Override
