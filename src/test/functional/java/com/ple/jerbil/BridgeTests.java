@@ -11,6 +11,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.util.Properties;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -73,8 +74,7 @@ public class BridgeTests {
           itemId int,
           primary key (playerId, itemId)
         ) ENGINE=Aria;
-      """).subscribe();
-    Thread.sleep(10);
+      """).blockLast(Duration.ofMillis(100));
     final Flux<Result> result = DataGlobal.bridge.execute("use test; show tables;");
     StepVerifier.create(result
         .flatMap(results -> results.map((row, rowMetadata) -> String.format("%s",

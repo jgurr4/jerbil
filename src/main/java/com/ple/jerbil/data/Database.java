@@ -6,6 +6,7 @@ import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.query.Table;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Database is a object representing the database and it's tables.
@@ -14,9 +15,9 @@ import com.ple.util.IList;
 public class Database {
 
   public final String name;
-  public final IList<Table> tables;
+  @Nullable public IList<Table> tables;
 
-  public Database(String name, IList<Table> tables) {
+  public Database(String name, @Nullable IList<Table> tables) {
     this.name = name;
     this.tables = tables;
   }
@@ -35,7 +36,7 @@ public class Database {
 
   public QueryList createAll() {
     QueryList<CompleteQuery> completeQueries = QueryList.make(CreateQuery.make(this));
-    for (Table table : this.tables) {
+    for (Table table : tables) {
       completeQueries = completeQueries.add(CreateQuery.make(table));
     }
     return completeQueries;

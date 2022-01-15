@@ -24,7 +24,6 @@ public class SqlStructureTests {
   final ItemTableColumns itemColumns = new ItemTableColumns(item);
   final InventoryTable inventory = new InventoryTable();
   final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
-
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
   public SqlStructureTests() {
