@@ -1,5 +1,6 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.query.CompleteQuery;
 import io.r2dbc.spi.Result;
 import reactor.core.publisher.Flux;
 
@@ -10,6 +11,8 @@ import reactor.core.publisher.Flux;
  */
 public interface DataBridge {
   LanguageGenerator getGenerator();
+
+  Flux<Result> execute(String toSql, CompleteQuery query);
 
   Flux<Result> execute(String toSql);
 

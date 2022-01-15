@@ -42,7 +42,6 @@ public class SqlQueryTests {
       """, q.toSql());
   }
 
-
   @Test
   void multipleWhereConditions() {
 
@@ -162,6 +161,5 @@ public class SqlQueryTests {
     final CompleteQuery q = make(32).minus(make(15)).as("result").select();
     assertEquals("select 32 - 15 as result", q.toSql());
   }
-
 
 }

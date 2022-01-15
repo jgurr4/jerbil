@@ -60,6 +60,7 @@ public class SqlStructureTests {
         primary key (playerId, itemId)
       ) ENGINE=Aria;
       """, testCreateAll.toSql());
+//    testCreateAll.execute();
   }
 
   @Test
@@ -78,12 +79,7 @@ public class SqlStructureTests {
         key (name)
       ) ENGINE=Aria
       """, q.toSql());
-//      ResultSet rs = q.execute().getResultSet(); // For this we will be using rxjava over jdbc to make asynchronous
-    // connections and streams of resultset data.
-    //When translator sees that this column doesn't
-    // already exist in the item table inside mysql when it communicates to mysql, it will create this column using the add
-    // column command, rather than dropping table or creating a new table, because we don't want users to lose their
-    // data. It should never auto-drop or create new tables unless the table doesn't exist.
+//    q.execute();
   }
 
   /*
@@ -121,6 +117,7 @@ public class SqlStructureTests {
         key (name)
       ) ENGINE=Aria
       """, q.toSql());
+//    q.execute();
   }
 
 }

@@ -48,7 +48,7 @@ public class BridgeTests {
 
   @Test
   @Order(3)
-  void createMultipleTablesTest() throws InterruptedException {
+  void createMultipleTablesTest() {
     DataGlobal.bridge.execute("""
         use test;
         create table user (
