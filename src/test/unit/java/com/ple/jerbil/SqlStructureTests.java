@@ -60,7 +60,6 @@ public class SqlStructureTests {
         primary key (playerId, itemId)
       ) ENGINE=Aria;
       """, testCreateAll.toSql());
-//    testCreateAll.execute();
   }
 
   @Test
@@ -79,7 +78,6 @@ public class SqlStructureTests {
         key (name)
       ) ENGINE=Aria
       """, q.toSql());
-//    q.execute();
   }
 
   /*
@@ -117,7 +115,6 @@ public class SqlStructureTests {
         key (name)
       ) ENGINE=Aria
       """, q.toSql());
-//    q.execute();
   }
 
 }

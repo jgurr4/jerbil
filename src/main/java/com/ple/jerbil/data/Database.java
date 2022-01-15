@@ -42,4 +42,53 @@ public class Database {
     return completeQueries;
   }
 
+
+  public void sync() {
+    sync(DdlOption.validate);
+  }
+  
+  public void sync(DdlOption ddlOption) {
+    if (ddlOption == DdlOption.validate) {
+      // This checks if database actually matches current schema. If not it throws and error and exits the application.
+      throw new RuntimeException("Schema object is not matching the current Schema inside database.");
+    } else if (ddlOption == DdlOption.update) {
+      // This checks if database actually matches current schema. If not, it will update and change structure but will 
+      // never drop or remove databases/tables/columns, but it may modify those columns/tables. If the database or table
+      // does not exist, it will also create them based on schema object.
+    } else if (ddlOption == DdlOption.createDrop) {
+      // This checks if database actually matches current schema. If not, it will drop and recreate the database/tables
+      // and recreate them. This option will erase data.
+    }
+  }
+  
+  /**
+   * This will check the current database structure before running the statement. It makes sure
+   * the relevant databases and tables exist. If anything doesn't exactly match the structure of the query
+   * then this method will execute certain commands to recreate/update the database structure. If a database
+   * doesn't exist, then this method will create the database and tables.
+   * @param query
+   */
+  private void checkDbStructure(CompleteQuery query) {
+//    this.execute("show databases;")
+//      .blockLast()
+//      .map((row, rowMetadata) -> row.get("Database"))
+//      .subscribe(result -> result == query);
+//    this.execute("use test;")
+//    this.execute("show tables;")
+  }
+
+  /**
+   * This will check the current table structure of the relevant tables. It makes sure the
+   * tables have the right amount/type of columns. If anything doesn't exactly match the structure of the query
+   * then this method will execute certain commands to alter the table structure. If a table doesn't exist, then
+   * this will create the table.
+   * @param query
+   */
+  private void checkTableStructure(CompleteQuery query) {
+//    this.execute("use test;")
+//    this.execute("show create table" + table)
+
+  }
+
+
 }

@@ -1,8 +1,10 @@
 package com.ple.jerbil;
 
+import com.ple.jerbil.data.DdlOption;
 import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
-import com.ple.jerbil.testcommon.ConfigProps;
+import com.ple.jerbil.testcommon.*;
 import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -14,8 +16,20 @@ import reactor.test.StepVerifier;
 import java.time.Duration;
 import java.util.Properties;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BridgeTests {
+
+  final UserTable user = new UserTable();
+  final UserTableColumns userColumns = new UserTableColumns(user);
+  final PlayerTable player = new PlayerTable();
+  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
+  final ItemTable item = new ItemTable();
+  final ItemTableColumns itemColumns = new ItemTableColumns(item);
+  final InventoryTable inventory = new InventoryTable();
+  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
+  final Database testDb = Database.make("test").add(user, player, item, inventory);
 
   public BridgeTests() {
     final Properties props = ConfigProps.getProperties();
@@ -25,8 +39,6 @@ public class BridgeTests {
   @Test
   @Order(1)
   void dropDbTest() {
-    final Properties props = ConfigProps.getProperties();
-    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
     final Flux<Result> result = DataGlobal.bridge.execute("drop database test");
     StepVerifier.create(result
         .doOnSubscribe(n -> System.out.println("Successfully dropped database")))
@@ -133,6 +145,33 @@ public class BridgeTests {
       System.out.println(item_entry);
     }
 */
+  }
+
+  @Test
+  @Order(6)
+  void syncValidateDbStructureTest() {
+    assertDoesNotThrow(() -> testDb.sync());
+    DataGlobal.bridge.execute("use test; create table test (id int not null);").subscribe();
+    assertThrows(RuntimeException.class, () -> testDb.sync()); //Default DdlOption is validate.
+  }
+
+  @Test
+  @Order(7)
+  void syncUpdateDbStructureTest() {
+    DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
+    testDb.sync(DdlOption.update);
+    StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("`create table`")))
+      .filter(e -> e.contains("`name` varchar(20) NOT NULL,"))
+        .map(e -> true))
+      .expectNext(true)  //Should fail if no elements make it to this part.
+      .verifyComplete();
+  }
+
+  @Test
+  @Order(8)
+  void syncCreateDropDbStructureTest() {
+    testDb.sync(DdlOption.createDrop);
   }
 
 }

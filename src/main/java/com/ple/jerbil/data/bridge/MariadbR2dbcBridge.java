@@ -3,7 +3,6 @@ package com.ple.jerbil.data.bridge;
 import com.ple.jerbil.data.DataBridge;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.LanguageGenerator;
-import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.translator.MysqlLanguageGenerator;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
@@ -58,13 +57,6 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @Override
-  public Flux<Result> execute(String sql, CompleteQuery query) {
-    checkDbStructure(query);
-    checkTableStructure(query);
-    return execute(sql);
-  }
-
-  @Override
   public Flux<Result> execute(String sql) {
     final MariadbR2dbcBridge bridge = this.createConnectionPool();
     final Connection connection = bridge.pool.create().block();
@@ -99,26 +91,6 @@ public class MariadbR2dbcBridge implements DataBridge {
       bridge.pool.close();
     }
     return bridge;
-  }
-
-  /**
-   * This will check the current database structure before running the statement. It makes sure
-   * the relevant databases and tables exist. If anything doesn't exactly match the structure of the query
-   * then this method will execute certain commands to drop/recreate/update the database structure. If a database
-   * doesn't exist, then this method will create the database and tables.
-   * @param query
-   */
-  private void checkDbStructure(CompleteQuery query) {
-  }
-
-  /**
-   * This will check the current table structure of the relevant tables. It makes sure the
-   * tables have the right amount/type of columns. If anything doesn't exactly match the structure of the query
-   * then this method will execute certain commands to alter the table structure. If a table doesn't exist, then
-   * this will create the table.
-   * @param query
-   */
-  private void checkTableStructure(CompleteQuery query) {
   }
 
 }

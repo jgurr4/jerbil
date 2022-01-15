@@ -87,7 +87,7 @@ public class CompleteQuery extends Query {
   }
 
   private Flux<Result> execute(DataBridge bridge) {
-    return bridge.execute(toSql(), this);
+    return bridge.execute(toSql());
   }
 
 }
