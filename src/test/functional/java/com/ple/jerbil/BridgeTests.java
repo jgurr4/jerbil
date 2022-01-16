@@ -149,29 +149,47 @@ public class BridgeTests {
 
   @Test
   @Order(6)
-  void syncValidateDbStructureTest() {
-    assertDoesNotThrow(() -> testDb.sync());
+  void syncValidateSchemaTest() {
+    assertDoesNotThrow(() -> testDb.sync(DdlOption.validate));
     DataGlobal.bridge.execute("use test; create table test (id int not null);").subscribe();
-    assertThrows(RuntimeException.class, () -> testDb.sync()); //Default DdlOption is validate.
+    assertThrows(RuntimeException.class, () -> testDb.sync(DdlOption.validate));
   }
 
   @Test
   @Order(7)
-  void syncUpdateDbStructureTest() {
+  void syncUpdateSchemaTest() {
     DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
     testDb.sync(DdlOption.update);
     StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("`create table`")))
       .filter(e -> e.contains("`name` varchar(20) NOT NULL,"))
         .map(e -> true))
-      .expectNext(true)  //Should fail if no elements make it to this part.
+      .expectNext(true)
       .verifyComplete();
   }
 
   @Test
   @Order(8)
-  void syncCreateDropDbStructureTest() {
+  void syncCreateSchemaTest() {
+    DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
+    testDb.sync(DdlOption.create);
+    StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("`create table`")))
+        .filter(e -> e.contains("`name` varchar(20) NOT NULL,"))
+        .map(e -> true))
+      .expectNext(true)
+      .verifyComplete();
+    StepVerifier.create(DataGlobal.bridge.execute("select * from player")
+      .flatMap(result -> result.map((row, rowMetadata) -> row.get("name"))))
+      .expectNextCount(0)
+      .verifyComplete();
+  }
+
+  @Test
+  @Order(9)
+  void syncCreateDropSchemaTest() {
     testDb.sync(DdlOption.createDrop);
+    //TODO: Figure out how to use exit/shutdown signal to call a method which will drop the schema.
   }
 
 }

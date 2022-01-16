@@ -44,20 +44,21 @@ public class Database {
 
 
   public void sync() {
-    sync(DdlOption.validate);
+    sync(DdlOption.update);
   }
   
   public void sync(DdlOption ddlOption) {
     if (ddlOption == DdlOption.validate) {
-      // This checks if database actually matches current schema. If not it throws and error and exits the application.
+      // This checks if database actually matches current schema. If not it throws an error and exits the application.
       throw new RuntimeException("Schema object is not matching the current Schema inside database.");
     } else if (ddlOption == DdlOption.update) {
       // This checks if database actually matches current schema. If not, it will update and change structure but will 
-      // never drop or remove databases/tables/columns, but it may modify those columns/tables. If the database or table
+      // never drop or remove databases/tables/columns, but it may modify columns/tables. If the database or table
       // does not exist, it will also create them based on schema object.
+    } else if (ddlOption == DdlOption.create) {
+      // This creates the schema, destroying previous data.
     } else if (ddlOption == DdlOption.createDrop) {
-      // This checks if database actually matches current schema. If not, it will drop and recreate the database/tables
-      // and recreate them. This option will erase data.
+      // This creates the schema, then drops it at the end of the session.
     }
   }
   
