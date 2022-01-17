@@ -33,7 +33,7 @@ public class Table extends FromExpression {
   }
 
   public String toSql() {
-    return "create table " + name + " (" + ")";
+    return CreateQuery.make(this).toSql();
   }
 
   public QueryWithFrom where(BooleanExpression condition) {

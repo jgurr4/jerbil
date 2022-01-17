@@ -10,4 +10,6 @@ public interface IList<T> extends Iterable<T>{
 
   T get(int i);
 
+  boolean remove(T t);
+
 }

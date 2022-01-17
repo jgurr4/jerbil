@@ -8,6 +8,8 @@ import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
+
 /**
  * Database is a object representing the database and it's tables.
  */
@@ -48,46 +50,70 @@ public class Database {
   }
   
   public void sync(DdlOption ddlOption) {
-    if (ddlOption == DdlOption.validate) {
-      // This checks if database actually matches current schema. If not it throws an error and exits the application.
-      throw new RuntimeException("Schema object is not matching the current Schema inside database.");
+    if (ddlOption == DdlOption.create) {
+      createSchema(Create.shouldNotDrop);
+      checkSchemaStructure();
+      checkTableStructure();
     } else if (ddlOption == DdlOption.update) {
-      // This checks if database actually matches current schema. If not, it will update and change structure but will 
-      // never drop or remove databases/tables/columns, but it may modify columns/tables. If the database or table
-      // does not exist, it will also create them based on schema object.
-    } else if (ddlOption == DdlOption.create) {
-      // This creates the schema, destroying previous data.
-    } else if (ddlOption == DdlOption.createDrop) {
-      // This creates the schema, then drops it at the end of the session.
+    } else if (ddlOption == DdlOption.replace) {
+    } else if (ddlOption == DdlOption.replaceDrop) {
     }
   }
-  
-  /**
-   * This will check the current database structure before running the statement. It makes sure
-   * the relevant databases and tables exist. If anything doesn't exactly match the structure of the query
-   * then this method will execute certain commands to recreate/update the database structure. If a database
-   * doesn't exist, then this method will create the database and tables.
-   * @param query
-   */
-  private void checkDbStructure(CompleteQuery query) {
-//    this.execute("show databases;")
-//      .blockLast()
-//      .map((row, rowMetadata) -> row.get("Database"))
-//      .subscribe(result -> result == query);
-//    this.execute("use test;")
-//    this.execute("show tables;")
+
+  private enum Create {
+    shouldDrop,
+    shouldNotDrop
   }
 
-  /**
-   * This will check the current table structure of the relevant tables. It makes sure the
-   * tables have the right amount/type of columns. If anything doesn't exactly match the structure of the query
-   * then this method will execute certain commands to alter the table structure. If a table doesn't exist, then
-   * this will create the table.
-   * @param query
-   */
-  private void checkTableStructure(CompleteQuery query) {
-//    this.execute("use test;")
-//    this.execute("show create table" + table)
+  private void createSchema(Create createOption) {
+    if (createOption == Create.shouldDrop) {
+      DataGlobal.bridge.execute("drop database " + name);
+    }
+    DataGlobal.bridge.execute("show databases;")
+      .flatMap(result -> result.map((row, rowMetadata) -> row.get("database")))
+//      .log()
+      .filter(dbName -> dbName == name)
+      .doOnNext(dbName -> System.out.println(dbName))
+      .switchIfEmpty(DataGlobal.bridge.execute(createAll().toSql()))
+      .subscribe();
+  }
+
+  private void checkTableStructure() {
+    
+  }
+
+  private void checkSchemaStructure() {
+
+  }
+
+  private void updateSchemaStructure() {
+    Boolean dbExists = false;
+    DataGlobal.bridge.execute("show databases;")
+      .flatMap(result -> result.map((row, rowMetadata) -> row.get("Database")))
+      .filter(el -> el == name)
+      .switchIfEmpty(DataGlobal.bridge.execute("create database" + name))
+      //TODO: Consider printing out that a database was created here if rowsupdated had values.
+      .subscribe();
+    final IList<Table> schemaTableList = tables;
+    final List<String> existingTablesList = DataGlobal.bridge.execute("use " + name + " show tables")
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
+      .collectList().block();
+    for (Table table : tables) {
+      if (existingTablesList.contains(table.name)) {
+        schemaTableList.remove(table); // TODO: Run this and make sure the IList.remove() method works correctly.
+      }
+    }
+    for (Table table : schemaTableList) {
+      DataGlobal.bridge.execute(table.toSql()).subscribe(); //TODO: Run this and make sure the table.toSql works correctly
+    }
+  }
+
+  private void updateTableStructure() {
+    for (Table table : tables) {
+    DataGlobal.bridge.execute("use test; show create table" + table)
+      .flatMap(result -> result.map((row, rowMetadata) -> row.get("create table")))
+      .subscribe();
+    }
 
   }
 

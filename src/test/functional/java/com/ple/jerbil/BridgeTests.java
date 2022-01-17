@@ -149,10 +149,10 @@ public class BridgeTests {
 
   @Test
   @Order(6)
-  void syncValidateSchemaTest() {
-    assertDoesNotThrow(() -> testDb.sync(DdlOption.validate));
-    DataGlobal.bridge.execute("use test; create table test (id int not null);").subscribe();
-    assertThrows(RuntimeException.class, () -> testDb.sync(DdlOption.validate));
+  void syncCreateSchemaTest() {
+    assertDoesNotThrow(() -> testDb.sync(DdlOption.create));
+//    DataGlobal.bridge.execute("use test; create table test (id int not null);").subscribe();
+//    assertThrows(RuntimeException.class, () -> testDb.sync(DdlOption.create));
   }
 
   @Test
@@ -161,7 +161,7 @@ public class BridgeTests {
     DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
     testDb.sync(DdlOption.update);
     StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
-      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("`create table`")))
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
       .filter(e -> e.contains("`name` varchar(20) NOT NULL,"))
         .map(e -> true))
       .expectNext(true)
@@ -170,9 +170,9 @@ public class BridgeTests {
 
   @Test
   @Order(8)
-  void syncCreateSchemaTest() {
+  void syncReplaceSchemaTest() {
     DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
-    testDb.sync(DdlOption.create);
+    testDb.sync(DdlOption.replace);
     StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("`create table`")))
         .filter(e -> e.contains("`name` varchar(20) NOT NULL,"))
@@ -187,8 +187,8 @@ public class BridgeTests {
 
   @Test
   @Order(9)
-  void syncCreateDropSchemaTest() {
-    testDb.sync(DdlOption.createDrop);
+  void syncReplaceDropSchemaTest() {
+    testDb.sync(DdlOption.replaceDrop);
     //TODO: Figure out how to use exit/shutdown signal to call a method which will drop the schema.
   }
 

@@ -53,6 +53,22 @@ public class QueryList<T> implements IList<T> {
     return values[i];
   }
 
+  @Override
+  public boolean remove(T t) {
+    T[] result = Arrays.copyOf(values, values.length - 1);
+    for (int i = 0; i < values.length - 1; i++) {
+      if (values[i] != t) {
+        result[i] = values[i];
+      } else {
+        while (i < values.length - 1) {
+          result[i] = values[i+1];
+          i++;
+        }
+      }
+    }
+    return values.length == result.length ? false : true;
+  }
+
   @NotNull
   @Override
   public Iterator iterator() {

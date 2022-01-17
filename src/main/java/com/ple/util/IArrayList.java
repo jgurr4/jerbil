@@ -42,6 +42,22 @@ public class IArrayList<V> implements IList<V> {
     return values[i];
   }
 
+  @Override
+  public boolean remove(V v) {
+    V[] result = Arrays.copyOf(values, values.length - 1);
+    for (int i = 0; i < values.length - 1; i++) {
+      if (values[i] != v) {
+        result[i] = values[i];
+      } else {
+        while (i < values.length - 1) {
+          result[i] = values[i+1];
+          i++;
+        }
+      }
+    }
+    return values.length == result.length ? false : true;
+  }
+
   @NotNull
   @Override
   public Iterator<V> iterator() {
