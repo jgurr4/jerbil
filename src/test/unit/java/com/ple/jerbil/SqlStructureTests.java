@@ -36,6 +36,7 @@ public class SqlStructureTests {
     final QueryList<CompleteQuery> testCreateAll = testDb.createAll();
     assertEquals("""
       create database test;
+      use test;
       create table user (
         userId int primary key auto_increment,
         name varchar(255) not null,

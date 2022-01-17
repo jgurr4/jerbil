@@ -155,6 +155,7 @@ public class BridgeTests {
 //    assertThrows(RuntimeException.class, () -> testDb.sync(DdlOption.create));
   }
 
+/*
   @Test
   @Order(7)
   void syncUpdateSchemaTest() {
@@ -191,5 +192,6 @@ public class BridgeTests {
     testDb.sync(DdlOption.replaceDrop);
     //TODO: Figure out how to use exit/shutdown signal to call a method which will drop the schema.
   }
+*/
 
 }

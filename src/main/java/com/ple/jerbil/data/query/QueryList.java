@@ -1,10 +1,7 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.util.IList;
-import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.NotNull;
-import org.mariadb.r2dbc.api.MariadbResult;
-import reactor.core.publisher.Flux;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -91,17 +88,15 @@ public class QueryList<T> implements IList<T> {
     String sql = "";
     for (T query : this) {
       if (query instanceof CreateQuery) {
-        sql += ((CreateQuery) query).toSql() + ";\n";
+        final CreateQuery createQuery = (CreateQuery) query;
+        sql += createQuery.toSql() + ";\n";
+        if (createQuery.db != null) {
+          sql += "use " + createQuery.db.name + ";\n";
+        }
       }
     }
     sql = sql.replaceAll("\n;", ";");
     return sql;
-  }
-
-  public Flux<Result> execute() {
-    return Flux.just(this.values)
-      .map(e -> (CompleteQuery) e)
-      .map(e -> (MariadbResult) e.execute());
   }
 
 }
