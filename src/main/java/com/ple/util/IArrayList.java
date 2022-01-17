@@ -58,6 +58,21 @@ public class IArrayList<V> implements IList<V> {
     return values.length == result.length ? false : true;
   }
 
+  @Override
+  public boolean contains(V v) {
+    for (V value : values) {
+      if (value.equals(v)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
+  public int length() {
+    return values.length;
+  }
+
   @NotNull
   @Override
   public Iterator<V> iterator() {

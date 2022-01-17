@@ -85,6 +85,10 @@ public class MariadbR2dbcBridge implements DataBridge {
         .build();
       bridge = MariadbR2dbcBridge.make(driver, host, port, username, password, database, new ConnectionPool(poolConfig));
     } catch (IllegalArgumentException e) {
+      //FIXME: Avoid allowing the pool to continue despite a exception occuring.
+      // You wouldn't want to keep doing queries when one fails. Instead this should close the entire program to prevent
+      // further queries from proceeding. Or alternatively, make a functor which will also return the object without making
+      // any further queries.
       System.err.println("Issue creating connection pool");
       e.printStackTrace();
     } finally {

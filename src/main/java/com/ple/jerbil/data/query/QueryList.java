@@ -66,6 +66,16 @@ public class QueryList<T> implements IList<T> {
     return values.length == result.length ? false : true;
   }
 
+  @Override
+  public boolean contains(T t) {
+    return false;
+  }
+
+  @Override
+  public int length() {
+    return 0;
+  }
+
   @NotNull
   @Override
   public Iterator iterator() {

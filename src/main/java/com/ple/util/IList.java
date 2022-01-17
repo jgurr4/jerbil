@@ -12,4 +12,8 @@ public interface IList<T> extends Iterable<T>{
 
   boolean remove(T t);
 
+  boolean contains(T t);
+
+  int length();
+
 }

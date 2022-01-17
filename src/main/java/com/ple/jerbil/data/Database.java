@@ -17,7 +17,8 @@ import java.util.List;
 public class Database {
 
   public final String name;
-  @Nullable public IList<Table> tables;
+  @Nullable
+  public IList<Table> tables;
 
   public Database(String name, @Nullable IList<Table> tables) {
     this.name = name;
@@ -44,16 +45,22 @@ public class Database {
     return completeQueries;
   }
 
-
   public void sync() {
     sync(DdlOption.update);
   }
-  
+
   public void sync(DdlOption ddlOption) {
     if (ddlOption == DdlOption.create) {
+      boolean diffsExist;
       createSchema(Create.shouldNotDrop);
-      checkSchemaStructure();
-      checkTableStructure();
+      diffsExist = checkDiffsInSchema();
+      if (diffsExist) {
+        throw new RuntimeException("Diffs exist inside database: " + name + "\nCannot make modifications using DdlOption.create mode.");
+      }
+      diffsExist = checkDiffsInTables();
+      if (diffsExist) {
+        throw new RuntimeException("Diffs exist inside database: " + name + "\nCannot make modifications using DdlOption.create mode.");
+      }
     } else if (ddlOption == DdlOption.update) {
     } else if (ddlOption == DdlOption.replace) {
     } else if (ddlOption == DdlOption.replaceDrop) {
@@ -71,19 +78,33 @@ public class Database {
     }
     DataGlobal.bridge.execute("show databases;")
       .flatMap(result -> result.map((row, rowMetadata) -> row.get("database")))
-//      .log()
-      .filter(dbName -> dbName == name)
-      .doOnNext(dbName -> System.out.println(dbName))
-      .switchIfEmpty(DataGlobal.bridge.execute(createAll().toSql()))
+      .filter(dbName -> dbName.equals(name))
+      .switchIfEmpty(DataGlobal.bridge.execute(createAll().toSql()).doOnSubscribe((e) -> System.out.println("Schema was not found. Successfully created schema " + name)))
       .subscribe();
   }
 
-  private void checkTableStructure() {
-    
+  private boolean checkDiffsInSchema() {
+    IList<String> tableList = IArrayList.make();  // player, inventory, item
+    for (Table table : tables) {
+      tableList = tableList.add(table.name);
+    }
+    IList<String> finalTableList = tableList;
+    final Boolean diffsExist = DataGlobal.bridge.execute("use " + name + "; show tables")
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
+      .filter(tableName -> !finalTableList.contains(tableName))
+      .doOnNext(tableName -> {
+        System.out.println("Table `" + tableName + "` does not exist in object schema");
+      })
+      .map(e -> true)
+      .blockFirst();
+    if (diffsExist != null) {
+      return diffsExist.booleanValue();
+    }
+    return false;
   }
 
-  private void checkSchemaStructure() {
-
+  private boolean checkDiffsInTables() {
+    return false;
   }
 
   private void updateSchemaStructure() {
@@ -110,12 +131,42 @@ public class Database {
 
   private void updateTableStructure() {
     for (Table table : tables) {
-    DataGlobal.bridge.execute("use test; show create table" + table)
-      .flatMap(result -> result.map((row, rowMetadata) -> row.get("create table")))
-      .subscribe();
+      DataGlobal.bridge.execute("use test; show create table" + table)
+        .flatMap(result -> result.map((row, rowMetadata) -> row.get("create table")))
+        .subscribe();
     }
 
   }
 
 
 }
+/* Ask Jerm about this.
+  private void checkSchemaStructure() {
+    AtomicBoolean diffsExist = new AtomicBoolean(false);
+    IList<String> prototype = IArrayList.make();  // player, inventory, item
+    for (Table table : tables) {
+      prototype = prototype.add(table.name);
+    }
+    final IList<String> tableList = prototype;
+    DataGlobal.bridge.execute("use test; show tables")
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
+      .doOnNext(table -> {
+        if (tableList.contains(table)) {  // Schema contains: player, inventory, bug
+          tableList.remove(table);  // all that's left inside tableList: item
+        }
+      })
+      .filter(table -> !tableList.contains(table)) // Schema contains: player, inventory, bug
+      .doOnNext(table -> { // All that passes through is bug.
+        if (table != null) {
+          diffsExist.set(true);
+        }
+      })
+      .subscribe();
+    if (tableList.length() != 0) {
+      diffsExist.set(true);
+    }
+    if (diffsExist.get()) {
+      throw new RuntimeException("Diffs exist inside database: " + name + "\nCannot make modifications using DdlOption.create mode.");
+    }
+  }
+*/
