@@ -10,7 +10,7 @@ public interface IList<T> extends Iterable<T>{
 
   T get(int i);
 
-  boolean remove(T t);
+  IList<T> remove(T t);
 
   boolean contains(T t);
 

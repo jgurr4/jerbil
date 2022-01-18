@@ -43,10 +43,13 @@ public class IArrayList<V> implements IList<V> {
   }
 
   @Override
-  public boolean remove(V v) {
+  public IList<V> remove(V v) {
+    if (!contains(v)) {
+      return this;
+    }
     V[] result = Arrays.copyOf(values, values.length - 1);
     for (int i = 0; i < values.length - 1; i++) {
-      if (values[i] != v) {
+      if (!values[i].equals(v)) {
         result[i] = values[i];
       } else {
         while (i < values.length - 1) {
@@ -55,7 +58,7 @@ public class IArrayList<V> implements IList<V> {
         }
       }
     }
-    return values.length == result.length ? false : true;
+    return IArrayList.make(result);
   }
 
   @Override

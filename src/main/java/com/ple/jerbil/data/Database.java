@@ -17,9 +17,12 @@ import java.util.List;
 public class Database {
 
   public final String name;
-  @Nullable public IList<Table> tables;
-  @Nullable public final String errorMessage;
-  @Nullable public final SchemaType schemaType;
+  @Nullable
+  public IList<Table> tables;
+  @Nullable
+  public final String errorMessage;
+  @Nullable
+  public final SchemaType schemaType;
 
   public Database(String name, @Nullable IList<Table> tables, @Nullable String errorMessage, @Nullable SchemaType schemaType) {
     this.name = name;
@@ -85,17 +88,6 @@ public class Database {
     return this;
   }
 
-  private enum Create {
-    shouldDrop,
-    shouldNotDrop
-  }
-
-  private enum SchemaType {
-    generated,
-    reused,
-    modified
-  }
-
   private Database createSchema(Create createOption) {
     if (hasError()) {
       return this;
@@ -109,35 +101,46 @@ public class Database {
       .take(1)
       .map(e -> make(name, tables, null, SchemaType.reused))
       .switchIfEmpty(DataGlobal.bridge.execute(createAll().toSql())
-        .doOnSubscribe((e) -> System.out.println("Since the schema was not found, auto-generated schema: `" + name + "`"))
+        .doOnSubscribe((e) -> System.out.println("(DB Sync): Auto-generated schema: `" + name + "`"))
         .map(e -> make(name, tables, null, SchemaType.generated)))
 //      .onErrorContinue((err, type) -> make(name, tables, true, err.getMessage())) //FIXME: Find out how to return database object with error message by catching error in stream rather than throwing error.
       .blockLast();
     if (!db.firstTimeGenerated()) {
-      System.out.println("Re-using existing schema: `" + name + "`");
+      System.out.println("(DB Sync): Re-using existing schema: `" + name + "`");
     }
     return db;
   }
 
+  // FIXME: After getting IArrayList working replace ArrayList and try to do everything inside streams instead of using
+  // iterations.
   private Database checkDbStructure() {
     if (hasError() || firstTimeGenerated()) {
       return this;
     }
-    IList<String> tableList = IArrayList.make();  // player, inventory, item
+    IList<String> tableList = IArrayList.make();
     for (Table table : tables) {
       tableList = tableList.add(table.name);
     }
-    IList<String> finalTableList = tableList;
-    final Boolean diffsExist = DataGlobal.bridge.execute("use " + name + "; show tables")
+    final List<String> schemaTables = DataGlobal.bridge.execute("use " + name + "; show tables")
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
-      .filter(tableName -> !finalTableList.contains(tableName))
-      .doOnNext(tableName -> {
-        System.out.println("Table `" + tableName + "` does not exist in object schema");
-      })
-      .map(e -> true)
-      .blockFirst();
-    if (diffsExist != null) {
-      return make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \nDdlOption.create cannot make modifications when there is diffs.", schemaType);
+      .collectList()
+      .block();
+    final IList<String> finalTableList = tableList;
+    final List<String> finalSchemaTables = schemaTables;
+    for (String schemaTable : finalSchemaTables) {
+      tableList = tableList.remove(schemaTable);
+    }
+    for (String table : finalTableList) {
+      schemaTables.remove(table);
+    }
+    for (String schemaTable : schemaTables) {
+      System.out.println("Extra table `" + schemaTable + "` exists in database: `" + name + "`");
+    }
+    for (String table : tableList) {
+      System.out.println("Missing table `" + table + "` in database: `" + name + "`");
+    }
+    if (schemaTables.size() > 0 || tableList.length() > 0) {
+      return make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType);
     }
     return this;
   }
@@ -189,33 +192,3 @@ public class Database {
 
 
 }
-/* Ask Jerm about this.
-  private void checkSchemaStructure() {
-    AtomicBoolean diffsExist = new AtomicBoolean(false);
-    IList<String> prototype = IArrayList.make();  // player, inventory, item
-    for (Table table : tables) {
-      prototype = prototype.add(table.name);
-    }
-    final IList<String> tableList = prototype;
-    DataGlobal.bridge.execute("use test; show tables")
-      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
-      .doOnNext(table -> {
-        if (tableList.contains(table)) {  // Schema contains: player, inventory, bug
-          tableList.remove(table);  // all that's left inside tableList: item
-        }
-      })
-      .filter(table -> !tableList.contains(table)) // Schema contains: player, inventory, bug
-      .doOnNext(table -> { // All that passes through is bug.
-        if (table != null) {
-          diffsExist.set(true);
-        }
-      })
-      .subscribe();
-    if (tableList.length() != 0) {
-      diffsExist.set(true);
-    }
-    if (diffsExist.get()) {
-      throw new RuntimeException("Diffs exist inside database: " + name + "\nCannot make modifications using DdlOption.create mode.");
-    }
-  }
-*/

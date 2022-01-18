@@ -1,8 +1,9 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.data.DdlOption;
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.DdlOption;
+import com.ple.jerbil.data.SchemaType;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.*;
 import io.r2dbc.spi.Result;
@@ -150,17 +151,20 @@ public class BridgeTests {
   @Test
   @Order(6)
   void syncCreateSchemaSuccess() {
+    DataGlobal.bridge.execute("drop database test").subscribe();
     assertFalse(testDb.sync(DdlOption.create).hasError());
+    assertEquals(SchemaType.reused, testDb.sync(DdlOption.create).schemaType);
   }
 
+  //FIXME: This is supposed to throw an Exception and exit the program if diffs exist when using DdlOption.create
   @Test
   @Order(7)
   void syncCreateSchemaFail() {
-    DataGlobal.bridge.execute("use test; create table if not exists something (id int not null)").subscribe();
+    DataGlobal.bridge.execute("use test; create table if not exists something (id int not null); drop table inventory").subscribe();
     final Database syncAfterChange = testDb.sync(DdlOption.create);
     assertTrue(syncAfterChange.hasError());
     System.out.println(syncAfterChange.errorMessage);
-    DataGlobal.bridge.execute("use test; drop table something").subscribe();
+    DataGlobal.bridge.execute("use test; drop table something; create table inventory (playerId int, itemId int, primary key (playerId, itemId))ENGINE=Aria;").subscribe();
   }
 
 /*
