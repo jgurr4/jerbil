@@ -149,10 +149,18 @@ public class BridgeTests {
 
   @Test
   @Order(6)
-  void syncCreateSchemaTest() {
-    assertDoesNotThrow(() -> testDb.sync(DdlOption.create));
+  void syncCreateSchemaSuccess() {
+    assertFalse(testDb.sync(DdlOption.create).hasError());
+  }
+
+  @Test
+  @Order(7)
+  void syncCreateSchemaFail() {
     DataGlobal.bridge.execute("use test; create table if not exists something (id int not null)").subscribe();
-    assertThrows(RuntimeException.class, () -> testDb.sync(DdlOption.create));
+    final Database syncAfterChange = testDb.sync(DdlOption.create);
+    assertTrue(syncAfterChange.hasError());
+    System.out.println(syncAfterChange.errorMessage);
+    DataGlobal.bridge.execute("use test; drop table something").subscribe();
   }
 
 /*

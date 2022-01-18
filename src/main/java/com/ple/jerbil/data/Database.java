@@ -17,20 +17,43 @@ import java.util.List;
 public class Database {
 
   public final String name;
-  @Nullable
-  public IList<Table> tables;
+  @Nullable public IList<Table> tables;
+  @Nullable public final String errorMessage;
+  @Nullable public final SchemaType schemaType;
 
-  public Database(String name, @Nullable IList<Table> tables) {
+  public Database(String name, @Nullable IList<Table> tables, @Nullable String errorMessage, @Nullable SchemaType schemaType) {
     this.name = name;
     this.tables = tables;
+    this.errorMessage = errorMessage;
+    this.schemaType = schemaType;
   }
 
   public static Database make(String name) {
-    return new Database(name, null);
+    return new Database(name, null, null, null);
+  }
+
+  public static Database make(String name, IList<Table> tables, String errorMessage, SchemaType schemaType) {
+    return new Database(name, tables, errorMessage, schemaType);
   }
 
   public Database add(Table... tables) {
-    return new Database(name, IArrayList.make(tables));
+    return new Database(name, IArrayList.make(tables), null, null);
+  }
+
+  public boolean hasError() {
+    if (errorMessage != null) {
+      return true;
+    }
+    return false;
+  }
+
+  public boolean firstTimeGenerated() {
+    if (schemaType != null) {
+      if (schemaType == SchemaType.generated) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public String toSql() {
@@ -45,26 +68,21 @@ public class Database {
     return completeQueries;
   }
 
-  public void sync() {
-    sync(DdlOption.update);
+  public Database sync() {
+    return hasError() ? this : sync(DdlOption.update);
   }
 
-  public void sync(DdlOption ddlOption) {
+  public Database sync(DdlOption ddlOption) {
+    if (hasError()) {
+      return this;
+    }
     if (ddlOption == DdlOption.create) {
-      boolean diffsExist;
-      createSchema(Create.shouldNotDrop);
-      diffsExist = checkDiffsInSchema();
-      if (diffsExist) {
-        throw new RuntimeException("Diffs exist inside database: " + name + "\nCannot make modifications using DdlOption.create mode.");
-      }
-      diffsExist = checkDiffsInTables();
-      if (diffsExist) {
-        throw new RuntimeException("Diffs exist inside database: " + name + "\nCannot make modifications using DdlOption.create mode.");
-      }
+      return createSchema(Create.shouldNotDrop).checkDbStructure();//.checkTableStructure();
     } else if (ddlOption == DdlOption.update) {
     } else if (ddlOption == DdlOption.replace) {
     } else if (ddlOption == DdlOption.replaceDrop) {
     }
+    return this;
   }
 
   private enum Create {
@@ -72,18 +90,39 @@ public class Database {
     shouldNotDrop
   }
 
-  private void createSchema(Create createOption) {
+  private enum SchemaType {
+    generated,
+    reused,
+    modified
+  }
+
+  private Database createSchema(Create createOption) {
+    if (hasError()) {
+      return this;
+    }
     if (createOption == Create.shouldDrop) {
       DataGlobal.bridge.execute("drop database " + name);
     }
-    DataGlobal.bridge.execute("show databases;")
+    final Database db = DataGlobal.bridge.execute("show databases;")
       .flatMap(result -> result.map((row, rowMetadata) -> row.get("database")))
       .filter(dbName -> dbName.equals(name))
-      .switchIfEmpty(DataGlobal.bridge.execute(createAll().toSql()).doOnSubscribe((e) -> System.out.println("Schema was not found. Successfully created schema " + name)))
-      .subscribe();
+      .take(1)
+      .map(e -> make(name, tables, null, SchemaType.reused))
+      .switchIfEmpty(DataGlobal.bridge.execute(createAll().toSql())
+        .doOnSubscribe((e) -> System.out.println("Since the schema was not found, auto-generated schema: `" + name + "`"))
+        .map(e -> make(name, tables, null, SchemaType.generated)))
+//      .onErrorContinue((err, type) -> make(name, tables, true, err.getMessage())) //FIXME: Find out how to return database object with error message by catching error in stream rather than throwing error.
+      .blockLast();
+    if (!db.firstTimeGenerated()) {
+      System.out.println("Re-using existing schema: `" + name + "`");
+    }
+    return db;
   }
 
-  private boolean checkDiffsInSchema() {
+  private Database checkDbStructure() {
+    if (hasError() || firstTimeGenerated()) {
+      return this;
+    }
     IList<String> tableList = IArrayList.make();  // player, inventory, item
     for (Table table : tables) {
       tableList = tableList.add(table.name);
@@ -98,16 +137,22 @@ public class Database {
       .map(e -> true)
       .blockFirst();
     if (diffsExist != null) {
-      return diffsExist.booleanValue();
+      return make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \nDdlOption.create cannot make modifications when there is diffs.", schemaType);
     }
-    return false;
+    return this;
   }
 
-  private boolean checkDiffsInTables() {
-    return false;
+  private Database checkTableStructure() {
+    if (hasError() || firstTimeGenerated()) {
+      return this;
+    }
+    return this;
   }
 
-  private void updateSchemaStructure() {
+  private Database updateSchemaStructure() {
+    if (hasError() || firstTimeGenerated()) {
+      return this;
+    }
     Boolean dbExists = false;
     DataGlobal.bridge.execute("show databases;")
       .flatMap(result -> result.map((row, rowMetadata) -> row.get("Database")))
@@ -127,15 +172,19 @@ public class Database {
     for (Table table : schemaTableList) {
       DataGlobal.bridge.execute(table.toSql()).subscribe(); //TODO: Run this and make sure the table.toSql works correctly
     }
+    return this;
   }
 
-  private void updateTableStructure() {
+  private Database updateTableStructure() {
+    if (hasError() || firstTimeGenerated()) {
+      return this;
+    }
     for (Table table : tables) {
       DataGlobal.bridge.execute("use test; show create table" + table)
         .flatMap(result -> result.map((row, rowMetadata) -> row.get("create table")))
         .subscribe();
     }
-
+    return this;
   }
 
 
