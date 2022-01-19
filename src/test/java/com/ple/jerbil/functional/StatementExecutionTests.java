@@ -1,4 +1,4 @@
-package com.ple.jerbil;
+package com.ple.jerbil.functional;
 
 public class StatementExecutionTests {
 

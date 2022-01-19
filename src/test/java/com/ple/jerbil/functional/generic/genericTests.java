@@ -1,4 +1,4 @@
-package com.ple.jerbil.generic;
+package com.ple.jerbil.functional.generic;
 
 
 /**

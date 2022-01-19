@@ -1,4 +1,4 @@
-package com.ple.jerbil;
+package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
@@ -40,6 +40,7 @@ public class BridgeTests {
   @Test
   @Order(1)
   void dropDbTest() {
+    DataGlobal.bridge.execute("set global max_connections=300").subscribe();  //151 is default. Not required for testing, but can be useful later in configuring server max connections.
     final Flux<Result> result = DataGlobal.bridge.execute("drop database test");
     StepVerifier.create(result
         .doOnSubscribe(n -> System.out.println("Successfully dropped database")))
@@ -148,6 +149,8 @@ public class BridgeTests {
 */
   }
 
+  //FIXME: The sync method should not return a Database functor. It should return a Promise/future of Database functor like Flux<Database> or Mono<Database>. Then the user can decide if they want to do things
+  // asynchronously or synchronously. Anything related to the mysql bridge should be asynchronous.
   @Test
   @Order(6)
   void syncCreateSchemaSuccess() {
@@ -156,7 +159,11 @@ public class BridgeTests {
     assertEquals(SchemaType.reused, testDb.sync(DdlOption.create).schemaType);
   }
 
-  //FIXME: This is supposed to throw an Exception and exit the program if diffs exist when using DdlOption.create
+  //TODO: Make a note. This is actually ok to not exit program. Instead just log the error and don't perform any more queries
+  // when the object is returned the user will be able to see the error log if they choose to. If they want, they can make it
+  // exit the program. It's actually not good practice for libraries to exit the app. What if you're doing work that needs
+  // to happen on a system which it cannot exit on? But this functor method is nice because it actually won't exit, but still
+  // it will prevent further processes from executing after the first error. And the user can log the details in the functor from there.
   @Test
   @Order(7)
   void syncCreateSchemaFail() {

@@ -56,9 +56,18 @@ public class MariadbR2dbcBridge implements DataBridge {
     return generator;
   }
 
+  public MariadbR2dbcBridge getConnectionPool() {
+    if (pool == null || pool.getMetrics().get().acquiredSize() == pool.getMetrics().get().getMaxAllocatedSize()) {
+      return createConnectionPool();
+    }
+    return this;
+  }
+
   @Override
   public Flux<Result> execute(String sql) {
-    final MariadbR2dbcBridge bridge = this.createConnectionPool();
+    //FIXME: You should never create connection pool for every .execute() method. That's 20 connections being used up per
+    // execute(). Instead, have a .getConnect() method which sees if a pool is available, and if not create a new one.
+    final MariadbR2dbcBridge bridge = this.getConnectionPool();
     final Connection connection = bridge.pool.create().block();
     final Statement statement = connection.createStatement(sql);
     return Flux.from(statement.execute());

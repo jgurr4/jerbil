@@ -140,6 +140,8 @@ public class Database {
       System.out.println("Missing table `" + table + "` in database: `" + name + "`");
     }
     if (schemaTables.size() > 0 || tableList.length() > 0) {
+//      System.out.println("\n\t[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.");
+//      System.exit(1);
       return make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType);
     }
     return this;
