@@ -30,11 +30,8 @@ public class BridgeTests {
     DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
   }
 
-  //FIXME: The sync method should not return a Database functor. It should return a Promise/future of Database functor like Flux<Database> or Mono<Database>. Then the user can decide if they want to do things
-  // asynchronously or synchronously. Anything related to the mysql bridge should be asynchronous.
   @Test
   void syncCreateSchemaSuccess() {
-//    DataGlobal.bridge.execute("drop database test").subscribe();
     assertFalse(Objects.requireNonNull(testDb.sync(DdlOption.create).block()).hasError());
     assertEquals(SchemaType.reused, Objects.requireNonNull(testDb.sync(DdlOption.create).block()).schemaType);
   }

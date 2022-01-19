@@ -124,14 +124,14 @@ public class Database {
     final IList<String> finalTableList = tableList;
     return DataGlobal.bridge.execute("use " + name + "; show tables")
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
-      .filter(finalTableList::contains)
+      .filter(tableName -> !finalTableList.contains(tableName))
       .doOnNext(tableName -> System.out.println("Extra table `" + tableName + "` exists in database: `" + name + "`"))  //FIXME: Find out why .contains method is not working to filter out the inventory table even though it should.
       .map(tableName -> make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType))
       .switchIfEmpty(DataGlobal.bridge.execute("use " + name + "; show tables")
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
         .collectList()
         .flatMap(listOfTables -> Flux.just(finalTableList.toArray())
-          .filter(listOfTables::contains)
+          .filter(tableName -> !listOfTables.contains(tableName))
           .doOnNext(tableName -> System.out.println("Missing table `" + tableName + "` in database: `" + name + "`"))
           .next()
           .map(tableName -> make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType)))
