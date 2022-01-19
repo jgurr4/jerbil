@@ -8,6 +8,7 @@ import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
+import java.util.Objects;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,9 +34,9 @@ public class BridgeTests {
   // asynchronously or synchronously. Anything related to the mysql bridge should be asynchronous.
   @Test
   void syncCreateSchemaSuccess() {
-    DataGlobal.bridge.execute("drop database test").subscribe();
-    assertFalse(testDb.sync(DdlOption.create).hasError());
-    assertEquals(SchemaType.reused, testDb.sync(DdlOption.create).schemaType);
+//    DataGlobal.bridge.execute("drop database test").subscribe();
+    assertFalse(Objects.requireNonNull(testDb.sync(DdlOption.create).block()).hasError());
+    assertEquals(SchemaType.reused, Objects.requireNonNull(testDb.sync(DdlOption.create).block()).schemaType);
   }
 
   //TODO: Make a note. This is actually ok to not exit program. Instead just log the error and don't perform any more queries
@@ -46,7 +47,8 @@ public class BridgeTests {
   @Test
   void syncCreateSchemaFail() {
     DataGlobal.bridge.execute("use test; create table if not exists something (id int not null); drop table inventory").subscribe();
-    final Database syncAfterChange = testDb.sync(DdlOption.create);
+    final Database syncAfterChange = testDb.sync(DdlOption.create).block();
+    assert syncAfterChange != null;
     assertTrue(syncAfterChange.hasError());
     System.out.println(syncAfterChange.errorMessage);
     DataGlobal.bridge.execute("use test; drop table something; create table inventory (playerId int, itemId int, primary key (playerId, itemId))ENGINE=Aria;").subscribe();

@@ -7,6 +7,8 @@ import com.ple.jerbil.data.query.Table;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import org.jetbrains.annotations.Nullable;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -71,92 +73,82 @@ public class Database {
     return completeQueries;
   }
 
-  public Database sync() {
-    return hasError() ? this : sync(DdlOption.update);
+  public Mono<Database> sync() {
+    return hasError() ? Mono.just(this) : sync(DdlOption.update);
   }
 
-  public Database sync(DdlOption ddlOption) {
+  public Mono<Database> sync(DdlOption ddlOption) {
     if (hasError()) {
-      return this;
+      return Mono.just(this);
     }
     if (ddlOption == DdlOption.create) {
-      return createSchema(Create.shouldNotDrop).checkDbStructure();//.checkTableStructure();
+      return createSchema(Create.shouldNotDrop)
+        .flatMap(Database::checkDbStructure)
+        .flatMap(Database::checkTableStructure);
     } else if (ddlOption == DdlOption.update) {
     } else if (ddlOption == DdlOption.replace) {
     } else if (ddlOption == DdlOption.replaceDrop) {
     }
-    return this;
+    return Mono.just(this);
   }
 
-  private Database createSchema(Create createOption) {
+  private Mono<Database> createSchema(Create createOption) {
     if (hasError()) {
-      return this;
+      return Mono.just(this);
     }
     if (createOption == Create.shouldDrop) {
       DataGlobal.bridge.execute("drop database " + name);
     }
-    final Database db = DataGlobal.bridge.execute("show databases;")
+    return DataGlobal.bridge.execute("show databases;")
       .flatMap(result -> result.map((row, rowMetadata) -> row.get("database")))
       .filter(dbName -> dbName.equals(name))
-      .take(1)
-      .map(e -> make(name, tables, null, SchemaType.reused))
+      .next()
+      .map(db -> make(name, tables, null, SchemaType.reused))
+      .doOnNext((e) -> System.out.println("(DB Sync): Re-using existing schema: `" + name + "`"))
       .switchIfEmpty(DataGlobal.bridge.execute(createAll().toSql())
         .doOnSubscribe((e) -> System.out.println("(DB Sync): Auto-generated schema: `" + name + "`"))
-        .map(e -> make(name, tables, null, SchemaType.generated)))
+        .map(e -> make(name, tables, null, SchemaType.generated)).next());
 //      .onErrorContinue((err, type) -> make(name, tables, true, err.getMessage())) //FIXME: Find out how to return database object with error message by catching error in stream rather than throwing error.
-      .blockLast();
-    if (!db.firstTimeGenerated()) {
-      System.out.println("(DB Sync): Re-using existing schema: `" + name + "`");
-    }
-    return db;
   }
 
   // FIXME: After getting IArrayList working replace ArrayList and try to do everything inside streams instead of using
   // iterations.
-  private Database checkDbStructure() {
+  private Mono<Database> checkDbStructure() {
     if (hasError() || firstTimeGenerated()) {
-      return this;
+      return Mono.just(this);
     }
     IList<String> tableList = IArrayList.make();
     for (Table table : tables) {
       tableList = tableList.add(table.name);
     }
-    final List<String> schemaTables = DataGlobal.bridge.execute("use " + name + "; show tables")
-      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
-      .collectList()
-      .block();
     final IList<String> finalTableList = tableList;
-    final List<String> finalSchemaTables = schemaTables;
-    for (String schemaTable : finalSchemaTables) {
-      tableList = tableList.remove(schemaTable);
-    }
-    for (String table : finalTableList) {
-      schemaTables.remove(table);
-    }
-    for (String schemaTable : schemaTables) {
-      System.out.println("Extra table `" + schemaTable + "` exists in database: `" + name + "`");
-    }
-    for (String table : tableList) {
-      System.out.println("Missing table `" + table + "` in database: `" + name + "`");
-    }
-    if (schemaTables.size() > 0 || tableList.length() > 0) {
-//      System.out.println("\n\t[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.");
-//      System.exit(1);
-      return make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType);
-    }
-    return this;
+    return DataGlobal.bridge.execute("use " + name + "; show tables")
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
+      .filter(finalTableList::contains)
+      .doOnNext(tableName -> System.out.println("Extra table `" + tableName + "` exists in database: `" + name + "`"))  //FIXME: Find out why .contains method is not working to filter out the inventory table even though it should.
+      .map(tableName -> make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType))
+      .switchIfEmpty(DataGlobal.bridge.execute("use " + name + "; show tables")
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
+        .collectList()
+        .flatMap(listOfTables -> Flux.just(finalTableList.toArray())
+          .filter(listOfTables::contains)
+          .doOnNext(tableName -> System.out.println("Missing table `" + tableName + "` in database: `" + name + "`"))
+          .next()
+          .map(tableName -> make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType)))
+        .defaultIfEmpty(this))
+      .next();
   }
 
-  private Database checkTableStructure() {
+  private Mono<Database> checkTableStructure() {
     if (hasError() || firstTimeGenerated()) {
-      return this;
+      return Mono.just(this);
     }
-    return this;
+    return Mono.just(this);
   }
 
-  private Database updateSchemaStructure() {
+  private Mono<Database> updateSchemaStructure() {
     if (hasError() || firstTimeGenerated()) {
-      return this;
+      return Mono.just(this);
     }
     Boolean dbExists = false;
     DataGlobal.bridge.execute("show databases;")
@@ -177,19 +169,19 @@ public class Database {
     for (Table table : schemaTableList) {
       DataGlobal.bridge.execute(table.toSql()).subscribe(); //TODO: Run this and make sure the table.toSql works correctly
     }
-    return this;
+    return Mono.just(this);
   }
 
-  private Database updateTableStructure() {
+  private Mono<Database> updateTableStructure() {
     if (hasError() || firstTimeGenerated()) {
-      return this;
+      return Mono.just(this);
     }
     for (Table table : tables) {
       DataGlobal.bridge.execute("use test; show create table" + table)
         .flatMap(result -> result.map((row, rowMetadata) -> row.get("create table")))
         .subscribe();
     }
-    return this;
+    return Mono.just(this);
   }
 
 

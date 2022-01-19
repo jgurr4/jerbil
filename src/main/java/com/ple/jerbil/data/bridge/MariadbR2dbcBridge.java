@@ -6,13 +6,12 @@ import com.ple.jerbil.data.LanguageGenerator;
 import com.ple.jerbil.data.translator.MysqlLanguageGenerator;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
-import io.r2dbc.spi.Connection;
 import io.r2dbc.spi.Result;
-import io.r2dbc.spi.Statement;
 import org.jetbrains.annotations.Nullable;
 import org.mariadb.r2dbc.MariadbConnectionConfiguration;
 import org.mariadb.r2dbc.MariadbConnectionFactory;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
@@ -25,8 +24,9 @@ public class MariadbR2dbcBridge implements DataBridge {
   public final int port;
   public final String username;
   public final String password;
-  @Nullable public final String database;
-  @Nullable public final ConnectionPool pool;
+  @Nullable
+  public final String database;
+  public final ConnectionPool pool;
 
   protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password, @Nullable String database, @Nullable ConnectionPool pool) {
     this.driver = driver;
@@ -56,24 +56,29 @@ public class MariadbR2dbcBridge implements DataBridge {
     return generator;
   }
 
-  public MariadbR2dbcBridge getConnectionPool() {
-    if (pool == null || pool.getMetrics().get().acquiredSize() == pool.getMetrics().get().getMaxAllocatedSize()) {
+  public Mono<MariadbR2dbcBridge> getConnectionPool() {
+    if (pool == null) {
       return createConnectionPool();
     }
-    return this;
+    if (pool.getMetrics().isPresent()) {
+      if (pool.getMetrics().get().acquiredSize() == pool.getMetrics().get().getMaxAllocatedSize()) {
+        return createConnectionPool();
+      }
+    }
+    return Mono.just(this);
   }
 
   @Override
   public Flux<Result> execute(String sql) {
-    //FIXME: You should never create connection pool for every .execute() method. That's 20 connections being used up per
-    // execute(). Instead, have a .getConnect() method which sees if a pool is available, and if not create a new one.
-    final MariadbR2dbcBridge bridge = this.getConnectionPool();
-    final Connection connection = bridge.pool.create().block();
-    final Statement statement = connection.createStatement(sql);
-    return Flux.from(statement.execute());
+    return this.getConnectionPool()
+      .map(bridge -> bridge.pool)
+      .flatMap(pool -> pool.create())
+      .map(conn -> conn.createStatement(sql))
+      .flatMapMany(statement -> statement.execute());
   }
 
-  private MariadbR2dbcBridge createConnectionPool() {
+  //TODO: Review this method and rework it if you find any blocking code. (Code that forces thread to wait here while it's processing, instead of letting thread leave to do other tasks.)
+  private Mono<MariadbR2dbcBridge> createConnectionPool() {
     MariadbR2dbcBridge bridge = null;
     try {
       final MariadbConnectionConfiguration.Builder builder = MariadbConnectionConfiguration.builder()
@@ -103,7 +108,7 @@ public class MariadbR2dbcBridge implements DataBridge {
     } finally {
       bridge.pool.close();
     }
-    return bridge;
+    return Mono.just(bridge);
   }
 
 }
