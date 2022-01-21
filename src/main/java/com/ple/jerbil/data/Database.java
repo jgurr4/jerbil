@@ -46,17 +46,12 @@ public class Database {
   }
 
   public boolean hasError() {
-    if (errorMessage != null) {
-      return true;
-    }
-    return false;
+    return errorMessage != null;
   }
 
   public boolean firstTimeGenerated() {
     if (schemaType != null) {
-      if (schemaType == SchemaType.generated) {
-        return true;
-      }
+      return schemaType == SchemaType.generated;
     }
     return false;
   }
@@ -86,6 +81,9 @@ public class Database {
         .flatMap(Database::checkDbStructure)
         .flatMap(Database::checkTableStructure);
     } else if (ddlOption == DdlOption.update) {
+      return createSchema(Create.shouldNotDrop)
+        .flatMap(Database::updateSchemaStructure)
+        .flatMap(Database::updateTableStructure);
     } else if (ddlOption == DdlOption.replace) {
     } else if (ddlOption == DdlOption.replaceDrop) {
     }
@@ -118,8 +116,10 @@ public class Database {
       return Mono.just(this);
     }
     IList<String> tableList = IArrayList.make();
-    for (Table table : tables) {
-      tableList = tableList.add(table.name);
+    if (tables != null) {
+      for (Table table : tables) {
+        tableList = tableList.add(table.name);
+      }
     }
     final IList<String> finalTableList = tableList;
     return DataGlobal.bridge.execute("use " + name + "; show tables")
@@ -139,12 +139,68 @@ public class Database {
       .next();
   }
 
+  //TODO: Ask about if statement. Does it block? Should I use reactive streams to check conditions instead?
   private Mono<Database> checkTableStructure() {
     if (hasError() || firstTimeGenerated()) {
       return Mono.just(this);
     }
-    return Mono.just(this);
+    return DataGlobal.bridge.execute("use " + name + "; show tables")
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
+      .flatMap(tableName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tableName)
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
+        .flatMap(existingTableInfo -> compareTable(existingTableInfo, tableName)))
+      .next();
   }
+
+  private Mono<Database> compareTable(String existingTableInfo, String tableName) {
+    final String formattedTableInfo = formatToCompare(existingTableInfo);
+    if (tables != null) {
+      return Flux.just(tables.toArray())
+        .filter(table -> table.name.equals(tableName))
+        .next()
+        .map(Table::toSql)
+        .flatMapMany(this::formatToCompareLines)
+        .filter(tableLine -> !formattedTableInfo.contains(tableLine))
+        .doOnNext(tableLine -> System.out.println("\nThis line: \"" + tableLine + "\" does not match the line inside this table:\n\"" + formattedTableInfo + "\" from your schema"))
+        .next()
+        .map(tableLine -> make(name, tables, "\n[ERROR]: diffs exist in the table structure of some tables between the schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType))
+        .defaultIfEmpty(this);
+    }
+    return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", schemaType));
+  }
+
+  private String formatToCompare(String tableInfo) {
+    return tableInfo
+      .toLowerCase()
+      .replaceAll("`", "")
+      .replaceAll(" int([0-9].*) ", " int ")
+      .replaceAll(" varchar([0-9].*) ", " varchar ")
+      .replaceAll("\nprimary.*\n", "")
+      .replaceAll("\nkey.*\n", "");
+  }
+
+  private Flux<String> formatToCompareLines(String tableInfo) {
+    return Flux.just(tableInfo.split("\n"));
+  }
+
+/* Change this to work for updating and altering tables.
+  private Mono<Database> compareLines(String existingTableInfo) {
+    if (tables != null) {
+      return Flux.just(tables.toArray())
+        .flatMap(table -> formatToCompare(table.toSql()))
+        .log()
+        .flatMap(tableLine -> Flux.from(formatToCompare(existingTableInfo))
+          .log()
+          .filter(existingTableLine -> existingTableLine.contains(tableLine))
+          .doOnNext(existingTableLine -> System.out.println("This line \"" + existingTableLine + "\" does not match the line: \"" + tableLine + "\" from your schema"))
+        )
+        .next()
+        .map(existingTableLine -> make(name, tables, "\n[ERROR]: diffs exist between table structure of some tables between the schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType))
+        .defaultIfEmpty(this);
+    }
+    return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", schemaType));
+  }
+*/
 
   private Mono<Database> updateSchemaStructure() {
     if (hasError() || firstTimeGenerated()) {

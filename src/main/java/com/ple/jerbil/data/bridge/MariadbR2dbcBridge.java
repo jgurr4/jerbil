@@ -38,7 +38,6 @@ public class MariadbR2dbcBridge implements DataBridge {
     this.pool = pool;
   }
 
-  //TODO: Consider creating another make() method that allows developers to skip using the driver parameter. Since it's not required for MariadbR2dbc connector. Or just get rid of the driver parameter entirely unless I find a use for it.
   public static MariadbR2dbcBridge make(String driver, String host, int port, String username, String password, String database, ConnectionPool pool) {
     return new MariadbR2dbcBridge(driver, host, port, username, password, database, pool);
   }
@@ -49,6 +48,10 @@ public class MariadbR2dbcBridge implements DataBridge {
 
   public static DataBridge make(String driver, String host, int port, String username, String password) {
     return new MariadbR2dbcBridge(driver, host, port, username, password, null, null);
+  }
+
+  public static DataBridge make(String host, int port, String username, String password) {
+    return new MariadbR2dbcBridge("r2dbc:mariadb", host, port, username, password, null, null);
   }
 
   @Override
@@ -77,38 +80,29 @@ public class MariadbR2dbcBridge implements DataBridge {
       .flatMapMany(statement -> statement.execute());
   }
 
-  //TODO: Review this method and rework it if you find any blocking code. (Code that forces thread to wait here while it's processing, instead of letting thread leave to do other tasks.)
   private Mono<MariadbR2dbcBridge> createConnectionPool() {
-    MariadbR2dbcBridge bridge = null;
-    try {
-      final MariadbConnectionConfiguration.Builder builder = MariadbConnectionConfiguration.builder()
-        .host(host)
-        .port(port)
-        .username(username)
-        .allowMultiQueries(true)
-        .password(password);
-      if (database != null) {
-        builder.database(database);
-      }
-      final MariadbConnectionConfiguration conf = builder.build();
-      final MariadbConnectionFactory factory = MariadbConnectionFactory.from(conf);
-      final ConnectionPoolConfiguration poolConfig = ConnectionPoolConfiguration
-        .builder(factory)
+    return Mono.just(MariadbConnectionConfiguration.builder()
+      .host(host)
+      .port(port)
+      .username(username)
+      .allowMultiQueries(true)
+      .password(password)
+      .database(database))
+      .map(MariadbConnectionConfiguration.Builder::build)
+      .map(MariadbConnectionFactory::from)
+      .map(factory -> ConnectionPoolConfiguration.builder(factory)
         .maxIdleTime(Duration.ofMillis(1000))
         .maxSize(20)
-        .build();
-      bridge = MariadbR2dbcBridge.make(driver, host, port, username, password, database, new ConnectionPool(poolConfig));
-    } catch (IllegalArgumentException e) {
-      //FIXME: Avoid allowing the pool to continue despite a exception occuring.
-      // You wouldn't want to keep doing queries when one fails. Instead this should close the entire program to prevent
-      // further queries from proceeding. Or alternatively, make a functor which will also return the object without making
-      // any further queries.
-      System.err.println("Issue creating connection pool");
-      e.printStackTrace();
-    } finally {
-      bridge.pool.close();
-    }
-    return Mono.just(bridge);
+        .build())
+      .map(poolConfig -> MariadbR2dbcBridge.make(driver, host, port, username, password, database, new ConnectionPool(poolConfig)))
+      .doOnError(e -> {
+//        System.err.println("Issue creating connection pool");
+//        e.printStackTrace();
+        throw new IllegalArgumentException("Issue creating connection pool");
+      } )
+      .doOnSuccess(bridge -> {
+        if (bridge.pool != null) bridge.pool.close();
+      });
   }
 
 }
