@@ -1,9 +1,6 @@
 package com.ple.jerbil.data.translator;
 
-import com.ple.jerbil.data.DataType;
-import com.ple.jerbil.data.EnumSpec;
-import com.ple.jerbil.data.LanguageGenerator;
-import com.ple.jerbil.data.StorageEngine;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
@@ -29,6 +26,114 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       default -> throw new IllegalStateException("Unexpected value: " + completeQuery.queryType);
     }
     return sql;
+  }
+
+  @Override
+  public Table fromSql(String createTableSql) {
+    final String tableName = getTableNameFromSql(createTableSql);
+    final StorageEngine engine = getEngineFromSql(createTableSql);
+    final String formattedTable = formatTable(createTableSql);
+    final IList<Column> columns = createColumnsFromTableString(formattedTable);
+    return Table.make(engine, tableName, columns);
+  }
+
+  private StorageEngine getEngineFromSql(String createTableSql) {
+    final String tableSql = createTableSql.toLowerCase();
+    final int engineIndex = tableSql.indexOf("\n) engine=");
+    final String engineName = tableSql.substring(engineIndex, tableSql.indexOf(" ", engineIndex));
+    switch (engineName) {
+      case "aria":
+        return StorageEngine.simple;
+      case "innodb":
+        return StorageEngine.transactional;
+      default:
+        return StorageEngine.simple;
+    }
+  }
+
+  private String getTableNameFromSql(String createTableSql) {
+    final int nameIndex = createTableSql.indexOf("`");
+    final String tableName = createTableSql.substring(nameIndex, createTableSql.indexOf("`", nameIndex));
+    return tableName;
+  }
+
+  private IList<Column> createColumnsFromTableString(String formattedTable) {
+    //TODO: Finish implementing this method.
+    final IMap<String, String[]> indexedColumns = IHashMap.empty;
+    IList<Column> columns = IArrayList.make();
+    if (formattedTable.contains("primary key (")) {
+      final int primaryIndex = formattedTable.indexOf("primary key (");
+      final String[] colArr = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex)).split(", ");
+      indexedColumns.put("primary key", colArr);
+    }
+    if (formattedTable.contains("key (")) {
+    }
+    final String[] tableLines = formatToColumnLines(formattedTable);
+    for (String tableLine : tableLines) {
+      columns = columns.add(getColumnFromSql(tableLine, indexedColumns));
+    }
+    return columns;
+  }
+
+  private Column getColumnFromSql(String tableLine, IMap<String, String[]> indexedColumns) {
+    final String colName = tableLine.replaceFirst(" .*", "");
+    final DataSpec dataSpec = getDataSpecFromSql(tableLine);
+    final Expression generatedFrom = getGeneratedFromSql(tableLine);
+    boolean indexed = false;
+    boolean primary = false;
+    for (String column : indexedColumns.get("primary key")) {
+      if (column.equals(colName)) {
+        primary = true;
+      }
+    }
+    for (String column : indexedColumns.get("key")) {
+      if (column.equals(colName)) {
+        indexed = true;
+      }
+    }
+    if (tableLine.contains("auto_increment")) {
+      return NumericColumn.make(colName, dataSpec, indexed, primary, true, (NumericExpression) generatedFrom);
+    } else if (dataSpec.dataType == DataType.integer || dataSpec.dataType == DataType.decimal || dataSpec.dataType == DataType.bigint || dataSpec.dataType == DataType.tinyint) {
+      return NumericColumn.make(colName, dataSpec, indexed, primary, false, (NumericExpression) generatedFrom);
+    } else if (dataSpec.dataType == DataType.varchar || dataSpec.dataType == DataType.enumeration) {
+      return StringColumn.make(colName, dataSpec, indexed, primary);
+    } else if (dataSpec.dataType == DataType.datetime) {
+      return DateColumn.make(colName, dataSpec, indexed, primary);
+    } else if (dataSpec.dataType == DataType.bool) {
+      return BooleanColumn.make(colName, dataSpec, indexed, primary);
+    } else {
+      System.out.println("Failed to determine data type of this column:" + colName);
+    }
+    return null;
+  }
+
+  private Expression getGeneratedFromSql(String tableLine) {
+    //TODO: Implement this method.
+    return null;
+  }
+
+  private DataSpec getDataSpecFromSql(String tableLine) {
+    //TODO: Implement this method.
+    return null;
+  }
+
+  private String[] formatToColumnLines(String formattedTable) {
+    return formattedTable
+      .replaceAll("\n\\) engine=.*", "")
+      .replaceAll("^create table .*\n", "")
+      .replaceAll("\nprimary key .*", "")
+      .replaceAll("\nkey \\(.*", "")
+      .split("\n");
+  }
+
+  private String formatTable(String tableInfo) {
+    return tableInfo
+      .replaceAll("`", "")
+      .replaceAll(" int\\([0-9].*\\) ", " int ")
+      .replaceAll(" varchar\\([0-9].*\\) ", " varchar ")
+//      .replaceAll(" not null,", ",")
+//      .replaceAll(" not null ", " ")
+      .replaceAll("^  ", "");
   }
 
   private String toSql(SelectQuery selectQuery) {
@@ -412,17 +517,17 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       sql += separator + columns.get(i).getName() + " " + toSql(columns.get(i));
       separator = ",\n  ";
     }
-    String multiIndex = getMultiIndex(columns);
-    if (multiIndex != "") {
-      if (multiIndex.contains("primary")) {
+    String indexes = gatherIndexes(columns);
+    if (indexes != "") {
+      if (indexes.contains("primary")) {
         sql = sql.replaceAll(" primary key", "");
       }
     }
-    sql += multiIndex + "\n) ENGINE=" + engine + "\n";
+    sql += indexes + "\n) ENGINE=" + engine + "\n";
     return sql;
   }
 
-  private String getMultiIndex(IList<Column> columns) {
+  private String gatherIndexes(IList<Column> columns) {
     String multiIndex = "";
     String separator = "";
     int primaryCount = 0;
@@ -434,21 +539,22 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       } else if (column.isIndexed()) {
         indexCount++;
         indexedColumnName = separator + column.getName();
-        separator = ", ";
+        separator = ",";
       }
     }
-    if (primaryCount > 1) {
+    separator = "";
+    if (primaryCount > 0) {
       multiIndex += ",\n  primary key (";
       for (Column column : columns) {
         if (column.isPrimary()) {
           multiIndex += separator + column.getName();
-          separator = ", ";
+          separator = ",";
         }
       }
       multiIndex += ")";
     }
     if (indexCount > 0) {
-      multiIndex += ",\n  key (";
+      multiIndex += ",\n  key " + indexedColumnName + "_idx (";
       multiIndex += indexedColumnName;
       multiIndex += ")";
     }

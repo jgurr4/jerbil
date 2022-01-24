@@ -20,12 +20,12 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
     this.autoIncrement = autoIncrement;
   }
 
-  @Override
-  public NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
+  public static NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, NumericExpression generatedFrom) {
     return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, generatedFrom);
   }
 
-  public static NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, NumericExpression generatedFrom) {
+  @Override
+  public NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
     return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, generatedFrom);
   }
 

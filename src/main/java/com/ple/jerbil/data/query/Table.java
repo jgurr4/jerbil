@@ -1,8 +1,12 @@
 package com.ple.jerbil.data.query;
 
+import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.DelayedImmutable;
+import com.ple.jerbil.data.LanguageGenerator;
 import com.ple.jerbil.data.StorageEngine;
-import com.ple.jerbil.data.selectExpression.*;
+import com.ple.jerbil.data.selectExpression.AliasedExpression;
+import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.CountAgg;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
@@ -28,12 +32,23 @@ public class Table extends FromExpression {
     this.columns = columns;
   }
 
-  private static Table make(StorageEngine engine, String name, IList<Column> columns) {
+  public static Table make(StorageEngine engine, String name, IList<Column> columns) {
     return new Table(engine, name, columns);
   }
 
   public String toSql() {
     return CreateQuery.make(this).toSql();
+  }
+
+  public static Table fromSql(String showCreateTable) {
+    if (DataGlobal.bridge == null) {
+      throw new NullPointerException("Global.sqlGenerator not set.");
+    }
+    return fromSql(DataGlobal.bridge.getGenerator(), showCreateTable);
+  }
+
+  public static Table fromSql(LanguageGenerator generator, String showCreateTable) {
+    return generator.fromSql(showCreateTable);
   }
 
   public QueryWithFrom where(BooleanExpression condition) {

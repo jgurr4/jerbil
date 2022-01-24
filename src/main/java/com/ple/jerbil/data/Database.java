@@ -148,20 +148,22 @@ public class Database {
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
       .flatMap(tableName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tableName)
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
-        .flatMap(existingTableInfo -> compareTable(existingTableInfo, tableName)))
-      .next();
+        .map(createTableString -> Table.fromSql(createTableString))
+        .flatMap(existingTable -> compareTable(existingTable)))
+      .filter(db -> db.hasError())
+      .next()
+      .defaultIfEmpty(this);
   }
 
-  private Mono<Database> compareTable(String existingTableInfo, String tableName) {
-    final String formattedTableInfo = formatToCompare(existingTableInfo);
+  private Mono<Database> compareTable(Table existingTable) {
     if (tables != null) {
       return Flux.just(tables.toArray())
-        .filter(table -> table.name.equals(tableName))
+        .filter(table -> table.name.equals(existingTable.name))
         .next()
-        .map(Table::toSql)
-        .flatMapMany(this::formatToCompareLines)
-        .filter(tableLine -> !formattedTableInfo.contains(tableLine))
-        .doOnNext(tableLine -> System.out.println("\nThis line: \"" + tableLine + "\" does not match the line inside this table:\n\"" + formattedTableInfo + "\" from your schema"))
+        .filter(table -> table.engine.name().equals(existingTable.engine.name()))
+        .flatMapMany(table -> Flux.just(table.columns.toArray()))
+        .filter(column -> !existingTable.columns.contains(column))
+        .doOnNext(column -> System.out.println("\nThis column: \"" + column + "\" does not match the column inside this table:\n\"" + existingTable.toSql() + "\"\n from your schema"))
         .next()
         .map(tableLine -> make(name, tables, "\n[ERROR]: diffs exist in the table structure of some tables between the schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType))
         .defaultIfEmpty(this);
@@ -169,19 +171,6 @@ public class Database {
     return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", schemaType));
   }
 
-  private String formatToCompare(String tableInfo) {
-    return tableInfo
-      .toLowerCase()
-      .replaceAll("`", "")
-      .replaceAll(" int([0-9].*) ", " int ")
-      .replaceAll(" varchar([0-9].*) ", " varchar ")
-      .replaceAll("\nprimary.*\n", "")
-      .replaceAll("\nkey.*\n", "");
-  }
-
-  private Flux<String> formatToCompareLines(String tableInfo) {
-    return Flux.just(tableInfo.split("\n"));
-  }
 
 /* Change this to work for updating and altering tables.
   private Mono<Database> compareLines(String existingTableInfo) {
