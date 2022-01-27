@@ -11,6 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Database is a object representing the database and it's tables.
@@ -149,46 +150,38 @@ public class Database {
       .next()
       .defaultIfEmpty(this);
   }
-
+  //FIXME: If no table exists with same name, this should also create error inside database functor and log it. This means extra table exists in existing Schema that doesn't exist in java object.
+  //FIXME: If the engine or name doesn't match it should create error inside database functor and also log it. Probably filter out anything that doesn't match and use .map() and .switchIfEmpty().
   private Mono<Database> compareTable(Table existingTable) {
+    AtomicReference<String> errorMessage = new AtomicReference<>(null);
     if (hasError()) {
       return Mono.just(this);
     }
-    //FIXME: line 164: This compares a column object with another column object without looking inside to verify the columns are the same. You should use a method here that compares the details inside the columns.
     if (tables != null) {
       return Flux.just(tables.toArray())
         .filter(table -> table.name.equals(existingTable.name))
         .next()
+        .doOnNext(table -> {
+          if (table == null) {
+            errorMessage.set("A table inside Database Object is missing from the local/remote database.");
+          }
+        })
         .filter(table -> table.engine.name().equals(existingTable.engine.name()))
+        .doOnNext(table -> {
+          if (table == null) {
+            errorMessage.set("Engine of " + existingTable.name + " inside local/remote database is: " + existingTable.engine.name() + ". This does not matching data inside the Database Object." );
+          }
+        })
         .flatMapMany(table -> Flux.just(table.columns.toArray()))
         .filter(column -> !existingTable.columns.contains(column))
-        .doOnNext(column -> System.out.println("\nThis column: \"" + column + "\" does not match the column inside this table:\n\"" + existingTable.toSql() + "\"\n from your schema"))
+        .doOnNext(column -> System.out.println("\nThis column: \n" + column.toString() + "\ndoes not match any columns found inside this table:\n" + existingTable.toString().replaceAll(", Column\\{", "\nColumn{").replaceFirst("\\{values=\\[Column", "{values=[\nColumn")))
         .next()
-        .map(tableLine -> make(name, tables, "\n[ERROR]: diffs exist in the table structure of some tables between the schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType))
-        .defaultIfEmpty(this);
+        .map(tableLine -> make(name, tables, "\n[ERROR]: diffs exist in the table structure of some tables between the Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", schemaType))
+        .defaultIfEmpty(make(name, tables, errorMessage.get(), schemaType));
     }
     return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", schemaType));
   }
 
-
-/* Change this to work for updating and altering tables.
-  private Mono<Database> compareLines(String existingTableInfo) {
-    if (tables != null) {
-      return Flux.just(tables.toArray())
-        .flatMap(table -> formatToCompare(table.toSql()))
-        .log()
-        .flatMap(tableLine -> Flux.from(formatToCompare(existingTableInfo))
-          .log()
-          .filter(existingTableLine -> existingTableLine.contains(tableLine))
-          .doOnNext(existingTableLine -> System.out.println("This line \"" + existingTableLine + "\" does not match the line: \"" + tableLine + "\" from your schema"))
-        )
-        .next()
-        .map(existingTableLine -> make(name, tables, "\n[ERROR]: diffs exist between table structure of some tables between the schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType))
-        .defaultIfEmpty(this);
-    }
-    return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", schemaType));
-  }
-*/
 
   private Mono<Database> updateSchemaStructure() {
     if (hasError() || firstTimeGenerated()) {

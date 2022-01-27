@@ -94,4 +94,11 @@ public class IArrayList<V> implements IList<V> {
     };
   }
 
+  @Override
+  public String toString() {
+    return "IArrayList{" +
+      "values=" + Arrays.toString(values) +
+      '}';
+  }
+
 }

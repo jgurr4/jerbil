@@ -32,6 +32,12 @@ public class BridgeTests {
 
   @Test
   void syncCreateSchemaGeneratedSuccess() {
+    StepVerifier.create(
+        DataGlobal.bridge.execute("drop database if exists test")
+          .flatMap(result -> result.getRowsUpdated())
+          .next())
+      .expectNext(4)
+      .verifyComplete();
     final Database db = testDb.sync(DdlOption.create).block();
     if (db.hasError()) {
       System.out.println(db.errorMessage);
@@ -52,12 +58,12 @@ public class BridgeTests {
 
   @Test
   void syncCreateSchemaReusedFail() {
-//    StepVerifier.create(
-//        DataGlobal.bridge.execute("use test; alter table player drop column name")
-//          .flatMap(result -> result.getRowsUpdated())
-//          .next())
-//      .expectNext(0)
-//      .verifyComplete();
+    StepVerifier.create(
+        DataGlobal.bridge.execute("use test; alter table player drop column name")
+          .flatMap(result -> result.getRowsUpdated())
+          .next())
+      .expectNext(0)
+      .verifyComplete();
     StepVerifier.create(testDb.sync(DdlOption.create)
         .filter(db -> db.hasError()))
       .consumeNextWith(db -> {

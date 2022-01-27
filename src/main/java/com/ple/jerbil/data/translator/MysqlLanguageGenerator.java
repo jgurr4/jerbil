@@ -42,7 +42,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private StorageEngine getEngineFromSql(String createTableSql) {
     final String tableSql = createTableSql.toLowerCase();
-    final int engineIndex = tableSql.indexOf("\n) engine=");
+    final int engineIndex = tableSql.indexOf("\n) engine=")+10;
     final String engineName = tableSql.substring(engineIndex, tableSql.indexOf(" ", engineIndex));
     switch (engineName) {
       case "aria":
@@ -68,9 +68,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       final String[] primaryColumns = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex)).split(",");
       indexedColumns = indexedColumns.put("PRIMARY KEY", primaryColumns);
     }
-    if (formattedTable.matches("\nKEY \\(")) {
-      final int primaryIndex = formattedTable.indexOf("PRIMARY KEY (") + 13;
-      final String[] keyColumns = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex)).split(",");
+    if (formattedTable.contains("\n  KEY ")) {
+      final int keyIndex = formattedTable.indexOf("\n  KEY ") + 7;
+      final String refinedKeyValues = formattedTable.substring(keyIndex).replaceAll("^.*\\(", "");
+      final String[] keyColumns = refinedKeyValues.substring(0, refinedKeyValues.indexOf(")\n")).split(",");
       indexedColumns = indexedColumns.put("KEY", keyColumns);
     }
     final String[] tableLines = formatToColumnLines(formattedTable);
@@ -85,7 +86,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     final String colName = tableLine.replaceFirst(" .*", "");
     final DataSpec dataSpec = getDataSpecFromSql(tableLine);
     final Expression generatedFrom = getGeneratedFromSql(tableLine);
-    boolean indexed = false;
+    boolean indexed = false;  //FIXME: Find out why item.name column is not becoming indexed in fromSql() even though it says KEY name (name) in existing table.
     boolean primary = false;
     if (indexedColumns.keySet().contains("PRIMARY KEY")) {
       for (String column : indexedColumns.get("PRIMARY KEY")) {
@@ -463,7 +464,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
   }
 
-  private String toSql(Column column) {
+  //TODO: Add support for specifying Null on a column. Leave not null off because that is default.
+  public String toSql(Column column) {
     String sql = "";
     String primary = "";
     String autoIncrement = "";

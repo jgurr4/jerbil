@@ -2,7 +2,9 @@ package com.ple.jerbil.data;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Objects;
 
 /**
  * DataSpec represents any datatype and it's parameter definitions for defining specific columns in tables. For example:
@@ -69,7 +71,21 @@ public class DataSpec {
       return new DataSpec(type, defaultMaxSize);
     }
 */
-    return new DataSpec(type, defaultMaxSize, null);
+    int maxSize = 0;
+    if (type == DataType.varchar || type == DataType.enumeration) {
+      maxSize = DefaultSize.varchar.getSize();
+    } else if (type == DataType.bigint) {
+      maxSize = DefaultSize.bigint.getSize();
+    } else if (type == DataType.mediumint) {
+      maxSize = DefaultSize.mediumint.getSize();
+    } else if (type == DataType.integer) {
+      maxSize = DefaultSize.integer.getSize();
+    } else if (type == DataType.tinyint) {
+      maxSize = DefaultSize.tinyint.getSize();
+    } else if (type == DataType.bool) {
+      maxSize = DefaultSize.bool.getSize();
+    }
+    return new DataSpec(type, maxSize, null);
   }
 
   public String getSqlName() {
@@ -81,6 +97,30 @@ public class DataSpec {
       return "enum";
     }
     return this.dataType.name();
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof DataSpec)) return false;
+    DataSpec dataSpec = (DataSpec) o;
+    return size == dataSpec.size && dataType == dataSpec.dataType && Arrays.equals(preciseScale, dataSpec.preciseScale);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(dataType, size);
+    result = 31 * result + Arrays.hashCode(preciseScale);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    return "DataSpec{" +
+      "dataType=" + dataType +
+      ", size=" + size +
+      ", preciseScale=" + Arrays.toString(preciseScale) +
+      '}';
   }
 
 }

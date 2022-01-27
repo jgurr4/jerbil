@@ -107,4 +107,13 @@ public class Table extends FromExpression {
     columns = newColumns;
   }
 
+  @Override
+  public String toString() {
+    return "Table{" +
+      "name='" + name + '\'' +
+      ", columns=" + columns +
+      ", engine=" + engine +
+      '}';
+  }
+
 }
