@@ -56,10 +56,6 @@ public class Database {
     return false;
   }
 
-  public String toSql() {
-    return null;
-  }
-
   public QueryList createAll() {
     QueryList<CompleteQuery> completeQueries = QueryList.make(CreateQuery.make(this));
     for (Table table : tables) {
@@ -139,7 +135,6 @@ public class Database {
       .next();
   }
 
-  //TODO: Ask about if statement. Does it block? Should I use reactive streams to check conditions instead?
   private Mono<Database> checkTableStructure() {
     if (hasError() || firstTimeGenerated()) {
       return Mono.just(this);
@@ -156,6 +151,10 @@ public class Database {
   }
 
   private Mono<Database> compareTable(Table existingTable) {
+    if (hasError()) {
+      return Mono.just(this);
+    }
+    //FIXME: line 164: This compares a column object with another column object without looking inside to verify the columns are the same. You should use a method here that compares the details inside the columns.
     if (tables != null) {
       return Flux.just(tables.toArray())
         .filter(table -> table.name.equals(existingTable.name))

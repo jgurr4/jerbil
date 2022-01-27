@@ -52,12 +52,12 @@ public class BridgeTests {
 
   @Test
   void syncCreateSchemaReusedFail() {
-    StepVerifier.create(
-        DataGlobal.bridge.execute("use test; alter table player drop column name")
-          .flatMap(result -> result.getRowsUpdated())
-          .next())
-      .expectNext(0)
-      .verifyComplete();
+//    StepVerifier.create(
+//        DataGlobal.bridge.execute("use test; alter table player drop column name")
+//          .flatMap(result -> result.getRowsUpdated())
+//          .next())
+//      .expectNext(0)
+//      .verifyComplete();
     StepVerifier.create(testDb.sync(DdlOption.create)
         .filter(db -> db.hasError()))
       .consumeNextWith(db -> {

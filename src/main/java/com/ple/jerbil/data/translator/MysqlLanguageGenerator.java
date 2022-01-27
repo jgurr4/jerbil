@@ -5,7 +5,10 @@ import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
-import com.ple.util.*;
+import com.ple.util.IArrayList;
+import com.ple.util.IHashMap;
+import com.ple.util.IList;
+import com.ple.util.IMap;
 import org.jetbrains.annotations.NotNull;
 
 public class MysqlLanguageGenerator implements LanguageGenerator {
@@ -52,21 +55,23 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private String getTableNameFromSql(String createTableSql) {
-    final int nameIndex = createTableSql.indexOf("`");
-    final String tableName = createTableSql.substring(nameIndex, createTableSql.indexOf("`", nameIndex));
+    createTableSql = createTableSql.replaceFirst("^.* `", "");
+    final String tableName = createTableSql.substring(0, createTableSql.indexOf("`"));
     return tableName;
   }
 
   private IList<Column> createColumnsFromTableString(String formattedTable) {
-    //TODO: Finish implementing this method.
-    final IMap<String, String[]> indexedColumns = IHashMap.empty;
+    IMap<String, String[]> indexedColumns = IHashMap.empty;
     IList<Column> columns = IArrayList.make();
-    if (formattedTable.contains("primary key (")) {
-      final int primaryIndex = formattedTable.indexOf("primary key (");
-      final String[] colArr = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex)).split(", ");
-      indexedColumns.put("primary key", colArr);
+    if (formattedTable.contains("PRIMARY KEY (")) {
+      final int primaryIndex = formattedTable.indexOf("PRIMARY KEY (") + 13;
+      final String[] primaryColumns = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex)).split(",");
+      indexedColumns = indexedColumns.put("PRIMARY KEY", primaryColumns);
     }
-    if (formattedTable.contains("key (")) {
+    if (formattedTable.matches("\nKEY \\(")) {
+      final int primaryIndex = formattedTable.indexOf("PRIMARY KEY (") + 13;
+      final String[] keyColumns = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex)).split(",");
+      indexedColumns = indexedColumns.put("KEY", keyColumns);
     }
     final String[] tableLines = formatToColumnLines(formattedTable);
     for (String tableLine : tableLines) {
@@ -76,22 +81,27 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private Column getColumnFromSql(String tableLine, IMap<String, String[]> indexedColumns) {
+    tableLine = tableLine.stripLeading();
     final String colName = tableLine.replaceFirst(" .*", "");
     final DataSpec dataSpec = getDataSpecFromSql(tableLine);
     final Expression generatedFrom = getGeneratedFromSql(tableLine);
     boolean indexed = false;
     boolean primary = false;
-    for (String column : indexedColumns.get("primary key")) {
-      if (column.equals(colName)) {
-        primary = true;
+    if (indexedColumns.keySet().contains("PRIMARY KEY")) {
+      for (String column : indexedColumns.get("PRIMARY KEY")) {
+        if (column.equals(colName)) {
+          primary = true;
+        }
       }
     }
-    for (String column : indexedColumns.get("key")) {
-      if (column.equals(colName)) {
-        indexed = true;
+    if (indexedColumns.keySet().contains("KEY")) {
+      for (String column : indexedColumns.get("KEY")) {
+        if (column.equals(colName)) {
+          indexed = true;
+        }
       }
     }
-    if (tableLine.contains("auto_increment")) {
+    if (tableLine.contains("AUTO_INCREMENT")) {
       return NumericColumn.make(colName, dataSpec, indexed, primary, true, (NumericExpression) generatedFrom);
     } else if (dataSpec.dataType == DataType.integer || dataSpec.dataType == DataType.decimal || dataSpec.dataType == DataType.bigint || dataSpec.dataType == DataType.tinyint) {
       return NumericColumn.make(colName, dataSpec, indexed, primary, false, (NumericExpression) generatedFrom);
@@ -113,27 +123,48 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private DataSpec getDataSpecFromSql(String tableLine) {
-    //TODO: Implement this method.
-    return null;
+    DataType dataType = null;
+    int size = 0;
+    String regex = "";
+    int endIndex = 0;
+    if (tableLine.contains(" enum(")) {
+      tableLine = tableLine.replaceFirst("^.* enum\\(", "").replaceAll("'", "");
+      endIndex = tableLine.indexOf(") ");
+      return DataSpec.make(DataType.enumeration, tableLine.substring(0, endIndex));
+    } else if (tableLine.contains(" set(")) {
+      tableLine = tableLine.replaceFirst("^.* set\\(", "").replaceAll("'", "");
+      endIndex = tableLine.indexOf(") ");
+      return DataSpec.make(DataType.enumeration, tableLine.substring(0, endIndex));
+    } else if (tableLine.contains(" varchar(")) {
+      regex = "^.* varchar\\(";
+      dataType = DataType.varchar;
+    } else if (tableLine.contains(" int(")) {
+      regex = "^.* int\\(";
+      dataType = DataType.integer;
+    } else if (tableLine.contains(" bigint(")) {
+      regex = "^.* bigint\\(";
+      dataType = DataType.bigint;
+    } else if (tableLine.contains(" tinyint(")) {
+      regex = "^.* tinyint\\(";
+      dataType = DataType.tinyint;
+    }
+    tableLine = tableLine.replaceFirst(regex, "");
+    endIndex = tableLine.indexOf(")");
+    size = Integer.parseInt(tableLine.substring(0, endIndex));
+    return DataSpec.make(dataType, size);
   }
 
   private String[] formatToColumnLines(String formattedTable) {
     return formattedTable
-      .replaceAll("\n\\) engine=.*", "")
-      .replaceAll("^create table .*\n", "")
-      .replaceAll("\nprimary key .*", "")
-      .replaceAll("\nkey \\(.*", "")
+      .replaceAll("\n\\) ENGINE=.*", "")
+      .replaceAll("^CREATE TABLE .*\n", "")
+      .replaceAll("\n\s+PRIMARY KEY .*", "")
+      .replaceAll("\n\s+KEY .* \\(.*", "")
       .split("\n");
   }
 
   private String formatTable(String tableInfo) {
-    return tableInfo
-      .replaceAll("`", "")
-      .replaceAll(" int\\([0-9].*\\) ", " int ")
-      .replaceAll(" varchar\\([0-9].*\\) ", " varchar ")
-//      .replaceAll(" not null,", ",")
-//      .replaceAll(" not null ", " ")
-      .replaceAll("^  ", "");
+    return tableInfo.replaceAll("`", "");
   }
 
   private String toSql(SelectQuery selectQuery) {
@@ -459,7 +490,13 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         sql += strCol.dataSpec.dataType.name() + "(" + strCol.dataSpec.size + ")" + " not null" + primary;
       } else if (strCol.dataSpec.dataType == DataType.enumeration) {
         final EnumSpec enumSpec = (EnumSpec) strCol.dataSpec;
-        sql += "enum" + enumSpec.enumStr + " not null" + primary;
+        sql += "enum(";
+        String separator = "'";
+        for (String value : enumSpec.values) {
+          sql += separator + value + "'";
+          separator = ",'";
+        }
+        sql += ") not null" + primary;
       }
     }
     sql = sql.replaceAll("not null primary key", "primary key");

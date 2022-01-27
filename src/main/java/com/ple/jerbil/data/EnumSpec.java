@@ -2,16 +2,16 @@ package com.ple.jerbil.data;
 
 public class EnumSpec extends DataSpec {
 
-  public final String enumStr;
+  public final String[] values;
 
   @Immutable
-  protected EnumSpec(DataType dataType, int size, String enumStr) {
+  protected EnumSpec(DataType dataType, int size, String[] values) {
     super(dataType, size);
-    this.enumStr = enumStr;
+    this.values = values;
   }
 
-  public static EnumSpec make(DataType type, int size, String enumStr) {
-    return new EnumSpec(type, size, enumStr);
+  public static EnumSpec make(DataType type, int size, String[] values) {
+    return new EnumSpec(type, size, values);
   }
 
 }

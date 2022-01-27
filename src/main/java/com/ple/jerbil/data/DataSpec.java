@@ -49,16 +49,18 @@ public class DataSpec {
 
   public static DataSpec make(DataType type, Class enumObj) {
     final EnumSet enumSet = EnumSet.allOf(enumObj);
-    String enumStr = "(";
-    String separator = "";
-    int size = 0;
-    for (Object e : enumSet) {
-      enumStr += separator + "'" + ((Enum) e).name() + "'";
-      separator = ",";
-      size++;
+    String[] enums = new String[enumSet.size()];
+    int i = 0;
+    for (Object o : enumSet) {
+      enums[i] = o.toString();
+      i++;
     }
-    enumStr += ")";
-    return EnumSpec.make(type, size, enumStr);
+    return EnumSpec.make(type, enums.length, enums);
+  }
+
+  public static DataSpec make(DataType type, String enumStr) {
+    final String[] enums = enumStr.split(",");
+    return EnumSpec.make(type, enums.length, enums);
   }
 
   public static DataSpec make(DataType type) {
