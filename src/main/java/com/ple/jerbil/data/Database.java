@@ -10,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -110,6 +109,10 @@ public class Database {
   }
 
   private Mono<Database> checkDbStructure() {
+    return checkDbStructure(null);
+  }
+
+  private Mono<Database> checkDbStructure(DdlOption ddlOption) {
     if (hasError() || firstTimeGenerated()) {
       return Mono.just(this);
     }
@@ -123,18 +126,44 @@ public class Database {
     return DataGlobal.bridge.execute("use " + name + "; show tables")
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
       .filter(tableName -> !finalTableList.contains(tableName))
-      .doOnNext(tableName -> System.out.println("Extra table `" + tableName + "` exists in database: `" + name + "`"))  //FIXME: Find out why .contains method is not working to filter out the inventory table even though it should.
+      .doOnNext(tableName -> System.out.println("Extra table `" + tableName + "` found in local/remote database: `" + name + "`"))
       .map(tableName -> make(name, tables, "\n[WARNING]: diffs exist between Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType))
+      .filter(db -> {
+        if (ddlOption == DdlOption.update) {
+          return false;
+        }
+        return true;
+      })
       .switchIfEmpty(DataGlobal.bridge.execute("use " + name + "; show tables")
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
         .collectList()
         .flatMap(listOfTables -> Flux.just(finalTableList.toArray())
           .filter(tableName -> !listOfTables.contains(tableName))
-          .doOnNext(tableName -> System.out.println("Missing table `" + tableName + "` in database: `" + name + "`"))
+          .doOnNext(tableName -> {
+            if (ddlOption == DdlOption.update) {
+              generateMissingTable(tableName);
+            } else {
+              System.out.println("Missing table `" + tableName + "` in database: `" + name + "`");
+            }
+          })
           .next()
-          .map(tableName -> make(name, tables, "\n[WARNING]: diffs exist between Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType)))
+          .map(tableName -> {
+            if (ddlOption == DdlOption.update) {
+              return make(name, tables, null, GeneratedType.modified);
+            }
+            return make(name, tables, "\n[WARNING]: diffs exist between Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType);
+          }))
         .defaultIfEmpty(this))
       .next();
+  }
+
+  private void generateMissingTable(String tableName) {
+    Flux.just(tables.toArray())
+      .filter(table -> table.name.equals(tableName))
+      .next()
+      .doOnNext(table -> DataGlobal.bridge.execute(table.toSql()))
+      .doOnNext(table -> System.out.println("Successfully generated missing table: " + table.name))
+      .subscribe();
   }
 
   private Mono<Database> checkTableStructure() {
@@ -187,36 +216,12 @@ public class Database {
     if (hasError() || firstTimeGenerated()) {
       return Mono.just(this);
     }
-    Boolean dbExists = false;
-    DataGlobal.bridge.execute("show databases;")
-      .flatMap(result -> result.map((row, rowMetadata) -> row.get("Database")))
-      .filter(el -> el == name)
-      .switchIfEmpty(DataGlobal.bridge.execute("create database" + name))
-      //TODO: Consider printing out that a database was created here if rowsupdated had values.
-      .subscribe();
-    final IList<Table> schemaTableList = tables;
-    final List<String> existingTablesList = DataGlobal.bridge.execute("use " + name + " show tables")
-      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
-      .collectList().block();
-    for (Table table : tables) {
-      if (existingTablesList.contains(table.name)) {
-        schemaTableList.remove(table); // TODO: Run this and make sure the IList.remove() method works correctly.
-      }
-    }
-    for (Table table : schemaTableList) {
-      DataGlobal.bridge.execute(table.toSql()).subscribe(); //TODO: Run this and make sure the table.toSql works correctly
-    }
-    return Mono.just(this);
+    return checkDbStructure(DdlOption.update);
   }
 
   private Mono<Database> updateTableStructure() {
     if (hasError() || firstTimeGenerated()) {
       return Mono.just(this);
-    }
-    for (Table table : tables) {
-      DataGlobal.bridge.execute("use test; show create table" + table)
-        .flatMap(result -> result.map((row, rowMetadata) -> row.get("create table")))
-        .subscribe();
     }
     return Mono.just(this);
   }

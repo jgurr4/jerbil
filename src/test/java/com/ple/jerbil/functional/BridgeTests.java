@@ -107,19 +107,25 @@ public class BridgeTests {
       .verifyComplete();
   }
 
-/*
   @Test
-  void syncUpdateSchemaTest() {
-    DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
-    assertFalse(testDb.sync(DdlOption.update).block().hasError());
-    StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
-      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
-      .filter(e -> e.contains("`name` varchar(20) NOT NULL,"))
-        .map(e -> true))
-      .expectNext(true)
+  void syncUpdateSchemaWithMissingTable() {
+    StepVerifier.create(DataGlobal.bridge.execute("use test; drop table player")
+        .flatMap(Result::getRowsUpdated)
+        .next())
+      .expectNext(0)
+      .verifyComplete();
+    StepVerifier.create(testDb.sync(DdlOption.update)
+        .filter(Database::hasError)
+        .doOnNext(db -> System.out.println(db.errorMessage)))
+      .verifyComplete();
+    StepVerifier.create(DataGlobal.bridge.execute("use test; create table player (playerId int auto_increment, userId int not null, name varchar(20) not null, primary key (playerId)) ENGINE=Innodb")
+        .flatMap(Result::getRowsUpdated)
+        .next())
+      .expectNext(0)
       .verifyComplete();
   }
 
+/*
   @Test
   void syncReplaceSchemaTest() {
     DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
