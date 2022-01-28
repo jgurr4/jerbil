@@ -7,14 +7,17 @@ import com.ple.jerbil.data.GeneratedType;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.*;
 import io.r2dbc.spi.Result;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class BridgeTests {
 
@@ -149,23 +152,26 @@ public class BridgeTests {
       .verifyComplete();
   }
 
-/*
   @Test
   void syncReplaceSchemaTest() {
     DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
-    testDb.sync(DdlOption.replace);
-    StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
-        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("`create table`")))
-        .filter(e -> e.contains("`name` varchar(20) NOT NULL,"))
-        .map(e -> true))
-      .expectNext(true)
-      .verifyComplete();
-    StepVerifier.create(DataGlobal.bridge.execute("select * from player")
-      .flatMap(result -> result.map((row, rowMetadata) -> row.get("name"))))
+    StepVerifier.create(testDb.sync(DdlOption.replace)
+        .delayElement(Duration.ofMillis(100))
+        .thenMany(DataGlobal.bridge.execute("use test; show create table player")
+          .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
+          .doOnNext(System.out::println)
+          .filter(e -> e.contains("`name` varchar(20) NOT NULL,"))
+          .map(e -> true)
+          .doOnNext(Assertions::assertTrue)
+          .delayElements(Duration.ofMillis(100)))
+        .then(DataGlobal.bridge.execute("use test; select * from player")
+          .flatMap(result -> result.map((row, rowMetadata) -> row.get("name")))
+          .next()))
       .expectNextCount(0)
       .verifyComplete();
   }
 
+/*
   @Test
   void syncReplaceDropSchemaTest() {
     testDb.sync(DdlOption.replaceDrop);

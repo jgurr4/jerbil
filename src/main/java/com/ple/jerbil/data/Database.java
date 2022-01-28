@@ -85,7 +85,8 @@ public class Database {
         .flatMap(Database::updateSchemaStructure)
         .flatMap(Database::updateTableStructure);
     } else if (ddlOption == DdlOption.replace) {
-      return createSchema(Create.shouldDrop);
+      return DataGlobal.bridge.execute("drop database if exists " + name).then(createSchema(Create.shouldDrop));
+//      return createSchema(Create.shouldDrop);
     } else if (ddlOption == DdlOption.replaceDrop) {
       //TODO: Make it so that when the program exits, a command is run likely inside the MariadbR2dbcBridge which drops the database.
       return createSchema(Create.shouldDrop); //.drop();
@@ -97,9 +98,9 @@ public class Database {
     if (hasError()) {
       return Mono.just(this);
     }
-    if (createOption == Create.shouldDrop) {
-      DataGlobal.bridge.execute("drop database " + name);
-    }
+//    if (createOption == Create.shouldDrop) {
+//      DataGlobal.bridge.execute("drop database " + name).subscribe();
+//    }
     return DataGlobal.bridge.execute("show databases;")
       .flatMap(result -> result.map((row, rowMetadata) -> row.get("database")))
       .filter(dbName -> dbName.equals(name))
