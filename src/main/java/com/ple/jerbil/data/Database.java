@@ -25,21 +25,21 @@ public class Database {
   @Nullable
   public final String errorMessage;
   @Nullable
-  public final SchemaType schemaType;
+  public final GeneratedType generatedType;
 
-  public Database(String name, @Nullable IList<Table> tables, @Nullable String errorMessage, @Nullable SchemaType schemaType) {
+  public Database(String name, @Nullable IList<Table> tables, @Nullable String errorMessage, @Nullable GeneratedType generatedType) {
     this.name = name;
     this.tables = tables;
     this.errorMessage = errorMessage;
-    this.schemaType = schemaType;
+    this.generatedType = generatedType;
   }
 
   public static Database make(String name) {
     return new Database(name, null, null, null);
   }
 
-  public static Database make(String name, IList<Table> tables, String errorMessage, SchemaType schemaType) {
-    return new Database(name, tables, errorMessage, schemaType);
+  public static Database make(String name, IList<Table> tables, String errorMessage, GeneratedType generatedType) {
+    return new Database(name, tables, errorMessage, generatedType);
   }
 
   public Database add(Table... tables) {
@@ -51,8 +51,8 @@ public class Database {
   }
 
   public boolean firstTimeGenerated() {
-    if (schemaType != null) {
-      return schemaType == SchemaType.generated;
+    if (generatedType != null) {
+      return generatedType == GeneratedType.generated;
     }
     return false;
   }
@@ -82,7 +82,10 @@ public class Database {
         .flatMap(Database::updateSchemaStructure)
         .flatMap(Database::updateTableStructure);
     } else if (ddlOption == DdlOption.replace) {
+      return createSchema(Create.shouldDrop);
     } else if (ddlOption == DdlOption.replaceDrop) {
+      //TODO: Make it so that when the program exits, a command is run likely inside the MariadbR2dbcBridge which drops the database.
+      return createSchema(Create.shouldDrop); //.drop();
     }
     return Mono.just(this);
   }
@@ -98,16 +101,14 @@ public class Database {
       .flatMap(result -> result.map((row, rowMetadata) -> row.get("database")))
       .filter(dbName -> dbName.equals(name))
       .next()
-      .map(db -> make(name, tables, null, SchemaType.reused))
+      .map(db -> make(name, tables, null, GeneratedType.reused))
       .doOnNext((e) -> System.out.println("(DB Sync): Re-using existing schema: `" + name + "`"))
       .switchIfEmpty(DataGlobal.bridge.execute(createAll().toSql())
         .doOnSubscribe((e) -> System.out.println("(DB Sync): Auto-generated schema: `" + name + "`"))
-        .map(e -> make(name, tables, null, SchemaType.generated)).next());
+        .map(e -> make(name, tables, null, GeneratedType.generated)).next());
 //      .onErrorContinue((err, type) -> make(name, tables, true, err.getMessage())) //FIXME: Find out how to return database object with error message by catching error in stream rather than throwing error.
   }
 
-  // FIXME: After getting IArrayList working replace ArrayList and try to do everything inside streams instead of using
-  // iterations.
   private Mono<Database> checkDbStructure() {
     if (hasError() || firstTimeGenerated()) {
       return Mono.just(this);
@@ -123,7 +124,7 @@ public class Database {
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
       .filter(tableName -> !finalTableList.contains(tableName))
       .doOnNext(tableName -> System.out.println("Extra table `" + tableName + "` exists in database: `" + name + "`"))  //FIXME: Find out why .contains method is not working to filter out the inventory table even though it should.
-      .map(tableName -> make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType))
+      .map(tableName -> make(name, tables, "\n[WARNING]: diffs exist between Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType))
       .switchIfEmpty(DataGlobal.bridge.execute("use " + name + "; show tables")
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
         .collectList()
@@ -131,7 +132,7 @@ public class Database {
           .filter(tableName -> !listOfTables.contains(tableName))
           .doOnNext(tableName -> System.out.println("Missing table `" + tableName + "` in database: `" + name + "`"))
           .next()
-          .map(tableName -> make(name, tables, "\n[ERROR]: diffs exist between schema object and the database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.", schemaType)))
+          .map(tableName -> make(name, tables, "\n[WARNING]: diffs exist between Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType)))
         .defaultIfEmpty(this))
       .next();
   }
@@ -150,8 +151,7 @@ public class Database {
       .next()
       .defaultIfEmpty(this);
   }
-  //FIXME: If no table exists with same name, this should also create error inside database functor and log it. This means extra table exists in existing Schema that doesn't exist in java object.
-  //FIXME: If the engine or name doesn't match it should create error inside database functor and also log it. Probably filter out anything that doesn't match and use .map() and .switchIfEmpty().
+
   private Mono<Database> compareTable(Table existingTable) {
     AtomicReference<String> errorMessage = new AtomicReference<>(null);
     if (hasError()) {
@@ -169,17 +169,17 @@ public class Database {
         .filter(table -> table.engine.name().equals(existingTable.engine.name()))
         .doOnNext(table -> {
           if (table == null) {
-            errorMessage.set("Engine of " + existingTable.name + " inside local/remote database is: " + existingTable.engine.name() + ". This does not matching data inside the Database Object." );
+            errorMessage.set("Engine of " + existingTable.name + " inside local/remote database is: " + existingTable.engine.name() + ". This does not match data inside the Database Object." );
           }
         })
         .flatMapMany(table -> Flux.just(table.columns.toArray()))
         .filter(column -> !existingTable.columns.contains(column))
         .doOnNext(column -> System.out.println("\nThis column: \n" + column.toString() + "\ndoes not match any columns found inside this table:\n" + existingTable.toString().replaceAll(", Column\\{", "\nColumn{").replaceFirst("\\{values=\\[Column", "{values=[\nColumn")))
         .next()
-        .map(tableLine -> make(name, tables, "\n[ERROR]: diffs exist in the table structure of some tables between the Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", schemaType))
-        .defaultIfEmpty(make(name, tables, errorMessage.get(), schemaType));
+        .map(tableLine -> make(name, tables, "\n[WARNING]: diffs exist in the table structure of some tables between the Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType))
+        .defaultIfEmpty(make(name, tables, errorMessage.get(), generatedType));
     }
-    return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", schemaType));
+    return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", generatedType));
   }
 
 

@@ -3,12 +3,14 @@ package com.ple.jerbil.functional;
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.DdlOption;
-import com.ple.jerbil.data.SchemaType;
+import com.ple.jerbil.data.GeneratedType;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.*;
+import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.Test;
 import reactor.test.StepVerifier;
 
+import java.util.Optional;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,58 +36,75 @@ public class BridgeTests {
   void syncCreateSchemaGeneratedSuccess() {
     StepVerifier.create(
         DataGlobal.bridge.execute("drop database if exists test")
-          .flatMap(result -> result.getRowsUpdated())
+          .flatMap(Result::getRowsUpdated)
+          .map(numRowsUpdated -> true)
           .next())
-      .expectNext(4)
+      .expectNext(true)
       .verifyComplete();
-    final Database db = testDb.sync(DdlOption.create).block();
-    if (db.hasError()) {
-      System.out.println(db.errorMessage);
-      fail();
+    final Optional<Database> db = testDb.sync(DdlOption.create).blockOptional();
+    if (db.isPresent()) {
+      if (db.get().hasError()) {
+        System.out.println(db.get().errorMessage);
+        fail();
+      }
     }
-    assertEquals(SchemaType.generated, db.schemaType);
+    assertEquals(GeneratedType.generated, db.get().generatedType);
   }
 
   @Test
   void syncCreateSchemaReusedSuccess() {
-    final Database db = testDb.sync(DdlOption.create).block();
-    if (db.hasError()) {
-      System.out.println(db.errorMessage);
-      fail();
+    final Optional<Database> db = testDb.sync(DdlOption.create).blockOptional();
+    if (db.isPresent()) {
+      if (db.get().hasError()) {
+        System.out.println(db.get().errorMessage);
+        fail();
+      }
     }
-    assertEquals(SchemaType.reused, db.schemaType);
+    assertEquals(GeneratedType.reused, db.get().generatedType);
   }
 
   @Test
-  void syncCreateSchemaReusedFail() {
+  void syncCreateSchemaFailWithMissingCol() {
     StepVerifier.create(
         DataGlobal.bridge.execute("use test; alter table player drop column name")
-          .flatMap(result -> result.getRowsUpdated())
+          .flatMap(Result::getRowsUpdated)
           .next())
       .expectNext(0)
       .verifyComplete();
     StepVerifier.create(testDb.sync(DdlOption.create)
-        .filter(db -> db.hasError()))
+        .filter(Database::hasError))
       .consumeNextWith(db -> {
         System.out.println(db.errorMessage);
-        assertEquals(SchemaType.reused, db.schemaType);
+        assertEquals(GeneratedType.reused, db.generatedType);
       })
       .verifyComplete();
     StepVerifier.create(DataGlobal.bridge.execute("use test; alter table player add column name varchar(20) not null")
-        .flatMap(result -> result.getRowsUpdated())
+        .flatMap(Result::getRowsUpdated)
         .next())
       .expectNext(0)
       .verifyComplete();
   }
 
   @Test
-  void syncCreateSchemaFail() {
-    DataGlobal.bridge.execute("use test; create table if not exists something (id int not null); drop table inventory").subscribe();
-    final Database syncAfterChange = testDb.sync(DdlOption.create).block();
-    assert syncAfterChange != null;
-    assertTrue(syncAfterChange.hasError());
-    System.out.println(syncAfterChange.errorMessage);
-    DataGlobal.bridge.execute("use test; drop table something; create table inventory (playerId int, itemId int, primary key (playerId, itemId))ENGINE=Aria;").subscribe();
+  void syncCreateSchemaFailWithExtraTable() {
+    StepVerifier.create(
+        DataGlobal.bridge.execute("use test; create table if not exists something (id int not null)")
+          .flatMap(Result::getRowsUpdated)
+          .next())
+      .expectNext(0)
+      .verifyComplete();
+    StepVerifier.create(testDb.sync(DdlOption.create)
+        .filter(Database::hasError))
+      .consumeNextWith(db -> {
+        System.out.println(db.errorMessage);
+        assertEquals(GeneratedType.reused, db.generatedType);
+      })
+      .verifyComplete();
+    StepVerifier.create(DataGlobal.bridge.execute("use test; drop table something")
+        .flatMap(Result::getRowsUpdated)
+        .next())
+      .expectNext(0)
+      .verifyComplete();
   }
 
 /*
@@ -102,7 +121,6 @@ public class BridgeTests {
   }
 
   @Test
-  @Order(8)
   void syncReplaceSchemaTest() {
     DataGlobal.bridge.execute("use test; alter table player modify column name int not null").subscribe();
     testDb.sync(DdlOption.replace);
@@ -119,7 +137,6 @@ public class BridgeTests {
   }
 
   @Test
-  @Order(9)
   void syncReplaceDropSchemaTest() {
     testDb.sync(DdlOption.replaceDrop);
     //TODO: Figure out how to use exit/shutdown signal to call a method which will drop the schema.

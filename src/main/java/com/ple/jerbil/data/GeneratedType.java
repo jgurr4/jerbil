@@ -1,6 +1,6 @@
 package com.ple.jerbil.data;
 
-public enum SchemaType {
+public enum GeneratedType {
   generated,
   reused,
   modified

@@ -28,7 +28,7 @@ public class MariadbR2dbcBridge implements DataBridge {
   public final String database;
   public final ConnectionPool pool;
 
-  protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password, @Nullable String database, @Nullable ConnectionPool pool) {
+  protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password, @Nullable String database, ConnectionPool pool) {
     this.driver = driver;
     this.host = host;
     this.port = port;
@@ -43,15 +43,15 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   public static DataBridge make(String driver, String host, int port, String username, String password, String database) {
-    return new MariadbR2dbcBridge(driver, host, port, username, password, database, null);
+    return new MariadbR2dbcBridge(driver, host, port, username, password, database, startConnection(host, port, username, password, database));
   }
 
   public static DataBridge make(String driver, String host, int port, String username, String password) {
-    return new MariadbR2dbcBridge(driver, host, port, username, password, null, null);
+    return new MariadbR2dbcBridge(driver, host, port, username, password, null, startConnection(host, port, username, password, null));
   }
 
   public static DataBridge make(String host, int port, String username, String password) {
-    return new MariadbR2dbcBridge("r2dbc:mariadb", host, port, username, password, null, null);
+    return new MariadbR2dbcBridge("r2dbc:mariadb", host, port, username, password, null, startConnection(host, port, username, password, null));
   }
 
   @Override
@@ -81,28 +81,32 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   private Mono<MariadbR2dbcBridge> createConnectionPool() {
-    return Mono.just(MariadbConnectionConfiguration.builder()
+    return Mono.just(startConnection(host, port, username, password, database))
+      .map(pool -> MariadbR2dbcBridge.make(driver, host, port, username, password, database, pool))
+      .doOnError(e -> {
+        throw new IllegalArgumentException("Issue creating connection pool");
+      })
+      .doOnSuccess(bridge -> {
+        if (bridge.pool != null) bridge.pool.close();
+      });
+  }
+
+  private static ConnectionPool startConnection(String host, int port, String username, String password, String database) {
+    final MariadbConnectionConfiguration factoryConfig = MariadbConnectionConfiguration.builder()
       .host(host)
       .port(port)
       .username(username)
       .allowMultiQueries(true)
       .password(password)
-      .database(database))
-      .map(MariadbConnectionConfiguration.Builder::build)
-      .map(MariadbConnectionFactory::from)
-      .map(factory -> ConnectionPoolConfiguration.builder(factory)
-        .maxIdleTime(Duration.ofMillis(1000))
-        .maxSize(20)
-        .build())
-      .map(poolConfig -> MariadbR2dbcBridge.make(driver, host, port, username, password, database, new ConnectionPool(poolConfig)))
-      .doOnError(e -> {
-//        System.err.println("Issue creating connection pool");
-//        e.printStackTrace();
-        throw new IllegalArgumentException("Issue creating connection pool");
-      } )
-      .doOnSuccess(bridge -> {
-        if (bridge.pool != null) bridge.pool.close();
-      });
+      .database(database)
+      .build();
+    final MariadbConnectionFactory connFactory = new MariadbConnectionFactory(factoryConfig);
+    final ConnectionPoolConfiguration poolConfig = ConnectionPoolConfiguration
+      .builder(connFactory)
+      .maxIdleTime(Duration.ofMillis(1000))
+      .maxSize(20)
+      .build();
+    return new ConnectionPool(poolConfig);
   }
 
 }
