@@ -424,6 +424,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private String toSqlArithmetic(String sql, ArithmeticExpression arExp) {
     String operator = "";
+    sql = "";
     try {
       if (arExp.type == Operator.plus) {
         operator = " + ";
@@ -466,7 +467,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   //TODO: Add support for specifying Null on a column. Leave not null off because that is default.
   public String toSql(Column column) {
-    String sql = "";
+    String sql = column.getName() + " ";
     String primary = "";
     String autoIncrement = "";
     String preciseScale = "";
@@ -553,7 +554,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     final IList<Column> columns = createQuery.fromExpression.tableList().get(0).columns;
     String separator = "  ";
     for (int i = 0; i < columns.toArray().length; i++) {
-      sql += separator + columns.get(i).getName() + " " + toSql(columns.get(i));
+      sql += separator + toSql(columns.get(i));
       separator = ",\n  ";
     }
     String indexes = gatherIndexes(columns);

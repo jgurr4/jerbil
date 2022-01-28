@@ -4,11 +4,14 @@ import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
+import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
@@ -110,7 +113,11 @@ public class Database {
   }
 
   private Mono<Database> checkDbStructure() {
-    return checkDbStructure(null);
+    return checkDbStructure(DdlOption.create);
+  }
+
+  private Mono<Database> checkTableStructure() {
+    return checkTableStructure(DdlOption.create);
   }
 
   private Mono<Database> checkDbStructure(DdlOption ddlOption) {
@@ -136,6 +143,7 @@ public class Database {
         return true;
       })
       .switchIfEmpty(DataGlobal.bridge.execute("use " + name + "; show tables")
+        .publishOn(Schedulers.single())
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
         .collectList()
         .flatMap(listOfTables -> Flux.just(finalTableList.toArray())
@@ -148,7 +156,7 @@ public class Database {
             }
           })
           .next()
-          .delayElement(Duration.ofMillis(100)) //FIXME: Find another way of doing this which doesn't force waiting until 100ms has finished.
+//          .delayElement(Duration.ofMillis(100))  //This is an alternative to .publishOn(Schedulers.single()) This is bad practice because it blocks for 100ms every time. Reason for use was to allow generateMissingTable() time to finish.
           .map(tableName -> {
             if (ddlOption == DdlOption.update) {
               return make(name, tables, null, GeneratedType.modified);
@@ -169,7 +177,7 @@ public class Database {
       .subscribe();
   }
 
-  private Mono<Database> checkTableStructure() {
+  private Mono<Database> checkTableStructure(DdlOption ddlOption) {
     if (hasError() || firstTimeGenerated()) {
       return Mono.just(this);
     }
@@ -178,13 +186,13 @@ public class Database {
       .flatMap(tableName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tableName)
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
         .map(createTableString -> Table.fromSql(createTableString))
-        .flatMap(existingTable -> compareTable(existingTable)))
+        .flatMap(existingTable -> compareTable(existingTable, ddlOption)))
       .filter(db -> db.hasError())
       .next()
       .defaultIfEmpty(this);
   }
 
-  private Mono<Database> compareTable(Table existingTable) {
+  private Mono<Database> compareTable(Table existingTable, DdlOption ddlOption) {
     AtomicReference<String> errorMessage = new AtomicReference<>(null);
     if (hasError()) {
       return Mono.just(this);
@@ -195,23 +203,48 @@ public class Database {
         .next()
         .doOnNext(table -> {
           if (table == null) {
-            errorMessage.set("A table inside Database Object is missing from the local/remote database.");
+            System.out.println("An extra table was found inside the local/remote database that has not been specified in the Database Object: \n" + existingTable.toString());
           }
         })
         .filter(table -> table.engine.name().equals(existingTable.engine.name()))
         .doOnNext(table -> {
-          if (table == null) {
-            errorMessage.set("Engine of " + existingTable.name + " inside local/remote database is: " + existingTable.engine.name() + ". This does not match data inside the Database Object." );
+          if (table == null && ddlOption == DdlOption.create) {
+            errorMessage.set("Engine of " + existingTable.name + " inside local/remote database is: " + existingTable.engine.name() + ". This does not match data inside the Database Object.");
           }
         })
         .flatMapMany(table -> Flux.just(table.columns.toArray()))
         .filter(column -> !existingTable.columns.contains(column))
-        .doOnNext(column -> System.out.println("\nThis column: \n" + column.toString() + "\ndoes not match any columns found inside this table:\n" + existingTable.toString().replaceAll(", Column\\{", "\nColumn{").replaceFirst("\\{values=\\[Column", "{values=[\nColumn")))
+        .doOnNext(column -> System.out.println("\nThis column: \n" + column.toString() + "\ndoes not match any columns found inside the table in the local/remote database:\n" + existingTable.toString().replaceAll(", Column\\{", "\nColumn{").replaceFirst("\\{values=\\[Column", "{values=[\nColumn")))
+        .map(column -> {
+          if (ddlOption == DdlOption.create) {
+            return make(name, tables, "\n[WARNING]: diffs exist in the table structure of some tables between the Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType);
+          } else if (ddlOption == DdlOption.update) {
+            alterTable(existingTable, column)
+              .doOnNext(bool -> {
+                if (bool) {
+                  System.out.println("Successfully generated missing column: " + column);
+                } else {
+                  errorMessage.set("[ERROR]: Failed to generate missing column:\n" + column + "\n");
+                }
+              })
+              .subscribe();
+            return make(name, tables, errorMessage.get(), GeneratedType.modified);
+          }
+          return make(name, tables, errorMessage.get(), generatedType);
+        })
         .next()
-        .map(tableLine -> make(name, tables, "\n[WARNING]: diffs exist in the table structure of some tables between the Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType))
+        .delayElement(Duration.ofMillis(100))  //FIXME: Find alternative that doesn't block for 100ms every time.
         .defaultIfEmpty(make(name, tables, errorMessage.get(), generatedType));
     }
     return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", generatedType));
+  }
+
+  private Mono<Boolean> alterTable(Table existingTable, Column column) {
+    System.out.println("use test; alter table " + existingTable.name + " add column " + column.toSql());
+    return DataGlobal.bridge.execute("use test; alter table " + existingTable.name + " add column " + column.toSql())
+      .flatMap(Result::getRowsUpdated)
+      .next()
+      .hasElement();
   }
 
   private Mono<Database> updateSchemaStructure() {
@@ -225,7 +258,7 @@ public class Database {
     if (hasError() || firstTimeGenerated()) {
       return Mono.just(this);
     }
-    return Mono.just(this);
+    return checkTableStructure(DdlOption.update);
   }
 
 

@@ -13,7 +13,8 @@ import reactor.test.StepVerifier;
 import java.util.Optional;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BridgeTests {
 
@@ -66,7 +67,7 @@ public class BridgeTests {
   @Test
   void syncCreateSchemaFailWithMissingCol() {
     StepVerifier.create(
-        DataGlobal.bridge.execute("use test; alter table player drop column name")
+        DataGlobal.bridge.execute("use test; alter table player drop column if exists name")
           .flatMap(Result::getRowsUpdated)
           .next())
       .expectNext(0)
@@ -123,6 +124,28 @@ public class BridgeTests {
         .doOnNext(System.out::println)
         .filter(tableName -> tableName.equals("player")))
       .expectNext("player")
+      .verifyComplete();
+  }
+
+  @Test
+  void syncUpdateSchemaWithMissingColumn() {
+    StepVerifier.create(
+        DataGlobal.bridge.execute("use test; alter table player drop column if exists name")
+          .flatMap(Result::getRowsUpdated)
+          .next())
+      .expectNext(0)
+      .verifyComplete();
+    StepVerifier.create(testDb.sync(DdlOption.update)
+        .filter(Database::hasError)
+        .doOnNext(db -> System.out.println(db.errorMessage)))
+      .verifyComplete();
+    StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
+        .doOnNext(System.out::println)
+        .filter(row -> row.contains("`name` varchar(20) NOT NULL,"))  //TODO: Make this work with just comparing testdb structure to the fromSql() object of the show create table result.
+        .map(row -> row.replaceAll(".*", "").replaceAll("\n", ""))
+      )
+      .expectNext("")
       .verifyComplete();
   }
 
