@@ -118,10 +118,11 @@ public class BridgeTests {
         .filter(Database::hasError)
         .doOnNext(db -> System.out.println(db.errorMessage)))
       .verifyComplete();
-    StepVerifier.create(DataGlobal.bridge.execute("use test; create table player (playerId int auto_increment, userId int not null, name varchar(20) not null, primary key (playerId)) ENGINE=Innodb")
-        .flatMap(Result::getRowsUpdated)
-        .next())
-      .expectNext(0)
+    StepVerifier.create(DataGlobal.bridge.execute("use test; show tables")
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_test")))
+        .doOnNext(System.out::println)
+        .filter(tableName -> tableName.equals("player")))
+      .expectNext("player")
       .verifyComplete();
   }
 

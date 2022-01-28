@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -147,6 +148,7 @@ public class Database {
             }
           })
           .next()
+          .delayElement(Duration.ofMillis(100)) //FIXME: Find another way of doing this which doesn't force waiting until 100ms has finished.
           .map(tableName -> {
             if (ddlOption == DdlOption.update) {
               return make(name, tables, null, GeneratedType.modified);
@@ -160,9 +162,10 @@ public class Database {
   private void generateMissingTable(String tableName) {
     Flux.just(tables.toArray())
       .filter(table -> table.name.equals(tableName))
+//      .doOnNext(System.out::println)  FIXME: Replace this with logger once I get one.
       .next()
-      .doOnNext(table -> DataGlobal.bridge.execute(table.toSql()))
-      .doOnNext(table -> System.out.println("Successfully generated missing table: " + table.name))
+      .doOnNext(table -> DataGlobal.bridge.execute("use " + name + "; " + table.toSql()).subscribe())
+      .doOnNext(table -> System.out.println("Successfully generated missing table: `" + table.name + "`"))
       .subscribe();
   }
 
@@ -210,7 +213,6 @@ public class Database {
     }
     return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", generatedType));
   }
-
 
   private Mono<Database> updateSchemaStructure() {
     if (hasError() || firstTimeGenerated()) {
