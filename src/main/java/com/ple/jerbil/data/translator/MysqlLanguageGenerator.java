@@ -572,13 +572,13 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String separator = "";
     int primaryCount = 0;
     int indexCount = 0;
-    String indexedColumnName = "";
+    String indexedColumns = "";
     for (Column column : columns) {
       if (column.isPrimary()) {
         primaryCount++;
       } else if (column.isIndexed()) {
         indexCount++;
-        indexedColumnName = separator + column.getName();
+        indexedColumns += separator + column.getName();
         separator = ",";
       }
     }
@@ -594,11 +594,17 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       multiIndex += ")";
     }
     if (indexCount > 0) {
-      multiIndex += ",\n  key " + indexedColumnName + "_idx (";
-      multiIndex += indexedColumnName;
+      multiIndex += ",\n  key " + generateIndexName(indexedColumns) + "_idx (";
+      multiIndex += indexedColumns;
       multiIndex += ")";
     }
     return multiIndex;
+  }
+
+  private String generateIndexName(String indexedColumns) {
+    return indexedColumns.replaceAll(",", "_")
+      .replaceAll("[aeiou]", "")
+      .replaceAll("([a-z])\\1*", "$1");
   }
 
 }

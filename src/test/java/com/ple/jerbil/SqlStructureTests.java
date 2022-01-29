@@ -42,7 +42,7 @@ public class SqlStructureTests {
         name varchar(255) not null,
         age int not null,
         primary key (userId),
-        key name_idx (name)
+        key nm_idx (name)
       ) ENGINE=Aria;
       create table player (
         playerId int auto_increment,
@@ -56,7 +56,7 @@ public class SqlStructureTests {
         type enum('weapon','armor','shield','accessory') not null,
         price int not null,
         primary key (itemId),
-        key name_idx (name)
+        key nm_idx (name)
       ) ENGINE=Aria;
       create table inventory (
         playerId int,
@@ -69,7 +69,7 @@ public class SqlStructureTests {
   @Test
   void testAddColumn() {
     final CompleteQuery q2 = item.create();
-    Column newColumn = Column.make("quantity").asInt();
+    Column newColumn = Column.make("quantity").asInt().indexed();
     item.add(newColumn);
     final CompleteQuery q = item.create();
     assertEquals("""
@@ -80,11 +80,13 @@ public class SqlStructureTests {
         price int not null,
         quantity int not null,
         primary key (itemId),
-        key name_idx (name)
+        key nm_qnty_idx (name,quantity)
       ) ENGINE=Aria
       """, q.toSql());
     //FIXME: This should generate the name based on the multi-column names. Ex: key name_product_idx  limit to 7 characters. if limit is reached remove vowels. so it becomes: key nm_prdct_idx
   }
+
+
 
   /*
     @Test
@@ -120,7 +122,7 @@ public class SqlStructureTests {
         quantity int not null,
         total decimal(14, 2) as (price * quantity),
         primary key (itemId),
-        key name_idx (name)
+        key nm_idx (name)
       ) ENGINE=Aria
       """, q.toSql());
   }

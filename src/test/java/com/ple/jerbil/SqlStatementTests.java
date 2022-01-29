@@ -75,7 +75,7 @@ public class SqlStatementTests {
         type enum('weapon','armor','shield','accessory') not null,
         price int not null,
         primary key (itemId),
-        key name_idx (name)
+        key nm_idx (name)
       ) ENGINE=Aria
       """, q.toSql());
 

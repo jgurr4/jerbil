@@ -44,7 +44,6 @@ public class SqlQueryTests {
 
   @Test
   void multipleWhereConditions() {
-
     final CompleteQuery q = user.where(
       and(
         userColumns.name.eq(make("john")),
@@ -114,7 +113,6 @@ public class SqlQueryTests {
 
   @Test
   void testAggregation() {
-
     final CompleteQuery q = item.select(Agg.count);
     assertEquals("""
         select count(*)
@@ -125,7 +123,6 @@ public class SqlQueryTests {
 
   @Test
   void testGroupBy() {
-
     final CompleteQuery q = item.select(itemColumns.type, Agg.count.as("total")).groupBy(itemColumns.type);
     assertEquals("""
         select type, count(*) as total
@@ -137,7 +134,6 @@ public class SqlQueryTests {
 
   @Test
   void testComplexExpressions() {
-
     final CompleteQuery q = item
         .select(itemColumns.price
           .times(make(42))
