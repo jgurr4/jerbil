@@ -32,7 +32,6 @@ public class SqlStatementTests {
 
   @Test
   void testInsertSingle() {
-
     final CompleteQuery q = item.insert().set(itemColumns.name, Literal.make("sword of spirit")).set(
       itemColumns.type,
       Literal.make(ItemType.weapon.toString())
@@ -45,7 +44,6 @@ public class SqlStatementTests {
   }
   @Test
   void testInsertMulti() {
-
     final CompleteQuery q = item.insert().set(
       List.of(itemColumns.name, itemColumns.type),
       List.of(
@@ -61,12 +59,34 @@ public class SqlStatementTests {
       ('shield of faith', 'shield'),
       ('breastplate of righteousness', 'armor')
       """, q.toSql());
+  }
 
+  @Test
+  void testUpdateSingle() {
+  }
+
+  @Test
+  void testUpdateMulti() {
+  }
+
+  @Test
+  void testDeleteSingle() {
+  }
+
+  @Test
+  void testDeleteMulti() {
+  }
+
+  @Test
+  void testReplaceSingle() {
+  }
+
+  @Test
+  void testReplaceMulti() {
   }
 
   @Test
   void testTableCreate() {
-
     final CompleteQuery q = item.create();
     assertEquals("""
       create table item (
@@ -78,12 +98,10 @@ public class SqlStatementTests {
         key nm_idx (name)
       ) ENGINE=Aria
       """, q.toSql());
-
   }
 
   @Test
   void testMultiColumnPrimaryKey() {
-
     final CompleteQuery q = inventory.create();
     assertEquals("""
       create table inventory (
@@ -92,7 +110,5 @@ public class SqlStatementTests {
         primary key (playerId,itemId)
       ) ENGINE=Aria
       """, q.toSql());
-
   }
-
 }

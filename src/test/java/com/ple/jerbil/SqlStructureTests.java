@@ -83,10 +83,7 @@ public class SqlStructureTests {
         key nm_qnty_idx (name,quantity)
       ) ENGINE=Aria
       """, q.toSql());
-    //FIXME: This should generate the name based on the multi-column names. Ex: key name_product_idx  limit to 7 characters. if limit is reached remove vowels. so it becomes: key nm_prdct_idx
   }
-
-
 
   /*
     @Test
