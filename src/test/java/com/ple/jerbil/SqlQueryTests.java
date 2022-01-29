@@ -97,8 +97,8 @@ public class SqlQueryTests {
   void testSelectJoins() {
     final CompleteQuery q = player.join(inventory, item).where(
       and(
-        playerColumns.name.eq("bob"),
-        itemColumns.name.eq("sword")
+        itemColumns.name.eq("bob"),
+        playerColumns.name.eq("sword")
       )
     ).select();
     assertEquals("""
@@ -106,10 +106,9 @@ public class SqlQueryTests {
         from player
         inner join inventory using (playerId)
         inner join item using (itemId)
-        where player.name = 'bob'
-        and item.name = 'sword'
+        where item.name = 'bob'
+        and player.name = 'sword'
         """, q.toSql());
-
   }
 
   @Test
@@ -119,7 +118,6 @@ public class SqlQueryTests {
         select count(*)
         from item
         """, q.toSql());
-
   }
 
   @Test
@@ -130,7 +128,6 @@ public class SqlQueryTests {
         from item
         group by type
         """, q.toSql());
-
   }
 
   @Test
@@ -150,18 +147,17 @@ public class SqlQueryTests {
         from item
         where price / 4 > 5
         """, q.toSql());
-
   }
 
   @Test
   void testExpressionWithoutTable() {
     final CompleteQuery q = make(32).minus(make(15)).as("result").select();
     assertEquals("select 32 - 15 as result", q.toSql());
-    //Use this to test results from real mysql database, but this code doesn't belong here for unit tests. Only for integration tests.
-//    StepVerifier.create(q.execute().flatMap(results -> results.map((row, rowMetadata) -> row.get("result", Integer.class)))
-//      .doOnNext(System.out::println))
-//      .expectNext(17)
-//      .verifyComplete();
+//    Use this to test results from real mysql database, but this code doesn't belong here for unit tests. Only for integration tests.
+    StepVerifier.create(q.execute().flatMap(results -> results.map((row, rowMetadata) -> row.get("result", Integer.class)))
+      .doOnNext(System.out::println))
+      .expectNext(17)
+      .verifyComplete();
   }
 
   @Test

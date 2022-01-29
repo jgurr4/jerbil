@@ -85,6 +85,11 @@ public class SqlStructureTests {
       """, q.toSql());
   }
 
+  @Test
+  void dropDatabase() {
+
+  }
+
   /*
     @Test
     void testModifyColumn() {

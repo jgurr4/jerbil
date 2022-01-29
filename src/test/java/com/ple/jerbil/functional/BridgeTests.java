@@ -46,6 +46,7 @@ public class BridgeTests {
       .expectNext(true)
       .verifyComplete();
     final Optional<Database> db = testDb.sync(DdlOption.create).blockOptional();
+    if (db.get().firstTimeGenerated())
     if (db.isPresent()) {
       if (db.get().hasError()) {
         System.out.println(db.get().errorMessage);

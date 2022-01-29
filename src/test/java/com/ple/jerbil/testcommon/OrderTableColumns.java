@@ -30,6 +30,7 @@ public class OrderTableColumns {
 
   public OrderTableColumns(Table table) {
 
+    Column.make("test").id();
     orderId = Column.make("orderId").asBigInt().primary().ai();  //Alternatively just use .bigId() to replace all 3.
     add = Column.make("add").asVarchar().unique().defaultValue();  //Tests unique(), null and defaultValue()
     phrase = Column.make("phrase").asText().fullText();
