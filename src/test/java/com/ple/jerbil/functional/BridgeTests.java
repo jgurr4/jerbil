@@ -90,7 +90,7 @@ public class BridgeTests {
   }
 
   @Test
-  void syncCreateSchemaFailWithExtraTable() {
+  void syncCreateSchemaSucceedWithExtraTable() {
     StepVerifier.create(
         DataGlobal.bridge.execute("use test; create table if not exists something (id int not null)")
           .flatMap(Result::getRowsUpdated)
@@ -98,9 +98,8 @@ public class BridgeTests {
       .expectNext(0)
       .verifyComplete();
     StepVerifier.create(testDb.sync(DdlOption.create)
-        .filter(Database::hasError))
+        .filter(database -> !database.hasError()))
       .consumeNextWith(db -> {
-        System.out.println(db.errorMessage);
         assertEquals(GeneratedType.reused, db.generatedType);
       })
       .verifyComplete();
@@ -132,22 +131,21 @@ public class BridgeTests {
 
   @Test
   void syncUpdateSchemaWithMissingColumn() {
+    final Scheduler single = Schedulers.single();
     StepVerifier.create(
         DataGlobal.bridge.execute("use test; alter table player drop column if exists name")
           .flatMap(Result::getRowsUpdated)
           .next())
       .expectNext(0)
       .verifyComplete();
-    StepVerifier.create(testDb.sync(DdlOption.update)
-        .filter(Database::hasError)
-        .doOnNext(db -> System.out.println(db.errorMessage)))
-      .verifyComplete();
+    assertFalse(testDb.sync(DdlOption.update).publishOn(single).block().hasError());
+
     StepVerifier.create(DataGlobal.bridge.execute("use test; show create table player")
+        .subscribeOn(single)
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
         .doOnNext(System.out::println)
         .filter(row -> row.contains("`name` varchar(20) NOT NULL,"))  //TODO: Make this work with just comparing testdb structure to the fromSql() object of the show create table result.
-        .map(row -> row.replaceAll(".*", "").replaceAll("\n", ""))
-      )
+        .map(row -> row.replaceAll(".*", "").replaceAll("\n", "")))
       .expectNext("")
       .verifyComplete();
   }

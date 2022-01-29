@@ -136,7 +136,7 @@ public class Database {
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
       .filter(tableName -> !finalTableList.contains(tableName))
       .doOnNext(tableName -> System.out.println("Extra table `" + tableName + "` found in local/remote database: `" + name + "`"))
-      .map(tableName -> make(name, tables, "\n[WARNING]: diffs exist between Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType))
+      .map(tableName -> this)
       .filter(db -> {
         if (ddlOption == DdlOption.update) {
           return false;
@@ -144,7 +144,6 @@ public class Database {
         return true;
       })
       .switchIfEmpty(DataGlobal.bridge.execute("use " + name + "; show tables")
-        .publishOn(Schedulers.single())
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
         .collectList()
         .flatMap(listOfTables -> Flux.just(finalTableList.toArray())
@@ -157,12 +156,13 @@ public class Database {
             }
           })
           .next()
-//          .delayElement(Duration.ofMillis(100))  //This is an alternative to .publishOn(Schedulers.single()) This is bad practice because it blocks for 100ms every time. Reason for use was to allow generateMissingTable() time to finish.
           .map(tableName -> {
             if (ddlOption == DdlOption.update) {
               return make(name, tables, null, GeneratedType.modified);
+            } else if (ddlOption == DdlOption.create) {
+              System.out.println("\n[WARNING]: diffs exist between Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n");
             }
-            return make(name, tables, "\n[WARNING]: diffs exist between Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType);
+            return this;
           }))
         .defaultIfEmpty(this))
       .next();
@@ -199,7 +199,7 @@ public class Database {
       return Mono.just(this);
     }
     if (tables != null) {
-      return Flux.just(tables.toArray())
+      final Flux<Column> columnFlux = Flux.just(tables.toArray())
         .filter(table -> table.name.equals(existingTable.name))
         .next()
         .doOnNext(table -> {
@@ -215,27 +215,20 @@ public class Database {
         })
         .flatMapMany(table -> Flux.just(table.columns.toArray()))
         .filter(column -> !existingTable.columns.contains(column))
-        .doOnNext(column -> System.out.println("\nThis column: \n" + column.toString() + "\ndoes not match any columns found inside the table in the local/remote database:\n" + existingTable.toString().replaceAll(", Column\\{", "\nColumn{").replaceFirst("\\{values=\\[Column", "{values=[\nColumn")))
-        .map(column -> {
-          if (ddlOption == DdlOption.create) {
-            return make(name, tables, "\n[WARNING]: diffs exist in the table structure of some tables between the Database Object and the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType);
-          } else if (ddlOption == DdlOption.update) {
-            alterTable(existingTable, column)
-              .doOnNext(bool -> {
-                if (bool) {
-                  System.out.println("Successfully generated missing column: " + column);
-                } else {
-                  errorMessage.set("[ERROR]: Failed to generate missing column:\n" + column + "\n");
-                }
-              })
-              .subscribe();
-            return make(name, tables, errorMessage.get(), GeneratedType.modified);
-          }
-          return make(name, tables, errorMessage.get(), generatedType);
-        })
-        .next()
-        .delayElement(Duration.ofMillis(100))  //FIXME: Find alternative that doesn't block for 100ms every time.
-        .defaultIfEmpty(make(name, tables, errorMessage.get(), generatedType));
+        .doOnNext(column -> System.out.println("\nThis column: \n" + column.toString() + "\ndoes not match any columns found inside the table in the local/remote database:\n" + existingTable.toString().replaceAll(", Column\\{", "\nColumn{").replaceFirst("\\{values=\\[Column", "{values=[\nColumn")));
+      if (ddlOption == DdlOption.update) {
+        return columnFlux.flatMap(column -> alterTable(existingTable, column))
+          .filter(Boolean.FALSE::equals)
+          .next()
+          .doOnNext(bool -> errorMessage.set("[ERROR]: Failed to generate a missing column in table:\n" + existingTable))
+          .map(bool -> make(name, tables, errorMessage.get(), GeneratedType.modified))
+          .defaultIfEmpty(make(name, tables, errorMessage.get(), GeneratedType.modified));
+      } else if (ddlOption == DdlOption.create) {
+        return columnFlux
+          .next()
+          .map(column -> make(name, tables, "\n[ERROR]: Some tables are missing from the local/remote database called `" + name + "`. \n\tDdlOption.create cannot make modifications when there are diffs.\n", generatedType))
+          .defaultIfEmpty(this);
+      }
     }
     return Mono.just(make(name, tables, "[ERROR]: The tables inside Database Object is null.", generatedType));
   }
@@ -245,6 +238,7 @@ public class Database {
     return DataGlobal.bridge.execute("use test; alter table " + existingTable.name + " add column " + column.toSql())
       .flatMap(Result::getRowsUpdated)
       .next()
+      .doOnNext(numRows -> System.out.println("Successfully generated column: " + column))
       .hasElement();
   }
 
