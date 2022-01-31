@@ -1,9 +1,6 @@
 package com.ple.jerbil.functional;
 
-import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.DdlOption;
-import com.ple.jerbil.data.GeneratedType;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.*;
 import io.r2dbc.spi.Result;
@@ -45,7 +42,7 @@ public class BridgeTests {
           .next())
       .expectNext(true)
       .verifyComplete();
-    final Optional<Database> db = testDb.sync(DdlOption.create).blockOptional();
+    final Optional<SyncResult> db = testDb.sync(DdlOption.create).blockOptional();
     if (db.get().firstTimeGenerated())
     if (db.isPresent()) {
       if (db.get().hasError()) {
@@ -58,7 +55,7 @@ public class BridgeTests {
 
   @Test
   void syncCreateSchemaReusedSuccess() {
-    final Optional<Database> db = testDb.sync(DdlOption.create).blockOptional();
+    final Optional<SyncResult> db = testDb.sync(DdlOption.create).blockOptional();
     if (db.isPresent()) {
       if (db.get().hasError()) {
         System.out.println(db.get().errorMessage);
@@ -77,7 +74,7 @@ public class BridgeTests {
       .expectNext(0)
       .verifyComplete();
     StepVerifier.create(testDb.sync(DdlOption.create)
-        .filter(Database::hasError))
+        .filter(SyncResult::hasError))
       .consumeNextWith(db -> {
         System.out.println(db.errorMessage);
         assertEquals(GeneratedType.reused, db.generatedType);
@@ -119,7 +116,7 @@ public class BridgeTests {
       .expectNext(0)
       .verifyComplete();
     StepVerifier.create(testDb.sync(DdlOption.update)
-        .filter(Database::hasError)
+        .filter(SyncResult::hasError)
         .doOnNext(db -> System.out.println(db.errorMessage)))
       .verifyComplete();
     StepVerifier.create(DataGlobal.bridge.execute("use test; show tables")

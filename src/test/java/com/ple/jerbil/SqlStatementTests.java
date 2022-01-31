@@ -61,6 +61,7 @@ public class SqlStatementTests {
       """, q.toSql());
   }
 
+/*
   @Test
   void testUpdateSingle() {
   }
@@ -84,6 +85,7 @@ public class SqlStatementTests {
   @Test
   void testReplaceMulti() {
   }
+*/
 
   @Test
   void testTableCreate() {

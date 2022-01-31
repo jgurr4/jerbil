@@ -154,15 +154,10 @@ public class SqlQueryTests {
     final CompleteQuery q = make(32).minus(make(15)).as("result").select();
     assertEquals("select 32 - 15 as result", q.toSql());
 //    Use this to test results from real mysql database, but this code doesn't belong here for unit tests. Only for integration tests.
-    StepVerifier.create(q.execute().flatMap(results -> results.map((row, rowMetadata) -> row.get("result", Integer.class)))
-      .doOnNext(System.out::println))
-      .expectNext(17)
-      .verifyComplete();
-  }
-
-  @Test
-  void testSome() {
-
+//    StepVerifier.create(q.execute().flatMap(results -> results.map((row, rowMetadata) -> row.get("result", Integer.class)))
+//      .doOnNext(System.out::println))
+//      .expectNext(17)
+//      .verifyComplete();
   }
 
 }

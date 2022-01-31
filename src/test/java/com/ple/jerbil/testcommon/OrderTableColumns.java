@@ -1,3 +1,4 @@
+/*
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.Immutable;
@@ -54,3 +55,4 @@ public class OrderTableColumns {
   //to insert on generated columns without specifying each column name use `default`: insert into experimental values (0, 2.34, 15, default);
   // add support for
 }
+*/
