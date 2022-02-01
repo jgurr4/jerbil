@@ -1,14 +1,8 @@
-package com.ple.jerbil.data;
+package com.ple.jerbil.data.sync;
 
-import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.util.IArrayList;
-import com.ple.util.IList;
-import io.r2dbc.spi.Result;
+import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.DelayedImmutable;
 import org.jetbrains.annotations.Nullable;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 @DelayedImmutable
 public class SyncResult {

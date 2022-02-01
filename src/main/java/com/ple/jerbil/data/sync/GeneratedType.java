@@ -1,4 +1,4 @@
-package com.ple.jerbil.data;
+package com.ple.jerbil.data.sync;
 
 public enum GeneratedType {
   generated,

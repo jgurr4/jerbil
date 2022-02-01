@@ -1,6 +1,4 @@
-package com.ple.jerbil.data;
-
-import com.ple.jerbil.data.query.Table;
+package com.ple.jerbil.data.sync;
 
 /**
  * Configure how the bridge will handle diffs between the schema object and the actual schema inside the database.
@@ -12,6 +10,9 @@ import com.ple.jerbil.data.query.Table;
 
 public class DdlOption {
   public final byte option;
+  private static final byte create = 1 << 2;
+  private static final byte update = 1 << 1;
+  private static final byte delete = 1;
   protected DdlOption(int option) {
     this.option = (byte) option;
   }
@@ -25,31 +26,19 @@ public class DdlOption {
   }
 
   public DdlOption create() {
-    if (option < 0b111) {
-      return new DdlOption(0b100 + option);
-    }
-    return this;
+    return new DdlOption(create|option);
   }
 
   public DdlOption update() {
-    if (option < 0b111) {
-      return new DdlOption(0b010 + option);
-    }
-    return this;
+    return new DdlOption(update|option);
   }
 
   public DdlOption delete() {
-    if (option < 0b111) {
-      return new DdlOption(0b001 + option);
-    }
-    return this;
+    return new DdlOption(delete|option);
   }
 
   public DdlOption all() {
-    if (option < 0b111) {
-      return new DdlOption(0b111);
-    }
-    return this;
+    return new DdlOption(0b111);
   }
 
 }

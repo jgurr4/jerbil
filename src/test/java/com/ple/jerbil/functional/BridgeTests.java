@@ -2,19 +2,13 @@ package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
+import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.testcommon.*;
-import io.r2dbc.spi.Result;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-import reactor.test.StepVerifier;
 
-import java.time.Duration;
-import java.util.Optional;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.ple.jerbil.data.sync.DdlOption.*;
 
 public class BridgeTests {
 
@@ -36,11 +30,24 @@ public class BridgeTests {
   //if db doesn't exist, all options will create it. If it does exist, all options will create database.
   @Test
   void syncCreateWithDbMissing() { //Should create database using Database Object.
-
+    final DdlOption ddlOption = DdlOption.make().create();
+    testDb.sync(ddlOption);
   }
+/*
+
+  sync(db1, db2) {
+    DbDiff dbDiff = DiffService.compare(db1, db2);
+    DbDiff filteredDiff = dbDiff.filter(ddlOption);
+    String sql = filteredDiff.toSql();
+    bridge.execute(sql);
+
+    compare(db1, db2).filter(ddlOption).toSql().execute();
+  }
+*/
 
   @Test
   void syncCreateWithoutConflicts() { //Diffs don't exist in this case so reuse without error.
+    final DdlOption ddlOption = DdlOption.make().create();
 
   }
 
@@ -66,6 +73,7 @@ public class BridgeTests {
 
   @Test
   void syncUpdateWithTableMissing() { //create-level diff exists in tables, so should contain the error inside SyncResult.
+    final DdlOption ddlOption = DdlOption.make().create().update();
 
   }
 
@@ -96,6 +104,7 @@ public class BridgeTests {
 
   @Test
   void syncDeleteWithConflictingTable() { //update-level diffs means delete should contain the error in SyncResult.
+    final DdlOption ddlOption = DdlOption.make().create().update().delete();
 
   }
 

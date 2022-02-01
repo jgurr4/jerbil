@@ -4,6 +4,10 @@ import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.sync.DbDiff;
+import com.ple.jerbil.data.sync.DdlOption;
+import com.ple.jerbil.data.sync.DiffService;
+import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +53,12 @@ public class Database {
   }
 
   public Mono<SyncResult> sync(DdlOption ddlOption) {
-    return Mono.just(SyncResult.make(this));
+    Database existingDb = DiffService.getDb(name);
+    DbDiff dbDiff = DiffService.compare(this, existingDb);
+    DbDiff filteredDiff = dbDiff.filter(ddlOption);
+    String sql = filteredDiff.toSql();
+    return DataGlobal.bridge.execute(sql).next(); //FIXME: Decide whether this should return Result wrapped in SyncResult functor or just Result.
+//    return SyncResult.compare(this, existingDb).filter(ddlOption).toSql().execute();
   }
 
   @Override

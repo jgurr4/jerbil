@@ -80,6 +80,11 @@ public class MariadbR2dbcBridge implements DataBridge {
       .flatMapMany(statement -> statement.execute());
   }
 
+  @Override
+  public Result executeSync(String sql) {
+    return execute(sql).blockLast();
+  }
+
   private Mono<MariadbR2dbcBridge> createConnectionPool() {
     return Mono.just(startConnection(host, port, username, password, database))
       .map(pool -> MariadbR2dbcBridge.make(driver, host, port, username, password, database, pool))
