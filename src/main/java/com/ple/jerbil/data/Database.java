@@ -4,17 +4,10 @@ import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
-import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.Nullable;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-
-import java.time.Duration;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Database is a object representing the database and it's tables.
@@ -35,7 +28,7 @@ public class Database {
     return new Database(name, null);
   }
 
-  public static Database make(String name, IList<Table> tables, String errorMessage, GeneratedType generatedType) {
+  public static Database make(String name, IList<Table> tables) {
     return new Database(name, tables);
   }
 
@@ -52,25 +45,19 @@ public class Database {
   }
 
   public Mono<SyncResult> sync() {
-    return sync(DdlOption.update);
+    return sync(DdlOption.make((byte) 0b110));
   }
 
   public Mono<SyncResult> sync(DdlOption ddlOption) {
-    if (ddlOption == DdlOption.create) {
-      return SyncResult.make(this).createSchema(Create.shouldNotDrop)
-        .flatMap(SyncResult::checkDbStructure)
-        .flatMap(SyncResult::checkTableStructure);
-    } else if (ddlOption == DdlOption.update) {
-      return SyncResult.make(this).createSchema(Create.shouldNotDrop)
-        .flatMap(SyncResult::updateSchemaStructure)
-        .flatMap(SyncResult::updateTableStructure);
-    } else if (ddlOption == DdlOption.replace) {
-      return DataGlobal.bridge.execute("drop database if exists " + name)
-        .then(SyncResult.make(this).createSchema(Create.shouldDrop));
-//      return createSchema(Create.shouldDrop);
-    } else if (ddlOption == DdlOption.replaceDrop) {
-      return SyncResult.make(this).createSchema(Create.shouldDrop);
-    }
     return Mono.just(SyncResult.make(this));
   }
+
+  @Override
+  public String toString() {
+    return "Database{" +
+      "name='" + name + '\'' +
+      ", tables=" + tables +
+      '}';
+  }
+
 }

@@ -90,7 +90,7 @@ public class SqlStructureTests {
   void dropDatabase() {
 
   }
-  
+
     @Test
     void testModifyColumn() {
       Column newColumn = Column.make("quantity", item).integer(5); //When translator sees that the column is not

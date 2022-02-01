@@ -6,10 +6,9 @@ import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.Nullable;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 @DelayedImmutable
 public class SyncResult {
@@ -44,6 +43,7 @@ public class SyncResult {
     return false;
   }
 
+/*
   protected Mono<SyncResult> createSchema(Create createOption) {
     if (hasError()) {
       return Mono.just(this);
@@ -138,13 +138,20 @@ public class SyncResult {
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create table")))
         .map(createTableString -> Table.fromSql(createTableString))
         .flatMap(existingTable -> compareTable(existingTable, ddlOption)))
-      .filter(db -> db.hasError())
       .next()
       .defaultIfEmpty(this);
   }
 
+  private class ErrorHolder {
+    public final String errorMessage;
+    public final Table table;
+    public ErrorHolder(String errorMessage, Table table) {
+      this.errorMessage = errorMessage;
+      this.table = table;
+    }
+  }
+
   private Mono<SyncResult> compareTable(Table existingTable, DdlOption ddlOption) {
-    AtomicReference<String> errorMessage = new AtomicReference<>(null);
     if (hasError()) {
       return Mono.just(this);
     }
@@ -158,21 +165,22 @@ public class SyncResult {
           }
         })
         .filter(table -> table.engine.name().equals(existingTable.engine.name()))
-        .doOnNext(table -> {
+        .map(table -> {
           if (table == null && ddlOption == DdlOption.create) {
-            errorMessage.set("Engine of " + existingTable.name + " inside local/remote database is: " + existingTable.engine.name() + ". This does not match data inside the Database Object.");
+            return new ErrorHolder("Engine of " + existingTable.name + " inside local/remote database is: " + existingTable.engine.name() + ". This does not match data inside the Database Object.", table);
           }
+          return new ErrorHolder(null, table);
         })
-        .flatMapMany(table -> Flux.just(table.columns.toArray()))
-        .filter(column -> !existingTable.columns.contains(column))
-        .doOnNext(column -> System.out.println("\nThis column: \n" + column.toString() + "\ndoes not match any columns found inside the table in the local/remote database:\n" + existingTable.toString().replaceAll(", Column\\{", "\nColumn{").replaceFirst("\\{values=\\[Column", "{values=[\nColumn")));
+        .flatMapMany(errorHolder -> Flux.just(errorHolder.table.columns.toArray())
+          .filter(column -> !existingTable.columns.contains(column))
+          .doOnNext(column -> System.out.println("\n[WARNING]: This column: \n" + column.toString() + "\ndoes not match any columns found inside the table in the local/remote database:\n" + existingTable.toString().replaceAll(", Column\\{", "\nColumn{").replaceFirst("\\{values=\\[Column", "{values=[\nColumn")))
+          .next());
       if (ddlOption == DdlOption.update) {
         return columnFlux.flatMap(column -> alterTable(existingTable, column))
           .filter(Boolean.FALSE::equals)
           .next()
-          .doOnNext(bool -> errorMessage.set("[ERROR]: Failed to generate a missing column in table:\n" + existingTable))
-          .map(bool -> make(db, errorMessage.get(), GeneratedType.modified))
-          .defaultIfEmpty(make(db, errorMessage.get(), GeneratedType.modified));
+          .map(bool -> make(db, "[ERROR]: Failed to generate a missing column in table:\n" + existingTable, GeneratedType.modified))
+          .defaultIfEmpty(make(db, , GeneratedType.modified));
       } else if (ddlOption == DdlOption.create) {
         return columnFlux
           .next()
@@ -205,7 +213,15 @@ public class SyncResult {
     }
     return checkTableStructure(DdlOption.update);
   }
+*/
 
-
+  @Override
+  public String toString() {
+    return "SyncResult{" +
+      "db=" + db +
+      ", errorMessage='" + errorMessage + '\'' +
+      ", generatedType=" + generatedType +
+      '}';
+  }
 
 }

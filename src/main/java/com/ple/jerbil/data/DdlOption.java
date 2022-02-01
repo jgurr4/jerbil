@@ -1,25 +1,55 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.query.Table;
+
 /**
  * Configure how the bridge will handle diffs between the schema object and the actual schema inside the database.
  *
- * The options are as follows: Each one above create is a lower level of preserving existing schema data.
+ * The options are as follows: Each one above create is a lower level of preserving existing schema data and higher
+ * level of altering existing database structure.
  *
- * create : Bridge only creates schema if it doesn't already exist. If any diffs exist between schema object and
- * existing schema it will throw an error and exit program rather than modifying the existing schema.
- *
- * update : (Default) Bridge modifies schema if any diffs exist, or creates schema if it doesn't exist.
- * Does not ever drop tables/schema.
- *
- * replace : Bridge will drop any existing structure and recreate entire schema. Destroys previous data.
- *
- * replaceDrop = Bridge will drop the existing structure and recreate entire schema. Destroys previous data.
- * Then drops schema again when session ends.
- *
- */
-public enum DdlOption {
-  create,
-  update,
-  replace,
-  replaceDrop,
+ **/
+
+public class DdlOption {
+  public final byte option;
+  protected DdlOption(int option) {
+    this.option = (byte) option;
+  }
+
+  public static DdlOption make() {
+    return new DdlOption(0b000);
+  }
+
+  public static DdlOption make(byte i) {
+    return new DdlOption(i);
+  }
+
+  public DdlOption create() {
+    if (option < 0b111) {
+      return new DdlOption(0b100 + option);
+    }
+    return this;
+  }
+
+  public DdlOption update() {
+    if (option < 0b111) {
+      return new DdlOption(0b010 + option);
+    }
+    return this;
+  }
+
+  public DdlOption delete() {
+    if (option < 0b111) {
+      return new DdlOption(0b001 + option);
+    }
+    return this;
+  }
+
+  public DdlOption all() {
+    if (option < 0b111) {
+      return new DdlOption(0b111);
+    }
+    return this;
+  }
+
 }
