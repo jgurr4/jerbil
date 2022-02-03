@@ -81,7 +81,7 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @Override
-  public Result executeSync(String sql) {
+  public Result executeSynchronously(String sql) {
     return execute(sql).blockLast();
   }
 

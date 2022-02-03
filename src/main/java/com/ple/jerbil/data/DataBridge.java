@@ -13,6 +13,6 @@ public interface DataBridge {
 
   Flux<Result> execute(String toSql);
 
-  Result executeSync(String toSql);
+  Result executeSynchronously(String toSql);
 
 }

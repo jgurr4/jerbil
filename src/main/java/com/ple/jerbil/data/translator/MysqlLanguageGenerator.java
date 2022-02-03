@@ -5,6 +5,8 @@ import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
+import com.ple.jerbil.data.sync.DbDiff;
+import com.ple.jerbil.data.sync.Diff;
 import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
 import com.ple.util.IList;
@@ -504,6 +506,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
     sql = sql.replaceAll("not null primary key", "primary key");
     return sql;
+  }
+
+  @Override
+  public String toSql(Diff diff) {
+    return null;
   }
 
   public String toSql(UpdateQuery updateQuery) {

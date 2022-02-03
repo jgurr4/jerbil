@@ -48,16 +48,16 @@ public class Database {
     return completeQueries;
   }
 
-  public Mono<SyncResult> sync() {
+  public SyncResult sync() {
     return sync(DdlOption.make((byte) 0b110));
   }
 
-  public Mono<SyncResult> sync(DdlOption ddlOption) {
+  public SyncResult sync(DdlOption ddlOption) {
     Database existingDb = DiffService.getDb(name);
     DbDiff dbDiff = DiffService.compare(this, existingDb);
-    DbDiff filteredDiff = dbDiff.filter(ddlOption);
+    FilteredDiff filteredDiff = dbDiff.filter(ddlOption);
     String sql = filteredDiff.toSql();
-    return DataGlobal.bridge.execute(sql).next(); //FIXME: Decide whether this should return Result wrapped in SyncResult functor or just Result.
+    return SyncResult.make(DataGlobal.bridge.execute(sql).next(), dbDiff, filteredDiff.errors, filteredDiff.warnings); //FIXME: Decide whether this should return Result wrapped in SyncResult functor or just Result.
 //    return SyncResult.compare(this, existingDb).filter(ddlOption).toSql().execute();
   }
 
@@ -67,6 +67,10 @@ public class Database {
       "name='" + name + '\'' +
       ", tables=" + tables +
       '}';
+  }
+
+  public String drop() {
+    return null;
   }
 
 }

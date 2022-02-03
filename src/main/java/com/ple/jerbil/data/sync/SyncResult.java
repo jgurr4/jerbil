@@ -2,30 +2,40 @@ package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.DelayedImmutable;
+import com.ple.jerbil.data.Immutable;
+import com.ple.util.IList;
+import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.Nullable;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
-@DelayedImmutable
+@Immutable
 public class SyncResult {
-  public final Database db;
-  @Nullable
-  public final String errorMessage;
-  @Nullable
-  public final GeneratedType generatedType;
 
-  protected SyncResult(Database db, @Nullable String errorMessage, @Nullable GeneratedType generatedType) {
-    this.db = db;
-    this.errorMessage = errorMessage;
-    this.generatedType = generatedType;
+  public final Mono<Result> result;
+  public final Diff diff;
+  public final IList<String> errors;
+  public final IList<String> warnings;
+
+  protected SyncResult(Mono<Result> result, Diff diff, IList<String> errors, IList<String> warnings) {
+    this.result = result;
+    this.diff = diff;
+    this.errors = errors;
+    this.warnings = warnings;
   }
 
-  public static SyncResult make(Database db, String errorMessage, GeneratedType generatedType) {
-    return new SyncResult(db, errorMessage, generatedType);
+  public static SyncResult make(Mono<Result> result, Diff diffs, IList<String> errors, IList<String> warnings) {
+    return new SyncResult(result, diffs, errors, warnings);
   }
 
-  public static SyncResult make(Database db) {
-    return new SyncResult(db, null, null);
+  @Override
+  public String toString() {
+    return "SyncResult{" +
+      "result=" + result +
+      ", diffs=" + diff +
+      '}';
   }
-
+/*
   public boolean hasError() {
     return errorMessage != null;
   }
@@ -37,6 +47,7 @@ public class SyncResult {
     return false;
   }
 
+*/
 /*
   protected Mono<SyncResult> createSchema(Create createOption) {
     if (hasError()) {
@@ -208,14 +219,5 @@ public class SyncResult {
     return checkTableStructure(DdlOption.update);
   }
 */
-
-  @Override
-  public String toString() {
-    return "SyncResult{" +
-      "db=" + db +
-      ", errorMessage='" + errorMessage + '\'' +
-      ", generatedType=" + generatedType +
-      '}';
-  }
 
 }

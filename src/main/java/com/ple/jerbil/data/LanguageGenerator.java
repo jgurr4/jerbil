@@ -3,7 +3,7 @@ package com.ple.jerbil.data;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.sync.DbDiff;
+import com.ple.jerbil.data.sync.Diff;
 
 public interface LanguageGenerator {
 
@@ -13,6 +13,6 @@ public interface LanguageGenerator {
 
   String toSql(Column column);
 
-  String toSql(DbDiff dbDiff);
+  String toSql(Diff diff);
 
 }
