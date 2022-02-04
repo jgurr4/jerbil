@@ -5,6 +5,8 @@ import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
 import com.ple.util.IMap;
 
+import static com.ple.jerbil.data.sync.DbProps.*;
+
 /**
  * Contains static methods for obtaining all differences between existing database structure and Database Object.
  * Overall checks for extra, missing or conflicting tables, columns, indexes and procedures of existing database and the
@@ -17,10 +19,15 @@ public class DiffService {
   }
 
   public static DbDiff compare(Database database, Database existingDb) {
-    IMap<String, Object> map = IHashMap.from("exists", IArrayList.make("auto_increment", "null"), "size", 10, "precision", 2);
-    System.out.println(map.get("exists"));
-    System.out.println(map.get("size"));
-    return null;
+    // left: { database : 'test' }
+    // right: { }
+    // both: { tables : [ 'user', 'orders', ], views : [ 'ordersBetweenFebAndJuly' ], storedProcedures : [ 'updateUser' ], charset : "utf8" }
+    IMap<DbProps, Object> left = IHashMap.from(tables, IArrayList.make("inventory"));
+    IMap<DbProps, Object> right = IHashMap.from();
+    IMap<DbProps, Object> both = IHashMap.from(tables, IArrayList.make("user", "player", "item"));
+//    System.out.println(left.get("exists"));
+//    System.out.println(left.get("size"));
+    return DbDiff.make(left, right, both);
   }
 
 }

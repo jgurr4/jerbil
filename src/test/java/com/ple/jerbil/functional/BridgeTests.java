@@ -2,14 +2,14 @@ package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
-import com.ple.jerbil.data.sync.DdlOption;
-import com.ple.jerbil.data.sync.DiffService;
-import com.ple.jerbil.data.sync.SyncResult;
+import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
 import org.junit.jupiter.api.Test;
-import reactor.test.StepVerifier;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,35 +33,45 @@ public class BridgeTests {
 
   @Test
   void testCompare() {
-    DiffService.compare(testDb, new Database("myDb", IArrayList.make()));
+    final DbDiff diffs = DiffService.compare(testDb, new Database("myDb", IArrayList.make(user, player, item)));
+    assertEquals(IArrayList.make("inventory"), diffs.left().get(DbProps.tables));
+    assertEquals(IArrayList.make("user", "player", "item"), diffs.both().get(DbProps.tables));
+    System.out.println(diffs.left());
+    System.out.println(diffs.right());
+    System.out.println(diffs.both());
+    System.out.println(diffs.left().get(DbProps.tables));
+    System.out.println(diffs.right().get(DbProps.tables));
+    System.out.println(diffs.both().get(DbProps.tables));
   }
 
   @Test
   void testExecuteSynchronously() {
-    DataGlobal.bridge.executeSynchronously(testDb.createAll().toSql());
+//    DataGlobal.bridge.executeSynchronously(testDb.createAll().toSql());
     //FIXME: Currently this returns an object that still is asynchronous and requires async methods/libraries.
   }
 
   //if db doesn't exist, all options will create it. If it does exist, all options will create database.
   @Test
   void syncCreateWithDbMissing() { //Should create database using Database Object.
-    DataGlobal.bridge.execute(testDb.drop());
-    final DdlOption ddlOption = DdlOption.make().create();
-    final SyncResult syncResult = testDb.sync(ddlOption);
-    assertEquals(1, syncResult.diff.left().size());
-    assertEquals(0, syncResult.diff.right().size());
-    assertEquals(0, syncResult.diff.both().size());
-    for (String error : syncResult.errors) {
-      System.out.println(error);
-    }
-    for (String warning : syncResult.warnings) {
-      System.out.println(warning);
-    }
-    // left: { exists : [ 'test database' }
-    // right: { }
-    // both: { exists : [ 'auto_increment', 'varchar' ], size : 10, precision: 2 }
-    // NOTE: This example is showing properties list for columns.
+    DataGlobal.bridge.execute("create database order")
+      .delayElements(Duration.ofMillis(100))
+//      .onErrorResume((err) -> err.getMessage())  //FIXME: figure out how to get execute() method to save the error or warning instead of exiting the program.
+      .blockLast();
+//    final DdlOption ddlOption = DdlOption.make().create();
+//    final SyncResult syncResult = testDb.sync(ddlOption);
+//    assertEquals(1, syncResult.diff.left().size());
+//    assertEquals(0, syncResult.diff.right().size());
+//    assertEquals(0, syncResult.diff.both().size());
+//    System.out.println(syncResult.errorMessage);
+//    for (String warning : syncResult.warnings) {
+//      System.out.println(warning);
+//    }
   }
+
+  // left: { exists : [ 'primary key' ] }
+  // right: { }
+  // both: { exists : [ 'auto_increment', 'varchar' ], size : 10, precision: 2 }
+  // NOTE: This example is showing properties list for columns.
 /*
 
   sync(db1, db2) {

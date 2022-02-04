@@ -95,6 +95,19 @@ public class IArrayList<V> implements IList<V> {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof IArrayList)) return false;
+    IArrayList<?> that = (IArrayList<?>) o;
+    return Arrays.equals(values, that.values);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(values);
+  }
+
+  @Override
   public String toString() {
     return "IArrayList{" +
       "values=" + Arrays.toString(values) +

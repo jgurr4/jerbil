@@ -55,9 +55,11 @@ public class Database {
   public SyncResult sync(DdlOption ddlOption) {
     Database existingDb = DiffService.getDb(name);
     DbDiff dbDiff = DiffService.compare(this, existingDb);
-    FilteredDiff filteredDiff = dbDiff.filter(ddlOption);
+    DbDiff filteredDiff = dbDiff.filter(ddlOption);
     String sql = filteredDiff.toSql();
-    return SyncResult.make(DataGlobal.bridge.execute(sql).next(), dbDiff, filteredDiff.errors, filteredDiff.warnings); //FIXME: Decide whether this should return Result wrapped in SyncResult functor or just Result.
+    return SyncResult.make(DataGlobal.bridge.execute(sql).next(), dbDiff);
+    //Consider making an executeAll() method that executes each statement individually and returns a flux of results.
+    // If one statement has a error then it should prevent further statements.
 //    return SyncResult.compare(this, existingDb).filter(ddlOption).toSql().execute();
   }
 

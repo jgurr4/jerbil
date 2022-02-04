@@ -164,7 +164,9 @@ public class IHashMap<K, V> implements IMap<K, V> {
 
   @Override
   public V get(K key) {
-
+    if (entriesInUse == 0 || !keySet().contains(key)) {
+      return null;
+    }
     final int hashCode = Math.abs(key.hashCode());
     final int bucketIndex = hashCode % bucketCount;
     int entryIndex = bucketIndex * bucketSize;
@@ -286,6 +288,33 @@ public class IHashMap<K, V> implements IMap<K, V> {
     };
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof IHashMap)) return false;
+    IHashMap<?, ?> iHashMap = (IHashMap<?, ?>) o;
+    return getBucketSize() == iHashMap.getBucketSize() && Float.compare(iHashMap.threshold, threshold) == 0 && entriesInUse == iHashMap.entriesInUse && getBucketCount() == iHashMap.getBucketCount() && expansionFactor == iHashMap.expansionFactor && Arrays.equals(entries, iHashMap.entries);
+  }
+
+  @Override
+  public int hashCode() {
+    int result = Objects.hash(getBucketSize(), threshold, entriesInUse, getBucketCount(), expansionFactor);
+    result = 31 * result + Arrays.hashCode(entries);
+    return result;
+  }
+
+  @Override
+  public String toString() {
+    return "IHashMap{" +
+      "entries=" + Arrays.toString(entries) +
+      ", bucketSize=" + bucketSize +
+      ", threshold=" + threshold +
+      ", entriesInUse=" + entriesInUse +
+      ", bucketCount=" + bucketCount +
+      ", expansionFactor=" + expansionFactor +
+      '}';
+  }
+
 }
 
 class IHashMapEntry<K, V> implements IEntry<K, V>{
@@ -318,6 +347,27 @@ class IHashMapEntry<K, V> implements IEntry<K, V>{
   public IHashMapEntry<K, V> setValue(V v) {
 
     return new IHashMapEntry<K, V>(key, v);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof IHashMapEntry)) return false;
+    IHashMapEntry<?, ?> that = (IHashMapEntry<?, ?>) o;
+    return getKey().equals(that.getKey()) && getValue().equals(that.getValue());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getKey(), getValue());
+  }
+
+  @Override
+  public String toString() {
+    return "IHashMapEntry{" +
+      "key=" + key +
+      ", value=" + value +
+      '}';
   }
 
 }

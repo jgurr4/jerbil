@@ -1,26 +1,25 @@
 package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.FilteredDiff;
-import com.ple.jerbil.data.query.Table;
-import com.ple.util.IArrayList;
-import com.ple.util.IHashMap;
-import com.ple.util.IList;
 import com.ple.util.IMap;
 
 public class DbDiff implements Diff {
 
-  private final IMap<String, Object> left;
-  private final IMap<String, Object> right;
-  private final IMap<String, Object> both;
+  private final IMap<DbProps, Object> left;
+  private final IMap<DbProps, Object> right;
+  private final IMap<DbProps, Object> both;
 
-  protected DbDiff(IMap<String, Object> left, IMap<String, Object> right, IMap<String, Object> both) {
+  protected DbDiff(IMap<DbProps, Object> left, IMap<DbProps, Object> right, IMap<DbProps, Object> both) {
     this.left = left;
     this.right = right;
     this.both = both;
   }
 
-  public FilteredDiff filter(DdlOption ddlOption) {
+  public static DbDiff make(IMap<DbProps, Object> left, IMap<DbProps, Object> right, IMap<DbProps, Object> both) {
+    return new DbDiff(left, right, both);
+  }
+
+  public DbDiff filter(DdlOption ddlOption) {
     if (ddlOption.equals(0b001)) {
       return null;
     } else if (ddlOption.equals(0b010)) {
@@ -28,7 +27,7 @@ public class DbDiff implements Diff {
     } else if (ddlOption.equals(0b100)) {
       return null;
     }
-    return FilteredDiff.make(this, null, null);
+    return this;
   }
 
   public String toSql() {
@@ -36,18 +35,27 @@ public class DbDiff implements Diff {
   }
 
   @Override
-  public IMap<String, Object> left() {
-    return null;
+  public IMap<DbProps, Object> left() {
+    return left;
   }
 
   @Override
-  public IMap right() {
-    return null;
+  public IMap<DbProps, Object> right() {
+    return right;
   }
 
   @Override
-  public IMap both() {
-    return null;
+  public IMap<DbProps, Object> both() {
+    return both;
+  }
+
+  @Override
+  public String toString() {
+    return "DbDiff{" +
+      "left=" + left +
+      ", right=" + right +
+      ", both=" + both +
+      '}';
   }
 
 }

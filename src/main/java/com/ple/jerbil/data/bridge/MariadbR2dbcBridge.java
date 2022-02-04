@@ -105,6 +105,7 @@ public class MariadbR2dbcBridge implements DataBridge {
       .password(password)
       .database(database)
       .build();
+    //TODO: Add SSl configuration options above.
     final MariadbConnectionFactory connFactory = new MariadbConnectionFactory(factoryConfig);
     final ConnectionPoolConfiguration poolConfig = ConnectionPoolConfiguration
       .builder(connFactory)
