@@ -1,16 +1,12 @@
 package com.ple.jerbil.data.sync;
 
-public enum DbProps {
+public enum DbProps implements Props {
   exists,
-  database,
+  name,
   tables,
   tempTables,
   views,
   storedProcedures,
   storedFunctions,
-  generatedFrom,
   charset,
-  size,
-  precision,
-
 }

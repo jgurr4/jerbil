@@ -15,4 +15,6 @@ public interface DataBridge {
 
   Result executeSynchronously(String toSql);
 
+  Database getDb(String name);
+
 }

@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.sync;
 
+import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
 import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
@@ -14,20 +15,12 @@ import static com.ple.jerbil.data.sync.DbProps.*;
  */
 public class DiffService {
 
-  public static Database getDb(String name) {
-    return null;
-  }
-
   public static DbDiff compare(Database database, Database existingDb) {
-    // left: { database : 'test' }
-    // right: { }
-    // both: { tables : [ 'user', 'orders', ], views : [ 'ordersBetweenFebAndJuly' ], storedProcedures : [ 'updateUser' ], charset : "utf8" }
-    IMap<DbProps, Object> left = IHashMap.from(tables, IArrayList.make("inventory"));
-    IMap<DbProps, Object> right = IHashMap.from();
-    IMap<DbProps, Object> both = IHashMap.from(tables, IArrayList.make("user", "player", "item"));
-//    System.out.println(left.get("exists"));
-//    System.out.println(left.get("size"));
-    return DbDiff.make(left, right, both);
+//    DataGlobal.bridge.execute()
+    IMap<DbProps, Object> create = IHashMap.empty;
+    IMap<DbProps, Object> delete = IHashMap.empty;
+    IMap<DbProps, Object> update = IHashMap.empty;
+    return DbDiff.make(create, delete, update);
   }
 
 }

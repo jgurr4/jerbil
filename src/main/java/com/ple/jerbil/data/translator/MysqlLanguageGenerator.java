@@ -44,7 +44,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private StorageEngine getEngineFromSql(String createTableSql) {
     final String tableSql = createTableSql.toLowerCase();
-    final int engineIndex = tableSql.indexOf("\n) engine=")+10;
+    final int engineIndex = tableSql.indexOf("\n) engine=") + 10;
     final String engineName = tableSql.substring(engineIndex, tableSql.indexOf(" ", engineIndex));
     switch (engineName) {
       case "aria":

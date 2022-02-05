@@ -5,11 +5,10 @@ import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
+import com.ple.util.IHashMap;
+import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,55 +33,70 @@ public class BridgeTests {
   @Test
   void testCompare() {
     final DbDiff diffs = DiffService.compare(testDb, new Database("myDb", IArrayList.make(user, player, item)));
-    assertEquals(IArrayList.make("inventory"), diffs.left().get(DbProps.tables));
-    assertEquals(IArrayList.make("user", "player", "item"), diffs.both().get(DbProps.tables));
-    System.out.println(diffs.left());
-    System.out.println(diffs.right());
-    System.out.println(diffs.both());
-    System.out.println(diffs.left().get(DbProps.tables));
-    System.out.println(diffs.right().get(DbProps.tables));
-    System.out.println(diffs.both().get(DbProps.tables));
+    assertEquals(IArrayList.make("inventory"), diffs.create().get(DbProps.tables));
+    assertEquals(IArrayList.make("user", "player", "item"), diffs.update().get(DbProps.tables));
+    System.out.println(diffs.create());
+    System.out.println(diffs.delete());
+    System.out.println(diffs.update());
+    System.out.println(diffs.create().get(DbProps.tables));
+    System.out.println(diffs.delete().get(DbProps.tables));
+    System.out.println(diffs.update().get(DbProps.tables));
   }
 
   @Test
   void testExecuteSynchronously() {
-//    DataGlobal.bridge.executeSynchronously(testDb.createAll().toSql());
+    DataGlobal.bridge.executeSynchronously(testDb.createAll().toSql());
     //FIXME: Currently this returns an object that still is asynchronous and requires async methods/libraries.
+  }
+
+  @Test
+  void testGetDb() {
+    final Database test = Database.getDb("test");
+    assertEquals("test", test.name);
+    System.out.println(user);
+    System.out.println(test.tables);
+    assertTrue(test.tables.contains(user));
+  }
+
+  @Test
+  void testDbFilter() {
+    final IMap<DbProps, Object> create = IHashMap.from(DbProps.tables, IArrayList.make(inventory));
+    final IMap<DbProps, Object> delete = IHashMap.from(DbProps.tables, IArrayList.make(item));
+    final IMap<DbProps, Object> update = IHashMap.from(DbProps.tables, IArrayList.make(user));
+    final DbDiff baseDiff = DbDiff.make(create, delete, update);
+    final DbDiff createDiff = baseDiff.filter(DdlOption.make().create());
+    final DbDiff updateDiff = baseDiff.filter(DdlOption.make().update());
+    final DbDiff deleteDiff = baseDiff.filter(DdlOption.make().delete());
+    assertNotNull(createDiff.create().get(DbProps.tables));
+    assertNotNull(updateDiff.update().get(DbProps.tables));
+    assertNotNull(deleteDiff.delete().get(DbProps.tables));
+    assertNull(createDiff.update().get(DbProps.tables));
+    assertNull(createDiff.delete().get(DbProps.tables));
+    assertNull(updateDiff.delete().get(DbProps.tables));
+    assertNull(updateDiff.create().get(DbProps.tables));
+    assertNull(deleteDiff.create().get(DbProps.tables));
+    assertNull(deleteDiff.update().get(DbProps.tables));
+    System.out.println(baseDiff);
+    System.out.println(createDiff);
+    System.out.println(updateDiff);
+    System.out.println(deleteDiff);
   }
 
   //if db doesn't exist, all options will create it. If it does exist, all options will create database.
   @Test
   void syncCreateWithDbMissing() { //Should create database using Database Object.
-    DataGlobal.bridge.execute("create database order")
-      .delayElements(Duration.ofMillis(100))
-//      .onErrorResume((err) -> err.getMessage())  //FIXME: figure out how to get execute() method to save the error or warning instead of exiting the program.
-      .blockLast();
-//    final DdlOption ddlOption = DdlOption.make().create();
-//    final SyncResult syncResult = testDb.sync(ddlOption);
-//    assertEquals(1, syncResult.diff.left().size());
-//    assertEquals(0, syncResult.diff.right().size());
-//    assertEquals(0, syncResult.diff.both().size());
+    DataGlobal.bridge.execute(testDb.drop()).blockLast();
+    final DdlOption ddlOption = DdlOption.make().create();
+    final SyncResult syncResult = testDb.sync(ddlOption);
+    assertNotNull(syncResult.diff.create().get(DbProps.name));
+    assertNull(syncResult.diff.delete().get(DbProps.name));
+    assertNull(syncResult.diff.update().get(DbProps.name));
+    syncResult.result.block(); //FIXME: Find a way to make syncResult inherit from Result or MariadbResult so you can just do .block on it directly.
 //    System.out.println(syncResult.errorMessage);
 //    for (String warning : syncResult.warnings) {
 //      System.out.println(warning);
 //    }
   }
-
-  // left: { exists : [ 'primary key' ] }
-  // right: { }
-  // both: { exists : [ 'auto_increment', 'varchar' ], size : 10, precision: 2 }
-  // NOTE: This example is showing properties list for columns.
-/*
-
-  sync(db1, db2) {
-    DbDiff dbDiff = DiffService.compare(db1, db2);
-    DbDiff filteredDiff = dbDiff.filter(ddlOption);
-    String sql = filteredDiff.toSql();
-    bridge.execute(sql);
-
-    compare(db1, db2).filter(ddlOption).toSql().execute();
-  }
-*/
 
   @Test
   void syncCreateWithoutConflicts() { //Diffs don't exist in this case so reuse without error.

@@ -1,9 +1,9 @@
 package com.ple.jerbil.data.bridge;
 
-import com.ple.jerbil.data.DataBridge;
-import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.LanguageGenerator;
+import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.translator.MysqlLanguageGenerator;
+import com.ple.util.IArrayList;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Result;
@@ -84,6 +84,25 @@ public class MariadbR2dbcBridge implements DataBridge {
   public Result executeSynchronously(String sql) {
     return execute(sql).blockLast();
   }
+
+  public Database getDb(String name) {
+    return DataGlobal.bridge.execute("show databases")
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+      .filter(db -> db.equals(name))
+      .next()
+      .flatMap(db -> DataGlobal.bridge.execute("use " + name + "; show tables")
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+        //FIXME: Currently this only outputs the first tablename.
+        .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName)
+          .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1)))
+          .map(tblCreateStr -> DataGlobal.bridge.getGenerator().fromSql(tblCreateStr))
+          .collectList()
+          .map(tables -> IArrayList.make(tables.toArray(new Table[0])))
+          .map(tablesIList -> Database.make(name, tablesIList)))
+        .next()).block();
+  }
+//          .collect(IArrayList::make, (s, table) -> tables.add(table))  //Alternative method.
+//            .map(iListTables -> Database.make(name, iListTables))
 
   private Mono<MariadbR2dbcBridge> createConnectionPool() {
     return Mono.just(startConnection(host, port, username, password, database))

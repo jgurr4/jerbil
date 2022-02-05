@@ -26,7 +26,6 @@ public class SyncResult {
   }
 
   public static SyncResult make(Mono<Result> result, Diff diff) {
-    //TODO: Obtain errors/warnings from result.
     String error = "";
     IList<String> warnings = IArrayList.make();
     return new SyncResult(result, diff, error, warnings);

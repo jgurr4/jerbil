@@ -53,7 +53,7 @@ public class Database {
   }
 
   public SyncResult sync(DdlOption ddlOption) {
-    Database existingDb = DiffService.getDb(name);
+    Database existingDb = getDb(name);
     DbDiff dbDiff = DiffService.compare(this, existingDb);
     DbDiff filteredDiff = dbDiff.filter(ddlOption);
     String sql = filteredDiff.toSql();
@@ -61,6 +61,11 @@ public class Database {
     //Consider making an executeAll() method that executes each statement individually and returns a flux of results.
     // If one statement has a error then it should prevent further statements.
 //    return SyncResult.compare(this, existingDb).filter(ddlOption).toSql().execute();
+  }
+
+  //FIXME: Consider changing return object to Mono<Database> to prevent blocking or Optional<Database> to return in case of null.
+  public static Database getDb(String name) {
+    return DataGlobal.bridge.getDb(name);
   }
 
   @Override
