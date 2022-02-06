@@ -1,7 +1,9 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.bridge.ReactiveWrapper;
 import io.r2dbc.spi.Result;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Bridge is responsible for connecting and sending data to and from a database.
@@ -15,6 +17,6 @@ public interface DataBridge {
 
   Result executeSynchronously(String toSql);
 
-  Database getDb(String name);
+  ReactiveWrapper<Database> getDb(String name);
 
 }

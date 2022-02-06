@@ -2,7 +2,6 @@ package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
-import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
@@ -33,7 +32,7 @@ public class BridgeTests {
 
   @Test
   void testCompare() {
-    final DbDiff diffs = DiffService.compare(testDb, new Database("myDb", IArrayList.make(user, player, item)));
+    final DbDiff diffs = DiffService.compare(testDb.wrap(), new Database("myDb", IArrayList.make(user, player, item)).wrap());
     assertEquals(IArrayList.make("inventory"), diffs.create().get(DbProps.tables));
     assertEquals(IArrayList.make("user", "player", "item"), diffs.update().get(DbProps.tables));
     System.out.println(diffs.create());
@@ -47,12 +46,12 @@ public class BridgeTests {
   @Test
   void testExecuteSynchronously() {
     DataGlobal.bridge.executeSynchronously(testDb.createAll().toSql());
-    //FIXME: Currently this returns an object that still is asynchronous and requires async methods/libraries.
+    //FIXME: This should not return a Result because that is still asynchronouse and requires async methods/knowledge.
   }
 
   @Test
   void testGetDb() {
-    final Database test = Database.getDb("test");
+    final Database test = Database.getDb("test").unwrap();
     assertEquals("test", test.name);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
     System.out.println(test.tables.toString().replaceAll("Table\\{", "\nTable{"));

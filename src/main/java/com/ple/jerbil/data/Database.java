@@ -1,5 +1,7 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.bridge.ReactiveWrapper;
+import com.ple.jerbil.data.bridge.SynchronousObject;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
@@ -53,8 +55,8 @@ public class Database {
   }
 
   public SyncResult sync(DdlOption ddlOption) {
-    Database existingDb = getDb(name);
-    DbDiff dbDiff = DiffService.compare(this, existingDb);
+    ReactiveWrapper<Database> existingDb = getDb(name);
+    DbDiff dbDiff = DiffService.compare(this.wrap(), existingDb);
     DbDiff filteredDiff = dbDiff.filter(ddlOption);
     String sql = filteredDiff.toSql();
     return SyncResult.make(DataGlobal.bridge.execute(sql).next(), dbDiff);
@@ -63,8 +65,7 @@ public class Database {
 //    return SyncResult.compare(this, existingDb).filter(ddlOption).toSql().execute();
   }
 
-  //FIXME: Consider changing return object to Mono<Database> to prevent blocking or Optional<Database> to return in case of null.
-  public static Database getDb(String name) {
+  public static ReactiveWrapper<Database> getDb(String name) {
     return DataGlobal.bridge.getDb(name);
   }
 
@@ -78,6 +79,10 @@ public class Database {
 
   public String drop() {
     return null;
+  }
+
+  public ReactiveWrapper<Database> wrap() {
+    return SynchronousObject.make(this);
   }
 
 }

@@ -2,9 +2,11 @@ package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.bridge.ReactiveWrapper;
 import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
 import com.ple.util.IMap;
+import reactor.core.publisher.Mono;
 
 import static com.ple.jerbil.data.sync.DbProps.*;
 
@@ -15,7 +17,7 @@ import static com.ple.jerbil.data.sync.DbProps.*;
  */
 public class DiffService {
 
-  public static DbDiff compare(Database database, Database existingDb) {
+  public static DbDiff compare(ReactiveWrapper<Database> database, ReactiveWrapper<Database> existingDb) {
 //    DataGlobal.bridge.execute()
     IMap<DbProps, Object> create = IHashMap.empty;
     IMap<DbProps, Object> delete = IHashMap.empty;
