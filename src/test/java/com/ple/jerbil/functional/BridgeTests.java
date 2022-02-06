@@ -32,7 +32,7 @@ public class BridgeTests {
 
   @Test
   void testCompare() {
-    final DbDiff diffs = DiffService.compare(testDb.wrap(), new Database("myDb", IArrayList.make(user, player, item)).wrap());
+    final DbDiff diffs = DiffService.compare(testDb.wrap(), new Database("myDb", IArrayList.make(user, player, item)).wrap()).unwrap();
     assertEquals(IArrayList.make("inventory"), diffs.create().get(DbProps.tables));
     assertEquals(IArrayList.make("user", "player", "item"), diffs.update().get(DbProps.tables));
     System.out.println(diffs.create());
@@ -41,12 +41,6 @@ public class BridgeTests {
     System.out.println(diffs.create().get(DbProps.tables));
     System.out.println(diffs.delete().get(DbProps.tables));
     System.out.println(diffs.update().get(DbProps.tables));
-  }
-
-  @Test
-  void testExecuteSynchronously() {
-    DataGlobal.bridge.executeSynchronously(testDb.createAll().toSql());
-    //FIXME: This should not return a Result because that is still asynchronouse and requires async methods/knowledge.
   }
 
   @Test

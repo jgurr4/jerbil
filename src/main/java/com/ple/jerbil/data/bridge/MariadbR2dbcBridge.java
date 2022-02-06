@@ -81,8 +81,8 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @Override
-  public Result executeSynchronously(String sql) {
-    return execute(sql).blockLast();
+  public Flux<Result> execute(Mono<String> toSql) {
+    return null;
   }
 
   public ReactiveWrapper<Database> getDb(String name) {

@@ -1,6 +1,7 @@
 package com.ple.jerbil.data;
 
 import com.ple.jerbil.data.bridge.ReactiveWrapper;
+import com.ple.jerbil.data.bridge.ReactorMono;
 import com.ple.jerbil.data.bridge.SynchronousObject;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.CreateQuery;
@@ -56,10 +57,10 @@ public class Database {
 
   public SyncResult sync(DdlOption ddlOption) {
     ReactiveWrapper<Database> existingDb = getDb(name);
-    DbDiff dbDiff = DiffService.compare(this.wrap(), existingDb);
-    DbDiff filteredDiff = dbDiff.filter(ddlOption);
-    String sql = filteredDiff.toSql();
-    return SyncResult.make(DataGlobal.bridge.execute(sql).next(), dbDiff);
+    ReactiveWrapper<DbDiff> dbDiff = DiffService.compare(this.wrap(), existingDb);
+    ReactiveWrapper<DbDiff> filteredDiff = ReactorMono.make(dbDiff.unwrapMono().map(diffs -> diffs.filter(ddlOption)));
+    ReactiveWrapper<String> sql = ReactorMono.make(filteredDiff.unwrapMono().map(fDiff -> fDiff.toSql()));
+    return SyncResult.make(DataGlobal.bridge.execute(sql.unwrapMono()).next(), dbDiff);
     //Consider making an executeAll() method that executes each statement individually and returns a flux of results.
     // If one statement has a error then it should prevent further statements.
 //    return SyncResult.compare(this, existingDb).filter(ddlOption).toSql().execute();

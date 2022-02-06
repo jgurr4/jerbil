@@ -15,7 +15,7 @@ public interface DataBridge {
 
   Flux<Result> execute(String toSql);
 
-  Result executeSynchronously(String toSql);
+  Flux<Result> execute(Mono<String> toSql);
 
   ReactiveWrapper<Database> getDb(String name);
 
