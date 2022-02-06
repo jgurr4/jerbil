@@ -1,9 +1,11 @@
 package com.ple.jerbil.data.sync;
 
 public enum ColumnProps implements Props {
+  exists,
   name,
   datatype,
-  values,
+  enumValues,
+  setValues,
   size,
   precision,
   generatedFrom,

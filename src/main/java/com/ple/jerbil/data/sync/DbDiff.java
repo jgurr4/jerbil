@@ -51,4 +51,8 @@ public class DbDiff implements Diff {
       '}';
   }
 
+  public DbDiff combineDiffs(TableDiff compareTableProps) {
+    return null;
+  }
+
 }

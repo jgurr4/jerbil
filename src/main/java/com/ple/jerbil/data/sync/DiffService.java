@@ -32,9 +32,28 @@ public class DiffService {
         return db2.unwrapMono()
           .map(rightDb -> new DiffWrap(rightDb, compareDatabaseProps(leftDb, rightDb)))
           .map(diffWrap -> new DiffWrap(diffWrap.rightDb, diffWrap.diffs.combineDiffs(compareTableProps(leftDb.tables, diffWrap.rightDb.tables))))
-          .map(diffWrap -> new DiffWrap(diffWrap.rightDb, diffWrap.diffs.combineDiffs(compareColumnProps(getColumns(leftDb.tables), getColumns(diffWrap.rightDb.tables)))))
+//          .map(diffWrap -> new DiffWrap(diffWrap.rightDb, diffWrap.diffs.combineDiffs(compareColumnProps(getColumns(leftDb.tables), getColumns(diffWrap.rightDb.tables)))))
           .map(diffWrap -> diffWrap.diffs);
       }));
+    /*
+     Returned object should be DbDiff containing 3 HashMaps of diffs based on create, delete, update.
+     DbProps.tables is not a list of tablenames, or of tables, but rather a list of TableProp diffs.
+     Similarly TableProps.columns is not a list of columns, but rather a list of ColumnProp diffs. This means combineDiffs is rather simple,
+     It just fills the DbProps.tables value with list of tableDiffs if any exist, and it fills the TableProps.columns value with
+     a list of ColumnDiffs if any exist.
+    Example:
+    DbDiff{
+      create{ tables: [ missingTable{...}, user{columns: [missingColumn{...}]] }
+      delete{ tables: [extraTable{...}, user{columns: [extraColumn{}]] }
+      update{
+      shouldBe{charset : utf8, tables : [ user{ columns : [ type{ enumValues : '"admin","customer","employee"' }}]]}
+      is{charset : latin1, tables : [ user{columns : [ type{ enumValues : '"admin","customer"' }}]]}
+      }
+    }
+    So far the only downside to this method above is it may be a little tricky to read because of how verbose it may be
+    in the toString method for some people. Although in most cases there should be very few diffs, so it won't be an issue in most cases.
+    Alternative name for shouldBe{} and is{}: left-side{} right-side{}.
+     */
   }
 
   private static DbDiff compareDatabaseProps(Database leftDb, Database rightDb) {
@@ -42,6 +61,7 @@ public class DiffService {
   }
 
   private static TableDiff compareTableProps(IList<Table> leftTables, IList<Table> rightTables) {
+    TableDiff.combineDiffs(getColumns(leftTables), getColumns(rightTables));
     return null;
   }
 
