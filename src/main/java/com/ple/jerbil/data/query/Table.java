@@ -11,6 +11,8 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 
+import java.util.Objects;
+
 
 /**
  * Table is a database Object which contains columns.
@@ -105,6 +107,19 @@ public class Table extends FromExpression {
   public void add(Column column) {
     final IList<Column> newColumns = columns.add(column);
     columns = newColumns;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Table)) return false;
+    Table table = (Table) o;
+    return engine == table.engine && name.equals(table.name) && columns.equals(table.columns);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(engine, name, columns);
   }
 
   @Override

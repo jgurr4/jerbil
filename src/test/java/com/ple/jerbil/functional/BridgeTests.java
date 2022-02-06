@@ -2,6 +2,7 @@ package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
@@ -53,9 +54,10 @@ public class BridgeTests {
   void testGetDb() {
     final Database test = Database.getDb("test");
     assertEquals("test", test.name);
-    System.out.println(user);
-    System.out.println(test.tables);
+    System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
+    System.out.println(test.tables.toString().replaceAll("Table\\{", "\nTable{"));
     assertTrue(test.tables.contains(user));
+    assertTrue(test.tables.contains(item));
   }
 
   @Test

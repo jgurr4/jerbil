@@ -90,19 +90,38 @@ public class MariadbR2dbcBridge implements DataBridge {
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
       .filter(db -> db.equals(name))
       .next()
-      .flatMap(db -> DataGlobal.bridge.execute("use " + name + "; show tables")
-        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
-        //FIXME: Currently this only outputs the first tablename.
+      .flatMapMany(db -> DataGlobal.bridge.execute("use " + name + "; show tables")
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0))))
         .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName)
-          .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1)))
+          .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
           .map(tblCreateStr -> DataGlobal.bridge.getGenerator().fromSql(tblCreateStr))
           .collectList()
+          .log()
+          //FIXME: Currently this only outputs the first create table string.
           .map(tables -> IArrayList.make(tables.toArray(new Table[0])))
-          .map(tablesIList -> Database.make(name, tablesIList)))
-        .next()).block();
+          .map(tablesIList -> Database.make(name, tablesIList)).block();
   }
 //          .collect(IArrayList::make, (s, table) -> tables.add(table))  //Alternative method.
 //            .map(iListTables -> Database.make(name, iListTables))
+
+/*
+public Database getDb(String name) {
+  return DataGlobal.bridge.execute("show databases")
+    .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+    .filter(db -> db.equals(name))
+    .next()
+    .flatMap(db -> DataGlobal.bridge.execute("use " + name + "; show tables")
+      .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+      //FIXME: Currently this only outputs the first tablename.
+      .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName)
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1)))
+        .map(tblCreateStr -> DataGlobal.bridge.getGenerator().fromSql(tblCreateStr))
+        .collectList()
+        .map(tables -> IArrayList.make(tables.toArray(new Table[0])))
+        .map(tablesIList -> Database.make(name, tablesIList)))
+      .next()).block();
+}
+*/
 
   private Mono<MariadbR2dbcBridge> createConnectionPool() {
     return Mono.just(startConnection(host, port, username, password, database))
