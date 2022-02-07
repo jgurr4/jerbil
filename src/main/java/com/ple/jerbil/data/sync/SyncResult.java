@@ -1,31 +1,32 @@
 package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.bridge.ReactiveWrapper;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import io.r2dbc.spi.Result;
 import reactor.core.publisher.Mono;
 
 @Immutable
-public class SyncResult {
+public class SyncResult<D extends Diff> {
 
-  public final Mono<Result> result;
-  public final Diff diff;
+  public final ReactiveWrapper<Result> result;
+  public final ReactiveWrapper<D> diff;
   public final String errorMessage;
   public final IList<String> warnings;
 
-  protected SyncResult(Mono<Result> result, Diff diff, String errorMessage, IList<String> warnings) {
+  protected SyncResult(ReactiveWrapper<Result> result, ReactiveWrapper<D> diff, String errorMessage, IList<String> warnings) {
     this.result = result;
     this.diff = diff;
     this.errorMessage = errorMessage;
     this.warnings = warnings;
   }
 
-  public static SyncResult make(Mono<Result> result, Diff diffs, String errorMessage, IList<String> warnings) {
+  public static <D extends Diff> SyncResult make(ReactiveWrapper<Result> result, ReactiveWrapper<D> diffs, String errorMessage, IList<String> warnings) {
     return new SyncResult(result, diffs, errorMessage, warnings);
   }
 
-  public static SyncResult make(Mono<Result> result, Diff diff) {
+  public static <D extends Diff> SyncResult make(ReactiveWrapper<Result> result, ReactiveWrapper<D> diff) {
     String error = "";
     IList<String> warnings = IArrayList.make();
     return new SyncResult(result, diff, error, warnings);

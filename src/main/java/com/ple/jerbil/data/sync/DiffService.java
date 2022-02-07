@@ -5,6 +5,7 @@ import com.ple.jerbil.data.bridge.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.ReactorMono;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.util.IArrayList;
 import com.ple.util.IList;
 
 /**
@@ -16,7 +17,7 @@ public class DiffService {
 
   public static class DiffWrap {
     public final Database rightDb;
-    public final DbDiff diffs;
+    public final Diff diffs;
     public DiffWrap(Database rightDb, DbDiff diffs ) {
       this.rightDb = rightDb;
       this.diffs = diffs;
@@ -24,9 +25,11 @@ public class DiffService {
   }
 
   public static ReactiveWrapper<DbDiff> compare(ReactiveWrapper<Database> db1, ReactiveWrapper<Database> db2) {
+    return null;
     // This method must compare every part of database with the remote/local database and log the differences inside
     // each of the IHashMaps. Basically every property of the database needs to be compared, including the database name,
     // the list of tables, the list of columns inside each table and all the other properties associated with columns/tables.
+/*
     return ReactorMono.make(db1.unwrapMono()
       .flatMap(leftDb -> {
         return db2.unwrapMono()
@@ -35,37 +38,41 @@ public class DiffService {
 //          .map(diffWrap -> new DiffWrap(diffWrap.rightDb, diffWrap.diffs.combineDiffs(compareColumnProps(getColumns(leftDb.tables), getColumns(diffWrap.rightDb.tables)))))
           .map(diffWrap -> diffWrap.diffs);
       }));
-    /*
-     Returned object should be DbDiff containing 3 HashMaps of diffs based on create, delete, update.
-     DbProps.tables is not a list of tablenames, or of tables, but rather a list of TableProp diffs.
-     Similarly TableProps.columns is not a list of columns, but rather a list of ColumnProp diffs. This means combineDiffs is rather simple,
-     It just fills the DbProps.tables value with list of tableDiffs if any exist, and it fills the TableProps.columns value with
-     a list of ColumnDiffs if any exist.
-    Example:
-    DbDiff{
-      create{ tables: [ missingTable{...}, user{columns: [missingColumn{...}]] }
-      delete{ tables: [extraTable{...}, user{columns: [extraColumn{}]] }
-      update{
-      shouldBe{charset : utf8, tables : [ user{ columns : [ type{ enumValues : '"admin","customer","employee"' }}]]}
-      is{charset : latin1, tables : [ user{columns : [ type{ enumValues : '"admin","customer"' }}]]}
-      }
-    }
-    So far the only downside to this method above is it may be a little tricky to read because of how verbose it may be
-    in the toString method for some people. Although in most cases there should be very few diffs, so it won't be an issue in most cases.
-    Alternative name for shouldBe{} and is{}: left-side{} right-side{}.
-     */
+*/
   }
 
   private static DbDiff compareDatabaseProps(Database leftDb, Database rightDb) {
-    return null;
+    // This is sample code just to explain the process. You must do similar to this in reactive streams api.
+    //Check if name is the same. If not run this code:
+    final ScalarDiff<String> nameDiff = ScalarDiff.make(leftDb.name, rightDb.name);
+    //Check if tables are the same. If not run this code:
+    final IList<TableDiff> tableDiffs = compareTableProps(leftDb.tables, rightDb.tables);
+    final VectorDiff<Table> tablesDiff = VectorDiff.make(null, null, tableDiffs); //FIXME: figure out how to get make method to accept All types of diffs for update.
+    final DbDiff dbDiff = DbDiff.make(nameDiff, tablesDiff);
+    return dbDiff;
   }
 
-  private static TableDiff compareTableProps(IList<Table> leftTables, IList<Table> rightTables) {
-    TableDiff.combineDiffs(getColumns(leftTables), getColumns(rightTables));
-    return null;
+  private static IList<TableDiff> compareTableProps(IList<Table> leftTables, IList<Table> rightTables) {
+    //Step 1: filter out all the righttables that are contained inside leftTables.
+    for (Table rightTable : rightTables) {
+      leftTables.contains(rightTable);
+    }
+    //Step 2: Remaining rightTables must be compared to see if their names match any leftTables.
+    // If name matches, search for diffs inside column
+    // If name doesn't match, create a IList<Table> delete for extra Table. (Doesn't mean it will be deleted, only if user wants deletions).
+    for (Table leftTable : leftTables) {
+      for (Table rightTable : rightTables) {
+        if (leftTable.name.equals(rightTable.name)) {
+          VectorDiff<Column> columnDiffs = compareColumnProps(leftTable.columns, rightTable.columns);
+        } else {
+          VectorDiff<Table> tableDiffs = VectorDiff.make(null, IArrayList.make(rightTable), null);
+        }
+      }
+    }
+    return IArrayList.make(TableDiff.make(ScalarDiff.make("user", "use"), null, null));
   }
 
-  private static ColumnDiff compareColumnProps(IList<Column> leftColumns, IList<Column> rightColumns) {
+  private static VectorDiff<Column> compareColumnProps(IList<Column> leftColumns, IList<Column> rightColumns) {
     return null;
   }
 

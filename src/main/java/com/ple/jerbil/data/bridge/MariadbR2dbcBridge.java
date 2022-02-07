@@ -72,27 +72,32 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @Override
-  public Flux<Result> execute(String sql) {
-    return this.getConnectionPool()
+  public ReactiveWrapper<Result> execute(String sql) {
+    return ReactorFlux.make(this.getConnectionPool()
       .map(bridge -> bridge.pool)
       .flatMap(pool -> pool.create())
       .map(conn -> conn.createStatement(sql))
-      .flatMapMany(statement -> statement.execute());
+      .flatMapMany(statement -> statement.execute()));
   }
 
   @Override
-  public Flux<Result> execute(Mono<String> toSql) {
-    return null;
+  public ReactiveWrapper<Result> execute(ReactiveWrapper<String> sql) {
+    return ReactorFlux.make(
+      sql.unwrapMono()
+        .flatMapMany(
+          sqlString -> execute(sqlString).unwrapFlux()
+        )
+    );
   }
 
   public ReactiveWrapper<Database> getDb(String name) {
-    return ReactorMono.make(DataGlobal.bridge.execute("show databases")
+    return ReactorMono.make(DataGlobal.bridge.execute("show databases").unwrapFlux()
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
       .filter(db -> db.equals(name))
       .next()
-      .flatMapMany(db -> DataGlobal.bridge.execute("use " + name + "; show tables")
+      .flatMapMany(db -> DataGlobal.bridge.execute("use " + name + "; show tables").unwrapFlux()
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0))))
-      .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName)
+      .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName).unwrapFlux()
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
       .map(tblCreateStr -> DataGlobal.bridge.getGenerator().fromSql(tblCreateStr))
       .collectList()

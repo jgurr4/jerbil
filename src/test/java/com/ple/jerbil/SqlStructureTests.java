@@ -129,4 +129,96 @@ public class SqlStructureTests {
       """, q.toSql());
   }
 
+  @Test
+  void testCreateTableLike() {
+  }
+
+  @Test
+  void testCreateTempTable() {
+    // Temporary tables are useful since they only last as long as the session. So it can be perfect for
+    // developers who want everything to drop after done running their tests. Especially since a connection/session
+    // cannot view temporary tables created outside of them. So multiple connections can use the same name for a table
+    // at the same time and it won't cause any conflicts.
+  }
+
+  @Test
+  void testCreateView() {
+  }
+
+  @Test
+  void testCreateProcedure() {
+  }
+
+  @Test
+  void testCreateFunction() {
+  }
+
+  @Test
+  void testCreateTrigger() {
+  }
+
+  @Test
+  void testCreateEvent() {
+  }
+
+  @Test
+  void showTables() {
+  }
+
+  @Test
+  void showDatabases() {
+  }
+
+  @Test
+  void showCreateTable() {
+  }
+
+  @Test
+  void dropColumn() {
+  }
+
+  @Test
+  void dropTable() {
+  }
+
+  @Test
+  void dropDatabase() {
+  }
+
+  @Test
+  void dropProcedure() {
+  }
+
+  @Test
+  void dropFunction() {
+  }
+
+  @Test
+  void dropView() {
+  }
+
+  @Test
+  void dropEvent() {
+  }
+
+  @Test
+  void dropTrigger() {
+  }
+
+  @Test
+  void dropIndex() {
+  }
+
+  @Test
+  void createIndex() {
+  }
+
+  @Test
+  void testIfExists() { // drop table if exists.
+  }
+
+  @Test
+  void testIfNotExists(){  // create table if not exists.
+  }
+
 }

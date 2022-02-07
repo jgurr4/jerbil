@@ -4,6 +4,7 @@ import com.ple.jerbil.data.DataBridge;
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.LanguageGenerator;
+import com.ple.jerbil.data.bridge.ReactiveWrapper;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.Literal;
@@ -82,11 +83,11 @@ public class CompleteQuery extends Query {
     return InsertQuery.make(records, fromExpression);
   }
 
-  public Flux<Result> execute() {
+  public ReactiveWrapper<Result> execute() {
     return execute(DataGlobal.bridge);
   }
 
-  private Flux<Result> execute(DataBridge bridge) {
+  private ReactiveWrapper<Result> execute(DataBridge bridge) {
     return bridge.execute(toSql());
   }
 

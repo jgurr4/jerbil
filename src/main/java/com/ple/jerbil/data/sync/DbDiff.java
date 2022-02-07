@@ -1,22 +1,34 @@
 package com.ple.jerbil.data.sync;
 
+import com.ple.jerbil.data.CharSet;
 import com.ple.jerbil.data.DataGlobal;
-import com.ple.util.IMap;
+import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.query.Table;
 
-public class DbDiff implements Diff {
+public class DbDiff implements Diff<Database> {
 
-  private final IMap<DbProps, Object> create;
-  private final IMap<DbProps, Object> delete;
-  private final IMap<DbProps, Object> update;
+  public final ScalarDiff<String> name;
+  public final VectorDiff<Table> tables;
+//  public final VectorDiff<ViewTable> views;
+//  public final ScalarDiff<CharSet> charSet;
+//  public final VectorDiff<StoredProcedure> procedures;
+//  public final VectorDiff<StoredFunction> functions;
+//  public final VectorDiff<StoredEvent> events;
+//  public final VectorDiff<StoredTrigger> triggers;
 
-  protected DbDiff(IMap<DbProps, Object> create, IMap<DbProps, Object> delete, IMap<DbProps, Object> update) {
-    this.create = create;
-    this.delete = delete;
-    this.update = update;
+  protected DbDiff(ScalarDiff<String> name, VectorDiff<Table> tables) {
+    this.name = name;
+    this.tables = tables;
+//    this.views = views;
+//    this.charSet = charSet;
+//    this.procedures = procedures;
+//    this.functions = functions;
+//    this.events = events;
+//    this.triggers = triggers;
   }
 
-  public static DbDiff make(IMap<DbProps, Object> left, IMap<DbProps, Object> right, IMap<DbProps, Object> both) {
-    return new DbDiff(left, right, both);
+  public static DbDiff make(ScalarDiff<String> name, VectorDiff<Table> tables) {
+    return new DbDiff(name, tables);
   }
 
   public String toSql() {
@@ -28,31 +40,8 @@ public class DbDiff implements Diff {
   }
 
   @Override
-  public IMap<DbProps, Object> create() {
-    return create;
-  }
-
-  @Override
-  public IMap<DbProps, Object> delete() {
-    return delete;
-  }
-
-  @Override
-  public IMap<DbProps, Object> update() {
-    return update;
-  }
-
-  @Override
-  public String toString() {
-    return "DbDiff{" +
-      "left=" + create +
-      ", right=" + delete +
-      ", both=" + update +
-      '}';
-  }
-
-  public DbDiff combineDiffs(TableDiff compareTableProps) {
-    return null;
+  public int getTotalDiffs() {
+    return 1;
   }
 
 }

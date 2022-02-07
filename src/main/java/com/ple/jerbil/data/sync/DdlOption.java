@@ -17,6 +17,7 @@ public class DdlOption {
     this.option = (byte) option;
   }
 
+  //FIXME: Empty make should be create and update by default. Delete has to be explicit from developer.
   public static DdlOption make() {
     return new DdlOption(0b000);
   }

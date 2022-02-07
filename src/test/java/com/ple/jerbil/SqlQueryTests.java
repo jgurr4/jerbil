@@ -160,4 +160,24 @@ public class SqlQueryTests {
 //      .verifyComplete();
   }
 
+  @Test
+  void testUnion() {
+    final CompleteQuery q = null;
+    assertEquals("""
+                   select userId, name 
+                   from user 
+                   union all
+                   select userId, name 
+                   from player;
+                   """, q.toSql());
+  }
+
+  @Test
+  void testMatchFullText() {
+  }
+
+  @Test
+  void selectAnalyzeExplain() {
+  }
+
 }

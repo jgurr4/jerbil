@@ -13,9 +13,9 @@ import reactor.core.publisher.Mono;
 public interface DataBridge {
   LanguageGenerator getGenerator();
 
-  Flux<Result> execute(String toSql);
+  ReactiveWrapper<Result> execute(String toSql);
 
-  Flux<Result> execute(Mono<String> toSql);
+  ReactiveWrapper<Result> execute(ReactiveWrapper<String> toSql);
 
   ReactiveWrapper<Database> getDb(String name);
 
