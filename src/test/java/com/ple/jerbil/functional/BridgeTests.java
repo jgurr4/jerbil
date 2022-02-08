@@ -57,16 +57,19 @@ public class BridgeTests {
     Table extraTable = Table.make(StorageEngine.simple, "extra", IArrayList.make(Column.make("id").bigId()));
     final DbDiff diff = DiffService.compare(
       testDb.wrap(), Database.make("myDb", IArrayList.make(user, player, alteredItem, extraTable)).wrap()).unwrap();  //inventory needs create, alteredItem needs update, extraTable needs delete.
-    assertEquals(0, diff.filter(DdlOption.make().create()).tables.create.length());
-    assertEquals(1, diff.filter(DdlOption.make().create()).tables.delete.length());
-    assertEquals(1, diff.filter(DdlOption.make().create()).tables.update.length());
-    assertEquals(1, diff.filter(DdlOption.make().delete()).tables.create.length());
-    assertEquals(0, diff.filter(DdlOption.make().delete()).tables.delete.length());
-    assertEquals(1, diff.filter(DdlOption.make().delete()).tables.update.length());
-    assertEquals(1, diff.filter(DdlOption.make().update()).tables.create.length());
-    assertEquals(1, diff.filter(DdlOption.make().update()).tables.delete.length());
-    assertEquals(0, diff.filter(DdlOption.make().update()).tables.update.length());
-    //FIXME: Find a way to access the columns inside alteredItem to find columnDiffs.
+    assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.length());
+    assertEquals(0, diff.filter(DdlOption.make().create()).tables.delete.length());
+    assertEquals(0, diff.filter(DdlOption.make().create()).tables.update.length());
+    assertEquals(0, diff.filter(DdlOption.make().delete()).tables.create.length());
+    assertEquals(1, diff.filter(DdlOption.make().delete()).tables.delete.length());
+    assertEquals(0, diff.filter(DdlOption.make().delete()).tables.update.length());
+    assertEquals(0, diff.filter(DdlOption.make().update()).tables.create.length());
+    assertEquals(0, diff.filter(DdlOption.make().update()).tables.delete.length());
+    assertEquals(1, diff.filter(DdlOption.make().update()).tables.update.length());
+    // How to access table properties, column properties and columnDiffs:
+    // diff.filter().tables.create.get(0).engine;
+    // diff.filter().tables.update.get(0).create.get(0).dataSpec;
+    // diff.filter().tables.update.get(0).update.get(0). ;  //TODO: Ask what is inside ColumnDiff.update?
   }
 
 
@@ -84,7 +87,7 @@ public class BridgeTests {
   void syncCreateWithDbMissing() { //Should create database using Database Object. Every diff should exist because it is forced to create db for first time.
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create();
-    final SyncResult syncResult = testDb.sync(ddlOption);
+    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
     assertNotNull(((DbDiff)syncResult.diff.unwrap()).name);
   }
 
@@ -93,7 +96,7 @@ public class BridgeTests {
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     DataGlobal.bridge.execute(testDb.createAll().toSql()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final SyncResult syncResult = testDb.sync(ddlOption);
+    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
     assertEquals(0, syncResult.diff.unwrap().getTotalDiffs()); //FIXME: Find a way to run methods through Diff interface
   }
 
@@ -102,14 +105,14 @@ public class BridgeTests {
     DataGlobal.bridge.execute("alter table player modify column name varchar(50) not null").unwrapFlux()
       .blockLast();  //TODO: Replace sql with jerbil methods like player.modify(playerColumns.name).asVarchar(50);  or player.alter also add support for player.rename player.change
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final SyncResult syncResult = testDb.sync(ddlOption);
+    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
     assertEquals(1, ((DbDiff) syncResult.diff.unwrap()).tables.update.length());
-    assertEquals(1, syncResult.diff.unwrap().getDiffs().size);
+//    assertEquals(1, syncResult.diff.unwrap().getDiffs().size);
   }
 
   @Test
   void migrateColumn() {
-    //Should rename a existing column
+    //Should rename a existing column.
   }
 
   @Test

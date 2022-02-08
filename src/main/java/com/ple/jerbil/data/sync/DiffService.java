@@ -18,27 +18,23 @@ public class DiffService {
   public static class DiffWrap {
     public final Database rightDb;
     public final Diff diffs;
-    public DiffWrap(Database rightDb, DbDiff diffs ) {
+    public DiffWrap(Database rightDb, Diff diffs ) {
       this.rightDb = rightDb;
       this.diffs = diffs;
     }
   }
 
   public static ReactiveWrapper<DbDiff> compare(ReactiveWrapper<Database> db1, ReactiveWrapper<Database> db2) {
-    return null;
     // This method must compare every part of database with the remote/local database and log the differences inside
     // each of the IHashMaps. Basically every property of the database needs to be compared, including the database name,
     // the list of tables, the list of columns inside each table and all the other properties associated with columns/tables.
-/*
-    return ReactorMono.make(db1.unwrapMono()
-      .flatMap(leftDb -> {
-        return db2.unwrapMono()
-          .map(rightDb -> new DiffWrap(rightDb, compareDatabaseProps(leftDb, rightDb)))
-          .map(diffWrap -> new DiffWrap(diffWrap.rightDb, diffWrap.diffs.combineDiffs(compareTableProps(leftDb.tables, diffWrap.rightDb.tables))))
-//          .map(diffWrap -> new DiffWrap(diffWrap.rightDb, diffWrap.diffs.combineDiffs(compareColumnProps(getColumns(leftDb.tables), getColumns(diffWrap.rightDb.tables)))))
-          .map(diffWrap -> diffWrap.diffs);
-      }));
-*/
+    return null;
+//    return ReactorMono.make(db1.unwrapMono()
+//      .flatMap(leftDb -> {
+//        return db2.unwrapMono()
+//          .map(rightDb -> new DiffWrap(rightDb, compareDatabaseProps(leftDb, rightDb)))
+//          .map(diffWrap -> )
+//      }));
   }
 
   private static DbDiff compareDatabaseProps(Database leftDb, Database rightDb) {
@@ -46,13 +42,13 @@ public class DiffService {
     //Check if name is the same. If not run this code:
     final ScalarDiff<String> nameDiff = ScalarDiff.make(leftDb.name, rightDb.name);
     //Check if tables are the same. If not run this code:
-    final IList<TableDiff> tableDiffs = compareTableProps(leftDb.tables, rightDb.tables);
+    final IList<Diff<Table>> tableDiffs = compareTableProps(leftDb.tables, rightDb.tables);
     final VectorDiff<Table> tablesDiff = VectorDiff.make(null, null, tableDiffs); //FIXME: figure out how to get make method to accept All types of diffs for update.
     final DbDiff dbDiff = DbDiff.make(nameDiff, tablesDiff);
     return dbDiff;
   }
 
-  private static IList<TableDiff> compareTableProps(IList<Table> leftTables, IList<Table> rightTables) {
+  private static IList<Diff<Table>> compareTableProps(IList<Table> leftTables, IList<Table> rightTables) {
     //Step 1: filter out all the righttables that are contained inside leftTables.
     for (Table rightTable : rightTables) {
       leftTables.contains(rightTable);

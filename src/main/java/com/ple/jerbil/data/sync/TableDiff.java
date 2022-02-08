@@ -28,4 +28,9 @@ public class TableDiff implements Diff<Table> {
     return new TableDiff(name, columns, storageEngine);
   }
 
+  @Override
+  public int getTotalDiffs() {
+    return 0;
+  }
+
 }

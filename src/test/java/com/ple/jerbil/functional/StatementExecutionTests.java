@@ -25,7 +25,7 @@ public class StatementExecutionTests {
   @Test
   @Order(1)
   void dropDbTest() {
-    final Flux<Result> result = DataGlobal.bridge.execute("drop database test");
+    final Flux<Result> result = DataGlobal.bridge.execute("drop database test").unwrapFlux(); //FIXME: Remove all hard-coded sql statements in this file. Replace with Jerbil commands.
     StepVerifier.create(result
         .doOnSubscribe(n -> System.out.println("Successfully dropped database")))
       .expectNextCount(1)
@@ -35,7 +35,7 @@ public class StatementExecutionTests {
   @Test
   @Order(2)
   void createDbTest() {
-    final Flux<Result> result = DataGlobal.bridge.execute("create database test");
+    final Flux<Result> result = DataGlobal.bridge.execute("create database test").unwrapFlux();
     StepVerifier.create(
         result
           .flatMap(Result::getRowsUpdated)
@@ -72,8 +72,8 @@ public class StatementExecutionTests {
           itemId int,
           primary key (playerId, itemId)
         ) ENGINE=Aria;
-      """).blockLast(Duration.ofMillis(100));
-    final Flux<Result> result = DataGlobal.bridge.execute("use test; show tables;");
+      """).unwrapFlux().blockLast(Duration.ofMillis(100));
+    final Flux<Result> result = DataGlobal.bridge.execute("use test; show tables;").unwrapFlux();
     StepVerifier.create(result
         .flatMap(results -> results.map((row, rowMetadata) -> String.format("%s",
           row.get("tables_in_test", String.class))))
@@ -85,7 +85,7 @@ public class StatementExecutionTests {
   @Test
   @Order(4)
   void insertRowTest() {
-    final Flux<Result> result = DataGlobal.bridge.execute("use test; insert into item values (0, 'fire sword', 'weapon', 200), (0, 'robe', 'armor', 300)");
+    final Flux<Result> result = DataGlobal.bridge.execute("use test; insert into item values (0, 'fire sword', 'weapon', 200), (0, 'robe', 'armor', 300)").unwrapFlux();
     StepVerifier.create(
         result
           .flatMap(Result::getRowsUpdated)
@@ -98,7 +98,7 @@ public class StatementExecutionTests {
   @Test
   @Order(5)
   void selectQueryTest() {
-    final Flux<Result> result = DataGlobal.bridge.execute("use test; select itemId, name, type, price from item;");
+    final Flux<Result> result = DataGlobal.bridge.execute("use test; select itemId, name, type, price from item;").unwrapFlux();
     StepVerifier.create(result
         .flatMap(results -> results.map((row, rowMetadata) -> String.format("%d | %s | %s | %d",
           row.get("itemId", Long.class),
@@ -109,27 +109,5 @@ public class StatementExecutionTests {
         .map(s -> s.substring(s.length() - 3)))
       .expectNext("200", "300")
       .verifyComplete();
-
-/*
-    // This was the old way to subscribe to an object. But now instead of using subscribe with arguments, we use .methods()
-    // and operators on the publisher and use subscribe at the end. See https://www.woolha.com/tutorials/project-reactor-using-subscribe-on-mono-and-flux
-    result.subscribe(
-      result1 -> System.out.println(result1),
-      error -> System.err.println("Error: " + error),
-      () -> System.out.println("Done"),   //
-      subscription -> subscription.request(2)   //pass on two elements from the source to a new consumer that will be invoked on subscribe signal.
-    )
-*/
-
-/* Alternative method:
-    for (String item_entry : result.flatMap( res ->
-      res.map((row, metadata) -> String.format( "%d | %s | %s | %d",
-      row.get("itemId", Long.class),
-      row.get("name", String.class),
-      row.get("type", String.class),
-      row.get("price", Integer.class)))).toIterable()) {
-      System.out.println(item_entry);
-    }
-*/
   }
 }

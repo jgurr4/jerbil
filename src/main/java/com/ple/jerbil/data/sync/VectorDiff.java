@@ -14,7 +14,7 @@ public class VectorDiff<T> {
     this.update = update;
   }
 
-  public static <T> VectorDiff<T> make(IList<T> create, IList<T> delete, IList<Diff<T>> update) {
+  public static <T2> VectorDiff<T2> make(IList<T2> create, IList<T2> delete, IList<Diff<T2>> update) {
     return new VectorDiff<>(create, delete, update);
   }
 

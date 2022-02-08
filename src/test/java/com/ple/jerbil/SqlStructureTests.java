@@ -129,6 +129,37 @@ public class SqlStructureTests {
       """, q.toSql());
   }
 
+  //ALTER TABLE tests:
+  @Test
+  void testModifyColumn() {
+  }
+
+  @Test
+  void testRenameColumn() {
+  }
+
+  @Test
+  void testChangeColumn() {
+  }
+
+  @Test
+  void dropColumn() {
+  }
+
+  @Test
+  void addColumn() {
+  }
+
+  // Database objects tests:
+  @Test
+  void dropTable() {
+  }
+
+  @Test
+  void dropDatabase() {
+  }
+
+
   @Test
   void testCreateTableLike() {
   }
@@ -171,18 +202,6 @@ public class SqlStructureTests {
 
   @Test
   void showCreateTable() {
-  }
-
-  @Test
-  void dropColumn() {
-  }
-
-  @Test
-  void dropTable() {
-  }
-
-  @Test
-  void dropDatabase() {
   }
 
   @Test

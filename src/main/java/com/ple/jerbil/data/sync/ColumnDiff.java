@@ -38,4 +38,9 @@ public class ColumnDiff implements Diff<Column> {
     return new ColumnDiff(name, columnAttributes, dataSpec, index, generatedFrom, defaultValue);
   }
 
+  @Override
+  public int getTotalDiffs() {
+    return 0;
+  }
+
 }
