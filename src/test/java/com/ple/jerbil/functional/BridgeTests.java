@@ -39,33 +39,80 @@ public class BridgeTests {
     );
   }
 
-/*
   @Test
-  void myTest() {  //This shows a nice way to reuse results from stream.
-    final Mono<IArrayList<Integer>> cache = Mono.just(1)
-      .map(e -> IArrayList.make(1, 2))
-      .cache();
-    cache
-      .doOnNext(e -> System.out.println(e.get(0)))
-      .subscribe();
-    cache
-      .doOnNext(e -> System.out.println(e.get(1)))
-      .subscribe();
-    final Mono<IArrayList<Integer>> share = Mono.just(1)
-      .map(e -> IArrayList.make(3, 4))
-      .share();
-    share
-      .doOnNext(e -> System.out.println(e.get(0)))
-      .subscribe();
-    share
-      .doOnNext(e -> System.out.println(e.get(1)))
-      .subscribe();
+  void testCompareDatabases() {
+//    DiffService.compareDatabases();
   }
-*/
+
+  @Test
+  void testCompareTables() {
+//    DiffService.compareTables();
+  }
+
+  @Test
+  void testCompareColumns() {
+//    DiffService.compareColumns();
+  }
+
+  @Test
+  void testCompareTableLists() {
+//    DiffService.compareTableLists();
+  }
+
+  @Test
+  void testCompareColumnLists() {
+//    DiffService.compareColumnLists();
+//    DiffService.filterOutMatchingTables();
+  }
+
+  @Test
+  void testGetExtraTables() {
+//    DiffService.getExtraTables();
+  }
+
+  @Test
+  void testGetMissingTables() {
+//    DiffService.getMissingTables();
+  }
+
+  @Test
+  void testGetMatchingTables() {
+//    DiffService.getMatchingTables();
+  }
+
+  @Test
+  void testGetTableMatchingName() {
+//    DiffService.getTableMatchingName();
+  }
+
+  @Test
+  void testGetListOfTableDiffs() {
+//    DiffService.getListOfTableDiffs();
+  }
+
+  @Test
+  void testGetExtraColumns() {
+//    DiffService.getExtraColumns();
+  }
+
+  @Test
+  void testGetMissingColumns() {
+//    DiffService.getMissingColumns();
+  }
+
+  @Test
+  void testGetMatchingColumns() {
+//    DiffService.getMatchingColumns();
+  }
+
+  @Test
+  void testGetListOfColumnDiffs() {
+//    DiffService.getListOfColumnDiffs();
+  }
 
   @Test
   void testCompareMissingTable() {
-    final DbDiff diffs = DiffService.compare(
+    final DbDiff diffs = DiffService.compareDatabases(
       testDb.wrap(), new Database("myDb", IArrayList.make(user, player, item)).wrap()).unwrap();
     assertEquals(IArrayList.make("inventory"), diffs.tables.create);
     assertNull(diffs.tables.delete);
@@ -81,7 +128,7 @@ public class BridgeTests {
         itemColumns.type, Column.make("price").asInt()
       ));
     Table extraTable = Table.make(StorageEngine.simple, "extra", IArrayList.make(Column.make("id").bigId()));
-    final DbDiff diff = DiffService.compare(
+    final DbDiff diff = DiffService.compareDatabases(
       testDb.wrap(), Database.make("myDb", IArrayList.make(user, player, alteredItem, extraTable)).wrap()).unwrap();  //inventory needs create, alteredItem needs update, extraTable needs delete.
     assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.length());
     assertEquals(0, diff.filter(DdlOption.make().create()).tables.delete.length());

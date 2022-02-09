@@ -20,6 +20,7 @@ public class Table extends FromExpression implements TableContainer {
   public final StorageEngine engine;
   public final String name;
   public IList<Column> columns;
+  public static Table[] emptyArray = new Table[0];
 
   protected Table(String name) {
     this(StorageEngine.simple, name, IArrayList.make());

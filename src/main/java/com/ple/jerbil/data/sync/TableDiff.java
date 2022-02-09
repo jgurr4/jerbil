@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.sync;
 
+import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -7,8 +8,10 @@ import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 
+@Immutable
 public class TableDiff implements Diff<Table> {
 
+  public static Diff<Table>[] empty = new TableDiff[0];
   public final ScalarDiff<String> name;
   public final VectorDiff<Column> columns;
   public final ScalarDiff<StorageEngine> storageEngine;

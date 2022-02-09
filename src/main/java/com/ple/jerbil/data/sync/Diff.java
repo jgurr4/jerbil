@@ -9,6 +9,5 @@ import com.ple.util.IMap;
  * In other words, if every list is empty, that means there are no diffs and the databases match perfectly.
  */
 public interface Diff<T> {
-
   int getTotalDiffs();
 }

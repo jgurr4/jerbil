@@ -101,7 +101,7 @@ public class MariadbR2dbcBridge implements DataBridge {
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
       .map(tblCreateStr -> DataGlobal.bridge.getGenerator().fromSql(tblCreateStr))
       .collectList()
-      .map(tables -> IArrayList.make(tables.toArray(new Table[0])))
+      .map(tables -> IArrayList.make(tables.toArray(Table.emptyArray)))
       .map(tablesIList -> Database.make(name, tablesIList))
     );
   }
