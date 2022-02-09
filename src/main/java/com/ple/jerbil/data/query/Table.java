@@ -1,9 +1,6 @@
 package com.ple.jerbil.data.query;
 
-import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.DelayedImmutable;
-import com.ple.jerbil.data.LanguageGenerator;
-import com.ple.jerbil.data.StorageEngine;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.CountAgg;
@@ -17,8 +14,8 @@ import java.util.Objects;
 /**
  * Table is a database Object which contains columns.
  */
-@DelayedImmutable
-public class Table extends FromExpression {
+@Immutable
+public class Table extends FromExpression implements TableContainer {
 
   public final StorageEngine engine;
   public final String name;
@@ -32,6 +29,7 @@ public class Table extends FromExpression {
     this.engine = engine;
     this.name = name;
     this.columns = columns;
+//    this.columns = IArrayList.make(Column.make(this));
   }
 
   public static Table make(StorageEngine engine, String name, IList<Column> columns) {
@@ -129,6 +127,11 @@ public class Table extends FromExpression {
       ", columns=" + columns +
       ", engine=" + engine +
       '}';
+  }
+
+  @Override
+  public Table getTable() {
+    return this;
   }
 
 }

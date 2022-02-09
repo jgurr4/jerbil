@@ -10,8 +10,10 @@ import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
+import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
 import java.util.Properties;
 
@@ -36,6 +38,30 @@ public class BridgeTests {
       props.getProperty("user"), props.getProperty("password")
     );
   }
+
+/*
+  @Test
+  void myTest() {  //This shows a nice way to reuse results from stream.
+    final Mono<IArrayList<Integer>> cache = Mono.just(1)
+      .map(e -> IArrayList.make(1, 2))
+      .cache();
+    cache
+      .doOnNext(e -> System.out.println(e.get(0)))
+      .subscribe();
+    cache
+      .doOnNext(e -> System.out.println(e.get(1)))
+      .subscribe();
+    final Mono<IArrayList<Integer>> share = Mono.just(1)
+      .map(e -> IArrayList.make(3, 4))
+      .share();
+    share
+      .doOnNext(e -> System.out.println(e.get(0)))
+      .subscribe();
+    share
+      .doOnNext(e -> System.out.println(e.get(1)))
+      .subscribe();
+  }
+*/
 
   @Test
   void testCompareMissingTable() {

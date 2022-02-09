@@ -93,6 +93,7 @@ public class SqlQueryTests {
 
   }
 
+  //FIXME: If you switch player and inventory position, the results won't be what you expect.
   @Test
   void testSelectJoins() {
     final CompleteQuery q = player.join(inventory, item).where(

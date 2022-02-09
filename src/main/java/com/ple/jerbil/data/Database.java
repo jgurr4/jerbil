@@ -19,12 +19,12 @@ import reactor.core.publisher.Mono;
 /**
  * Database is a object representing the database and it's tables.
  */
-@DelayedImmutable
-public class Database {
+@Immutable
+public class Database implements DatabaseContainer {
 
   public final String name;
   @Nullable
-  public IList<Table> tables;
+  public final IList<Table> tables;
 
   public Database(String name, @Nullable IList<Table> tables) {
     this.name = name;
@@ -84,6 +84,11 @@ public class Database {
 
   public ReactiveWrapper<Database> wrap() {
     return SynchronousObject.make(this);
+  }
+
+  @Override
+  public Database getDatabase() {
+    return this;
   }
 
 }
