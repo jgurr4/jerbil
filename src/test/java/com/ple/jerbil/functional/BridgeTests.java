@@ -55,8 +55,8 @@ public class BridgeTests {
   }
 
   @Test
-  void testCompareTableLists() {
-//    DiffService.compareTableLists();
+  void testCompareListOfTables() {
+//    DiffService.compareListOfTables();
   }
 
   @Test
