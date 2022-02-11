@@ -3,6 +3,8 @@ package com.ple.jerbil.data.selectExpression.booleanExpression;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.Expression;
 
+import java.util.Objects;
+
 /**
  * Object representing GreaterThan BooleanExpression.
  *
@@ -36,6 +38,27 @@ public class GreaterThan implements BooleanExpression {
   @Override
   public BooleanExpression eq(Expression item) {
     return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof GreaterThan)) return false;
+    GreaterThan that = (GreaterThan) o;
+    return e1.equals(that.e1) && e2.equals(that.e2);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(e1, e2);
+  }
+
+  @Override
+  public String toString() {
+    return "GreaterThan{" +
+      "e1=" + e1 +
+      ", e2=" + e2 +
+      '}';
   }
 
 }

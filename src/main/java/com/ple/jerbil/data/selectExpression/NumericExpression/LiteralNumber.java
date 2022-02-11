@@ -1,9 +1,12 @@
 package com.ple.jerbil.data.selectExpression.NumericExpression;
 
+import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
+
+import java.util.Objects;
 
 /**
  * LiteralNumber looks like this in a normal query:
@@ -11,9 +14,10 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
  * Contrast that with selecting Numeric columns:
  * select price, amount from tablename;
  */
+@Immutable
 public class LiteralNumber implements Literal, NumericExpression {
 
-    public Integer value;
+    public final Integer value;
 
     protected LiteralNumber(Integer value) {
         this.value = value;
@@ -36,6 +40,26 @@ public class LiteralNumber implements Literal, NumericExpression {
   @Override
   public BooleanExpression eq(Expression item) {
       return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof LiteralNumber)) return false;
+    LiteralNumber that = (LiteralNumber) o;
+    return value.equals(that.value);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(value);
+  }
+
+  @Override
+  public String toString() {
+    return "LiteralNumber{" +
+      "value=" + value +
+      '}';
   }
 
 }

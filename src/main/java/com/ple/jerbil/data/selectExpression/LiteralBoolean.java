@@ -2,6 +2,8 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
+import java.util.Objects;
+
 /**
  * LiteralBoolean looks like this in a normal query:
  * select true, false;
@@ -33,6 +35,26 @@ public class LiteralBoolean implements BooleanExpression {
     @Override
     public BooleanExpression eq(Expression item) {
         return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LiteralBoolean)) return false;
+        LiteralBoolean that = (LiteralBoolean) o;
+        return bool.equals(that.bool);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(bool);
+    }
+
+    @Override
+    public String toString() {
+        return "LiteralBoolean{" +
+          "bool=" + bool +
+          '}';
     }
 
 }

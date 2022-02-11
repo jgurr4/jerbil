@@ -5,6 +5,8 @@ import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 
+import java.util.Objects;
+
 /**
  * Adds ability for Either-Or conditionals in 'where' + 'and' methods.
  */
@@ -38,6 +40,26 @@ public class Or implements BooleanExpression {
   @Override
   public BooleanExpression eq(Expression item) {
     return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Or)) return false;
+    Or or = (Or) o;
+    return conditions.equals(or.conditions);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(conditions);
+  }
+
+  @Override
+  public String toString() {
+    return "Or{" +
+      "conditions=" + conditions +
+      '}';
   }
 
 }

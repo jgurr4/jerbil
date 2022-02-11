@@ -10,6 +10,8 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 @Immutable
 public class NumericColumn extends Column<NumericColumn> implements NumericExpression {
 
@@ -68,6 +70,32 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   public Equals eq(Expression value) {
     return Equals.make(this, value);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof NumericColumn)) return false;
+    if (!super.equals(o)) return false;
+    NumericColumn that = (NumericColumn) o;
+    return isAutoIncrement() == that.isAutoIncrement();
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), isAutoIncrement());
+  }
+
+  @Override
+  public String toString() {
+    return "NumericColumn{" +
+      "dataSpec=" + dataSpec +
+      ", generatedFrom=" + generatedFrom +
+      ", autoIncrement=" + autoIncrement +
+      ", name='" + name + '\'' +
+      ", indexed=" + indexed +
+      ", primary=" + primary +
+      '}';
   }
 
 }

@@ -1,12 +1,12 @@
 package com.ple.jerbil.data.sync;
 
-import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.StorageEngine;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.ReactorFlux;
 import com.ple.jerbil.data.bridge.ReactorMono;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import reactor.core.publisher.Flux;
@@ -103,10 +103,10 @@ public class DiffService {
   public static IList<Table> filterOutMatchingTables(IList<Table> leftTables, IList<Table> rightTables) {
     IList<Table> nonMatchingTables = IArrayList.make();
     for (Table rightTable : rightTables) {
-        if (!leftTables.contains(rightTable)) {
-          nonMatchingTables = nonMatchingTables.add(rightTable);
-        }
+      if (!leftTables.contains(rightTable)) {
+        nonMatchingTables = nonMatchingTables.add(rightTable);
       }
+    }
     return nonMatchingTables;
   }
 
@@ -146,29 +146,91 @@ public class DiffService {
     //TODO: Decide if results should be empty or if object returned should be null.
   }
 
-  private static IList<Diff<Column>> getListOfColumnDiffs(IList<Column> leftColumns, IList<Column> matches) {
-    return null;
+  public static IList<Diff<Column>> getListOfColumnDiffs(IList<Column> leftColumns, IList<Column> rightColumns) {
+    return Flux.fromIterable(rightColumns)
+      .filter(Objects::nonNull)
+      .map(column -> compareColumns(getColumnMatchingName(leftColumns, column.name), column))
+      .collectList()
+      .map(columnDiffs -> IArrayList.make(columnDiffs.toArray(ColumnDiff.empty)))
+      .defaultIfEmpty(null)
+      .block();
   }
 
-  private static IList<Column> getExtraColumns(IList<Column> leftColumns, IList<Column> nonMatches) {
-    return null;
+  public static Column getColumnMatchingName(IList<Column> columns, String name) {
+    Column result = null;
+    for (Column c : columns) {
+      if (c.name.equals(name)) {
+        result = c;
+      }
+    }
+    return result;
   }
 
-  private static boolean checkColumnNameInList(IList<Column> leftColumns, Column column) {
+  public static IList<Column> getExtraColumns(IList<Column> leftColumns, IList<Column> rightColumns) {
+    IList<Column> result = IArrayList.make();
+    for (Column rColumn : rightColumns) {
+      if (!leftColumns.contains(rColumn) && !checkColumnNameInList(leftColumns, rColumn)) {
+        result = result.add(rColumn);
+      }
+    }
+    if (result.length() == 0) {
+      return null;
+    }
+    return result;
+  }
+
+  public static boolean checkColumnNameInList(IList<Column> columns, Column column) {
+    for (Column c1 : columns) {
+      if (column.name.equals(c1.name)) {
+        return true;
+      }
+    }
     return false;
   }
 
-  private static IList<Column> filterOutMatchingColumns(IList<Column> leftColumns, IList<Column> rightColumns) {
-    return null;
+  public static IList<Column> filterOutMatchingColumns(IList<Column> leftColumns, IList<Column> rightColumns) {
+    IList<Column> nonMatchingTables = IArrayList.make();
+    for (Column rightColumn : rightColumns) {
+      if (!leftColumns.contains(rightColumn)) {
+        nonMatchingTables = nonMatchingTables.add(rightColumn);
+      }
+    }
+    return nonMatchingTables;
   }
 
-  private static IList<Column> getMissingColumns(IList<Column> leftColumns, IList<Column> rightColumns) {
-    return null;
+  public static IList<Column> getMissingColumns(IList<Column> leftColumns, IList<Column> rightColumns) {
+    IList<Column> result = IArrayList.make();
+    for (Column lColumn : leftColumns) {
+      if (!rightColumns.contains(lColumn) && !checkColumnNameInList(rightColumns, lColumn)) {
+        result = result.add(lColumn);
+      }
+    }
+    if (result.length() == 0) {
+      return null;
+    }
+    return result;
   }
 
   public static Diff<Column> compareColumns(Column c1, Column c2) {
-    //Should return a ColumnDiff containing all the diffs of column.
-    // If no diffs exist between columns then it should return null.
+    final ScalarDiff<String> nameDiff = c1.name.equals(c2.name) ? null : ScalarDiff.make(c1.name, c2.name);
+    final VectorDiff<ColumnAttribute> columnAttributesDiff = compareColumnAttributes(c1, c2);
+    final ScalarDiff<DataSpec> dataSpecDiff = c1.dataSpec.equals(c2.dataSpec) ? null : ScalarDiff.make(
+      c1.dataSpec, c2.dataSpec);
+    final VectorDiff<Index> indexDiff = compareIndexes(c1, c2);
+    final ScalarDiff<Expression> generatedDiff = c1.generatedFrom.equals(
+      c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
+    final ScalarDiff<Expression> defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(c1.defaultValue, c2.defaultValue);
+    return ColumnDiff.make(nameDiff, columnAttributesDiff, dataSpecDiff, indexDiff, generatedDiff, defaultDiff);
+  }
+
+  private static VectorDiff<Index> compareIndexes(Column c1, Column c2) {
+    if (!c1.indexed && c2.indexed || c1.indexed && !c2.indexed) {
+
+    }
+    return null;
+  }
+
+  private static VectorDiff<ColumnAttribute> compareColumnAttributes(Column c1, Column c2) {
     return null;
   }
 
@@ -182,6 +244,7 @@ public class DiffService {
   }
 
 /* Example of how to turn these methods into generic methods.
+   Note: This is not necessarily better because it still uses same amount of code. Better to somehow do it without checking instances.
   public static <T> boolean checkTableNameInList(IList<T> objects, T t1) {
     if (t1 instanceof Table) {
       for (T object : objects) {
@@ -198,6 +261,5 @@ public class DiffService {
     }
     return false;
   }
-*/
-
+ */
 }

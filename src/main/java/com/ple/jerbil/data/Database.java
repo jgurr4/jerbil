@@ -57,7 +57,7 @@ public class Database implements DatabaseContainer {
 
   public SyncResult sync(DdlOption ddlOption) {
     ReactiveWrapper<Database> existingDb = getDb(name);
-    ReactiveWrapper<DbDiff> dbDiff = DiffService.compare(this.wrap(), existingDb);
+    ReactiveWrapper<DbDiff> dbDiff = DiffService.compareDatabases(this.wrap(), existingDb);
     ReactiveWrapper<DbDiff> filteredDiff = ReactorMono.make(dbDiff.unwrapMono().map(diffs -> diffs.filter(ddlOption)));
     ReactiveWrapper<String> sql = ReactorMono.make(filteredDiff.unwrapMono().map(fDiff -> fDiff.toSql()));
     return SyncResult.make(DataGlobal.bridge.execute(sql), dbDiff);

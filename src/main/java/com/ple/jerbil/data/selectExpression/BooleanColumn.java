@@ -47,4 +47,6 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
         return null;
     }
 
+
+
 }

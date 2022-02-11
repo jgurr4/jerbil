@@ -5,6 +5,8 @@ import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
+import java.util.Objects;
+
 /**
  * A wrapper for columns which also includes info about whether said column requires a table name syntax
  * when used in a query.
@@ -43,6 +45,27 @@ public class QueriedColumn implements Expression {
   @Override
   public BooleanExpression eq(Expression item) {
     return null;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof QueriedColumn)) return false;
+    QueriedColumn that = (QueriedColumn) o;
+    return column.equals(that.column) && tableName.equals(that.tableName);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(column, tableName);
+  }
+
+  @Override
+  public String toString() {
+    return "QueriedColumn{" +
+      "column=" + column +
+      ", tableName='" + tableName + '\'' +
+      '}';
   }
 
 }

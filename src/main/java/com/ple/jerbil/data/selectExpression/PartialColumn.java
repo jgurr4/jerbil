@@ -5,6 +5,8 @@ import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
+import java.util.Objects;
+
 /**
  * PartialColumn was made to allow column expressions to be created without requiring a DataSpec.
  * That way it can be defined later as part of our fluent api, rather than always being required before dataspec is defined.
@@ -83,6 +85,28 @@ public class PartialColumn implements Expression, OrderedExpression {
 
   public String getName() {
     return name;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof PartialColumn)) return false;
+    PartialColumn that = (PartialColumn) o;
+    return isIndexed() == that.isIndexed() && isPrimary() == that.isPrimary() && getName().equals(that.getName());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getName(), isIndexed(), isPrimary());
+  }
+
+  @Override
+  public String toString() {
+    return "PartialColumn{" +
+      "name='" + name + '\'' +
+      ", indexed=" + indexed +
+      ", primary=" + primary +
+      '}';
   }
 
 }

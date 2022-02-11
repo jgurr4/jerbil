@@ -5,6 +5,7 @@ import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * LiteralDate looks like this in a normal query:
@@ -44,6 +45,26 @@ public class LiteralDate implements Literal, DateExpression {
     @Override
     public BooleanExpression eq(Expression item) {
         return null;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof LiteralDate)) return false;
+        LiteralDate that = (LiteralDate) o;
+        return dateTime.equals(that.dateTime);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(dateTime);
+    }
+
+    @Override
+    public String toString() {
+        return "LiteralDate{" +
+          "dateTime=" + dateTime +
+          '}';
     }
 
 }
