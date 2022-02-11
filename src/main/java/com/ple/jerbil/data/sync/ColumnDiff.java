@@ -6,8 +6,6 @@ import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.IntFunction;
-
 @Immutable
 public class ColumnDiff implements Diff<Column> {
 
@@ -15,29 +13,30 @@ public class ColumnDiff implements Diff<Column> {
   @Nullable public final ScalarDiff<String> name;
   @Nullable public final VectorDiff<ColumnAttribute> columnAttributes;
   @Nullable public final ScalarDiff<DataSpec> dataSpec;
-  @Nullable public final VectorDiff<Index> index;
+  @Nullable public final VectorDiff<IndexSpec> indexSpec;
   @Nullable public final ScalarDiff<Expression> generatedFrom;
   @Nullable public final ScalarDiff<Expression> defaultValue;
 //  private final ScalarDiff<String> comment;
   //ColumnAttribute has these fields: unique, nullable, invisible, autoIncrement,
-  //Index has these fields: primary, key, foreign, fulltext, spatial, order (ASC or DESC), and size for prefixed indexes.
+  //Index has these fields: primary, secondary, foreign, fulltext, spatial.
+  // IndexSpec has these fields: order (ASC or DESC), and size for prefixed indexes.
 
   protected ColumnDiff(@Nullable ScalarDiff<String> name, @Nullable VectorDiff<ColumnAttribute> columnAttributes,
-                       @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable VectorDiff<Index> index,
+                       @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable VectorDiff<IndexSpec> indexSpec,
                        @Nullable ScalarDiff<Expression> generatedFrom, @Nullable ScalarDiff<Expression> defaultValue) {
     this.name = name;
     this.columnAttributes = columnAttributes;
     this.dataSpec = dataSpec;
-    this.index = index;
+    this.indexSpec = indexSpec;
     this.generatedFrom = generatedFrom;
     this.defaultValue = defaultValue;
 //    this.comment = comment;
   }
 
   public static ColumnDiff make(ScalarDiff<String> name, VectorDiff<ColumnAttribute> columnAttributes,
-                                ScalarDiff<DataSpec> dataSpec, VectorDiff<Index> index,
+                                ScalarDiff<DataSpec> dataSpec, VectorDiff<IndexSpec> indexSpec,
                                 ScalarDiff<Expression> generatedFrom, ScalarDiff<Expression> defaultValue) {
-    return new ColumnDiff(name, columnAttributes, dataSpec, index, generatedFrom, defaultValue);
+    return new ColumnDiff(name, columnAttributes, dataSpec, indexSpec, generatedFrom, defaultValue);
   }
 
   @Override

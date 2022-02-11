@@ -2,7 +2,6 @@ package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.ReactiveWrapper;
-import com.ple.jerbil.data.bridge.ReactorFlux;
 import com.ple.jerbil.data.bridge.ReactorMono;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -13,7 +12,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 /**
  * Contains static methods for obtaining all differences between existing database structure and Database Object.
@@ -216,17 +214,21 @@ public class DiffService {
     final VectorDiff<ColumnAttribute> columnAttributesDiff = compareColumnAttributes(c1, c2);
     final ScalarDiff<DataSpec> dataSpecDiff = c1.dataSpec.equals(c2.dataSpec) ? null : ScalarDiff.make(
       c1.dataSpec, c2.dataSpec);
-    final VectorDiff<Index> indexDiff = compareIndexes(c1, c2);
+    final VectorDiff<IndexSpec> indexDiff = compareIndexes(c1, c2);
     final ScalarDiff<Expression> generatedDiff = c1.generatedFrom.equals(
       c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
     final ScalarDiff<Expression> defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(c1.defaultValue, c2.defaultValue);
     return ColumnDiff.make(nameDiff, columnAttributesDiff, dataSpecDiff, indexDiff, generatedDiff, defaultDiff);
   }
 
-  private static VectorDiff<Index> compareIndexes(Column c1, Column c2) {
+  private static VectorDiff<IndexSpec> compareIndexes(Column c1, Column c2) {
     if (!c1.indexed && c2.indexed || c1.indexed && !c2.indexed) {
 
     }
+    final IList<IndexSpec> create = IArrayList.make(IndexSet.primary);
+    final IList<IndexSpec> delete = IArrayList.make(IndexSet.secondary);
+    final IList<IndexSpec> update = IArrayList.make(IndexDiff.make(IndexSpec.make(Index.fulltext), IndexSpec.make(Index.secondary, 3, IndexSort.ascending)));
+    VectorDiff.make(create, delete, update);
     return null;
   }
 
