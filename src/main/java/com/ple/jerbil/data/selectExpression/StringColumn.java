@@ -8,33 +8,33 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
 public class StringColumn extends Column<StringColumn> implements StringExpression {
 
-    protected StringColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-        super(name, dataSpec, indexed, primary, generatedFrom);
+    protected StringColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom, StringExpression defaultValue) {
+        super(name, dataSpec, indexed, primary, generatedFrom, defaultValue);
     }
 
     @Override
     public StringColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-        return new StringColumn(name, dataSpec, indexed, primary, generatedFrom);
+        return new StringColumn(name, dataSpec, indexed, primary, generatedFrom, null);
     }
 
     public static StringColumn make(String name, DataSpec dataSpec, boolean indexed) {
-        return new StringColumn(name, dataSpec, indexed, false, null);
+        return new StringColumn(name, dataSpec, indexed, false, null, null);
     }
 
     public static StringColumn make(String name, DataSpec dataSpec) {
-        return new StringColumn(name, dataSpec, false, false, null);
+        return new StringColumn(name, dataSpec, false, false, null, null);
     }
 
     public static StringColumn make(String name, int size) {
-        return new StringColumn(name, DataSpec.make(DataType.varchar, size), false, false, null);
+        return new StringColumn(name, DataSpec.make(DataType.varchar, size), false, false, null, null);
     }
 
     public static StringColumn make(String name, Boolean indexed, Boolean primary) {
-        return new StringColumn(name, DataSpec.make(DataType.varchar), indexed, primary, null);
+        return new StringColumn(name, DataSpec.make(DataType.varchar), indexed, primary, null, null);
     }
 
     public static StringColumn make(String name, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        return new StringColumn(name, dataSpec, indexed, primary, null);
+        return new StringColumn(name, dataSpec, indexed, primary, null, null);
     }
 
     public Equals eq(Expression value) {
@@ -52,6 +52,10 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     @Override
     public BooleanExpression isLessThan(Expression i) {
         return null;
+    }
+
+    public StringColumn defaultValue(StringExpression str) {
+        return new StringColumn(name, dataSpec, indexed, primary, generatedFrom, str);
     }
 
 }

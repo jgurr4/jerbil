@@ -17,42 +17,42 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   public final boolean autoIncrement;
 
-  protected NumericColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, @Nullable Expression generatedFrom) {
-    super(name, dataSpec, indexed, primary, generatedFrom);
+  protected NumericColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, @Nullable Expression generatedFrom, @Nullable NumericExpression defaultValue) {
+    super(name, dataSpec, indexed, primary, generatedFrom, defaultValue);
     this.autoIncrement = autoIncrement;
-  }
-
-  public static NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, NumericExpression generatedFrom) {
-    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, generatedFrom);
   }
 
   @Override
   public NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, generatedFrom);
+    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, generatedFrom, null);
+  }
+
+  public static NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, NumericExpression generatedFrom, NumericExpression defaultValue) {
+    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, generatedFrom, defaultValue);
   }
 
   public static NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement) {
-    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, null);
+    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, null, null);
   }
 
   public static NumericColumn make(String name, int size) {
-    return new NumericColumn(name, DataSpec.make(DataType.integer, size), false, false, false, null);
+    return new NumericColumn(name, DataSpec.make(DataType.integer, size), false, false, false, null, null);
   }
 
   public static NumericColumn make(String name, boolean primary) {
-    return new NumericColumn(name, DataSpec.make(DataType.integer), false, primary, false, null);
+    return new NumericColumn(name, DataSpec.make(DataType.integer), false, primary, false, null, null);
   }
 
   public static NumericColumn make(String name, Boolean indexed, Boolean primary) {
-    return new NumericColumn(name, DataSpec.make(DataType.integer), indexed, primary, false, null);
+    return new NumericColumn(name, DataSpec.make(DataType.integer), indexed, primary, false, null, null);
   }
 
   public static NumericColumn make(String name, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-    return new NumericColumn(name, dataSpec, indexed, primary, false, null);
+    return new NumericColumn(name, dataSpec, indexed, primary, false, null, null);
   }
 
   public static NumericColumn make(String name, DataSpec dataSpec) {
-    return new NumericColumn(name, dataSpec, false, false, false, null);
+    return new NumericColumn(name, dataSpec, false, false, false, null, null);
   }
 
   public boolean isAutoIncrement() {
@@ -91,6 +91,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
     return "NumericColumn{" +
       "dataSpec=" + dataSpec +
       ", generatedFrom=" + generatedFrom +
+      ", defaultValue=" + defaultValue +
       ", autoIncrement=" + autoIncrement +
       ", name='" + name + '\'' +
       ", indexed=" + indexed +

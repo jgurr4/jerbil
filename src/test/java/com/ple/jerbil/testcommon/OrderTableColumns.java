@@ -2,12 +2,9 @@
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.selectExpression.BooleanColumn;
-import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.selectExpression.DateColumn;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
-import com.ple.jerbil.data.selectExpression.StringColumn;
 
 @Immutable
 public class OrderTableColumns {
@@ -33,7 +30,7 @@ public class OrderTableColumns {
 
     Column.make("test").id();
     orderId = Column.make("orderId").asBigInt().primary().ai();  //Alternatively just use .bigId() to replace all 3.
-    add = Column.make("add").asVarchar().unique().defaultValue();  //Tests unique(), null and defaultValue()
+    add = Column.make("add").asVarchar().defaultValue(Literal.make("barter")).unique();  //Tests unique(), null and defaultValue()
     phrase = Column.make("phrase").asText().fullText();
     userId = Column.make("userId").asInt().indexed();
     itemId = Column.make("itemId").asInt(10);  //Tests specifying the digits amount.
