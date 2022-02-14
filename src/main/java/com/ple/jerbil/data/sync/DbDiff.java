@@ -1,6 +1,5 @@
 package com.ple.jerbil.data.sync;
 
-import com.ple.jerbil.data.CharSet;
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.query.Table;

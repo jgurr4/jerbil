@@ -2,6 +2,8 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
+import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
@@ -13,20 +15,23 @@ import java.util.Objects;
  * For example Column.make('id', user).int().primary()
  * After Column.make() it's only a PartialColumn but after .int() it becomes a Column.
  */
+@Immutable
 public class PartialColumn implements Expression, OrderedExpression {
 
   public final String name;
+  public final Table table;
   public final boolean indexed;
   public final boolean primary;
 
-  protected PartialColumn(String name, boolean indexed, boolean primary) {
+  protected PartialColumn(String name, Table table, boolean indexed, boolean primary) {
     this.name = name;
+    this.table = table;
     this.indexed = indexed;
     this.primary = primary;
   }
 
-  public static PartialColumn make(String name) {
-    return new PartialColumn(name, false, false);
+  public static PartialColumn make(String name, Table table) {
+    return new PartialColumn(name, table, false, false);
   }
 
   @Override

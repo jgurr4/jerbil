@@ -2,12 +2,17 @@ package com.ple.jerbil;
 
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.DatabaseContainer;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Agg;
+import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.testcommon.*;
+import com.ple.util.IArrayList;
+import com.ple.util.IList;
 import org.junit.jupiter.api.Test;
-import reactor.test.StepVerifier;
 
 import java.util.Properties;
 
@@ -18,19 +23,45 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlQueryTests {
 
-  final UserTable user = new UserTable();
+  final Database testDb = Database.make("test");  //Can add ("test", Charset.utf8) here as well in future.
+
+  final UserTable user = new UserTable(testDb);
   final UserTableColumns userColumns = new UserTableColumns(user);
-  final PlayerTable player = new PlayerTable();
+  final TableContainer userTableContainer = TableContainer.make(user, userColumns.columns);
+
+  // This is the pattern I will use.
+  final PlayerTable player = new PlayerTable(testDb);
   final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
-  final ItemTable item = new ItemTable();
+  final TableContainer playerTableContainer = TableContainer.make(player, playerColumns.columns);
+
+  final ItemTable item = new ItemTable(testDb);
   final ItemTableColumns itemColumns = new ItemTableColumns(item);
-  final InventoryTable inventory = new InventoryTable();
+  final TableContainer itemTableContainer = TableContainer.make(item, itemColumns.columns);
+
+  final InventoryTable inventory = new InventoryTable(testDb);
   final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
-  final Database testDb = Database.make("test").add(user, player, item, inventory);
+  final TableContainer inventoryTableContainer = TableContainer.make(inventory, inventoryColumns.columns);
+
+  final DatabaseContainer dbContainer = DatabaseContainer.make(
+    testDb, IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer, inventoryTableContainer));
+
+  // To make everything above simpler and auto-generated for the user, I will use one of the methods below, either
+  // builder pattern, code generation or reflection.
+//  final DatabaseContainer dbContainer = DatabaseContainer.make(testDb, IArrayList.make(user, player, item, inventory));
+//  final Database testDb = Database.make("test");
+//  final Table player = Table.make("player", testDb);
+//  final PlayerColumns playerColumns = new PlayerTableColumns(player);
+//  final DatabaseContainer = DatabaseContainer.generate(testDb, IArrayList.make(TableContainer.make(player, playerColumns), TableContainer.make(user, userColumns)));
+  // This is builder pattern it is not code generation. It just makes objects. This is hardest for the user, but it is
+  // Code generation creates java code before compile time. Code Generation can be 1/5th the code. Code generation is compile time checked and users have to do 1/5th of the code. It can be messier and verbose compared to normal code writing, and it also makes things slightly harder to debug.
+  // Reflection generation creates java code after compile time. Reflection users can be 1/3rd the code.
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
-    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
+    DataGlobal.bridge = MariadbR2dbcBridge.make(
+      props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
+      props.getProperty("user"), props.getProperty("password")
+    );
   }
 
   @Test
@@ -70,26 +101,26 @@ public class SqlQueryTests {
     final CompleteQuery q1 = base.where(userColumns.name.eq(make("john")));
     final CompleteQuery q2 = base.where(userColumns.name.eq(make("james")));
     assertEquals("""
-        select userId
-        from user
-        where name = 'john'
-        """, q1.toSql());
+      select userId
+      from user
+      where name = 'john'
+      """, q1.toSql());
 
     assertEquals("""
-        select userId
-        from user
-        where name = 'james'
-        """, q2.toSql());
+      select userId
+      from user
+      where name = 'james'
+      """, q2.toSql());
   }
 
   @Test
   void testSelectEnum() {
     final CompleteQuery q = item.where(itemColumns.type.eq(ItemType.weapon.toString())).selectAll();
     assertEquals("""
-        select *
-        from item
-        where type = 'weapon'
-        """, q.toSql());
+      select *
+      from item
+      where type = 'weapon'
+      """, q.toSql());
 
   }
 
@@ -103,51 +134,51 @@ public class SqlQueryTests {
       )
     ).select();
     assertEquals("""
-        select *
-        from player
-        inner join inventory using (playerId)
-        inner join item using (itemId)
-        where item.name = 'bob'
-        and player.name = 'sword'
-        """, q.toSql());
+      select *
+      from player
+      inner join inventory using (playerId)
+      inner join item using (itemId)
+      where item.name = 'bob'
+      and player.name = 'sword'
+      """, q.toSql());
   }
 
   @Test
   void testAggregation() {
     final CompleteQuery q = item.select(Agg.count);
     assertEquals("""
-        select count(*)
-        from item
-        """, q.toSql());
+      select count(*)
+      from item
+      """, q.toSql());
   }
 
   @Test
   void testGroupBy() {
     final CompleteQuery q = item.select(itemColumns.type, Agg.count.as("total")).groupBy(itemColumns.type);
     assertEquals("""
-        select type, count(*) as total
-        from item
-        group by type
-        """, q.toSql());
+      select type, count(*) as total
+      from item
+      group by type
+      """, q.toSql());
   }
 
   @Test
   void testComplexExpressions() {
     final CompleteQuery q = item
-        .select(itemColumns.price
-          .times(make(42))
-          .minus(make(1))
-          .times(
-            make(3)
+      .select(itemColumns.price
+        .times(make(42))
+        .minus(make(1))
+        .times(
+          make(3)
             .plus(make(1))
-          )
-          .as("adjustedPrice"))
-        .where(itemColumns.price.dividedBy(make(4)).isGreaterThan(make(5)));
+        )
+        .as("adjustedPrice"))
+      .where(itemColumns.price.dividedBy(make(4)).isGreaterThan(make(5)));
     assertEquals("""
-        select (price * 42 - 1) * (3 + 1) as adjustedPrice
-        from item
-        where price / 4 > 5
-        """, q.toSql());
+      select (price * 42 - 1) * (3 + 1) as adjustedPrice
+      from item
+      where price / 4 > 5
+      """, q.toSql());
   }
 
   @Test
@@ -165,12 +196,12 @@ public class SqlQueryTests {
   void testUnion() {
     final CompleteQuery q = null;
     assertEquals("""
-                   select userId, name 
-                   from user 
-                   union all
-                   select userId, name 
-                   from player;
-                   """, q.toSql());
+      select userId, name 
+      from user 
+      union all
+      select userId, name 
+      from player;
+      """, q.toSql());
   }
 
   @Test

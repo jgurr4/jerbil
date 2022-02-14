@@ -1,29 +1,27 @@
 package com.ple.jerbil.data.selectExpression;
 
-import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.DataSpec;
-import com.ple.jerbil.data.DelayedImmutable;
-import com.ple.jerbil.data.LanguageGenerator;
+import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.query.Table;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-@DelayedImmutable
+@Immutable
 public abstract class Column <T extends Column> extends PartialColumn{
 
     public final DataSpec dataSpec;
     @Nullable public final Expression generatedFrom;
     @Nullable public final Expression defaultValue;
 
-    protected Column(String name, DataSpec dataSpec, boolean indexed, boolean primary, @Nullable Expression generatedFrom, @Nullable Expression defaultValue) {
-        super(name, indexed, primary);
+    protected Column(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, @Nullable Expression generatedFrom, @Nullable Expression defaultValue) {
+        super(name, table, indexed, primary);
         this.dataSpec = dataSpec;
         this.generatedFrom = generatedFrom;
         this.defaultValue = defaultValue;
     }
 
-    public static PartialColumn make(String name) {
-        return PartialColumn.make(name);
+    public static PartialColumn make(String name, Table table) {
+        return PartialColumn.make(name, table);
     }
 
     public abstract T make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom);

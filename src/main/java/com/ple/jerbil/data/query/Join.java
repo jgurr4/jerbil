@@ -1,7 +1,6 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.Immutable;
-import com.ple.util.IArrayList;
 import com.ple.util.IList;
 
 @Immutable

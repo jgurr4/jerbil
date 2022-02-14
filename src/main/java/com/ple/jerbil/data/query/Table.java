@@ -15,26 +15,29 @@ import java.util.Objects;
  * Table is a database Object which contains columns.
  */
 @Immutable
-public class Table extends FromExpression implements TableContainer {
+public class Table extends FromExpression {
 
-  public final StorageEngine engine;
   public final String name;
-  public IList<Column> columns;
+  public final Database database;
+  public final StorageEngine engine;
   public static Table[] emptyArray = new Table[0];
 
-  protected Table(String name) {
-    this(StorageEngine.simple, name, IArrayList.make());
+  protected Table(String name, Database database) {
+    this(name, database, StorageEngine.simple);
   }
 
-  protected Table(StorageEngine engine, String name, IList<Column> columns) {
-    this.engine = engine;
+  protected Table(String name, Database database, StorageEngine engine) {
     this.name = name;
-    this.columns = columns;
-//    this.columns = IArrayList.make(Column.make(this));
+    this.database = database;
+    this.engine = engine;
   }
 
-  public static Table make(StorageEngine engine, String name, IList<Column> columns) {
-    return new Table(engine, name, columns);
+  public static Table make(String name, Database database) {
+    return new Table(name, database, StorageEngine.simple);
+  }
+
+  public static Table make(String name, Database database, StorageEngine engine) {
+    return new Table(name, database, engine);
   }
 
   public String toSql() {
@@ -130,7 +133,6 @@ public class Table extends FromExpression implements TableContainer {
       '}';
   }
 
-  @Override
   public Table getTable() {
     return this;
   }

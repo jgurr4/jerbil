@@ -5,7 +5,6 @@ import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
-import com.ple.jerbil.data.sync.DbDiff;
 import com.ple.jerbil.data.sync.Diff;
 import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;

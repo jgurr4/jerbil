@@ -14,19 +14,18 @@ import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import org.jetbrains.annotations.Nullable;
-import reactor.core.publisher.Mono;
 
 /**
  * Database is a object representing the database and it's tables.
  */
 @Immutable
-public class Database implements DatabaseContainer {
+public class Database {
 
   public final String name;
-  @Nullable
   public final IList<Table> tables;
+//  public final CharSet charSet;
 
-  public Database(String name, @Nullable IList<Table> tables) {
+  public Database(String name, IList<Table> tables) {
     this.name = name;
     this.tables = tables;
   }
@@ -86,7 +85,6 @@ public class Database implements DatabaseContainer {
     return SynchronousObject.make(this);
   }
 
-  @Override
   public Database getDatabase() {
     return this;
   }

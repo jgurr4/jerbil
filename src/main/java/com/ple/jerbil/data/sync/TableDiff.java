@@ -4,9 +4,6 @@ import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.Expression;
-import com.ple.util.IList;
-import com.ple.util.IMap;
 
 @Immutable
 public class TableDiff implements Diff<Table> {

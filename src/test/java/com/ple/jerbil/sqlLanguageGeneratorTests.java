@@ -10,13 +10,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class sqlLanguageGeneratorTests {
 
   final UserTable user = new UserTable();
-  final UserTableColumns userColumns = new UserTableColumns(user);
+  final UserTable userColumns = new UserTable(user);
   final PlayerTable player = new PlayerTable();
-  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
-  final ItemTable item = new ItemTable();
-  final ItemTableColumns itemColumns = new ItemTableColumns(item);
+  final PlayerTable playerColumns = new PlayerTable(player);
+  final ItemTableOld item = new ItemTableOld();
+  final ItemTable itemColumns = new ItemTable(item);
   final InventoryTable inventory = new InventoryTable();
-  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
+  final InventoryTable inventoryColumns = new InventoryTable(inventory);
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
   @Test

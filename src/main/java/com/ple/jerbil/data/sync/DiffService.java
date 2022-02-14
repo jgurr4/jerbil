@@ -225,10 +225,10 @@ public class DiffService {
     if (!c1.indexed && c2.indexed || c1.indexed && !c2.indexed) {
 
     }
-    final IList<IndexSpec> create = IArrayList.make(IndexSet.primary);
-    final IList<IndexSpec> delete = IArrayList.make(IndexSet.secondary);
-    final IList<IndexSpec> update = IArrayList.make(IndexDiff.make(IndexSpec.make(Index.fulltext), IndexSpec.make(Index.secondary, 3, IndexSort.ascending)));
-    VectorDiff.make(create, delete, update);
+//    final IList<IndexSpec> create = IArrayList.make(IndexSet.primary);
+//    final IList<IndexSpec> delete = IArrayList.make(IndexSet.secondary);
+//    final IList<IndexSpec> update = IArrayList.make(IndexDiff.make(IndexSpec.make(Index.fulltext), IndexSpec.make(Index.secondary, 3, IndexSort.ascending)));
+//    VectorDiff.make(create, delete, update);
     return null;
   }
 

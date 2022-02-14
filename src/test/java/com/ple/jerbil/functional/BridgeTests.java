@@ -2,18 +2,12 @@ package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
-import com.ple.jerbil.data.bridge.ReactiveWrapper;
-import com.ple.jerbil.data.bridge.SynchronousObject;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
-import com.ple.util.IHashMap;
-import com.ple.util.IList;
-import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Mono;
 
 import java.util.Properties;
 
@@ -22,13 +16,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public class BridgeTests {
 
   final UserTable user = new UserTable();
-  final UserTableColumns userColumns = new UserTableColumns(user);
+  final UserTable userColumns = new UserTable(user);
   final PlayerTable player = new PlayerTable();
-  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
-  final ItemTable item = new ItemTable();
-  final ItemTableColumns itemColumns = new ItemTableColumns(item);
+  final PlayerTable playerColumns = new PlayerTable(player);
+  final ItemTableOld item = new ItemTableOld();
+  final ItemTable itemColumns = new ItemTable(item);
   final InventoryTable inventory = new InventoryTable();
-  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
+  final InventoryTable inventoryColumns = new InventoryTable(inventory);
   final Database testDb = Database.make("test").add(user, player, item, inventory);
 
   public BridgeTests() {
