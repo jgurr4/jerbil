@@ -44,15 +44,15 @@ public class Table extends FromExpression {
     return CreateQuery.make(this).toSql();
   }
 
-  public static Table fromSql(String showCreateTable) {
+  public static Table fromSql(String showCreateTable, Database db) {
     if (DataGlobal.bridge == null) {
       throw new NullPointerException("Global.sqlGenerator not set.");
     }
-    return fromSql(DataGlobal.bridge.getGenerator(), showCreateTable);
+    return fromSql(DataGlobal.bridge.getGenerator(), showCreateTable, db);
   }
 
-  public static Table fromSql(LanguageGenerator generator, String showCreateTable) {
-    return generator.fromSql(showCreateTable);
+  public static Table fromSql(LanguageGenerator generator, String showCreateTable, Database db) {
+    return generator.fromSql(showCreateTable, db);
   }
 
   public QueryWithFrom where(BooleanExpression condition) {

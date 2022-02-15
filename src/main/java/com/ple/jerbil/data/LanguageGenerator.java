@@ -9,7 +9,11 @@ public interface LanguageGenerator {
 
   String toSql(CompleteQuery completeQuery);
 
-  Table fromSql(String showCreateTable);
+  Database fromSql(String dbCreateString);
+
+  Table fromSql(String showCreateTable, Database db);
+
+  Column fromSql(String showCreateTable, Table table);
 
   String toSql(Column column);
 

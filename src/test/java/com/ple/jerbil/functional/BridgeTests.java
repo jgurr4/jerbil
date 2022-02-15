@@ -3,10 +3,13 @@ package com.ple.jerbil.functional;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
+import com.ple.util.IList;
 import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
@@ -15,17 +18,31 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BridgeTests {
 
-  final UserTable user = new UserTable();
-  final UserTable userColumns = new UserTable(user);
-  final PlayerTable player = new PlayerTable();
-  final PlayerTable playerColumns = new PlayerTable(player);
-  final ItemTableOld item = new ItemTableOld();
-  final ItemTable itemColumns = new ItemTable(item);
-  final InventoryTable inventory = new InventoryTable();
-  final InventoryTable inventoryColumns = new InventoryTable(inventory);
-  final Database testDb = Database.make("test").add(user, player, item, inventory);
+  final TestDatabase testDb = DatabaseBuilder.generate(TestDbTables.class);
+  //Basically with this method, all the code below is no longer needed. Users can still use the manual method below.
+  // But using the DatabaseBuilder instead will make things much simpler and reduce all this boilerplate code.
+  // So instead of making the code below, they just have to make the classes for this generator method.
+  // Specifically they have to make the NameDbTables class, and that class contains an accessible list of tables,
+  // as well as the DatabaseContainer. the NameTableColumns class contains the list of columns and the TableContainer.
+
+//  final Database testDb = Database.make("test");  //Can add ("test", Charset.utf8) here as well in future.
+//  final UserTable user = new UserTable(testDb);
+//  final UserTableColumns userColumns = new UserTableColumns(user);
+//  final TableContainer userTableContainer = TableContainer.make(user, userColumns.columns);
+//  final PlayerTable player = new PlayerTable(testDb);
+//  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
+//  final TableContainer playerTableContainer = TableContainer.make(player, playerColumns.columns);
+//  final ItemTable item = new ItemTable(testDb);
+//  final ItemTableColumns itemColumns = new ItemTableColumns(item);
+//  final TableContainer itemTableContainer = TableContainer.make(item, itemColumns.columns);
+//  final InventoryTable inventory = new InventoryTable(testDb);
+//  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
+//  final TableContainer inventoryTableContainer = TableContainer.make(inventory, inventoryColumns.columns);
+//  final DatabaseContainer testDbContainer = DatabaseContainer.make(
+//    testDb, IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer, inventoryTableContainer));
 
   public BridgeTests() {
+    testDb.tables.inventory;
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(
       props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
@@ -107,7 +124,7 @@ public class BridgeTests {
   @Test
   void testCompareMissingTable() {
     final DbDiff diffs = DiffService.compareDatabases(
-      testDb.wrap(), new Database("myDb", IArrayList.make(user, player, item)).wrap()).unwrap();
+      testDbContainer.wrap(), DatabaseContainer.make(Database.make("myDb"), IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer)).wrap()).unwrap();
     assertEquals(IArrayList.make("inventory"), diffs.tables.create);
     assertNull(diffs.tables.delete);
     assertNull(diffs.tables.update);
@@ -116,14 +133,24 @@ public class BridgeTests {
 
   @Test
   void testDbDiffFilter() {
-    Table alteredItem = Table.make(
-      StorageEngine.transactional, "item", IArrayList.make(
-        itemColumns.itemId, itemColumns.name,
-        itemColumns.type, Column.make("price").asInt()
-      ));
-    Table extraTable = Table.make(StorageEngine.simple, "extra", IArrayList.make(Column.make("id").bigId()));
+    final Table alteredItem = Table.make("item", testDb, StorageEngine.transactional);
+    final NumericColumn price = Column.make("price", alteredItem).asInt();
+    final IList<Column> alteredItemColumns = IArrayList.make(
+      itemColumns.itemId, itemColumns.name, itemColumns.type, price);
+    //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
+    final Table extraTable = Table.make("extra", testDb);
+    final IList<Column> extraTableColumns = IArrayList.make(Column.make("id", extraTable).bigId());
+
+    //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
+
+    final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns);
+    final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
+
     final DbDiff diff = DiffService.compareDatabases(
-      testDb.wrap(), Database.make("myDb", IArrayList.make(user, player, alteredItem, extraTable)).wrap()).unwrap();  //inventory needs create, alteredItem needs update, extraTable needs delete.
+      testDbContainer.wrap(), DatabaseContainer.make(Database.make("myDb"),
+        IArrayList.make(userTableContainer, playerTableContainer, alteredItemTableContainer, extraTableContainer)
+      ).wrap()).unwrap();
+    //inventory needs create, alteredItem needs update, extraTable needs delete.
     assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.length());
     assertEquals(0, diff.filter(DdlOption.make().create()).tables.delete.length());
     assertEquals(0, diff.filter(DdlOption.make().create()).tables.update.length());
@@ -142,7 +169,7 @@ public class BridgeTests {
 
   @Test
   void testGetDb() {
-    final Database test = Database.getDb("test").unwrap();
+    final Database test = DatabaseContainer.getDbContainer("test").unwrap().database;
     assertEquals("test", test.name);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
     System.out.println(test.tables.toString().replaceAll("Table\\{", "\nTable{"));
@@ -154,8 +181,8 @@ public class BridgeTests {
   void syncCreateWithDbMissing() { //Should create database using Database Object. Every diff should exist because it is forced to create db for first time.
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create();
-    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
-    assertNotNull(((DbDiff)syncResult.diff.unwrap()).name);
+    final SyncResult<Diff<Database>> syncResult = testDbContainer.sync(ddlOption);
+    assertNotNull(((DbDiff) syncResult.diff.unwrap()).name);
   }
 
   @Test
@@ -163,7 +190,7 @@ public class BridgeTests {
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     DataGlobal.bridge.execute(testDb.createAll().toSql()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
+    final SyncResult<Diff<Database>> syncResult = testDbContainer.sync(ddlOption);
     assertEquals(0, syncResult.diff.unwrap().getTotalDiffs()); //FIXME: Find a way to run methods through Diff interface
   }
 
@@ -172,7 +199,7 @@ public class BridgeTests {
     DataGlobal.bridge.execute("alter table player modify column name varchar(50) not null").unwrapFlux()
       .blockLast();  //TODO: Replace sql with jerbil methods like player.modify(playerColumns.name).asVarchar(50);  or player.alter also add support for player.rename player.change
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
+    final SyncResult<Diff<Database>> syncResult = testDbContainer.sync(ddlOption);
     assertEquals(1, ((DbDiff) syncResult.diff.unwrap()).tables.update.length());
 //    assertEquals(1, syncResult.diff.unwrap().getDiffs().size);
   }

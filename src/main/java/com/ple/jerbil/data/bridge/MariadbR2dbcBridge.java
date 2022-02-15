@@ -2,6 +2,8 @@ package com.ple.jerbil.data.bridge;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.query.TableContainer;
+import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.translator.MysqlLanguageGenerator;
 import com.ple.util.IArrayList;
 import io.r2dbc.pool.ConnectionPool;
@@ -27,7 +29,8 @@ public class MariadbR2dbcBridge implements DataBridge {
   public final String database;
   public final ConnectionPool pool;
 
-  protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password, @Nullable String database, ConnectionPool pool) {
+  protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password,
+                               @Nullable String database, ConnectionPool pool) {
     this.driver = driver;
     this.host = host;
     this.port = port;
@@ -37,20 +40,25 @@ public class MariadbR2dbcBridge implements DataBridge {
     this.pool = pool;
   }
 
-  public static MariadbR2dbcBridge make(String driver, String host, int port, String username, String password, String database, ConnectionPool pool) {
+  public static MariadbR2dbcBridge make(String driver, String host, int port, String username, String password,
+                                        String database, ConnectionPool pool) {
     return new MariadbR2dbcBridge(driver, host, port, username, password, database, pool);
   }
 
-  public static DataBridge make(String driver, String host, int port, String username, String password, String database) {
-    return new MariadbR2dbcBridge(driver, host, port, username, password, database, startConnection(host, port, username, password, database));
+  public static DataBridge make(String driver, String host, int port, String username, String password,
+                                String database) {
+    return new MariadbR2dbcBridge(
+      driver, host, port, username, password, database, startConnection(host, port, username, password, database));
   }
 
   public static DataBridge make(String driver, String host, int port, String username, String password) {
-    return new MariadbR2dbcBridge(driver, host, port, username, password, null, startConnection(host, port, username, password, null));
+    return new MariadbR2dbcBridge(
+      driver, host, port, username, password, null, startConnection(host, port, username, password, null));
   }
 
   public static DataBridge make(String host, int port, String username, String password) {
-    return new MariadbR2dbcBridge("r2dbc:mariadb", host, port, username, password, null, startConnection(host, port, username, password, null));
+    return new MariadbR2dbcBridge(
+      "r2dbc:mariadb", host, port, username, password, null, startConnection(host, port, username, password, null));
   }
 
   @Override
@@ -89,20 +97,31 @@ public class MariadbR2dbcBridge implements DataBridge {
     );
   }
 
-  public ReactiveWrapper<Database> getDb(String name) {
-    return ReactorMono.make(DataGlobal.bridge.execute("show databases").unwrapFlux()
+  public ReactiveWrapper<DatabaseContainer> getDb(String name) {
+    ReactorMono.make(DataGlobal.bridge.execute("show databases").unwrapFlux()
       .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
       .filter(db -> db.equals(name))
       .next()
-      .flatMapMany(db -> DataGlobal.bridge.execute("use " + name + "; show tables").unwrapFlux()
-        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0))))
-      .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName).unwrapFlux()
-        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
-      .map(tblCreateStr -> DataGlobal.bridge.getGenerator().fromSql(tblCreateStr))
-      .collectList()
-      .map(tables -> IArrayList.make(tables.toArray(Table.emptyArray)))
-      .map(tablesIList -> Database.make(name, tablesIList))
+      .map(db -> DataGlobal.bridge.execute("show create database " + db))
+      //Here is where you put more methods to retrieve database level properties to put into database, like obtaining charset and
+      .flatMapMany(
+        db -> db.unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create database"))))
+      .next()
+      .map(dbCreateString -> DataGlobal.bridge.getGenerator().fromSql(dbCreateString))
+      .flatMap(db -> DataGlobal.bridge.execute("use " + name + "; show tables").unwrapFlux()
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+        .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName).unwrapFlux()
+          .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
+        .map(tblCreateStr -> {
+          final Table table = DataGlobal.bridge.getGenerator().fromSql(tblCreateStr, db);
+          return DataGlobal.bridge.getGenerator().fromSql(tblCreateStr, table);
+        })
+        .collectList()
+        .map(columns -> TableContainer.make(columns.get(0).table, IArrayList.make(columns.toArray(Column.emptyArray))))
+      )
     );
+    //TODO: Finish implementing this method to return DatabaseContainer with all the TableContainers and Columns inside them.
+    return null;
   }
 
   private Mono<MariadbR2dbcBridge> createConnectionPool() {
@@ -116,7 +135,8 @@ public class MariadbR2dbcBridge implements DataBridge {
       });
   }
 
-  private static ConnectionPool startConnection(String host, int port, String username, String password, String database) {
+  private static ConnectionPool startConnection(String host, int port, String username, String password,
+                                                String database) {
     final MariadbConnectionConfiguration factoryConfig = MariadbConnectionConfiguration.builder()
       .host(host)
       .port(port)

@@ -2,12 +2,15 @@ package com.ple.jerbil;
 
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.DatabaseContainer;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.QueryList;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
+import com.ple.util.IArrayList;
 import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
@@ -16,15 +19,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStructureTests {
 
-  final UserTable user = new UserTable();
-  final UserTable userColumns = new UserTable(user);
-  final PlayerTable player = new PlayerTable();
-  final PlayerTable playerColumns = new PlayerTable(player);
-  final ItemTableOld item = new ItemTableOld();
-  final ItemTable itemColumns = new ItemTable(item);
-  final InventoryTable inventory = new InventoryTable();
-  final InventoryTable inventoryColumns = new InventoryTable(inventory);
-  final Database testDb = Database.make("test").add(user, player, item, inventory);
+  final Database testDb = Database.make("test");  //Can add ("test", Charset.utf8) here as well in future.
+  final UserTable user = new UserTable(testDb);
+  final UserTableColumns userColumns = new UserTableColumns(user);
+  final TableContainer userTableContainer = TableContainer.make(user, userColumns.columns);
+  final PlayerTable player = new PlayerTable(testDb);
+  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
+  final TableContainer playerTableContainer = TableContainer.make(player, playerColumns.columns);
+  final ItemTable item = new ItemTable(testDb);
+  final ItemTableColumns itemColumns = new ItemTableColumns(item);
+  final TableContainer itemTableContainer = TableContainer.make(item, itemColumns.columns);
+  final InventoryTable inventory = new InventoryTable(testDb);
+  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
+  final TableContainer inventoryTableContainer = TableContainer.make(inventory, inventoryColumns.columns);
+  final DatabaseContainer dbContainer = DatabaseContainer.make(
+    testDb, IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer, inventoryTableContainer));
 
   public SqlStructureTests() {
     final Properties props = ConfigProps.getProperties();
@@ -69,7 +78,7 @@ public class SqlStructureTests {
   @Test
   void testAddColumn() {
     final CompleteQuery q2 = item.create();
-    Column newColumn = Column.make("quantity").asInt().indexed();
+    Column newColumn = Column.make("quantity", item).asInt().indexed();
     item.add(newColumn);
     final CompleteQuery q = item.create();
     assertEquals("""
@@ -110,9 +119,9 @@ public class SqlStructureTests {
   */
   @Test
   void testGeneratedColumn() {
-    NumericColumn quantity = Column.make("quantity").asInt();
+    NumericColumn quantity = Column.make("quantity", item).asInt();
     item.add(quantity);
-    Column total = Column.make("total").asDecimal(14, 2).generatedFrom(itemColumns.price.times(quantity));
+    Column total = Column.make("total", item).asDecimal(14, 2).generatedFrom(itemColumns.price.times(quantity));
     item.add(total);
     final CompleteQuery q = item.create();
     assertEquals("""

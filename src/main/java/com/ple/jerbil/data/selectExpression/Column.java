@@ -12,6 +12,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
     public final DataSpec dataSpec;
     @Nullable public final Expression generatedFrom;
     @Nullable public final Expression defaultValue;
+    public static Column[] emptyArray = new Column[0];
 
     protected Column(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, @Nullable Expression generatedFrom, @Nullable Expression defaultValue) {
         super(name, table, indexed, primary);

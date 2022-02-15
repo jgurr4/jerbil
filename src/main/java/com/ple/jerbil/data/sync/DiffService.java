@@ -20,27 +20,27 @@ import java.util.Objects;
  */
 public class DiffService {
 
-  public static ReactiveWrapper<DbDiff> compareDatabases(ReactiveWrapper<Database> db1, ReactiveWrapper<Database> db2) {
-    // This method must compare every part of database with the remote/local database and record the diffs inside DbDiff.
-    return ReactorMono.make(Mono.from(db1.unwrapMono())
-      .concatWith(db2.unwrapMono())
+  public static ReactiveWrapper<DbDiff> compareDatabases(ReactiveWrapper<DatabaseContainer> leftDbc,
+                                                         ReactiveWrapper<DatabaseContainer> rightDbc) {
+    //This method must compare every part of database starting with database props.
+    //Step 1: compare database props
+    ReactorMono.make(Mono.from(leftDbc.unwrapMono().map(dbc -> dbc.database))
+      .concatWith(rightDbc.unwrapMono().map(dbc -> dbc.database))
       .collectList()
-      .flatMap(databases -> compareDatabaseProps(databases.get(0), databases.get(1)).unwrapMono()));
+      .map(databases -> compareDatabaseProps(databases.get(0), databases.get(1))));
+
+    //Step 2: compare list of tables by comparing each table together and getting all the diffs between them.
+    // Including the missing and extra tables.
+
+    //Step 3: compare list of columns and their properties.
+
+    // Step 4: create and return a DbDiff using the database, table and column diffs you discovered.
+    return null;
   }
 
-  private static ReactiveWrapper<DbDiff> compareDatabaseProps(Database leftDb, Database rightDb) {
-    final Mono<ScalarDiff<String>> nameDiff = Mono.just(0)
-      .filter(e -> leftDb.name.equals(rightDb.name))
-      .map(e -> ScalarDiff.make(leftDb.name, rightDb.name));  //Can be null or can be ScalarDiff of before and after.
-    Mono<VectorDiff<Table>> tablesDiff = Mono.just(0)
-      .map(e -> compareListOfTables(leftDb.tables, rightDb.tables));
-
-//  return ReactorMono.make(Mono.just(DbDiff.make(nameDiff.toFuture().get(), tablesDiff.toFuture().get())));   //Alternative method. Requires exception handling.
-    return ReactorMono.make(Mono.from(nameDiff)
-      .flatMap(nDiff -> Mono.from(tablesDiff)
-        .map(tDiff -> DbDiff.make(nDiff, tDiff))
-      )
-    );
+  private static DbDiff compareDatabaseProps(Database leftDb, Database rightDb) {
+    //TODO: This method should compare the database properties only. Not tables or columns.
+    return null;
   }
 
   public static VectorDiff<Table> compareListOfTables(IList<Table> leftTables, IList<Table> rightTables) {
@@ -217,7 +217,8 @@ public class DiffService {
     final VectorDiff<IndexSpec> indexDiff = compareIndexes(c1, c2);
     final ScalarDiff<Expression> generatedDiff = c1.generatedFrom.equals(
       c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
-    final ScalarDiff<Expression> defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(c1.defaultValue, c2.defaultValue);
+    final ScalarDiff<Expression> defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(
+      c1.defaultValue, c2.defaultValue);
     return ColumnDiff.make(nameDiff, columnAttributesDiff, dataSpecDiff, indexDiff, generatedDiff, defaultDiff);
   }
 

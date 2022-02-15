@@ -33,13 +33,20 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   @Override
-  public Table fromSql(String createTableSql) {
-    final String tableName = getTableNameFromSql(createTableSql);
-    final StorageEngine engine = getEngineFromSql(createTableSql);
-    final String formattedTable = formatTable(createTableSql);
-    final IList<Column> columns = createColumnsFromTableString(formattedTable);
-    return Table.make(engine, tableName, columns);
+  public Table fromSql(String createTableString, Database db) {
+    final String tableName = getTableNameFromSql(createTableString);
+    final StorageEngine engine = getEngineFromSql(createTableString);
+    return Table.make(tableName, db, engine);
   }
+
+  @Override
+  public Column fromSql(String createTableString, Table table) {
+    final String formattedTable = formatTable(createTableString);
+    //TODO: Finish implementing.
+
+     return null;
+  }
+
 
   private StorageEngine getEngineFromSql(String createTableSql) {
     final String tableSql = createTableSql.toLowerCase();

@@ -24,24 +24,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SqlQueryTests {
 
   final Database testDb = Database.make("test");  //Can add ("test", Charset.utf8) here as well in future.
-
   final UserTable user = new UserTable(testDb);
   final UserTableColumns userColumns = new UserTableColumns(user);
   final TableContainer userTableContainer = TableContainer.make(user, userColumns.columns);
-
-  // This is the pattern I will use.
   final PlayerTable player = new PlayerTable(testDb);
   final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
   final TableContainer playerTableContainer = TableContainer.make(player, playerColumns.columns);
-
   final ItemTable item = new ItemTable(testDb);
   final ItemTableColumns itemColumns = new ItemTableColumns(item);
   final TableContainer itemTableContainer = TableContainer.make(item, itemColumns.columns);
-
   final InventoryTable inventory = new InventoryTable(testDb);
   final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
   final TableContainer inventoryTableContainer = TableContainer.make(inventory, inventoryColumns.columns);
-
   final DatabaseContainer dbContainer = DatabaseContainer.make(
     testDb, IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer, inventoryTableContainer));
 
@@ -66,6 +60,7 @@ public class SqlQueryTests {
 
   @Test
   void testSelect() {
+
     final CompleteQuery q = user.where(userColumns.name.eq(make("john"))).select(userColumns.userId);
     assertEquals("""
       select userId

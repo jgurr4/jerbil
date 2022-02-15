@@ -25,7 +25,7 @@ public class Database {
   public final IList<Table> tables;
 //  public final CharSet charSet;
 
-  public Database(String name, IList<Table> tables) {
+  protected Database(String name, IList<Table> tables) {
     this.name = name;
     this.tables = tables;
   }
@@ -50,13 +50,14 @@ public class Database {
     return completeQueries;
   }
 
+/*
   public SyncResult sync() {
     return sync(DdlOption.make((byte) 0b110));
   }
 
   public SyncResult sync(DdlOption ddlOption) {
-    ReactiveWrapper<Database> existingDb = getDb(name);
-    ReactiveWrapper<DbDiff> dbDiff = DiffService.compareDatabases(this.wrap(), existingDb);
+    ReactiveWrapper<DatabaseContainer> existingDb = getDb(name);
+    ReactiveWrapper<DbDiff> dbDiff = DiffService.compareDatabases(this, existingDb);
     ReactiveWrapper<DbDiff> filteredDiff = ReactorMono.make(dbDiff.unwrapMono().map(diffs -> diffs.filter(ddlOption)));
     ReactiveWrapper<String> sql = ReactorMono.make(filteredDiff.unwrapMono().map(fDiff -> fDiff.toSql()));
     return SyncResult.make(DataGlobal.bridge.execute(sql), dbDiff);
@@ -65,9 +66,10 @@ public class Database {
 //    return SyncResult.compare(this, existingDb).filter(ddlOption).toSql().execute();
   }
 
-  public static ReactiveWrapper<Database> getDb(String name) {
+  public static ReactiveWrapper<DatabaseContainer> getDb(String name) {
     return DataGlobal.bridge.getDb(name);
   }
+*/
 
   @Override
   public String toString() {

@@ -17,6 +17,6 @@ public interface DataBridge {
 
   ReactiveWrapper<Result> execute(ReactiveWrapper<String> toSql);
 
-  ReactiveWrapper<Database> getDb(String name);
+  ReactiveWrapper<DatabaseContainer> getDb(String name);
 
 }
