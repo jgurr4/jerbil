@@ -3,7 +3,6 @@ package com.ple.jerbil.functional;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.sync.*;
@@ -17,13 +16,6 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BridgeTests {
-
-  final TestDatabase testDb = DatabaseBuilder.generate(TestDbTables.class);
-  //Basically with this method, all the code below is no longer needed. Users can still use the manual method below.
-  // But using the DatabaseBuilder instead will make things much simpler and reduce all this boilerplate code.
-  // So instead of making the code below, they just have to make the classes for this generator method.
-  // Specifically they have to make the NameDbTables class, and that class contains an accessible list of tables,
-  // as well as the DatabaseContainer. the NameTableColumns class contains the list of columns and the TableContainer.
 
 //  final Database testDb = Database.make("test");  //Can add ("test", Charset.utf8) here as well in future.
 //  final UserTable user = new UserTable(testDb);
@@ -42,7 +34,6 @@ public class BridgeTests {
 //    testDb, IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer, inventoryTableContainer));
 
   public BridgeTests() {
-    testDb.tables.inventory;
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(
       props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
@@ -170,7 +161,7 @@ public class BridgeTests {
   @Test
   void testGetDb() {
     final Database test = DatabaseContainer.getDbContainer("test").unwrap().database;
-    assertEquals("test", test.name);
+    assertEquals("test", test.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
     System.out.println(test.tables.toString().replaceAll("Table\\{", "\nTable{"));
     assertTrue(test.tables.contains(user));

@@ -212,7 +212,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
             }
           }
           if (matchingColumns > 1) {
-            tableName = table.name;
+            tableName = table.tableName;
           }
           matchingColumns = 0;
         }
@@ -268,7 +268,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
           if (table.columns.get(i).getName() == col.getName()) {
             matchingColumns++;
             if (table.columns.get(i) == col) {
-              tableName = table.name;
+              tableName = table.tableName;
             }
             if (matchingColumns > 1) {
               requiresTableName = true;
@@ -365,7 +365,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String fullFromExpressionList = "";
     if (fromExpression instanceof Table) {
       Table table = (Table) fromExpression;
-      fullFromExpressionList += table.name;
+      fullFromExpressionList += table.tableName;
     } else if (fromExpression instanceof Join) {
       Join join = (Join) fromExpression;
       fullFromExpressionList += getJoinString(join);
@@ -380,11 +380,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       result += getJoinString((Join) join.fe1);
       Table t2 = (Table) join.fe2;
       //FIXME: using needs to choose the name of the field based on primary key of the fromexpression and if a matching field exists in compared fromexpression. If not, this needs to throw an error.
-      result += "\ninner join " + t2.name + " using (" + t2.name + "Id)";
+      result += "\ninner join " + t2.tableName + " using (" + t2.tableName + "Id)";
     } else {
       Table t1 = (Table) join.fe1;
       Table t2 = (Table) join.fe2;
-      result += t1.name + "\ninner join " + t2.name + " using (" + t1.name + "Id)";
+      result += t1.tableName + "\ninner join " + t2.tableName + " using (" + t1.tableName + "Id)";
     }
     return result;
   }
@@ -555,12 +555,12 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   public String toSql(CreateQuery createQuery) {
     if (createQuery.db != null) {
-      return "create database " + createQuery.db.name;
+      return "create database " + createQuery.db.databaseName;
     }
     String engine = "";
-    if (createQuery.fromExpression.tableList().get(0).engine == StorageEngine.simple) {
+    if (createQuery.fromExpression.tableList().get(0).storageEngine == StorageEngine.simple) {
       engine = "Aria";
-    } else if (createQuery.fromExpression.tableList().get(0).engine == StorageEngine.transactional) {
+    } else if (createQuery.fromExpression.tableList().get(0).storageEngine == StorageEngine.transactional) {
       engine = "Innodb";
     }
     String sql = "create table " + toSql(createQuery.fromExpression) + " (\n";

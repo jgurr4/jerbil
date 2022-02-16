@@ -2,6 +2,7 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.sync.SyncResult;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -80,4 +81,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
           "}";
     }
 
+    public SyncResult sync() {
+        return null;
+    }
 }

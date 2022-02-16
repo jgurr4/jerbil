@@ -1,18 +1,13 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.DatabaseContainer;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
-import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Agg;
-import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
-import com.ple.util.IArrayList;
-import com.ple.util.IList;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Mono;
 
 import java.util.Properties;
 
@@ -23,32 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlQueryTests {
 
-  final Database testDb = Database.make("test");  //Can add ("test", Charset.utf8) here as well in future.
-  final UserTable user = new UserTable(testDb);
-  final UserTableColumns userColumns = new UserTableColumns(user);
-  final TableContainer userTableContainer = TableContainer.make(user, userColumns.columns);
-  final PlayerTable player = new PlayerTable(testDb);
-  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
-  final TableContainer playerTableContainer = TableContainer.make(player, playerColumns.columns);
-  final ItemTable item = new ItemTable(testDb);
-  final ItemTableColumns itemColumns = new ItemTableColumns(item);
-  final TableContainer itemTableContainer = TableContainer.make(item, itemColumns.columns);
-  final InventoryTable inventory = new InventoryTable(testDb);
-  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
-  final TableContainer inventoryTableContainer = TableContainer.make(inventory, inventoryColumns.columns);
-  final DatabaseContainer dbContainer = DatabaseContainer.make(
-    testDb, IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer, inventoryTableContainer));
-
-  // To make everything above simpler and auto-generated for the user, I will use one of the methods below, either
-  // builder pattern, code generation or reflection.
-//  final DatabaseContainer dbContainer = DatabaseContainer.make(testDb, IArrayList.make(user, player, item, inventory));
-//  final Database testDb = Database.make("test");
-//  final Table player = Table.make("player", testDb);
-//  final PlayerColumns playerColumns = new PlayerTableColumns(player);
-//  final DatabaseContainer = DatabaseContainer.generate(testDb, IArrayList.make(TableContainer.make(player, playerColumns), TableContainer.make(user, userColumns)));
-  // This is builder pattern it is not code generation. It just makes objects. This is hardest for the user, but it is
-  // Code generation creates java code before compile time. Code Generation can be 1/5th the code. Code generation is compile time checked and users have to do 1/5th of the code. It can be messier and verbose compared to normal code writing, and it also makes things slightly harder to debug.
-  // Reflection generation creates java code after compile time. Reflection users can be 1/3rd the code.
+  final TestDatabase testDb = DatabaseBuilder.generate(TestDatabase.class);
+  // With this method, all the code boilerplate code is no longer needed. Users can still use the manual method.
+  // But using the DatabaseBuilder instead will make things much simpler and reduce all the boilerplate code.
+  UserTable user = testDb.user;
+  ItemTable item = testDb.item;
+  PlayerTable player = testDb.player;
+  InventoryTable inventory = testDb.inventory;
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
@@ -59,9 +35,31 @@ public class SqlQueryTests {
   }
 
   @Test
-  void testSelect() {
+  void temporaryTest() {
+// Deciding between less verbose when reading or more clear when writing.
+    //This more verbose method makes it so that column names will never conflict with Database/Table properties/fields.
+    NumericColumn itemId = testDb.tables.inventory.columns.itemId;
+    //Less verbose for readers.
+//    CharSet charSet = testDb.charset;   //This would require the user to do more work to add Charset as field of TestDatabase class.
+    CharSet charSet = testDb.database.charSet;
+    NumericColumn playerId = testDb.inventory.playerId;
+    StorageEngine storageEngine = testDb.inventory.storageEngine;
+    DataSpec dataSpec = testDb.inventory.itemId.dataSpec;
+    testDb.sync();
+    testDb.inventory.sync();
+    testDb.inventory.itemId.sync();
+    InventoryTable inventory = testDb.inventory;
+    CompleteQuery q = testDb.inventory.select().where(inventory.itemId.eq(make(3)));
+    String name = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).blockFirst();
+    Mono<String> rName = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).next();
 
-    final CompleteQuery q = user.where(userColumns.name.eq(make("john"))).select(userColumns.userId);
+    //We are between deciding whether to separate the concept of TestDatabase and the list of tables/columns.
+
+  }
+
+  @Test
+  void testSelect() {
+    final CompleteQuery q = user.where(user.name.eq(make("john"))).select(user.userId);
     assertEquals("""
       select userId
       from user
@@ -73,14 +71,14 @@ public class SqlQueryTests {
   void multipleWhereConditions() {
     final CompleteQuery q = user.where(
       and(
-        userColumns.name.eq(make("john")),
+        user.name.eq(make("john")),
         or(
-          userColumns.userId.isGreaterThan(make(4)),
-          userColumns.name.eq(make("bob"))
+          user.userId.isGreaterThan(make(4)),
+          user.name.eq(make("bob"))
         ),
-        userColumns.age.eq(make(30))
+        user.age.eq(make(30))
       )
-    ).select(userColumns.userId);
+    ).select(user.userId);
     assertEquals("""
       select userId
       from user
@@ -92,9 +90,9 @@ public class SqlQueryTests {
 
   @Test
   void testReusableQueryBase() {
-    final CompleteQuery base = user.select(userColumns.userId);
-    final CompleteQuery q1 = base.where(userColumns.name.eq(make("john")));
-    final CompleteQuery q2 = base.where(userColumns.name.eq(make("james")));
+    final CompleteQuery base = user.select(user.userId);
+    final CompleteQuery q1 = base.where(user.name.eq(make("john")));
+    final CompleteQuery q2 = base.where(user.name.eq(make("james")));
     assertEquals("""
       select userId
       from user
@@ -110,7 +108,7 @@ public class SqlQueryTests {
 
   @Test
   void testSelectEnum() {
-    final CompleteQuery q = item.where(itemColumns.type.eq(ItemType.weapon.toString())).selectAll();
+    final CompleteQuery q = item.where(item.type.eq(ItemType.weapon.toString())).selectAll();
     assertEquals("""
       select *
       from item
@@ -124,8 +122,8 @@ public class SqlQueryTests {
   void testSelectJoins() {
     final CompleteQuery q = player.join(inventory, item).where(
       and(
-        itemColumns.name.eq("bob"),
-        playerColumns.name.eq("sword")
+        item.name.eq("bob"),
+        player.name.eq("sword")
       )
     ).select();
     assertEquals("""
@@ -149,7 +147,7 @@ public class SqlQueryTests {
 
   @Test
   void testGroupBy() {
-    final CompleteQuery q = item.select(itemColumns.type, Agg.count.as("total")).groupBy(itemColumns.type);
+    final CompleteQuery q = item.select(item.type, Agg.count.as("total")).groupBy(item.type);
     assertEquals("""
       select type, count(*) as total
       from item
@@ -160,7 +158,7 @@ public class SqlQueryTests {
   @Test
   void testComplexExpressions() {
     final CompleteQuery q = item
-      .select(itemColumns.price
+      .select(item.price
         .times(make(42))
         .minus(make(1))
         .times(
@@ -168,7 +166,7 @@ public class SqlQueryTests {
             .plus(make(1))
         )
         .as("adjustedPrice"))
-      .where(itemColumns.price.dividedBy(make(4)).isGreaterThan(make(5)));
+      .where(item.price.dividedBy(make(4)).isGreaterThan(make(5)));
     assertEquals("""
       select (price * 42 - 1) * (3 + 1) as adjustedPrice
       from item
@@ -191,10 +189,10 @@ public class SqlQueryTests {
   void testUnion() {
     final CompleteQuery q = null;
     assertEquals("""
-      select userId, name 
-      from user 
+      select userId, name
+      from user
       union all
-      select userId, name 
+      select userId, name
       from player;
       """, q.toSql());
   }

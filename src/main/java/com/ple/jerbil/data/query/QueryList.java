@@ -104,7 +104,7 @@ public class QueryList<T> implements IList<T> {
         final CreateQuery createQuery = (CreateQuery) query;
         sql += createQuery.toSql() + ";\n";
         if (createQuery.db != null) {
-          sql += "use " + createQuery.db.name + ";\n";
+          sql += "use " + createQuery.db.databaseName + ";\n";
         }
       }
     }

@@ -5,6 +5,7 @@ import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.CountAgg;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 
@@ -17,19 +18,20 @@ import java.util.Objects;
 @Immutable
 public class Table extends FromExpression {
 
-  public final String name;
+  //FIXME: name and engine need to be updated to "TableName" and "StorageEngine" to avoid conflicts with column names.
+  public final String tableName;
   public final Database database;
-  public final StorageEngine engine;
+  public final StorageEngine storageEngine;
   public static Table[] emptyArray = new Table[0];
 
-  protected Table(String name, Database database) {
-    this(name, database, StorageEngine.simple);
+  protected Table(String tableName, Database database) {
+    this(tableName, database, StorageEngine.simple);
   }
 
-  protected Table(String name, Database database, StorageEngine engine) {
-    this.name = name;
+  protected Table(String tableName, Database database, StorageEngine storageEngine) {
+    this.tableName = tableName;
     this.database = database;
-    this.engine = engine;
+    this.storageEngine = storageEngine;
   }
 
   public static Table make(String name, Database database) {
@@ -116,20 +118,20 @@ public class Table extends FromExpression {
     if (this == o) return true;
     if (!(o instanceof Table)) return false;
     Table table = (Table) o;
-    return engine == table.engine && name.equals(table.name) && columns.equals(table.columns);
+    return storageEngine == table.storageEngine && tableName.equals(table.tableName) && columns.equals(table.columns);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(engine, name, columns);
+    return Objects.hash(storageEngine, tableName, columns);
   }
 
   @Override
   public String toString() {
     return "Table{" +
-      "name='" + name + '\'' +
+      "name='" + tableName + '\'' +
       ", columns=" + columns +
-      ", engine=" + engine +
+      ", engine=" + storageEngine +
       '}';
   }
 
@@ -137,4 +139,7 @@ public class Table extends FromExpression {
     return this;
   }
 
+  public SyncResult sync() {
+    return null;
+  }
 }

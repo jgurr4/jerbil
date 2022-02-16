@@ -1,22 +1,17 @@
 package com.ple.jerbil.testcommon;
 
-import com.ple.jerbil.data.DatabaseContainer;
-import com.ple.jerbil.data.query.Table;
-
 public class TestDbTables {
 
-  public final Table user;
-  public final Table player;
-  public final Table item;
-  public final Table inventory;
-  public final DatabaseContainer dbContainer;
+  public final UserTable user;
+  public final PlayerTable player;
+  public final ItemTable item;
+  public final InventoryTable inventory;
 
-  public TestDbTables(Table user, Table player, Table item, Table inventory, DatabaseContainer dbContainer) {
+  public TestDbTables(UserTable user, PlayerTable player, ItemTable item, InventoryTable inventory) {
     this.user = user;
     this.player = player;
     this.item = item;
     this.inventory = inventory;
-    this.dbContainer = dbContainer;
   }
 
 }

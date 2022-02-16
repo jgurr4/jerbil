@@ -91,7 +91,7 @@ public class DiffService {
     // operation in a synchronous/mostly imperative style method.
     return Flux.fromIterable(rightTables)
       .filter(Objects::nonNull)
-      .map(table -> compareTables(getTableMatchingName(leftTables, table.name), table))
+      .map(table -> compareTables(getTableMatchingName(leftTables, table.tableName), table))
       .collectList()
       .map(tableDiffs -> IArrayList.make(tableDiffs.toArray(TableDiff.empty)))
       .defaultIfEmpty(null)
@@ -109,17 +109,17 @@ public class DiffService {
   }
 
   public static Diff<Table> compareTables(Table t1, Table t2) {
-    ScalarDiff<String> nameDiff = t1.name.equals(t2.name) ? null : ScalarDiff.make(t1.name, t2.name);
+    ScalarDiff<String> nameDiff = t1.tableName.equals(t2.tableName) ? null : ScalarDiff.make(t1.tableName, t2.tableName);
     VectorDiff<Column> columnsDiff = compareListOfColumns(t1.columns, t2.columns);
-    ScalarDiff<StorageEngine> storageEngineDiff = t1.engine.name().equals(t2.engine.name()) ? null : ScalarDiff.make(
-      t1.engine, t2.engine);
+    ScalarDiff<StorageEngine> storageEngineDiff = t1.storageEngine.name().equals(t2.storageEngine.name()) ? null : ScalarDiff.make(
+        t1.storageEngine, t2.storageEngine);
     return TableDiff.make(nameDiff, columnsDiff, storageEngineDiff);
   }
 
   public static Table getTableMatchingName(IList<Table> tables, String name) {
     Table result = null;
     for (Table t : tables) {
-      if (t.name.equals(name)) {
+      if (t.tableName.equals(name)) {
         result = t;
       }
     }
@@ -239,7 +239,7 @@ public class DiffService {
 
   public static boolean checkTableNameInList(IList<Table> tables, Table t1) {
     for (Table table : tables) {
-      if (table.name.equals(t1.name)) {
+      if (table.tableName.equals(t1.tableName)) {
         return true;
       }
     }
