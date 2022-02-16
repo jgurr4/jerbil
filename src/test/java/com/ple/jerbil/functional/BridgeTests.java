@@ -3,6 +3,7 @@ package com.ple.jerbil.functional;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.sync.*;
@@ -17,27 +18,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BridgeTests {
 
-//  final Database testDb = Database.make("test");  //Can add ("test", Charset.utf8) here as well in future.
-//  final UserTable user = new UserTable(testDb);
-//  final UserTableColumns userColumns = new UserTableColumns(user);
-//  final TableContainer userTableContainer = TableContainer.make(user, userColumns.columns);
-//  final PlayerTable player = new PlayerTable(testDb);
-//  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
-//  final TableContainer playerTableContainer = TableContainer.make(player, playerColumns.columns);
-//  final ItemTable item = new ItemTable(testDb);
-//  final ItemTableColumns itemColumns = new ItemTableColumns(item);
-//  final TableContainer itemTableContainer = TableContainer.make(item, itemColumns.columns);
-//  final InventoryTable inventory = new InventoryTable(testDb);
-//  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
-//  final TableContainer inventoryTableContainer = TableContainer.make(inventory, inventoryColumns.columns);
-//  final DatabaseContainer testDbContainer = DatabaseContainer.make(
-//    testDb, IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer, inventoryTableContainer));
+  final TestDatabase testDb = DatabaseBuilder.generate(TestDatabase.class);
+  final UserTable user = testDb.user;
+  final ItemTable item = testDb.item;
+  final PlayerTable player = testDb.player;
+  final InventoryTable inventory = testDb.inventory;
 
   public BridgeTests() {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(
-      props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
-      props.getProperty("user"), props.getProperty("password")
+        props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
+        props.getProperty("user"), props.getProperty("password")
     );
   }
 
@@ -115,7 +106,9 @@ public class BridgeTests {
   @Test
   void testCompareMissingTable() {
     final DbDiff diffs = DiffService.compareDatabases(
-      testDbContainer.wrap(), DatabaseContainer.make(Database.make("myDb"), IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer)).wrap()).unwrap();
+        testDbContainer.wrap(), DatabaseContainer.make(Database.make("myDb"),
+                                                       IArrayList.make(userTableContainer, playerTableContainer,
+                                                                       itemTableContainer)).wrap()).unwrap();
     assertEquals(IArrayList.make("inventory"), diffs.tables.create);
     assertNull(diffs.tables.delete);
     assertNull(diffs.tables.update);
@@ -127,7 +120,7 @@ public class BridgeTests {
     final Table alteredItem = Table.make("item", testDb, StorageEngine.transactional);
     final NumericColumn price = Column.make("price", alteredItem).asInt();
     final IList<Column> alteredItemColumns = IArrayList.make(
-      itemColumns.itemId, itemColumns.name, itemColumns.type, price);
+        itemColumns.itemId, itemColumns.name, itemColumns.type, price);
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
     final Table extraTable = Table.make("extra", testDb);
     final IList<Column> extraTableColumns = IArrayList.make(Column.make("id", extraTable).bigId());
@@ -138,9 +131,10 @@ public class BridgeTests {
     final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
 
     final DbDiff diff = DiffService.compareDatabases(
-      testDbContainer.wrap(), DatabaseContainer.make(Database.make("myDb"),
-        IArrayList.make(userTableContainer, playerTableContainer, alteredItemTableContainer, extraTableContainer)
-      ).wrap()).unwrap();
+        testDbContainer.wrap(), DatabaseContainer.make(Database.make("myDb"),
+                                                       IArrayList.make(userTableContainer, playerTableContainer,
+                                                                       alteredItemTableContainer, extraTableContainer)
+        ).wrap()).unwrap();
     //inventory needs create, alteredItem needs update, extraTable needs delete.
     assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.length());
     assertEquals(0, diff.filter(DdlOption.make().create()).tables.delete.length());
@@ -188,7 +182,7 @@ public class BridgeTests {
   @Test
   void syncWithConflictingTable() { //update-level diffs in tables exist, so should contain error inside SyncResult.
     DataGlobal.bridge.execute("alter table player modify column name varchar(50) not null").unwrapFlux()
-      .blockLast();  //TODO: Replace sql with jerbil methods like player.modify(playerColumns.name).asVarchar(50);  or player.alter also add support for player.rename player.change
+        .blockLast();  //TODO: Replace sql with jerbil methods like player.modify(playerColumns.name).asVarchar(50);  or player.alter also add support for player.rename player.change
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
     final SyncResult<Diff<Database>> syncResult = testDbContainer.sync(ddlOption);
     assertEquals(1, ((DbDiff) syncResult.diff.unwrap()).tables.update.length());

@@ -22,7 +22,7 @@ public class TestDatabase extends DatabaseContainer {
                           TableContainer.make(player, IArrayList.make(player.playerId, player.userId, player.name)),
                           TableContainer.make(item, IArrayList.make(item.itemId, item.name, item.type, item.price)),
                           TableContainer.make(inventory, IArrayList.make(
-                              inventory.itemId, inventory.playerId))));
+                              inventory.itemId, inventory.playerId)))); //Optionally add charset value to end of this.
     this.user = user;
     this.player = player;
     this.item = item;

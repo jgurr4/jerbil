@@ -19,12 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SqlQueryTests {
 
   final TestDatabase testDb = DatabaseBuilder.generate(TestDatabase.class);
-  // With this method, all the code boilerplate code is no longer needed. Users can still use the manual method.
-  // But using the DatabaseBuilder instead will make things much simpler and reduce all the boilerplate code.
-  UserTable user = testDb.user;
-  ItemTable item = testDb.item;
-  PlayerTable player = testDb.player;
-  InventoryTable inventory = testDb.inventory;
+  final UserTable user = testDb.user;
+  final ItemTable item = testDb.item;
+  final PlayerTable player = testDb.player;
+  final InventoryTable inventory = testDb.inventory;
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();

@@ -1,8 +1,9 @@
 package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.DatabaseBuilder;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
-import com.ple.jerbil.testcommon.ConfigProps;
+import com.ple.jerbil.testcommon.*;
 import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -16,6 +17,12 @@ import java.util.Properties;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StatementExecutionTests {
+
+  final TestDatabase testDb = DatabaseBuilder.generate(TestDatabase.class);
+  final UserTable user = testDb.user;
+  final ItemTable item = testDb.item;
+  final PlayerTable player = testDb.player;
+  final InventoryTable inventory = testDb.inventory;
 
   public StatementExecutionTests() {
     final Properties props = ConfigProps.getProperties();

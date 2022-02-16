@@ -1,16 +1,13 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.DatabaseContainer;
+import com.ple.jerbil.data.DatabaseBuilder;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.QueryList;
-import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
-import com.ple.util.IArrayList;
 import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
@@ -19,21 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStructureTests {
 
-  final Database testDb = Database.make("test");  //Can add ("test", Charset.utf8) here as well in future.
-  final UserTable user = new UserTable(testDb);
-  final UserTableColumns userColumns = new UserTableColumns(user);
-  final TableContainer userTableContainer = TableContainer.make(user, userColumns.columns);
-  final PlayerTable player = new PlayerTable(testDb);
-  final PlayerTableColumns playerColumns = new PlayerTableColumns(player);
-  final TableContainer playerTableContainer = TableContainer.make(player, playerColumns.columns);
-  final ItemTable item = new ItemTable(testDb);
-  final ItemTableColumns itemColumns = new ItemTableColumns(item);
-  final TableContainer itemTableContainer = TableContainer.make(item, itemColumns.columns);
-  final InventoryTable inventory = new InventoryTable(testDb);
-  final InventoryTableColumns inventoryColumns = new InventoryTableColumns(inventory);
-  final TableContainer inventoryTableContainer = TableContainer.make(inventory, inventoryColumns.columns);
-  final DatabaseContainer dbContainer = DatabaseContainer.make(
-    testDb, IArrayList.make(userTableContainer, playerTableContainer, itemTableContainer, inventoryTableContainer));
+  final TestDatabase testDb = DatabaseBuilder.generate(TestDatabase.class);
+  final UserTable user = testDb.user;
+  final ItemTable item = testDb.item;
+  final PlayerTable player = testDb.player;
+  final InventoryTable inventory = testDb.inventory;
 
   public SqlStructureTests() {
     final Properties props = ConfigProps.getProperties();
@@ -121,7 +108,7 @@ public class SqlStructureTests {
   void testGeneratedColumn() {
     NumericColumn quantity = Column.make("quantity", item).asInt();
     item.add(quantity);
-    Column total = Column.make("total", item).asDecimal(14, 2).generatedFrom(itemColumns.price.times(quantity));
+    Column total = Column.make("total", item).asDecimal(14, 2).generatedFrom(item.price.times(quantity));
     item.add(total);
     final CompleteQuery q = item.create();
     assertEquals("""

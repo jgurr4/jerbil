@@ -37,14 +37,6 @@ public class Database {
     return new Database(databaseName, IArrayList.make(tables), charSet);
   }
 
-  public QueryList createAll() {
-    QueryList<CompleteQuery> completeQueries = QueryList.make(CreateQuery.make(this));
-    for (Table table : tables) {
-      completeQueries = completeQueries.add(CreateQuery.make(table));
-    }
-    return completeQueries;
-  }
-
 /*
   public SyncResult sync() {
     return sync(DdlOption.make((byte) 0b110));
