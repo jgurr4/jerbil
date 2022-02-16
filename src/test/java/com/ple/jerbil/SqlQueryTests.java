@@ -3,7 +3,9 @@ package com.ple.jerbil;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Agg;
+import com.ple.jerbil.data.selectExpression.ColumnService;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ public class SqlQueryTests {
   final ItemTable item = testDb.item;
   final PlayerTable player = testDb.player;
   final InventoryTable inventory = testDb.inventory;
+  final TableContainer userCon = TableContainer.make(user, user.columns);
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
@@ -37,7 +40,6 @@ public class SqlQueryTests {
 // Deciding between less verbose when reading or more clear when writing.
     //This more verbose method makes it so that column names will never conflict with Database/Table properties/fields.
     NumericColumn itemId = testDb.tables.inventory.columns.itemId;
-    //Less verbose for readers.
 //    CharSet charSet = testDb.charset;   //This would require the user to do more work to add Charset as field of TestDatabase class.
     CharSet charSet = testDb.database.charSet;
     NumericColumn playerId = testDb.inventory.playerId;
@@ -50,9 +52,6 @@ public class SqlQueryTests {
     CompleteQuery q = testDb.inventory.select().where(inventory.itemId.eq(make(3)));
     String name = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).blockFirst();
     Mono<String> rName = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).next();
-
-    //We are between deciding whether to separate the concept of TestDatabase and the list of tables/columns.
-
   }
 
   @Test

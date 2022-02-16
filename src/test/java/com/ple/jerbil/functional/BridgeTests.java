@@ -106,9 +106,11 @@ public class BridgeTests {
   @Test
   void testCompareMissingTable() {
     final DbDiff diffs = DiffService.compareDatabases(
-        testDbContainer.wrap(), DatabaseContainer.make(Database.make("myDb"),
-                                                       IArrayList.make(userTableContainer, playerTableContainer,
-                                                                       itemTableContainer)).wrap()).unwrap();
+            testDb.wrap(), DatabaseContainer.make(Database.make("myDb"),
+                IArrayList.make(TableContainer.make(user, user.columns),
+                    TableContainer.make(player, player.columns),
+                    TableContainer.make(item, item.columns))).wrap())
+        .unwrap();
     assertEquals(IArrayList.make("inventory"), diffs.tables.create);
     assertNull(diffs.tables.delete);
     assertNull(diffs.tables.update);
@@ -117,12 +119,12 @@ public class BridgeTests {
 
   @Test
   void testDbDiffFilter() {
-    final Table alteredItem = Table.make("item", testDb, StorageEngine.transactional);
+    final Table alteredItem = Table.make("item", testDb.database, StorageEngine.transactional);
     final NumericColumn price = Column.make("price", alteredItem).asInt();
     final IList<Column> alteredItemColumns = IArrayList.make(
-        itemColumns.itemId, itemColumns.name, itemColumns.type, price);
+        item.itemId, item.name, item.type, price);
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
-    final Table extraTable = Table.make("extra", testDb);
+    final Table extraTable = Table.make("extra", testDb.database);
     final IList<Column> extraTableColumns = IArrayList.make(Column.make("id", extraTable).bigId());
 
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
@@ -131,9 +133,9 @@ public class BridgeTests {
     final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
 
     final DbDiff diff = DiffService.compareDatabases(
-        testDbContainer.wrap(), DatabaseContainer.make(Database.make("myDb"),
-                                                       IArrayList.make(userTableContainer, playerTableContainer,
-                                                                       alteredItemTableContainer, extraTableContainer)
+        testDb.wrap(), DatabaseContainer.make(Database.make("myDb"),
+            IArrayList.make(TableContainer.make(user, user.columns), TableContainer.make(player, player.columns),
+                alteredItemTableContainer, extraTableContainer)
         ).wrap()).unwrap();
     //inventory needs create, alteredItem needs update, extraTable needs delete.
     assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.length());
@@ -164,18 +166,18 @@ public class BridgeTests {
 
   @Test
   void syncCreateWithDbMissing() { //Should create database using Database Object. Every diff should exist because it is forced to create db for first time.
-    DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
+    DataGlobal.bridge.execute(testDb.database.drop()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create();
-    final SyncResult<Diff<Database>> syncResult = testDbContainer.sync(ddlOption);
+    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
     assertNotNull(((DbDiff) syncResult.diff.unwrap()).name);
   }
 
   @Test
   void syncWithoutConflicts() { //It should reuse existing with no diffs.
-    DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
+    DataGlobal.bridge.execute(testDb.database.drop()).unwrapFlux().blockLast();
     DataGlobal.bridge.execute(testDb.createAll().toSql()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final SyncResult<Diff<Database>> syncResult = testDbContainer.sync(ddlOption);
+    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
     assertEquals(0, syncResult.diff.unwrap().getTotalDiffs()); //FIXME: Find a way to run methods through Diff interface
   }
 
@@ -184,7 +186,7 @@ public class BridgeTests {
     DataGlobal.bridge.execute("alter table player modify column name varchar(50) not null").unwrapFlux()
         .blockLast();  //TODO: Replace sql with jerbil methods like player.modify(playerColumns.name).asVarchar(50);  or player.alter also add support for player.rename player.change
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final SyncResult<Diff<Database>> syncResult = testDbContainer.sync(ddlOption);
+    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
     assertEquals(1, ((DbDiff) syncResult.diff.unwrap()).tables.update.length());
 //    assertEquals(1, syncResult.diff.unwrap().getDiffs().size);
   }

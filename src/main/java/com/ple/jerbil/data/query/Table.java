@@ -18,7 +18,6 @@ import java.util.Objects;
 @Immutable
 public class Table extends FromExpression {
 
-  //FIXME: name and engine need to be updated to "TableName" and "StorageEngine" to avoid conflicts with column names.
   public final String tableName;
   public final Database database;
   public final StorageEngine storageEngine;

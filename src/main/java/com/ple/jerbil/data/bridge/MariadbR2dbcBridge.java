@@ -2,6 +2,7 @@ package com.ple.jerbil.data.bridge;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.translator.MysqlLanguageGenerator;
 import com.ple.util.IArrayList;
