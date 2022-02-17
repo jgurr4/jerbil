@@ -18,13 +18,13 @@ import java.util.Objects;
 @Immutable
 public class PartialColumn implements Expression, OrderedExpression {
 
-  public final String name;
+  public final String columnName;
   public final Table table;
   public final boolean indexed;
   public final boolean primary;
 
-  protected PartialColumn(String name, Table table, boolean indexed, boolean primary) {
-    this.name = name;
+  protected PartialColumn(String columnName, Table table, boolean indexed, boolean primary) {
+    this.columnName = columnName;
     this.table = table;
     this.indexed = indexed;
     this.primary = primary;
@@ -50,34 +50,34 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn asInt() {
-    return NumericColumn.make(name, DataSpec.make(DataType.integer));
+    return NumericColumn.make(columnName, DataSpec.make(DataType.integer));
   }
 
   public StringColumn asVarchar() {
-    return StringColumn.make(name, DataSpec.make(DataType.varchar, 255));
+    return StringColumn.make(columnName, DataSpec.make(DataType.varchar, 255));
   }
 
   public StringColumn asVarchar(int size) {
-    return StringColumn.make(name, size);
+    return StringColumn.make(columnName, size);
   }
 
   public NumericColumn asBigInt() {
-    return NumericColumn.make(name, DataSpec.make(DataType.bigint));
+    return NumericColumn.make(columnName, DataSpec.make(DataType.bigint));
   }
 
   public NumericColumn asDecimal(int precision, int scale) {
-    return NumericColumn.make(name, DataSpec.make(DataType.decimal, precision, scale));
+    return NumericColumn.make(columnName, DataSpec.make(DataType.decimal, precision, scale));
   }
 
   public StringColumn asEnum(Class enumObj) {
-    return StringColumn.make(name, DataSpec.make(DataType.enumeration, enumObj), indexed);
+    return StringColumn.make(columnName, DataSpec.make(DataType.enumeration, enumObj), indexed);
   }
   public NumericColumn bigId() {
-    return NumericColumn.make(name, DataSpec.make(DataType.bigint), false, true, true);
+    return NumericColumn.make(columnName, DataSpec.make(DataType.bigint), false, true, true);
   }
 
   public NumericColumn id() {
-    return NumericColumn.make(name, DataSpec.make(DataType.integer), false, true, true);
+    return NumericColumn.make(columnName, DataSpec.make(DataType.integer), false, true, true);
   }
 
   public boolean isPrimary() {
@@ -88,8 +88,8 @@ public class PartialColumn implements Expression, OrderedExpression {
     return indexed;
   }
 
-  public String getName() {
-    return name;
+  public String getColumnName() {
+    return columnName;
   }
 
   @Override
@@ -97,18 +97,18 @@ public class PartialColumn implements Expression, OrderedExpression {
     if (this == o) return true;
     if (!(o instanceof PartialColumn)) return false;
     PartialColumn that = (PartialColumn) o;
-    return isIndexed() == that.isIndexed() && isPrimary() == that.isPrimary() && getName().equals(that.getName());
+    return isIndexed() == that.isIndexed() && isPrimary() == that.isPrimary() && getColumnName().equals(that.getColumnName());
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getName(), isIndexed(), isPrimary());
+    return Objects.hash(getColumnName(), isIndexed(), isPrimary());
   }
 
   @Override
   public String toString() {
     return "PartialColumn{" +
-      "name='" + name + '\'' +
+      "name='" + columnName + '\'' +
       ", indexed=" + indexed +
       ", primary=" + primary +
       '}';

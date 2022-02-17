@@ -5,6 +5,7 @@ import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Agg;
+import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.ColumnService;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
@@ -39,16 +40,18 @@ public class SqlQueryTests {
   void temporaryTest() {
 // Deciding between less verbose when reading or more clear when writing.
     //This more verbose method makes it so that column names will never conflict with Database/Table properties/fields.
-    NumericColumn itemId = testDb.tables.inventory.columns.itemId;
+    Column itemIdVerbose = testDb.tables.get("inventory").columns.get("itemId");
+    NumericColumn itemId = testDb.inventory.itemId;
 //    CharSet charSet = testDb.charset;   //This would require the user to do more work to add Charset as field of TestDatabase class.
     CharSet charSet = testDb.database.charSet;
     NumericColumn playerId = testDb.inventory.playerId;
-    StorageEngine storageEngine = testDb.inventory.storageEngine;
-    DataSpec dataSpec = testDb.inventory.itemId.dataSpec;
+    StorageEngine storageEngine = testDb.item.table.storageEngine;
+    DataSpec dataSpec = testDb.item.itemId.dataSpec;
     testDb.sync();
-    testDb.inventory.sync();
-    testDb.inventory.itemId.sync();
+    testDb.item.sync();
+    testDb.item.itemId.sync();
     InventoryTable inventory = testDb.inventory;
+    ItemTable item = testDb.item;
     CompleteQuery q = testDb.inventory.select().where(inventory.itemId.eq(make(3)));
     String name = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).blockFirst();
     Mono<String> rName = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).next();

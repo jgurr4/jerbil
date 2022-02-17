@@ -8,18 +8,21 @@ import com.ple.jerbil.data.sync.DbDiff;
 import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.data.sync.DiffService;
 import com.ple.jerbil.data.sync.SyncResult;
+import com.ple.util.IArrayMap;
+import com.ple.util.IEntry;
 import com.ple.util.IList;
+import com.ple.util.IMap;
 
 public class DatabaseContainer {
   public final Database database;
-  public final IList<TableContainer> tables;
+  public final IMap<String, TableContainer> tables;
 
-  protected DatabaseContainer(Database database, IList<TableContainer> tables) {
+  protected DatabaseContainer(Database database, IMap<String, TableContainer> tables) {
     this.database = database;
     this.tables = tables;
   }
 
-  public static DatabaseContainer make(Database database, IList<TableContainer> tables) {
+  public static DatabaseContainer make(Database database, IMap<String, TableContainer> tables) {
     return new DatabaseContainer(database, tables);
   }
 
@@ -40,8 +43,8 @@ public class DatabaseContainer {
 
   public QueryList createAll() {
     QueryList<CompleteQuery> completeQueries = QueryList.make(CreateQuery.make(database));
-    for (TableContainer table : tables) {
-      completeQueries = completeQueries.add(CreateQuery.make((Table) table.table));
+    for (IEntry<String, TableContainer> entry : tables) {
+      completeQueries = completeQueries.add(CreateQuery.make(entry.value.table));
     }
     return completeQueries;
   }

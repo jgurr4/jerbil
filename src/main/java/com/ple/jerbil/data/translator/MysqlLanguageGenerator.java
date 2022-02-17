@@ -207,7 +207,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         final Column column = (Column) selectArr[i];
         for (Table table : tableList) {
           for (int j = 0; j < table.columns.toArray().length; j++) {
-            if (table.columns.get(j).getName() == column.getName()) {
+            if (table.columns.get(j).getName() == column.getColumnName()) {
               matchingColumns++;
             }
           }
@@ -265,7 +265,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       col = (Column) e;
       for (Table table : tableList) {
         for (int i = 0; i < table.columns.toArray().length; i++) {
-          if (table.columns.get(i).getName() == col.getName()) {
+          if (table.columns.get(i).getName() == col.getColumnName()) {
             matchingColumns++;
             if (table.columns.get(i) == col) {
               tableName = table.tableName;
@@ -345,9 +345,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       //TODO: Check if column name has space and if so put `backticks` around it.
       final QueriedColumn s = (QueriedColumn) e;
       if (s.tableName != "") {
-        output = s.tableName + "." + s.column.getName();
+        output = s.tableName + "." + s.column.getColumnName();
       } else {
-        output = s.column.getName();
+        output = s.column.getColumnName();
       }
     } else if (e instanceof LiteralString) {
       final LiteralString litStr = (LiteralString) e;
@@ -399,7 +399,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       if (selectArr[i] instanceof QueriedColumn) {
         final Column column = ((QueriedColumn) selectArr[i]).column;
         if (column instanceof NumericColumn || column instanceof StringColumn) {
-          fullSelectList += column.name;
+          fullSelectList += column.columnName;
         }
       } else if (selectArr[i] instanceof SelectAllExpression) {
         fullSelectList += "*";
@@ -416,7 +416,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         if (ae.expression != null) {
           if (ae.expression instanceof Column) {
             final Column column = (Column) ae.expression;
-            fullSelectList += column.getName() + " as " + ae.alias;
+            fullSelectList += column.getColumnName() + " as " + ae.alias;
           } else if (ae.expression instanceof ArithmeticExpression) {
             final ArithmeticExpression arExp = (ArithmeticExpression) ae.expression;
             fullSelectList += toSqlArithmetic(fullSelectList, arExp) + " as " + ae.alias;
@@ -465,7 +465,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private String getNumericExpression(NumericExpression e) throws ClassNotFoundException {
     if (e instanceof NumericColumn) {
-      return ((NumericColumn) e).name;
+      return ((NumericColumn) e).columnName;
     } else if (e instanceof LiteralNumber) {
       return ((LiteralNumber) e).value.toString();
     } else {
@@ -475,7 +475,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   //TODO: Add support for specifying Null on a column. Leave not null off because that is default.
   public String toSql(Column column) {
-    String sql = column.getName() + " ";
+    String sql = column.getColumnName() + " ";
     String primary = "";
     String autoIncrement = "";
     String preciseScale = "";
@@ -531,7 +531,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String sql = "insert into " + toSql(insertQuery.fromExpression) + "\n(";
     String separator = "";
     for (Column column : insertQuery.set.get(0).keySet()) {
-      sql += separator + column.getName();
+      sql += separator + column.getColumnName();
       separator = ", ";
     }
     sql += ")" + " values\n";
@@ -591,7 +591,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         primaryCount++;
       } else if (column.isIndexed()) {
         indexCount++;
-        indexedColumns += separator + column.getName();
+        indexedColumns += separator + column.getColumnName();
         separator = ",";
       }
     }
@@ -600,7 +600,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       multiIndex += ",\n  primary key (";
       for (Column column : columns) {
         if (column.isPrimary()) {
-          multiIndex += separator + column.getName();
+          multiIndex += separator + column.getColumnName();
           separator = ",";
         }
       }

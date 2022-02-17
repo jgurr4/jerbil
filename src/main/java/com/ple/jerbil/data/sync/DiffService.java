@@ -147,7 +147,7 @@ public class DiffService {
   public static IList<Diff<Column>> getListOfColumnDiffs(IList<Column> leftColumns, IList<Column> rightColumns) {
     return Flux.fromIterable(rightColumns)
       .filter(Objects::nonNull)
-      .map(column -> compareColumns(getColumnMatchingName(leftColumns, column.name), column))
+      .map(column -> compareColumns(getColumnMatchingName(leftColumns, column.columnName), column))
       .collectList()
       .map(columnDiffs -> IArrayList.make(columnDiffs.toArray(ColumnDiff.empty)))
       .defaultIfEmpty(null)
@@ -157,7 +157,7 @@ public class DiffService {
   public static Column getColumnMatchingName(IList<Column> columns, String name) {
     Column result = null;
     for (Column c : columns) {
-      if (c.name.equals(name)) {
+      if (c.columnName.equals(name)) {
         result = c;
       }
     }
@@ -179,7 +179,7 @@ public class DiffService {
 
   public static boolean checkColumnNameInList(IList<Column> columns, Column column) {
     for (Column c1 : columns) {
-      if (column.name.equals(c1.name)) {
+      if (column.columnName.equals(c1.columnName)) {
         return true;
       }
     }
@@ -210,7 +210,7 @@ public class DiffService {
   }
 
   public static Diff<Column> compareColumns(Column c1, Column c2) {
-    final ScalarDiff<String> nameDiff = c1.name.equals(c2.name) ? null : ScalarDiff.make(c1.name, c2.name);
+    final ScalarDiff<String> nameDiff = c1.columnName.equals(c2.columnName) ? null : ScalarDiff.make(c1.columnName, c2.columnName);
     final VectorDiff<ColumnAttribute> columnAttributesDiff = compareColumnAttributes(c1, c2);
     final ScalarDiff<DataSpec> dataSpecDiff = c1.dataSpec.equals(c2.dataSpec) ? null : ScalarDiff.make(
       c1.dataSpec, c2.dataSpec);

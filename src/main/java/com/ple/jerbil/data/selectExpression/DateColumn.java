@@ -19,7 +19,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
     }
 
     public DateColumn defaultValue(DateExpression dateExp) {
-        return new DateColumn(name, dataSpec, indexed, primary, generatedFrom, dateExp);
+        return new DateColumn(columnName, dataSpec, indexed, primary, generatedFrom, dateExp);
     }
 
     public static DateColumn make(String name, DataSpec dataSpec) {

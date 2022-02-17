@@ -93,7 +93,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
       ", generatedFrom=" + generatedFrom +
       ", defaultValue=" + defaultValue +
       ", autoIncrement=" + autoIncrement +
-      ", name='" + name + '\'' +
+      ", name='" + columnName + '\'' +
       ", indexed=" + indexed +
       ", primary=" + primary +
       '}';

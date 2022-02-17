@@ -29,15 +29,15 @@ public abstract class Column <T extends Column> extends PartialColumn{
     public abstract T make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom);
 
     public T primary() {
-        return make(name, dataSpec, indexed, true, generatedFrom);
+        return make(columnName, dataSpec, indexed, true, generatedFrom);
     }
 
     public T indexed() {
-        return make(name, dataSpec, true, primary, generatedFrom);
+        return make(columnName, dataSpec, true, primary, generatedFrom);
     }
 
     public T generatedFrom(Expression generatedFrom) {
-        return make(name, dataSpec, indexed, primary, generatedFrom);
+        return make(columnName, dataSpec, indexed, primary, generatedFrom);
     }
 
     public String toSql() {
@@ -57,7 +57,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
         if (!(o instanceof Column)) return false;
         Column<?> column = (Column<?>) o;
         return dataSpec.equals(column.dataSpec) &&
-          name.equals(column.name) &&
+          columnName.equals(column.columnName) &&
           Objects.equals(indexed, column.indexed) &&
           Objects.equals(primary, column.primary) &&
           Objects.equals(generatedFrom, column.generatedFrom) &&
@@ -72,7 +72,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
     @Override
     public String toString() {
         return "Column{" +
-          "name='" + name + '\'' +
+          "name='" + columnName + '\'' +
           ", dataSpec=" + dataSpec +
           ", indexed=" + indexed +
           ", primary=" + primary +

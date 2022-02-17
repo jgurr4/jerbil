@@ -55,7 +55,7 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     }
 
     public StringColumn defaultValue(StringExpression str) {
-        return new StringColumn(name, dataSpec, indexed, primary, generatedFrom, str);
+        return new StringColumn(columnName, dataSpec, indexed, primary, generatedFrom, str);
     }
 
 }

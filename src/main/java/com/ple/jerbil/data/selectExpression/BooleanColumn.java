@@ -48,7 +48,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
     }
 
     public BooleanColumn defaultValue(BooleanExpression bool) {
-        return new BooleanColumn(name, dataSpec, indexed, primary, generatedFrom, bool);
+        return new BooleanColumn(columnName, dataSpec, indexed, primary, generatedFrom, bool);
     }
 
 }
