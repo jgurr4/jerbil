@@ -19,7 +19,7 @@ public class PlayerTable extends TableContainer {
 
   public PlayerTable(Table table, NumericColumn playerId, NumericColumn userId,
                      StringColumn name) {
-    super(table, IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId));
+    super(table, IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId), StorageEngine.transactional);
     this.playerId = playerId;
     this.userId = userId;
     this.tableName = table.tableName;
@@ -27,7 +27,7 @@ public class PlayerTable extends TableContainer {
   }
 
   public static PlayerTable make(Database db) {
-    Table playerTable = Table.make("player", db, StorageEngine.transactional);
+    Table playerTable = Table.make("player", db);
     final NumericColumn playerId = Column.make("playerId", playerTable).id();
     final NumericColumn userId = Column.make("userId", playerTable).asInt();
     final StringColumn name = Column.make("name", playerTable).asVarchar(20);

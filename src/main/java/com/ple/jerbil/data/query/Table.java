@@ -20,25 +20,15 @@ public class Table extends FromExpression {
 
   public final String tableName;
   public final Database database;
-  public final StorageEngine storageEngine;
   public static Table[] emptyArray = new Table[0];
 
   protected Table(String tableName, Database database) {
-    this(tableName, database, StorageEngine.simple);
-  }
-
-  protected Table(String tableName, Database database, StorageEngine storageEngine) {
     this.tableName = tableName;
     this.database = database;
-    this.storageEngine = storageEngine;
   }
 
   public static Table make(String name, Database database) {
-    return new Table(name, database, StorageEngine.simple);
-  }
-
-  public static Table make(String name, Database database, StorageEngine engine) {
-    return new Table(name, database, engine);
+    return new Table(name, database);
   }
 
   public String toSql() {
@@ -70,21 +60,19 @@ public class Table extends FromExpression {
     if (this == o) return true;
     if (!(o instanceof Table)) return false;
     Table table = (Table) o;
-    return tableName.equals(table.tableName) && database.equals(table.database) && storageEngine == table.storageEngine;
+    return tableName.equals(table.tableName) && database.equals(table.database);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(tableName, database, storageEngine);
+    return Objects.hash(tableName, database);
   }
 
   @Override
   public String toString() {
     return "Table{" +
-      "name='" + tableName + '\'' +
-        "database='" + database + '\'' +
-      ", engine=" + storageEngine +
-      '}';
+        "tableName='" + tableName + '\'' +
+        ", database=" + database +
+        '}';
   }
-
 }

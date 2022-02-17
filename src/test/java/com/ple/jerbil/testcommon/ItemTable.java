@@ -8,7 +8,6 @@ import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.util.IArrayMap;
-import com.ple.util.IMap;
 
 /*
 FIXME: Currently you cannot do .add() or .remove() operations on columns inside this table because original Table had
@@ -94,7 +93,7 @@ public class ItemTable extends TableContainer {
 
   protected ItemTable(Table table, NumericColumn itemId, StringColumn name, StringColumn type, NumericColumn price) {
     super(table, IArrayMap.make(
-        itemId.columnName, itemId, name.columnName, name, type.columnName, type, price.columnName, price));
+        itemId.columnName, itemId, name.columnName, name, type.columnName, type, price.columnName, price), null);
     this.itemId = itemId;
     this.name = name;
     this.type = type;

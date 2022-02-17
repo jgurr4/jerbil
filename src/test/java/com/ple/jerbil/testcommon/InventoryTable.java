@@ -6,10 +6,7 @@ import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
-import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
-import com.ple.util.IList;
-import com.ple.util.IMap;
 
 @Immutable
 public class InventoryTable extends TableContainer {
@@ -18,7 +15,7 @@ public class InventoryTable extends TableContainer {
   public final String tableName;
 
   protected InventoryTable(Table table, NumericColumn playerId, NumericColumn itemId) {
-    super(table, IArrayMap.make(playerId.columnName, playerId, itemId.columnName, itemId));
+    super(table, IArrayMap.make(playerId.columnName, playerId, itemId.columnName, itemId), null);
     this.playerId = playerId;
     this.itemId = itemId;
     this.tableName = table.tableName;

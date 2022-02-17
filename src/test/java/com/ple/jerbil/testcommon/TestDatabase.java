@@ -18,7 +18,7 @@ public class TestDatabase extends DatabaseContainer {
   public TestDatabase(Database database, UserTable user, PlayerTable player, ItemTable item, InventoryTable inventory,
                       IMap<String, TableContainer> tables) {
     //Optionally add charset value to end of this.
-    super(database, tables);
+    super(database, tables, null);
     this.user = user;
     this.player = player;
     this.item = item;

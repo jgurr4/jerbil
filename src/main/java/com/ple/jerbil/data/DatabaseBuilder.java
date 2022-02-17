@@ -11,7 +11,7 @@ public class DatabaseBuilder {
     // passed into it.
     T t = null;
     try {
-      t = databaseClass.getDeclaredConstructor().newInstance();
+      t = databaseClass.getDeclaredMethod("make");
     } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
       e.printStackTrace();
     }

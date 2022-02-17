@@ -118,7 +118,7 @@ public class BridgeTests {
 
   @Test
   void testDbDiffFilter() {
-    final Table alteredItem = Table.make("item", testDb.database, StorageEngine.transactional);
+    final Table alteredItem = Table.make("item", testDb.database);
     final NumericColumn price = Column.make("price", alteredItem).asInt();
     final IMap<String, Column> alteredItemColumns = IArrayMap.make(item.itemId, item.name, item.type, price);
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
@@ -127,7 +127,7 @@ public class BridgeTests {
 
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
 
-    final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns);
+    final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns, StorageEngine.transactional);
     final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
 
     final DbDiff diff = DiffService.compareDatabases(
@@ -153,17 +153,17 @@ public class BridgeTests {
 
   @Test
   void testGetDb() {
-    final Database test = DatabaseContainer.getDbContainer("test").unwrap().database;
-    assertEquals("test", test.databaseName);
+    final DatabaseContainer test = DatabaseContainer.getDbContainer("test").unwrap();
+    assertEquals("test", test.database.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
-    System.out.println(test.tables.toString().replaceAll("Table\\{", "\nTable{"));
-    assertTrue(test.tables.contains(user.table));
-    assertTrue(test.tables.contains(item.table));
+    System.out.println(test.toString().replaceAll("Table\\{", "\nTable{"));
+    assertTrue(test.database.databaseName.equals("test"));
+    assertTrue(test.tables.get("item").equals(item.table));
   }
 
   @Test
   void syncCreateWithDbMissing() { //Should create database using Database Object. Every diff should exist because it is forced to create db for first time.
-    DataGlobal.bridge.execute(testDb.database.drop()).unwrapFlux().blockLast();
+    DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create();
     final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
     assertNotNull(((DbDiff) syncResult.diff.unwrap()).name);
@@ -171,7 +171,7 @@ public class BridgeTests {
 
   @Test
   void syncWithoutConflicts() { //It should reuse existing with no diffs.
-    DataGlobal.bridge.execute(testDb.database.drop()).unwrapFlux().blockLast();
+    DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     DataGlobal.bridge.execute(testDb.createAll().toSql()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
     final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);

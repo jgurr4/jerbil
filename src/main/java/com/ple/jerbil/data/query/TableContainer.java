@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.query;
 
+import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.CountAgg;
@@ -7,20 +8,26 @@ import com.ple.jerbil.data.selectExpression.SelectExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.util.IArrayList;
-import com.ple.util.IList;
 import com.ple.util.IMap;
+import reactor.util.annotation.Nullable;
 
 public class TableContainer {
   public final Table table;
   public final IMap<String, Column> columns;
+  @Nullable public final StorageEngine storageEngine;
 
-  protected TableContainer(Table table, IMap<String, Column> columns) {
+  protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine) {
     this.table = table;
     this.columns = columns;
+    this.storageEngine = storageEngine;
+  }
+
+  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine) {
+    return new TableContainer(table, columns, storageEngine);
   }
 
   public static TableContainer make(Table table, IMap<String, Column> columns) {
-    return new TableContainer(table, columns);
+    return new TableContainer(table, columns, null);
   }
 
   public TableContainer add(Column... columnArr) {
@@ -28,12 +35,12 @@ public class TableContainer {
     for (Column column : columnArr) {
       newColumns = newColumns.put(column.columnName, column);
     }
-    return new TableContainer(table, newColumns);
+    return new TableContainer(table, newColumns, storageEngine);
   }
 
   public TableContainer add(Column column) {
     final IMap<String, Column> newColumns = columns.put(column.columnName, column);
-    return new TableContainer(table, newColumns);
+    return new TableContainer(table, newColumns, storageEngine);
   }
 
 

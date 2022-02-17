@@ -42,9 +42,11 @@ public class SqlQueryTests {
     Column itemIdVerbose = testDb.tables.get("inventory").columns.get("itemId");
     NumericColumn itemId = testDb.inventory.itemId;
 //    CharSet charSet = testDb.charset;   //This would require the user to do more work to add Charset as field of TestDatabase class.
-    CharSet charSet = testDb.database.charSet;
+    CharSet charSet = testDb.charSet;
     NumericColumn playerId = testDb.inventory.playerId;
-    StorageEngine storageEngine = testDb.item.table.storageEngine;
+    //TODO: Pull all attributes from inside Table into TableContainer except for tableName and Database
+    // Do the same with Database and DatabaseContainer. Pull everything out except for DatabaseName.
+    StorageEngine storageEngine = testDb.item.storageEngine;
     DataSpec dataSpec = testDb.item.itemId.dataSpec;
     testDb.sync();
     testDb.item.sync();

@@ -8,22 +8,26 @@ import com.ple.jerbil.data.sync.DbDiff;
 import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.data.sync.DiffService;
 import com.ple.jerbil.data.sync.SyncResult;
+import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
 import com.ple.util.IEntry;
-import com.ple.util.IList;
 import com.ple.util.IMap;
+import reactor.util.annotation.Nullable;
 
 public class DatabaseContainer {
   public final Database database;
   public final IMap<String, TableContainer> tables;
+  @Nullable public final CharSet charSet;
 
-  protected DatabaseContainer(Database database, IMap<String, TableContainer> tables) {
+  protected DatabaseContainer(Database database, IMap<String, TableContainer> tables,
+                              @Nullable CharSet charSet) {
     this.database = database;
     this.tables = tables;
+    this.charSet = charSet;
   }
 
   public static DatabaseContainer make(Database database, IMap<String, TableContainer> tables) {
-    return new DatabaseContainer(database, tables);
+    return new DatabaseContainer(database, tables, null);
   }
 
   public SyncResult sync() {
@@ -49,6 +53,13 @@ public class DatabaseContainer {
     return completeQueries;
   }
 
+  public DatabaseContainer add(TableContainer... newTables) {
+    IMap<String, TableContainer> newTablesMap = tables;
+    for (TableContainer t : newTables) {
+     newTablesMap = newTablesMap.put(t.table.tableName, t);
+    }
+    return new DatabaseContainer(database, newTablesMap, charSet);
+  }
 
   public static ReactiveWrapper<DatabaseContainer> getDbContainer(String name) {
     return DataGlobal.bridge.getDb(name);
@@ -56,6 +67,10 @@ public class DatabaseContainer {
 
   public ReactiveWrapper<DatabaseContainer> wrap() {
     return SynchronousObject.make(this);
+  }
+
+  public String drop() {
+    return null;
   }
 
 }
