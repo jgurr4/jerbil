@@ -18,11 +18,11 @@ import java.util.Properties;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StatementExecutionTests {
 
-  final TestDatabase testDb = DatabaseBuilder.generate(TestDatabase.class);
-  final UserTable user = testDb.user;
-  final ItemTable item = testDb.item;
-  final PlayerTable player = testDb.player;
-  final InventoryTable inventory = testDb.inventory;
+  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, Database.make("test"));
+  final UserTableContainer user = testDb.user;
+  final ItemTableContainer item = testDb.item;
+  final PlayerTableContainer player = testDb.player;
+  final InventoryTableContainer inventory = testDb.inventory;
 
   public StatementExecutionTests() {
     final Properties props = ConfigProps.getProperties();

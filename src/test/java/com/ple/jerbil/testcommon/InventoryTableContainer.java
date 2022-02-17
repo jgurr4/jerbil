@@ -9,22 +9,22 @@ import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.util.IArrayMap;
 
 @Immutable
-public class InventoryTable extends TableContainer {
+public class InventoryTableContainer extends TableContainer {
   public final NumericColumn playerId;
   public final NumericColumn itemId;
   public final String tableName;
 
-  protected InventoryTable(Table table, NumericColumn playerId, NumericColumn itemId) {
+  protected InventoryTableContainer(Table table, NumericColumn playerId, NumericColumn itemId) {
     super(table, IArrayMap.make(playerId.columnName, playerId, itemId.columnName, itemId), null);
     this.playerId = playerId;
     this.itemId = itemId;
     this.tableName = table.tableName;
   }
 
-  public static InventoryTable make(Database db) {
+  public static InventoryTableContainer make(Database db) {
     final Table inventoryTable = Table.make("inventory", db);
     final NumericColumn playerId = Column.make("playerId", inventoryTable).asInt().primary();
     final NumericColumn itemId = Column.make("itemId", inventoryTable).asInt().primary();
-    return new InventoryTable(inventoryTable, playerId, itemId);
+    return new InventoryTableContainer(inventoryTable, playerId, itemId);
   }
 }

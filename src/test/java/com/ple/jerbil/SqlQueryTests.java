@@ -3,10 +3,8 @@ package com.ple.jerbil;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
-import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.ColumnService;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
@@ -21,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlQueryTests {
 
-  final TestDatabase testDb = DatabaseBuilder.generate(TestDatabase.class);
-  final UserTable user = testDb.user;
-  final ItemTable item = testDb.item;
-  final PlayerTable player = testDb.player;
-  final InventoryTable inventory = testDb.inventory;
+  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, Database.make("test"));
+  final UserTableContainer user = testDb.user;
+  final ItemTableContainer item = testDb.item;
+  final PlayerTableContainer player = testDb.player;
+  final InventoryTableContainer inventory = testDb.inventory;
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
@@ -51,8 +49,8 @@ public class SqlQueryTests {
     testDb.sync();
     testDb.item.sync();
     testDb.item.itemId.sync();
-    InventoryTable inventory = testDb.inventory;
-    ItemTable item = testDb.item;
+    InventoryTableContainer inventory = testDb.inventory;
+    ItemTableContainer item = testDb.item;
     CompleteQuery q = testDb.inventory.select().where(inventory.itemId.eq(make(3)));
     String name = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).blockFirst();
     Mono<String> rName = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).next();

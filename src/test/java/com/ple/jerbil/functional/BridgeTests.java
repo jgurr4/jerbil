@@ -10,7 +10,6 @@ import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
-import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
 
@@ -20,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class BridgeTests {
 
-  final TestDatabase testDb = DatabaseBuilder.generate(TestDatabase.class);
-  final UserTable user = testDb.user;
-  final ItemTable item = testDb.item;
-  final PlayerTable player = testDb.player;
-  final InventoryTable inventory = testDb.inventory;
+  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, Database.make("test"));
+  final UserTableContainer user = testDb.user;
+  final ItemTableContainer item = testDb.item;
+  final PlayerTableContainer player = testDb.player;
+  final InventoryTableContainer inventory = testDb.inventory;
 
   public BridgeTests() {
     final Properties props = ConfigProps.getProperties();

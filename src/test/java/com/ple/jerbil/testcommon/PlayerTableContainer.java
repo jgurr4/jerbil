@@ -11,14 +11,14 @@ import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.util.IArrayMap;
 
 @Immutable
-public class PlayerTable extends TableContainer {
+public class PlayerTableContainer extends TableContainer {
   public final NumericColumn playerId;
   public final NumericColumn userId;
   public final StringColumn name;
   public final String tableName;
 
-  public PlayerTable(Table table, NumericColumn playerId, NumericColumn userId,
-                     StringColumn name) {
+  public PlayerTableContainer(Table table, NumericColumn playerId, NumericColumn userId,
+                              StringColumn name) {
     super(table, IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId), StorageEngine.transactional);
     this.playerId = playerId;
     this.userId = userId;
@@ -26,12 +26,12 @@ public class PlayerTable extends TableContainer {
     this.name = name;
   }
 
-  public static PlayerTable make(Database db) {
+  public static PlayerTableContainer make(Database db) {
     Table playerTable = Table.make("player", db);
     final NumericColumn playerId = Column.make("playerId", playerTable).id();
     final NumericColumn userId = Column.make("userId", playerTable).asInt();
     final StringColumn name = Column.make("name", playerTable).asVarchar(20);
-    return new PlayerTable(playerTable, playerId, userId, name);
+    return new PlayerTableContainer(playerTable, playerId, userId, name);
   }
 
 }

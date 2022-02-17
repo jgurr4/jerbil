@@ -10,14 +10,14 @@ import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.util.IArrayMap;
 
 @Immutable
-public class UserTable extends TableContainer {
+public class UserTableContainer extends TableContainer {
   public final NumericColumn userId;
   public final StringColumn name;
   public final NumericColumn age;
   public final String tableName;
 
-  public UserTable(Table table, NumericColumn userId,
-                   StringColumn name, NumericColumn age) {
+  public UserTableContainer(Table table, NumericColumn userId,
+                            StringColumn name, NumericColumn age) {
     super(table, IArrayMap.make(userId.columnName, userId, name.columnName, name, age.columnName, age), null);
     this.userId = userId;
     this.name = name;
@@ -25,12 +25,12 @@ public class UserTable extends TableContainer {
     this.tableName = table.tableName;
   }
 
-  public static UserTable make(Database db) {
+  public static UserTableContainer make(Database db) {
     final Table userTable = Table.make("user", db);
     final NumericColumn userId = Column.make("userId", userTable).id();
     final StringColumn name = Column.make("name", userTable).asVarchar().indexed();
     final NumericColumn age = Column.make("age", userTable).asInt();
-    return new UserTable(userTable, userId, name, age);
+    return new UserTableContainer(userTable, userId, name, age);
   }
 /* Alternative style that we may decide to support as well
   public final Column userId;
