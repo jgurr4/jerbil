@@ -19,7 +19,8 @@ public class ItemTableContainer extends TableContainer {
 
   protected ItemTableContainer(Table table, NumericColumn itemId, StringColumn name, StringColumn type, NumericColumn price) {
     super(table, IArrayMap.make(
-        itemId.columnName, itemId, name.columnName, name, type.columnName, type, price.columnName, price), null);
+        itemId.columnName, itemId, name.columnName, name, type.columnName, type, price.columnName, price), null,
+        indexSpec);
     this.itemId = itemId;
     this.name = name;
     this.type = type;

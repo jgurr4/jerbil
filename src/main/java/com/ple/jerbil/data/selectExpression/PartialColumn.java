@@ -20,18 +20,14 @@ public class PartialColumn implements Expression, OrderedExpression {
 
   public final String columnName;
   public final Table table;
-  public final boolean indexed;
-  public final boolean primary;
 
-  protected PartialColumn(String columnName, Table table, boolean indexed, boolean primary) {
+  protected PartialColumn(String columnName, Table table) {
     this.columnName = columnName;
     this.table = table;
-    this.indexed = indexed;
-    this.primary = primary;
   }
 
   public static PartialColumn make(String name, Table table) {
-    return new PartialColumn(name, table, false, false);
+    return new PartialColumn(name, table);
   }
 
   @Override
@@ -70,7 +66,7 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public StringColumn asEnum(Class enumObj) {
-    return StringColumn.make(columnName, table, DataSpec.make(DataType.enumeration, enumObj), indexed);
+    return StringColumn.make(columnName, table, DataSpec.make(DataType.enumeration, enumObj));
   }
   public NumericColumn bigId() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), false, true, true);
@@ -78,14 +74,6 @@ public class PartialColumn implements Expression, OrderedExpression {
 
   public NumericColumn id() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), false, true, true);
-  }
-
-  public boolean isPrimary() {
-    return primary;
-  }
-
-  public boolean isIndexed() {
-    return indexed;
   }
 
   public String getColumnName() {
@@ -97,21 +85,19 @@ public class PartialColumn implements Expression, OrderedExpression {
     if (this == o) return true;
     if (!(o instanceof PartialColumn)) return false;
     PartialColumn that = (PartialColumn) o;
-    return isIndexed() == that.isIndexed() && isPrimary() == that.isPrimary() && getColumnName().equals(that.getColumnName());
+    return getColumnName().equals(that.getColumnName()) && table.equals(that.table);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(getColumnName(), isIndexed(), isPrimary());
+    return Objects.hash(getColumnName(), table);
   }
 
   @Override
   public String toString() {
     return "PartialColumn{" +
-      "name='" + columnName + '\'' +
-      ", indexed=" + indexed +
-      ", primary=" + primary +
-      '}';
+        "columnName='" + columnName + '\'' +
+        ", table=" + table +
+        '}';
   }
-
 }

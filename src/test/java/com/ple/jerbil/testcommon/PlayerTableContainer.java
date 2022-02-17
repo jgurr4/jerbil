@@ -19,7 +19,8 @@ public class PlayerTableContainer extends TableContainer {
 
   public PlayerTableContainer(Table table, NumericColumn playerId, NumericColumn userId,
                               StringColumn name) {
-    super(table, IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId), StorageEngine.transactional);
+    super(table, IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId), StorageEngine.transactional,
+        indexSpec);
     this.playerId = playerId;
     this.userId = userId;
     this.tableName = table.tableName;

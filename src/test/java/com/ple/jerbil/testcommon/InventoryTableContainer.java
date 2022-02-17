@@ -15,7 +15,7 @@ public class InventoryTableContainer extends TableContainer {
   public final String tableName;
 
   protected InventoryTableContainer(Table table, NumericColumn playerId, NumericColumn itemId) {
-    super(table, IArrayMap.make(playerId.columnName, playerId, itemId.columnName, itemId), null);
+    super(table, IArrayMap.make(playerId.columnName, playerId, itemId.columnName, itemId), null, null);
     this.playerId = playerId;
     this.itemId = itemId;
     this.tableName = table.tableName;

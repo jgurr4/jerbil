@@ -5,5 +5,6 @@ public enum Index {
   secondary,
   foreign,
   fulltext,
+  autoIncrement,
   spatial
 }

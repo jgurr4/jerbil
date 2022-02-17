@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.query;
 
+import com.ple.jerbil.data.IndexSpec;
 import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -15,19 +16,22 @@ public class TableContainer {
   public final Table table;
   public final IMap<String, Column> columns;
   @Nullable public final StorageEngine storageEngine;
+  @Nullable public final IndexSpec indexSpec;
 
-  protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine) {
+  protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
+                           @Nullable IndexSpec indexSpec) {
     this.table = table;
     this.columns = columns;
     this.storageEngine = storageEngine;
+    this.indexSpec = indexSpec;
   }
 
-  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine) {
-    return new TableContainer(table, columns, storageEngine);
+  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine, IndexSpec indexSpec) {
+    return new TableContainer(table, columns, storageEngine, indexSpec);
   }
 
   public static TableContainer make(Table table, IMap<String, Column> columns) {
-    return new TableContainer(table, columns, null);
+    return new TableContainer(table, columns, null, null);
   }
 
   public TableContainer add(Column... columnArr) {
@@ -35,14 +39,13 @@ public class TableContainer {
     for (Column column : columnArr) {
       newColumns = newColumns.put(column.columnName, column);
     }
-    return new TableContainer(table, newColumns, storageEngine);
+    return new TableContainer(table, newColumns, storageEngine, indexSpec);
   }
 
   public TableContainer add(Column column) {
     final IMap<String, Column> newColumns = columns.put(column.columnName, column);
-    return new TableContainer(table, newColumns, storageEngine);
+    return new TableContainer(table, newColumns, storageEngine, indexSpec);
   }
-
 
   public SyncResult sync() {
     return null;
@@ -87,6 +90,5 @@ public class TableContainer {
   public SelectQuery select(SelectExpression... selectExpressions) {
     return SelectQuery.make(table, IArrayList.make(selectExpressions));
   }
-
 
 }

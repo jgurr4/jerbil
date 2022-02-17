@@ -18,7 +18,7 @@ public class UserTableContainer extends TableContainer {
 
   public UserTableContainer(Table table, NumericColumn userId,
                             StringColumn name, NumericColumn age) {
-    super(table, IArrayMap.make(userId.columnName, userId, name.columnName, name, age.columnName, age), null);
+    super(table, IArrayMap.make(userId.columnName, userId, name.columnName, name, age.columnName, age), null, indexSpec);
     this.userId = userId;
     this.name = name;
     this.age = age;

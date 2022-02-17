@@ -4,7 +4,6 @@ import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.util.IList;
 
 public class IndexSpec {
-
   public final Index index;
   public final IList<Column> columns;
   public final int size;

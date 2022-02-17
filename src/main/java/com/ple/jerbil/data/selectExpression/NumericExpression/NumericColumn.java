@@ -18,42 +18,34 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   public final boolean autoIncrement;
 
-  protected NumericColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, @Nullable Expression generatedFrom, @Nullable NumericExpression defaultValue) {
-    super(name, table, dataSpec, indexed, primary, generatedFrom, defaultValue);
+  protected NumericColumn(String name, Table table, DataSpec dataSpec, boolean autoIncrement, @Nullable Expression generatedFrom, @Nullable NumericExpression defaultValue) {
+    super(name, table, dataSpec, generatedFrom, defaultValue);
     this.autoIncrement = autoIncrement;
   }
 
   @Override
-  public NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-    return new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement, generatedFrom, (NumericExpression) defaultValue);
+  public NumericColumn make(String name, DataSpec dataSpec, Expression generatedFrom) {
+    return new NumericColumn(name, table, dataSpec, autoIncrement, generatedFrom, (NumericExpression) defaultValue);
   }
 
-  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, NumericExpression generatedFrom, NumericExpression defaultValue) {
-    return new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement, generatedFrom, defaultValue);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean autoIncrement, NumericExpression generatedFrom, NumericExpression defaultValue) {
+    return new NumericColumn(name, table, dataSpec, autoIncrement, generatedFrom, defaultValue);
   }
 
-  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement) {
-    return new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement, null, null);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean autoIncrement) {
+    return new NumericColumn(name, table, dataSpec, autoIncrement, null, null);
   }
 
   public static NumericColumn make(String name, Table table, int size) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, false, false, null, null);
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, null, null);
   }
 
-  public static NumericColumn make(String name, Table table, boolean primary) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary, false, null, null);
-  }
-
-  public static NumericColumn make(String name, Table table, Boolean indexed, Boolean primary) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer), indexed, primary, false, null, null);
-  }
-
-  public static NumericColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-    return new NumericColumn(name, table, dataSpec, indexed, primary, false, null, null);
+  public static NumericColumn make(String name, Table table) {
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, null, null);
   }
 
   public static NumericColumn make(String name, Table table, DataSpec dataSpec) {
-    return new NumericColumn(name, table, dataSpec, false, false, false, null, null);
+    return new NumericColumn(name, table, dataSpec, false, null, null);
   }
 
   public boolean isAutoIncrement() {
@@ -72,7 +64,6 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   public Equals eq(Expression value) {
     return Equals.make(this, value);
   }
-
 
   @Override
   public boolean equals(Object o) {
@@ -96,8 +87,6 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
       ", defaultValue=" + defaultValue +
       ", autoIncrement=" + autoIncrement +
       ", name='" + columnName + '\'' +
-      ", indexed=" + indexed +
-      ", primary=" + primary +
       '}';
   }
 

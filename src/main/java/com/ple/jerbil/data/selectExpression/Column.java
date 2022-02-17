@@ -15,8 +15,8 @@ public abstract class Column <T extends Column> extends PartialColumn{
     @Nullable public final Expression defaultValue;
     public static Column[] emptyArray = new Column[0];
 
-    protected Column(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, @Nullable Expression generatedFrom, @Nullable Expression defaultValue) {
-        super(name, table, indexed, primary);
+    protected Column(String name, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom, @Nullable Expression defaultValue) {
+        super(name, table);
         this.dataSpec = dataSpec;
         this.generatedFrom = generatedFrom;
         this.defaultValue = defaultValue;
@@ -26,18 +26,10 @@ public abstract class Column <T extends Column> extends PartialColumn{
         return PartialColumn.make(name, table);
     }
 
-    public abstract T make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom);
-
-    public T primary() {
-        return make(columnName, dataSpec, indexed, true, generatedFrom);
-    }
-
-    public T indexed() {
-        return make(columnName, dataSpec, true, primary, generatedFrom);
-    }
+    public abstract T make(String name, DataSpec dataSpec, Expression generatedFrom);
 
     public T generatedFrom(Expression generatedFrom) {
-        return make(columnName, dataSpec, indexed, primary, generatedFrom);
+        return make(columnName, dataSpec, generatedFrom);
     }
 
     public String toSql() {
@@ -58,8 +50,6 @@ public abstract class Column <T extends Column> extends PartialColumn{
         Column<?> column = (Column<?>) o;
         return dataSpec.equals(column.dataSpec) &&
           columnName.equals(column.columnName) &&
-          Objects.equals(indexed, column.indexed) &&
-          Objects.equals(primary, column.primary) &&
           Objects.equals(generatedFrom, column.generatedFrom) &&
           Objects.equals(defaultValue, column.defaultValue);
     }
@@ -74,8 +64,6 @@ public abstract class Column <T extends Column> extends PartialColumn{
         return "Column{" +
           "name='" + columnName + '\'' +
           ", dataSpec=" + dataSpec +
-          ", indexed=" + indexed +
-          ", primary=" + primary +
           ", generatedFrom=" + generatedFrom +
           ", defaultValue=" + defaultValue +
           "}";
