@@ -26,7 +26,6 @@ public class SqlQueryTests {
   final ItemTable item = testDb.item;
   final PlayerTable player = testDb.player;
   final InventoryTable inventory = testDb.inventory;
-  final TableContainer userCon = TableContainer.make(user, user.columns);
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
@@ -120,7 +119,7 @@ public class SqlQueryTests {
   //FIXME: If you switch player and inventory position, the results won't be what you expect.
   @Test
   void testSelectJoins() {
-    final CompleteQuery q = player.join(inventory, item).where(
+    final CompleteQuery q = player.join(inventory.table, item.table).where(
       and(
         item.name.eq("bob"),
         player.name.eq("sword")

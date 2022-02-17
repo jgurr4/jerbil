@@ -9,7 +9,9 @@ import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
+import com.ple.util.IArrayMap;
 import com.ple.util.IList;
+import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
@@ -106,10 +108,7 @@ public class BridgeTests {
   @Test
   void testCompareMissingTable() {
     final DbDiff diffs = DiffService.compareDatabases(
-            testDb.wrap(), DatabaseContainer.make(Database.make("myDb"),
-                IArrayList.make(TableContainer.make(user, user.columns),
-                    TableContainer.make(player, player.columns),
-                    TableContainer.make(item, item.columns))).wrap())
+            testDb.wrap(), DatabaseContainer.make(Database.make("myDb"), IArrayMap.make(user, player, item)).wrap())
         .unwrap();
     assertEquals(IArrayList.make("inventory"), diffs.tables.create);
     assertNull(diffs.tables.delete);
@@ -121,11 +120,10 @@ public class BridgeTests {
   void testDbDiffFilter() {
     final Table alteredItem = Table.make("item", testDb.database, StorageEngine.transactional);
     final NumericColumn price = Column.make("price", alteredItem).asInt();
-    final IList<Column> alteredItemColumns = IArrayList.make(
-        item.itemId, item.name, item.type, price);
+    final IMap<String, Column> alteredItemColumns = IArrayMap.make(item.itemId, item.name, item.type, price);
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
     final Table extraTable = Table.make("extra", testDb.database);
-    final IList<Column> extraTableColumns = IArrayList.make(Column.make("id", extraTable).bigId());
+    final IMap<String, Column> extraTableColumns = IArrayMap.make(Column.make("id", extraTable).bigId());
 
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
 
@@ -134,8 +132,7 @@ public class BridgeTests {
 
     final DbDiff diff = DiffService.compareDatabases(
         testDb.wrap(), DatabaseContainer.make(Database.make("myDb"),
-            IArrayList.make(TableContainer.make(user, user.columns), TableContainer.make(player, player.columns),
-                alteredItemTableContainer, extraTableContainer)
+            IArrayMap.make(user, player, alteredItemTableContainer, extraTableContainer)
         ).wrap()).unwrap();
     //inventory needs create, alteredItem needs update, extraTable needs delete.
     assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.length());
@@ -160,8 +157,8 @@ public class BridgeTests {
     assertEquals("test", test.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
     System.out.println(test.tables.toString().replaceAll("Table\\{", "\nTable{"));
-    assertTrue(test.tables.contains(user));
-    assertTrue(test.tables.contains(item));
+    assertTrue(test.tables.contains(user.table));
+    assertTrue(test.tables.contains(item.table));
   }
 
   @Test
