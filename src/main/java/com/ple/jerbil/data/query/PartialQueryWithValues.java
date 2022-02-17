@@ -32,7 +32,7 @@ public class PartialQueryWithValues extends PartialQuery {
         if (!(i >= records.toArray().length)) {
           records.toArray()[i] = records.toArray()[i].put(columns.get(j), Literal.make(values.get(i).get(j)));
         } else {
-          final IMap<Column, Expression> record = IHashMap.from(columns.get(j), Literal.make(values.get(i).get(j)));
+          final IMap<Column, Expression> record = IHashMap.make(columns.get(j), Literal.make(values.get(i).get(j)));
           records = records.add(record);
         }
       }
@@ -42,7 +42,7 @@ public class PartialQueryWithValues extends PartialQuery {
 
   public CompleteQuery set(Column column, Literal value) {
     if (set == null) {
-      return CompleteQuery.make(IArrayList.make(IHashMap.from(column, value)), fromExpression);
+      return CompleteQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
     }
     final IMap<Column, Expression> map = set.get(0).put(column, value);
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);

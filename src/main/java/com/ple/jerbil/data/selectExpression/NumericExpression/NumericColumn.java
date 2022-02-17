@@ -3,6 +3,7 @@ package com.ple.jerbil.data.selectExpression.NumericExpression;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
@@ -17,42 +18,42 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   public final boolean autoIncrement;
 
-  protected NumericColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, @Nullable Expression generatedFrom, @Nullable NumericExpression defaultValue) {
-    super(name, dataSpec, indexed, primary, generatedFrom, defaultValue);
+  protected NumericColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, @Nullable Expression generatedFrom, @Nullable NumericExpression defaultValue) {
+    super(name, table, dataSpec, indexed, primary, generatedFrom, defaultValue);
     this.autoIncrement = autoIncrement;
   }
 
   @Override
   public NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, generatedFrom, null);
+    return new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement, generatedFrom, (NumericExpression) defaultValue);
   }
 
-  public static NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, NumericExpression generatedFrom, NumericExpression defaultValue) {
-    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, generatedFrom, defaultValue);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement, NumericExpression generatedFrom, NumericExpression defaultValue) {
+    return new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement, generatedFrom, defaultValue);
   }
 
-  public static NumericColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement) {
-    return new NumericColumn(name, dataSpec, indexed, primary, autoIncrement, null, null);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, boolean autoIncrement) {
+    return new NumericColumn(name, table, dataSpec, indexed, primary, autoIncrement, null, null);
   }
 
-  public static NumericColumn make(String name, int size) {
-    return new NumericColumn(name, DataSpec.make(DataType.integer, size), false, false, false, null, null);
+  public static NumericColumn make(String name, Table table, int size) {
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, false, false, null, null);
   }
 
-  public static NumericColumn make(String name, boolean primary) {
-    return new NumericColumn(name, DataSpec.make(DataType.integer), false, primary, false, null, null);
+  public static NumericColumn make(String name, Table table, boolean primary) {
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, primary, false, null, null);
   }
 
-  public static NumericColumn make(String name, Boolean indexed, Boolean primary) {
-    return new NumericColumn(name, DataSpec.make(DataType.integer), indexed, primary, false, null, null);
+  public static NumericColumn make(String name, Table table, Boolean indexed, Boolean primary) {
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer), indexed, primary, false, null, null);
   }
 
-  public static NumericColumn make(String name, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-    return new NumericColumn(name, dataSpec, indexed, primary, false, null, null);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+    return new NumericColumn(name, table, dataSpec, indexed, primary, false, null, null);
   }
 
-  public static NumericColumn make(String name, DataSpec dataSpec) {
-    return new NumericColumn(name, dataSpec, false, false, false, null, null);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec) {
+    return new NumericColumn(name, table, dataSpec, false, false, false, null, null);
   }
 
   public boolean isAutoIncrement() {
@@ -71,6 +72,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   public Equals eq(Expression value) {
     return Equals.make(this, value);
   }
+
 
   @Override
   public boolean equals(Object o) {

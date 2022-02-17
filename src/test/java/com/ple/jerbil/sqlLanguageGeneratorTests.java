@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 public class sqlLanguageGeneratorTests {
 
-  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, Database.make("test"));
+  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;

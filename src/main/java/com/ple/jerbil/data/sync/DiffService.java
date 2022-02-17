@@ -67,7 +67,7 @@ public class DiffService {
         result = result.add(lTable);
       }
     }
-    if (result.length() == 0) {
+    if (result.size() == 0) {
       return null;
     }
     return result;
@@ -80,7 +80,7 @@ public class DiffService {
         result = result.add(rTable);
       }
     }
-    if (result.length() == 0) {
+    if (result.size() == 0) {
       return null;
     }
     return result;
@@ -109,11 +109,15 @@ public class DiffService {
   }
 
   public static Diff<Table> compareTables(Table t1, Table t2) {
+/*
+//FIXME: broken after updates to database and tables.
     ScalarDiff<String> nameDiff = t1.tableName.equals(t2.tableName) ? null : ScalarDiff.make(t1.tableName, t2.tableName);
     VectorDiff<Column> columnsDiff = compareListOfColumns(t1.columns, t2.columns);
     ScalarDiff<StorageEngine> storageEngineDiff = t1.storageEngine.name().equals(t2.storageEngine.name()) ? null : ScalarDiff.make(
         t1.storageEngine, t2.storageEngine);
     return TableDiff.make(nameDiff, columnsDiff, storageEngineDiff);
+*/
+    return null;
   }
 
   public static Table getTableMatchingName(IList<Table> tables, String name) {
@@ -171,7 +175,7 @@ public class DiffService {
         result = result.add(rColumn);
       }
     }
-    if (result.length() == 0) {
+    if (result.size() == 0) {
       return null;
     }
     return result;
@@ -203,7 +207,7 @@ public class DiffService {
         result = result.add(lColumn);
       }
     }
-    if (result.length() == 0) {
+    if (result.size() == 0) {
       return null;
     }
     return result;

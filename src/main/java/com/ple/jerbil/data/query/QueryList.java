@@ -75,7 +75,7 @@ public class QueryList<T> implements IList<T> {
   }
 
   @Override
-  public int length() {
+  public int size() {
     return 0;
   }
 

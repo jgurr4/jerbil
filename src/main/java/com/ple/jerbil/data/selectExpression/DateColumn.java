@@ -4,34 +4,35 @@ import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.DateInterval;
 import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 @Immutable
 public class DateColumn extends Column<DateColumn> implements DateExpression {
 
-    protected DateColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom, DateExpression defaultValue) {
-        super(name, dataSpec, indexed, primary, generatedFrom, defaultValue);
+    protected DateColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom, DateExpression defaultValue) {
+        super(name, table, dataSpec, indexed, primary, generatedFrom, defaultValue);
     }
 
     @Override
     public DateColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-        return new DateColumn(name, dataSpec, indexed, primary, generatedFrom, null);
+        return new DateColumn(name, table, dataSpec, indexed, primary, generatedFrom, (DateExpression) defaultValue);
     }
 
     public DateColumn defaultValue(DateExpression dateExp) {
-        return new DateColumn(columnName, dataSpec, indexed, primary, generatedFrom, dateExp);
+        return new DateColumn(columnName, table, dataSpec, indexed, primary, generatedFrom, dateExp);
     }
 
-    public static DateColumn make(String name, DataSpec dataSpec) {
-        return new DateColumn(name, dataSpec, false, false, null, null);
+    public static DateColumn make(String name, Table table, DataSpec dataSpec) {
+        return new DateColumn(name, table, dataSpec, false, false, null, null);
     }
 
-    public static DateColumn make(String name, Boolean indexed, Boolean primary) {
-        return new DateColumn(name, DataSpec.make(DataType.datetime), indexed, primary, null, null);
+    public static DateColumn make(String name, Table table, Boolean indexed, Boolean primary) {
+        return new DateColumn(name, table, DataSpec.make(DataType.datetime), indexed, primary, null, null);
     }
 
-    public static DateColumn make(String name, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        return new DateColumn(name, dataSpec, indexed, primary, null, null);
+    public static DateColumn make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+        return new DateColumn(name, table, dataSpec, indexed, primary, null, null);
     }
 
     @Override

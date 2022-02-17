@@ -2,6 +2,7 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,25 +12,25 @@ import org.jetbrains.annotations.Nullable;
  */
 public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression  {
 
-    protected BooleanColumn(String name, DataSpec dataSpec, boolean indexed, boolean primary, @Nullable Expression generatedFrom, @Nullable BooleanExpression defaultValue) {
-        super(name, dataSpec, indexed, primary, generatedFrom, defaultValue);
+    protected BooleanColumn(String name, Table table, DataSpec dataSpec, boolean indexed, boolean primary, @Nullable Expression generatedFrom, @Nullable BooleanExpression defaultValue) {
+        super(name, table, dataSpec, indexed, primary, generatedFrom, defaultValue);
     }
 
     @Override
     public BooleanColumn make(String name, DataSpec dataSpec, boolean indexed, boolean primary, Expression generatedFrom) {
-        return new BooleanColumn(name, dataSpec, indexed, primary, generatedFrom, null);
+        return new BooleanColumn(name, table, dataSpec, indexed, primary, generatedFrom, (BooleanExpression) defaultValue);
     }
 
-    public static Column make(String name, DataSpec dataSpec) {
-        return new BooleanColumn(name, dataSpec, false, false, null, null);
+    public static Column make(String name, Table table, DataSpec dataSpec) {
+        return new BooleanColumn(name, table, dataSpec, false, false, null, null);
     }
 
-    public static Column make(String name, Boolean indexed, Boolean primary) {
-        return new BooleanColumn(name, DataSpec.make(DataType.bool), indexed, primary, null, null);
+    public static Column make(String name, Table table, Boolean indexed, Boolean primary) {
+        return new BooleanColumn(name, table, DataSpec.make(DataType.bool), indexed, primary, null, null);
     }
 
-    public static Column make(String name, DataSpec dataSpec, Boolean indexed, Boolean primary) {
-        return new BooleanColumn(name, dataSpec, indexed, primary, null, null);
+    public static Column make(String name, Table table, DataSpec dataSpec, Boolean indexed, Boolean primary) {
+        return new BooleanColumn(name, table, dataSpec, indexed, primary, null, null);
     }
 
     @Override
@@ -48,7 +49,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
     }
 
     public BooleanColumn defaultValue(BooleanExpression bool) {
-        return new BooleanColumn(columnName, dataSpec, indexed, primary, generatedFrom, bool);
+        return new BooleanColumn(columnName, table, dataSpec, indexed, primary, generatedFrom, bool);
     }
 
 }

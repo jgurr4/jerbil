@@ -1,20 +1,34 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.query.TableContainer;
+import com.ple.util.IArrayList;
+import com.ple.util.IList;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class DatabaseBuilder {
 
-  public static <T> T generate(Class<T> databaseContainerClass, Database db) {
-    //Step 1: Use Reflection methods to retrieve all the parameters of the TestDatabase.make method, which includes the
-    // each CustomTableContainer. except for map of tables.
-    //Step 2: Each parameter class must be instantiated using the make method. representing each CustomTableContainer.
-    //Step 3: Use Reflection methods to retrieve and invoke the make method of customDatabaseContainerClass.
-    //Step 4: Each of the instantiated classes must be used inside the make method of customDatabaseContainerClass.
+  public static <T> T generate(Class<T> customDbContainerClass, String dbName) {
     T t = null;
     try {
-      databaseContainerClass.getMethod("make").invoke();
-      t = databaseContainerClass.getDeclaredMethod("make");
-    } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+      final Database db = Database.make(dbName);
+      final Field[] fields = customDbContainerClass.getDeclaredFields();
+      IList<Object> args = IArrayList.make(db);
+      IList<Class> parameters = IArrayList.make(Database.class);
+      for (int i = 0; i < fields.length; i++) {
+        final Class<?> type = fields[i].getType();
+        if (type.getSuperclass() != null) {
+          if (type.getSuperclass().equals(TableContainer.class)) {
+            final Method method = type.getMethod("make", Database.class);
+            final Object tc = method.invoke(null, db);
+            args = args.add(tc);
+            parameters = parameters.add(type);
+          }
+        }
+      }
+      t = (T) customDbContainerClass.getMethod("make", parameters.toArray()).invoke(null, args.toArray());
+    } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
       e.printStackTrace();
     }
     return t;

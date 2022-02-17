@@ -33,10 +33,17 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   @Override
+  public Database fromSql(String dbCreateString) {
+    return null;
+  }
+
+  @Override
   public Table fromSql(String createTableString, Database db) {
     final String tableName = getTableNameFromSql(createTableString);
     final StorageEngine engine = getEngineFromSql(createTableString);
-    return Table.make(tableName, db, engine);
+//FIXME: broken after changes to tables and datbases.
+//    return Table.make(tableName, db, engine);
+    return null;
   }
 
   @Override
@@ -96,20 +103,21 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     final Expression generatedFrom = getGeneratedFromSql(tableLine);
     boolean indexed = false;  //FIXME: Find out why item.name column is not becoming indexed in fromSql() even though it says KEY name (name) in existing table.
     boolean primary = false;
-    if (indexedColumns.keySet().contains("PRIMARY KEY")) {
+    if (indexedColumns.keys().contains("PRIMARY KEY")) {
       for (String column : indexedColumns.get("PRIMARY KEY")) {
         if (column.equals(colName)) {
           primary = true;
         }
       }
     }
-    if (indexedColumns.keySet().contains("KEY")) {
+    if (indexedColumns.keys().contains("KEY")) {
       for (String column : indexedColumns.get("KEY")) {
         if (column.equals(colName)) {
           indexed = true;
         }
       }
     }
+/* //FIXME: broken after changes to tables and datbases.
     if (tableLine.contains("AUTO_INCREMENT")) {
       return NumericColumn.make(colName, dataSpec, indexed, primary, true, (NumericExpression) generatedFrom);
     } else if (dataSpec.dataType == DataType.integer || dataSpec.dataType == DataType.decimal || dataSpec.dataType == DataType.bigint || dataSpec.dataType == DataType.tinyint) {
@@ -123,6 +131,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else {
       System.out.println("Failed to determine data type of this column:" + colName);
     }
+*/
     return null;
   }
 
@@ -202,6 +211,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     final SelectExpression[] selectArr = select.toArray();
     String tableName = "";
     int matchingColumns = 0;
+/*
+//FIXME: broken after changes to tables and datbases.
     for (int i = 0; i < selectArr.length; i++) {
       if (selectArr[i] instanceof Column && !(selectArr[i] instanceof QueriedColumn)) {
         final Column column = (Column) selectArr[i];
@@ -220,6 +231,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         tableName = "";
       }
     }
+*/
     return select;
   }
 
@@ -261,6 +273,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     Column col;
     Boolean requiresTableName = false;
     int matchingColumns = 0;
+/*
+//FIXME: broken after changes to tables and datbases.
     if (e instanceof Column) {
       col = (Column) e;
       for (Table table : tableList) {
@@ -283,6 +297,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       tableName = "";
     }
     return QueriedColumn.make(col, tableName);
+*/
+    return null;
   }
 
   private String toSqlWhere(BooleanExpression where) {
@@ -530,7 +546,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   public String toSql(InsertQuery insertQuery) {
     String sql = "insert into " + toSql(insertQuery.fromExpression) + "\n(";
     String separator = "";
-    for (Column column : insertQuery.set.get(0).keySet()) {
+    for (Column column : insertQuery.set.get(0).keys()) {
       sql += separator + column.getColumnName();
       separator = ", ";
     }
@@ -554,6 +570,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   public String toSql(CreateQuery createQuery) {
+/*
+//FIXME: broken after changes to tables and datbases.
     if (createQuery.db != null) {
       return "create database " + createQuery.db.databaseName;
     }
@@ -578,6 +596,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
     sql += indexes + "\n) ENGINE=" + engine + "\n";
     return sql;
+*/
+    return null;
   }
 
   private String gatherIndexes(IList<Column> columns) {

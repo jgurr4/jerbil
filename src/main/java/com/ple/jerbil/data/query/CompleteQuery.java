@@ -76,7 +76,7 @@ public class CompleteQuery extends Query {
 
   public InsertQuery set(Column column, Literal value) {
     if (set == null) {
-      return InsertQuery.make(IArrayList.make(IHashMap.from(column, value)), fromExpression);
+      return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
     }
     final IMap<Column, Expression> map = set.get(0).put(column, value);
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);

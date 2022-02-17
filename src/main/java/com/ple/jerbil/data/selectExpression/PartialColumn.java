@@ -50,34 +50,34 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn asInt() {
-    return NumericColumn.make(columnName, DataSpec.make(DataType.integer));
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer));
   }
 
   public StringColumn asVarchar() {
-    return StringColumn.make(columnName, DataSpec.make(DataType.varchar, 255));
+    return StringColumn.make(columnName, table, DataSpec.make(DataType.varchar, 255));
   }
 
   public StringColumn asVarchar(int size) {
-    return StringColumn.make(columnName, size);
+    return StringColumn.make(columnName, table, size);
   }
 
   public NumericColumn asBigInt() {
-    return NumericColumn.make(columnName, DataSpec.make(DataType.bigint));
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint));
   }
 
   public NumericColumn asDecimal(int precision, int scale) {
-    return NumericColumn.make(columnName, DataSpec.make(DataType.decimal, precision, scale));
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.decimal, precision, scale));
   }
 
   public StringColumn asEnum(Class enumObj) {
-    return StringColumn.make(columnName, DataSpec.make(DataType.enumeration, enumObj), indexed);
+    return StringColumn.make(columnName, table, DataSpec.make(DataType.enumeration, enumObj), indexed);
   }
   public NumericColumn bigId() {
-    return NumericColumn.make(columnName, DataSpec.make(DataType.bigint), false, true, true);
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), false, true, true);
   }
 
   public NumericColumn id() {
-    return NumericColumn.make(columnName, DataSpec.make(DataType.integer), false, true, true);
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), false, true, true);
   }
 
   public boolean isPrimary() {

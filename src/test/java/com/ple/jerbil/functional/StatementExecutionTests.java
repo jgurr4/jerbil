@@ -1,6 +1,7 @@
 package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.DatabaseBuilder;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.*;
@@ -18,7 +19,7 @@ import java.util.Properties;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StatementExecutionTests {
 
-  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, Database.make("test"));
+  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;

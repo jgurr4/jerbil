@@ -23,7 +23,7 @@ public class InsertQuery extends CompleteQuery {
   }
 
   public static InsertQuery make(Column column, Literal value, FromExpression fromExpression) {
-    return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null, null, null, IArrayList.make(IHashMap.from(column, value)), false, false, false, false);
+    return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null, null, null, IArrayList.make(IHashMap.make(column, value)), false, false, false, false);
   }
 
   public static InsertQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
