@@ -19,9 +19,9 @@ public class PlayerTableContainer extends TableContainer {
 
   public PlayerTableContainer(Table table, NumericColumn playerId, NumericColumn userId,
                               StringColumn name, IList<IndexSpec> indexSpecs,
-                              IList<NumericColumn> autoIncrementColumns) {
+                              NumericColumn autoIncrementColumn) {
     super(table, IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId), StorageEngine.transactional,
-        indexSpecs, autoIncrementColumns);
+        indexSpecs, autoIncrementColumn);
     this.playerId = playerId;
     this.userId = userId;
     this.tableName = table.tableName;
@@ -34,8 +34,8 @@ public class PlayerTableContainer extends TableContainer {
     final NumericColumn userId = Column.make("userId", playerTable).asInt();
     final StringColumn name = Column.make("name", playerTable).asVarchar(20);
     final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.primary, IArrayList.make(playerId)));
-    final IList<NumericColumn> autoIncrementColumns = IArrayList.make(playerId);
-    return new PlayerTableContainer(playerTable, playerId, userId, name, indexSpecs, autoIncrementColumns);
+    final NumericColumn autoIncrementColumn = playerId;
+    return new PlayerTableContainer(playerTable, playerId, userId, name, indexSpecs, autoIncrementColumn);
   }
 
 }

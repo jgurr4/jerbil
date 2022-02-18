@@ -27,6 +27,7 @@ public class DataSpec {
   public final DataType dataType;
   public final int size;
   @Nullable public final int[] preciseScale;
+//  @Nullable public final boolean unsigned;
   public final static int defaultMaxSize = 255;
 
   protected DataSpec(DataType dataType, int size, int[] preciseScale) {

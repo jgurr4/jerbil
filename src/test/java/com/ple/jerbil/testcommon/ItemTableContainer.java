@@ -23,10 +23,10 @@ public class ItemTableContainer extends TableContainer {
 
   protected ItemTableContainer(Table table, NumericColumn itemId, StringColumn name, StringColumn type,
                                NumericColumn price, IList<IndexSpec> indexSpecs,
-                               IList<NumericColumn> autoIncrementColumns) {
+                               NumericColumn autoIncrementColumn) {
     super(table, IArrayMap.make(
         itemId.columnName, itemId, name.columnName, name, type.columnName, type, price.columnName, price), null,
-        indexSpecs, autoIncrementColumns);
+        indexSpecs, autoIncrementColumn);
     this.itemId = itemId;
     this.name = name;
     this.type = type;
@@ -42,8 +42,8 @@ public class ItemTableContainer extends TableContainer {
     final NumericColumn price = Column.make("price", itemTable).asInt();
     final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.primary, IArrayList.make(itemId)),
         IndexSpec.make(IndexType.secondary, IArrayList.make(name)));
-    final IList<NumericColumn> autoIncrementColumns = IArrayList.make(itemId);
-    return new ItemTableContainer(itemTable, itemId, name, type, price, indexSpecs, autoIncrementColumns);
+    final NumericColumn autoIncrementColumn = itemId;
+    return new ItemTableContainer(itemTable, itemId, name, type, price, indexSpecs, autoIncrementColumn);
   }
 
 }

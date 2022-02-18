@@ -22,9 +22,9 @@ public class UserTableContainer extends TableContainer {
 
   public UserTableContainer(Table table, NumericColumn userId,
                             StringColumn name, NumericColumn age, IList<IndexSpec> indexSpecs,
-                            IList<NumericColumn> autoIncrementColumns) {
-    super(table, IArrayMap.make(userId.columnName, userId, name.columnName, name, age.columnName, age), null, indexSpecs,
-        autoIncrementColumns);
+                            NumericColumn autoIncrementColumn) {
+    super(table, IArrayMap.make(userId.columnName, userId, name.columnName, name, age.columnName, age),
+        null, indexSpecs, autoIncrementColumn);
     this.userId = userId;
     this.name = name;
     this.age = age;
@@ -37,8 +37,8 @@ public class UserTableContainer extends TableContainer {
     final StringColumn name = Column.make("name", userTable).asVarchar();
     final NumericColumn age = Column.make("age", userTable).asInt();
     final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.secondary, IArrayList.make(name)));
-    final IList<NumericColumn> autoIncrementColumns = IArrayList.make(userId);
-    return new UserTableContainer(userTable, userId, name, age, indexSpecs, autoIncrementColumns);
+    final NumericColumn autoIncrementColumn = userId;
+    return new UserTableContainer(userTable, userId, name, age, indexSpecs, autoIncrementColumn);
   }
 /* Alternative style that we may decide to support as well
   public final Column userId;

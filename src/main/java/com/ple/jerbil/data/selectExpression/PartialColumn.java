@@ -49,20 +49,20 @@ public class PartialColumn implements Expression, OrderedExpression {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer));
   }
 
-  public StringColumn asVarchar() {
-    return StringColumn.make(columnName, table, DataSpec.make(DataType.varchar, 255));
-  }
-
-  public StringColumn asVarchar(int size) {
-    return StringColumn.make(columnName, table, size);
-  }
-
   public NumericColumn asBigInt() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint));
   }
 
   public NumericColumn asDecimal(int precision, int scale) {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.decimal, precision, scale));
+  }
+
+  public StringColumn asVarchar() {
+    return StringColumn.make(columnName, table, DataSpec.make(DataType.varchar, 255));
+  }
+
+  public StringColumn asVarchar(int size) {
+    return StringColumn.make(columnName, table, size);
   }
 
   public StringColumn asEnum(Class enumObj) {

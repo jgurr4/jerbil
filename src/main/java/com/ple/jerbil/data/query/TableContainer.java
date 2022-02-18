@@ -19,20 +19,20 @@ public class TableContainer {
   public final IMap<String, Column> columns;
   @Nullable public final StorageEngine storageEngine;
   @Nullable public final IList<IndexSpec> indexSpecs;
-  @Nullable public final IList<NumericColumn> autoIncrementColumns;
+  @Nullable public final NumericColumn autoIncrementColumn;
 
   protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
                            @Nullable IList<IndexSpec> indexSpecs,
-                           @Nullable IList<NumericColumn> autoIncrementColumns) {
+                           @Nullable NumericColumn autoIncrementColumn) {
     this.table = table;
     this.columns = columns;
     this.storageEngine = storageEngine;
     this.indexSpecs = indexSpecs;
-    this.autoIncrementColumns = autoIncrementColumns;
+    this.autoIncrementColumn = autoIncrementColumn;
   }
 
-  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine, IList<IndexSpec> indexSpecs, IList<NumericColumn> autoIncrementColumns) {
-    return new TableContainer(table, columns, storageEngine, indexSpecs, autoIncrementColumns);
+  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine, IList<IndexSpec> indexSpecs, NumericColumn autoIncrementColumn) {
+    return new TableContainer(table, columns, storageEngine, indexSpecs, autoIncrementColumn);
   }
 
   public static TableContainer make(Table table, IMap<String, Column> columns) {
@@ -44,12 +44,12 @@ public class TableContainer {
     for (Column column : columnArr) {
       newColumns = newColumns.put(column.columnName, column);
     }
-    return new TableContainer(table, newColumns, storageEngine, indexSpecs, autoIncrementColumns);
+    return new TableContainer(table, newColumns, storageEngine, indexSpecs, autoIncrementColumn);
   }
 
   public TableContainer add(Column column) {
     final IMap<String, Column> newColumns = columns.put(column.columnName, column);
-    return new TableContainer(table, newColumns, storageEngine, indexSpecs, autoIncrementColumns);
+    return new TableContainer(table, newColumns, storageEngine, indexSpecs, autoIncrementColumn);
   }
 
   public SyncResult sync() {
