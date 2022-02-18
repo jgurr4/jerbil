@@ -16,40 +16,29 @@ import java.util.Objects;
 @Immutable
 public class NumericColumn extends Column<NumericColumn> implements NumericExpression {
 
-  public final boolean autoIncrement;
-
-  protected NumericColumn(String name, Table table, DataSpec dataSpec, boolean autoIncrement, @Nullable Expression generatedFrom, @Nullable NumericExpression defaultValue) {
+  protected NumericColumn(String name, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom, @Nullable NumericExpression defaultValue) {
     super(name, table, dataSpec, generatedFrom, defaultValue);
-    this.autoIncrement = autoIncrement;
   }
 
   @Override
   public NumericColumn make(String name, DataSpec dataSpec, Expression generatedFrom) {
-    return new NumericColumn(name, table, dataSpec, autoIncrement, generatedFrom, (NumericExpression) defaultValue);
+    return new NumericColumn(name, table, dataSpec, generatedFrom, (NumericExpression) defaultValue);
   }
 
-  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean autoIncrement, NumericExpression generatedFrom, NumericExpression defaultValue) {
-    return new NumericColumn(name, table, dataSpec, autoIncrement, generatedFrom, defaultValue);
-  }
-
-  public static NumericColumn make(String name, Table table, DataSpec dataSpec, boolean autoIncrement) {
-    return new NumericColumn(name, table, dataSpec, autoIncrement, null, null);
-  }
-
-  public static NumericColumn make(String name, Table table, int size) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer, size), false, null, null);
-  }
-
-  public static NumericColumn make(String name, Table table) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer), false, null, null);
+  public static NumericColumn make(String name, Table table, DataSpec dataSpec, NumericExpression generatedFrom, NumericExpression defaultValue) {
+    return new NumericColumn(name, table, dataSpec, generatedFrom, defaultValue);
   }
 
   public static NumericColumn make(String name, Table table, DataSpec dataSpec) {
-    return new NumericColumn(name, table, dataSpec, false, null, null);
+    return new NumericColumn(name, table, dataSpec, null, null);
   }
 
-  public boolean isAutoIncrement() {
-    return autoIncrement;
+  public static NumericColumn make(String name, Table table, int size) {
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer, size), null, null);
+  }
+
+  public static NumericColumn make(String name, Table table) {
+    return new NumericColumn(name, table, DataSpec.make(DataType.integer), null, null);
   }
 
   public GreaterThan isGreaterThan(Expression value) {
@@ -66,28 +55,13 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   }
 
   @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (!(o instanceof NumericColumn)) return false;
-    if (!super.equals(o)) return false;
-    NumericColumn that = (NumericColumn) o;
-    return isAutoIncrement() == that.isAutoIncrement();
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(super.hashCode(), isAutoIncrement());
-  }
-
-  @Override
   public String toString() {
     return "NumericColumn{" +
-      "dataSpec=" + dataSpec +
-      ", generatedFrom=" + generatedFrom +
-      ", defaultValue=" + defaultValue +
-      ", autoIncrement=" + autoIncrement +
-      ", name='" + columnName + '\'' +
-      '}';
+        "dataSpec=" + dataSpec +
+        ", generatedFrom=" + generatedFrom +
+        ", defaultValue=" + defaultValue +
+        ", columnName='" + columnName + '\'' +
+        ", table=" + table +
+        '}';
   }
-
 }

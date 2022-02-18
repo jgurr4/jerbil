@@ -126,7 +126,7 @@ public class BridgeTests {
 
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
 
-    final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns, StorageEngine.transactional);
+    final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns, StorageEngine.transactional, null);
     final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
 
     final DbDiff diff = DiffService.compareDatabases(

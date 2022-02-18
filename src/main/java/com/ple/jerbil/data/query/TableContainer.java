@@ -5,10 +5,12 @@ import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.CountAgg;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.SelectExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.util.IArrayList;
+import com.ple.util.IList;
 import com.ple.util.IMap;
 import reactor.util.annotation.Nullable;
 
@@ -16,22 +18,25 @@ public class TableContainer {
   public final Table table;
   public final IMap<String, Column> columns;
   @Nullable public final StorageEngine storageEngine;
-  @Nullable public final IndexSpec indexSpec;
+  @Nullable public final IList<IndexSpec> indexSpecs;
+  @Nullable public final IList<NumericColumn> autoIncrementColumns;
 
   protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
-                           @Nullable IndexSpec indexSpec) {
+                           @Nullable IList<IndexSpec> indexSpecs,
+                           @Nullable IList<NumericColumn> autoIncrementColumns) {
     this.table = table;
     this.columns = columns;
     this.storageEngine = storageEngine;
-    this.indexSpec = indexSpec;
+    this.indexSpecs = indexSpecs;
+    this.autoIncrementColumns = autoIncrementColumns;
   }
 
-  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine, IndexSpec indexSpec) {
-    return new TableContainer(table, columns, storageEngine, indexSpec);
+  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine, IList<IndexSpec> indexSpecs, IList<NumericColumn> autoIncrementColumns) {
+    return new TableContainer(table, columns, storageEngine, indexSpecs, autoIncrementColumns);
   }
 
   public static TableContainer make(Table table, IMap<String, Column> columns) {
-    return new TableContainer(table, columns, null, null);
+    return new TableContainer(table, columns, null, null, null);
   }
 
   public TableContainer add(Column... columnArr) {
@@ -39,12 +44,12 @@ public class TableContainer {
     for (Column column : columnArr) {
       newColumns = newColumns.put(column.columnName, column);
     }
-    return new TableContainer(table, newColumns, storageEngine, indexSpec);
+    return new TableContainer(table, newColumns, storageEngine, indexSpecs, autoIncrementColumns);
   }
 
   public TableContainer add(Column column) {
     final IMap<String, Column> newColumns = columns.put(column.columnName, column);
-    return new TableContainer(table, newColumns, storageEngine, indexSpec);
+    return new TableContainer(table, newColumns, storageEngine, indexSpecs, autoIncrementColumns);
   }
 
   public SyncResult sync() {

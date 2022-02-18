@@ -68,13 +68,6 @@ public class PartialColumn implements Expression, OrderedExpression {
   public StringColumn asEnum(Class enumObj) {
     return StringColumn.make(columnName, table, DataSpec.make(DataType.enumeration, enumObj));
   }
-  public NumericColumn bigId() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), false, true, true);
-  }
-
-  public NumericColumn id() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), false, true, true);
-  }
 
   public String getColumnName() {
     return columnName;

@@ -1,10 +1,9 @@
 package com.ple.jerbil.data;
 
-public enum Index {
+public enum IndexType {
   primary,
   secondary,
   foreign,
-  fulltext,
-  autoIncrement,
-  spatial
+//  fulltext,
+//  spatial
 }

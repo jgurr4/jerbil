@@ -3,7 +3,7 @@
 # exclude patterns (uncomment them if you want to use them):
 # --------------------------------
 # When adding lines to this file, add a comment next to the exclude path detailing what it's excluding
-# mac directory index files
+# mac directory indexType files
 .DS_Store
 # eclipse IDE file
 .classpath
