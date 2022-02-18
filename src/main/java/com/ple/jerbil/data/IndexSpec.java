@@ -1,6 +1,7 @@
 package com.ple.jerbil.data;
 
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,20 +21,20 @@ public class IndexSpec {
     this.order = order;
   }
 
-  public static IndexSpec make(IndexType indexType, String indexName, IList<Column> columns, int size, IndexSort order) {
-    return new IndexSpec(indexType, indexName, columns, size, order);
+  public static IndexSpec make(IndexType indexType, String indexName, int size, IndexSort order, Column... columns) {
+    return new IndexSpec(indexType, indexName, IArrayList.make(columns), size, order);
   }
 
-  public static IndexSpec make(IndexType indexType, String indexName, IList<Column> columns) {
-    return new IndexSpec(indexType, indexName, columns, 0, null);
+  public static IndexSpec make(IndexType indexType, String indexName, Column... columns) {
+    return new IndexSpec(indexType, indexName, IArrayList.make(columns), 0, null);
   }
 
-  public static IndexSpec make(IndexType indexType, IList<Column> columns) {
-    return new IndexSpec(indexType, null, columns, 0, null);
+  public static IndexSpec make(IndexType indexType, Column... columns) {
+    return new IndexSpec(indexType, null, IArrayList.make(columns), 0, null);
   }
 
-  public static IndexSpec make(IndexType indexType, IList<Column> columns, int size, IndexSort order) {
-    return new IndexSpec(indexType, null, columns, size, order);
+  public static IndexSpec make(IndexType indexType, int size, IndexSort order, Column... columns) {
+    return new IndexSpec(indexType, null, IArrayList.make(columns), size, order);
   }
 
 }

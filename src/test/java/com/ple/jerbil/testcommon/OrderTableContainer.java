@@ -63,7 +63,7 @@ public class OrderTableContainer extends TableContainer {
     final NumericColumn orderId = Column.make("orderId", orderTable).asBigInt().unsigned();  //Alternatively just use .bigId() to replace all 3.
     final StringColumn add = Column.make("add", orderTable).asVarchar().defaultValue(Literal.make("barter")).unique();  //Tests unique(), null and defaultValue()
     final StringColumn phrase = Column.make("phrase", orderTable).asText().fullText();
-    final NumericColumn userId = Column.make("userId", orderTable).asIntUnsigned().indexed();
+    final NumericColumn userId = Column.make("userId", orderTable).asIntUnsigned();
     final NumericColumn itemId = Column.make("itemId", orderTable).asInt(10);  //Tests specifying the digits amount.
     final NumericColumn scale = Column.make("scale", orderTable).asMediumIntUnsigned();
     final NumericColumn quantity = Column.make("quantity", orderTable).asSmallInt().unsigned();
@@ -81,7 +81,10 @@ public class OrderTableContainer extends TableContainer {
         finalized.columnName, finalized, myDouble.columnName, myDouble, myFloat.columnName, myFloat, mySet.columnName,
         mySet, saleDate.columnName, saleDate, saleTime.columnName, saleTime, saleDateTime.columnName, saleDateTime);
     //FIXME: Find a way to do compile-time checking for Fulltext. If not possible at least do checks at runtime.
-    final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.fulltext, IArrayList.make(phrase)));
+    final IList<IndexSpec> indexSpecs = IArrayList.make(
+        IndexSpec.make(IndexType.primary, orderId),
+        IndexSpec.make(IndexType.secondary, itemId),
+        IndexSpec.make(IndexType.fulltext, phrase));
     final NumericColumn autoIncrementColumn = orderId;
     return new OrderTableContainer(orderTable, columns, indexSpecs, autoIncrementColumn, orderId, add, phrase, userId,
         itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime);

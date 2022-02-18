@@ -36,7 +36,7 @@ public class UserTableContainer extends TableContainer {
     final NumericColumn userId = Column.make("userId", userTable).asInt();
     final StringColumn name = Column.make("name", userTable).asVarchar();
     final NumericColumn age = Column.make("age", userTable).asInt();
-    final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.secondary, IArrayList.make(name)));
+    final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.secondary, name));
     final NumericColumn autoIncrementColumn = userId;
     return new UserTableContainer(userTable, userId, name, age, indexSpecs, autoIncrementColumn);
   }

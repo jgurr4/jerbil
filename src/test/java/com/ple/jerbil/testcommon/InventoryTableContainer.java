@@ -30,7 +30,7 @@ public class InventoryTableContainer extends TableContainer {
     final Table inventoryTable = Table.make("inventory", db);
     final NumericColumn playerId = Column.make("playerId", inventoryTable).asInt();
     final NumericColumn itemId = Column.make("itemId", inventoryTable).asInt();
-    final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.primary, IArrayList.make(playerId, itemId)));
+    final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.primary, playerId, itemId));
     return new InventoryTableContainer(inventoryTable, playerId, itemId, indexSpecs);
   }
 }

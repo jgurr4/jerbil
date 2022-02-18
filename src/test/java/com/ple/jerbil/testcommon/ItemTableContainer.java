@@ -40,8 +40,8 @@ public class ItemTableContainer extends TableContainer {
     final StringColumn name = Column.make("name", itemTable).asVarchar(20);
     final StringColumn type = Column.make("type", itemTable).asEnum(ItemType.class);
     final NumericColumn price = Column.make("price", itemTable).asInt();
-    final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.primary, IArrayList.make(itemId)),
-        IndexSpec.make(IndexType.secondary, IArrayList.make(name)));
+    final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.primary, itemId),
+        IndexSpec.make(IndexType.secondary, name));
     final NumericColumn autoIncrementColumn = itemId;
     return new ItemTableContainer(itemTable, itemId, name, type, price, indexSpecs, autoIncrementColumn);
   }
