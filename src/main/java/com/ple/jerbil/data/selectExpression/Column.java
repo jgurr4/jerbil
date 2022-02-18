@@ -2,6 +2,7 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.sync.SyncResult;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,19 +15,30 @@ public abstract class Column <T extends Column> extends PartialColumn{
     @Nullable public final Expression generatedFrom;
     @Nullable public final Expression defaultValue;
     public static Column[] emptyArray = new Column[0];
+    public final BuildingHints hints;
 
-    protected Column(String name, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom, @Nullable Expression defaultValue) {
-        super(name, table);
+    protected Column(String columnName, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom,
+                     @Nullable Expression defaultValue, BuildingHints hints) {
+        super(columnName, table);
         this.dataSpec = dataSpec;
         this.generatedFrom = generatedFrom;
         this.defaultValue = defaultValue;
+        this.hints = hints;
     }
 
-    public static PartialColumn make(String name, Table table) {
-        return PartialColumn.make(name, table);
+    public static PartialColumn make(String columnName, Table table) {
+        return PartialColumn.make(columnName, table);
     }
 
-    public abstract T make(String name, DataSpec dataSpec, Expression generatedFrom);
+    public abstract T make(String columnName, DataSpec dataSpec, Expression generatedFrom);
+
+    public abstract T indexed();
+
+    public abstract T primary();
+
+    public abstract T unique();
+
+    public abstract T invisible();
 
     public T generatedFrom(Expression generatedFrom) {
         return make(columnName, dataSpec, generatedFrom);
@@ -62,7 +74,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
     @Override
     public String toString() {
         return "Column{" +
-          "name='" + columnName + '\'' +
+          "columnName='" + columnName + '\'' +
           ", dataSpec=" + dataSpec +
           ", generatedFrom=" + generatedFrom +
           ", defaultValue=" + defaultValue +
@@ -72,4 +84,5 @@ public abstract class Column <T extends Column> extends PartialColumn{
     public SyncResult sync() {
         return null;
     }
+
 }

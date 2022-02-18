@@ -13,6 +13,7 @@ public class DdlOption {
   private static final byte create = 1 << 2;
   private static final byte update = 1 << 1;
   private static final byte delete = 1;
+
   protected DdlOption(int option) {
     this.option = (byte) option;
   }

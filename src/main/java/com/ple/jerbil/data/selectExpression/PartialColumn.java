@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
+import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.Immutable;
@@ -45,8 +46,17 @@ public class PartialColumn implements Expression, OrderedExpression {
     return null;
   }
 
+  @Override
+  public BooleanExpression eq(String value) {
+    return null;
+  }
+
   public NumericColumn asInt() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer));
+  }
+
+  public NumericColumn asInt(int i) {
+    return null;
   }
 
   public NumericColumn asBigInt() {
@@ -65,8 +75,8 @@ public class PartialColumn implements Expression, OrderedExpression {
     return StringColumn.make(columnName, table, size);
   }
 
-  public StringColumn asEnum(Class enumObj) {
-    return StringColumn.make(columnName, table, DataSpec.make(DataType.enumeration, enumObj));
+  public EnumeralColumn asEnum(Class enumObj) {
+    return EnumeralColumn.make(columnName, table, DataSpec.make(DataType.enumeration, enumObj));
   }
 
   public String getColumnName() {
@@ -92,5 +102,67 @@ public class PartialColumn implements Expression, OrderedExpression {
         "columnName='" + columnName + '\'' +
         ", table=" + table +
         '}';
+  }
+
+  public NumericColumn bigId() {
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), null, null,
+        BuildingHints.make(0b10000001));
+  }
+
+  public NumericColumn mediumId() {
+    return null;
+  }
+
+  public NumericColumn id() {
+    return null;
+  }
+
+  public StringColumn asText() {
+    return null;
+  }
+
+  public NumericColumn asIntUnsigned() {
+    return null;
+  }
+
+  public NumericColumn asMediumIntUnsigned() {
+    return null;
+  }
+
+  public NumericColumn asSmallInt() {
+    return null;
+  }
+
+  public NumericColumn asTinyInt() {
+    return null;
+  }
+
+  public BooleanColumn asBoolean() {
+    //MySql uses tinyint(1) data type to make a boolean column.
+    return null;
+  }
+
+  public NumericColumn asDouble() {
+    return null;
+  }
+
+  public NumericColumn asFloat() {
+    return null;
+  }
+
+  public EnumeralColumn asSet(Class<?> enumObj) {
+    return null;
+  }
+
+  public DateColumn asDate() {
+    return null;
+  }
+
+  public DateColumn asTime() {
+    return null;
+  }
+
+  public DateColumn asDateTime() {
+    return null;
   }
 }

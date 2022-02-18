@@ -11,8 +11,4 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 @Immutable
 public interface StringExpression extends OrderedExpression {
 
-    public default Equals eq(Expression item) {
-        return Equals.make(this, item);
-    }
-
 }

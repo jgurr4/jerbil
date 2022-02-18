@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.query;
 
-import com.ple.jerbil.data.IndexSpec;
+import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -18,20 +18,20 @@ public class TableContainer {
   public final Table table;
   public final IMap<String, Column> columns;
   @Nullable public final StorageEngine storageEngine;
-  @Nullable public final IList<IndexSpec> indexSpecs;
+  @Nullable public final IList<Index> indexes;
   @Nullable public final NumericColumn autoIncrementColumn;
 
   protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
-                           @Nullable IList<IndexSpec> indexSpecs,
+                           @Nullable IList<Index> indexes,
                            @Nullable NumericColumn autoIncrementColumn) {
     this.table = table;
     this.columns = columns;
     this.storageEngine = storageEngine;
-    this.indexSpecs = indexSpecs;
+    this.indexes = indexes;
     this.autoIncrementColumn = autoIncrementColumn;
   }
 
-  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine, IList<IndexSpec> indexSpecs, NumericColumn autoIncrementColumn) {
+  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine, IList<Index> indexSpecs, NumericColumn autoIncrementColumn) {
     return new TableContainer(table, columns, storageEngine, indexSpecs, autoIncrementColumn);
   }
 
@@ -44,12 +44,12 @@ public class TableContainer {
     for (Column column : columnArr) {
       newColumns = newColumns.put(column.columnName, column);
     }
-    return new TableContainer(table, newColumns, storageEngine, indexSpecs, autoIncrementColumn);
+    return new TableContainer(table, newColumns, storageEngine, indexes, autoIncrementColumn);
   }
 
   public TableContainer add(Column column) {
     final IMap<String, Column> newColumns = columns.put(column.columnName, column);
-    return new TableContainer(table, newColumns, storageEngine, indexSpecs, autoIncrementColumn);
+    return new TableContainer(table, newColumns, storageEngine, indexes, autoIncrementColumn);
   }
 
   public SyncResult sync() {

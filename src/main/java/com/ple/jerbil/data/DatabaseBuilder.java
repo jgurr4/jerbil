@@ -9,9 +9,10 @@ import java.lang.reflect.Method;
 
 public class DatabaseBuilder {
 
-  public static <T> T generate(Class<T> customDbContainerClass, String dbName) {
+  public static <T extends DatabaseContainer> T generate(Class<T> customDbContainerClass, String dbName) {
     T t = null;
     try {
+      //FIXME: Try to get parameters from DbContainerClass instead of fields.
       final Database db = Database.make(dbName);
       final Field[] fields = customDbContainerClass.getDeclaredFields();
       IList<Object> args = IArrayList.make(db);

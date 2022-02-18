@@ -1,3 +1,4 @@
 rootProject.name = 'jerbil'
 includeBuild '../immutable-collections'
+includeBuild '../observability-bridge'
 

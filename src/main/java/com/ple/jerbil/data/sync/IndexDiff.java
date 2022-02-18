@@ -1,16 +1,16 @@
 package com.ple.jerbil.data.sync;
 
-import com.ple.jerbil.data.IndexSpec;
+import com.ple.jerbil.data.Index;
 
 public class IndexDiff implements Diff {
 
-  public final VectorDiff<IndexSpec> indexSpecs;
+  public final VectorDiff<Index> indexSpecs;
 
-  protected IndexDiff(VectorDiff<IndexSpec> indexSpecs) {
+  protected IndexDiff(VectorDiff<Index> indexSpecs) {
     this.indexSpecs = indexSpecs;
   }
 
-  public static IndexDiff make(VectorDiff<IndexSpec> indexSpecs) {
+  public static IndexDiff make(VectorDiff<Index> indexSpecs) {
     return new IndexDiff(indexSpecs);
   }
 

@@ -14,14 +14,15 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 @Immutable
 public interface Expression extends SelectExpression {
 
-  public default AliasedExpression as(String name) {
+  default AliasedExpression as(String name) {
     return AliasedExpression.make(name, this);
   }
 
-  public BooleanExpression isGreaterThan(Expression i);
+  BooleanExpression isGreaterThan(Expression i);
 
-  public BooleanExpression isLessThan(Expression i);
+  BooleanExpression isLessThan(Expression i);
 
-  public BooleanExpression eq(Expression item);
+  BooleanExpression eq(Expression item);
 
+  BooleanExpression eq(String value);
 }

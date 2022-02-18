@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
+import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
@@ -10,42 +11,70 @@ import org.jetbrains.annotations.Nullable;
  * BooleanColumn is for compile-time checking to ensure people use a BooleanColumn in the
  * rare cases where a booleanExpression is a Boolean Column. For example: Select * from table where isTrue; // isTrue could be a column with boolean values.
  */
-public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression  {
+public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression {
 
-    protected BooleanColumn(String name, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom, @Nullable BooleanExpression defaultValue) {
-        super(name, table, dataSpec, generatedFrom, defaultValue);
-    }
+  protected BooleanColumn(String columnName, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom,
+                          @Nullable BooleanExpression defaultValue, BuildingHints hints) {
+    super(columnName, table, dataSpec, generatedFrom, defaultValue, hints);
+  }
 
-    @Override
-    public BooleanColumn make(String name, DataSpec dataSpec, Expression generatedFrom) {
-        return new BooleanColumn(name, table, dataSpec, generatedFrom, (BooleanExpression) defaultValue);
-    }
+  @Override
+  public BooleanColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
+    return new BooleanColumn(columnName, table, dataSpec, generatedFrom, (BooleanExpression) defaultValue,
+        BuildingHints.make(0b00000000));
+  }
 
-    public static Column make(String name, Table table, DataSpec dataSpec) {
-        return new BooleanColumn(name, table, dataSpec, null, null);
-    }
+  @Override
+  public BooleanColumn indexed() {
+    return new BooleanColumn(columnName, table, dataSpec, generatedFrom, (BooleanExpression) defaultValue,
+        BuildingHints.make(hints.flags + 0b01000000)); //TODO: Ask if this is correct way to add two flags together.
+  }
 
-    public static Column make(String name, Table table) {
-        return new BooleanColumn(name, table, DataSpec.make(DataType.bool), null, null);
-    }
+  @Override
+  public BooleanColumn primary() {
+    return null;
+  }
 
-    @Override
-    public BooleanExpression isGreaterThan(Expression i) {
-        return null;
-    }
+  @Override
+  public BooleanColumn unique() {
+    return null;
+  }
 
-    @Override
-    public BooleanExpression isLessThan(Expression i) {
-        return null;
-    }
+  @Override
+  public BooleanColumn invisible() {
+    return null;
+  }
 
-    @Override
-    public BooleanExpression eq(Expression item) {
-        return null;
-    }
+  public static Column make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
+    return new BooleanColumn(columnName, table, dataSpec, null, null, hints);
+  }
 
-    public BooleanColumn defaultValue(BooleanExpression bool) {
-        return new BooleanColumn(columnName, table, dataSpec, generatedFrom, bool);
-    }
+  public static Column make(String columnName, Table table, DataSpec dataSpec) {
+    return new BooleanColumn(columnName, table, dataSpec, null, null, BuildingHints.make(0b00000000));
+  }
+
+  public static Column make(String columnName, Table table) {
+    return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool), null, null,
+        BuildingHints.make(0b00000000));
+  }
+
+  @Override
+  public BooleanExpression isGreaterThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression isLessThan(Expression i) {
+    return null;
+  }
+
+  @Override
+  public BooleanExpression eq(Expression item) {
+    return null;
+  }
+
+  public BooleanColumn defaultValue(BooleanExpression bool) {
+    return new BooleanColumn(columnName, table, dataSpec, generatedFrom, bool, hints);
+  }
 
 }

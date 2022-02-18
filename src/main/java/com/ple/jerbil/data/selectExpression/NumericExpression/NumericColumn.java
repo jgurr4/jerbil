@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.selectExpression.NumericExpression;
 
+import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.Immutable;
@@ -11,34 +12,61 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-
 @Immutable
 public class NumericColumn extends Column<NumericColumn> implements NumericExpression {
 
-  protected NumericColumn(String name, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom, @Nullable NumericExpression defaultValue) {
-    super(name, table, dataSpec, generatedFrom, defaultValue);
+  protected NumericColumn(String columnName, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom,
+                          @Nullable NumericExpression defaultValue, BuildingHints hints) {
+    super(columnName, table, dataSpec, generatedFrom, defaultValue, hints);
+  }
+
+  public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression generatedFrom,
+                                   NumericExpression defaultValue, BuildingHints hints) {
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, defaultValue, hints);
   }
 
   @Override
-  public NumericColumn make(String name, DataSpec dataSpec, Expression generatedFrom) {
-    return new NumericColumn(name, table, dataSpec, generatedFrom, (NumericExpression) defaultValue);
+  public NumericColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue, hints);
   }
 
-  public static NumericColumn make(String name, Table table, DataSpec dataSpec, NumericExpression generatedFrom, NumericExpression defaultValue) {
-    return new NumericColumn(name, table, dataSpec, generatedFrom, defaultValue);
+  @Override
+  public NumericColumn indexed() {
+    return null;
   }
 
-  public static NumericColumn make(String name, Table table, DataSpec dataSpec) {
-    return new NumericColumn(name, table, dataSpec, null, null);
+  @Override
+  public NumericColumn primary() {
+    return null;
   }
 
-  public static NumericColumn make(String name, Table table, int size) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer, size), null, null);
+  @Override
+  public NumericColumn unique() {
+    return null;
   }
 
-  public static NumericColumn make(String name, Table table) {
-    return new NumericColumn(name, table, DataSpec.make(DataType.integer), null, null);
+  @Override
+  public NumericColumn invisible() {
+    return null;
+  }
+
+  public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression generatedFrom,
+                                   NumericExpression defaultValue) {
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, defaultValue, BuildingHints.make(0b00000000));
+  }
+
+  public static NumericColumn make(String columnName, Table table, DataSpec dataSpec) {
+    return new NumericColumn(columnName, table, dataSpec, null, null, BuildingHints.make(0b00000000));
+  }
+
+  public static NumericColumn make(String columnName, Table table, int size) {
+    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer, size), null, null,
+        BuildingHints.make(0b00000000));
+  }
+
+  public static NumericColumn make(String columnName, Table table) {
+    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, null,
+        BuildingHints.make(0b00000000));
   }
 
   public GreaterThan isGreaterThan(Expression value) {
@@ -63,5 +91,13 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
         ", columnName='" + columnName + '\'' +
         ", table=" + table +
         '}';
+  }
+
+  public NumericColumn ai() {
+    return null;
+  }
+
+  public NumericColumn unsigned() {
+    return null;
   }
 }

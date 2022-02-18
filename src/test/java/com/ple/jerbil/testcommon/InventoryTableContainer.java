@@ -2,7 +2,7 @@ package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.IndexSpec;
+import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.IndexType;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
@@ -18,8 +18,8 @@ public class InventoryTableContainer extends TableContainer {
   public final NumericColumn itemId;
   public final String tableName;
 
-  protected InventoryTableContainer(Table table, NumericColumn playerId, NumericColumn itemId, IList<IndexSpec> indexSpecs) {
-    super(table, IArrayMap.make(playerId.columnName, playerId, itemId.columnName, itemId), null, indexSpecs,
+  protected InventoryTableContainer(Table table, NumericColumn playerId, NumericColumn itemId) {
+    super(table, IArrayMap.make(playerId.columnName, playerId, itemId.columnName, itemId), null, null,
         null);
     this.playerId = playerId;
     this.itemId = itemId;
@@ -28,9 +28,9 @@ public class InventoryTableContainer extends TableContainer {
 
   public static InventoryTableContainer make(Database db) {
     final Table inventoryTable = Table.make("inventory", db);
-    final NumericColumn playerId = Column.make("playerId", inventoryTable).asInt();
-    final NumericColumn itemId = Column.make("itemId", inventoryTable).asInt();
-    final IList<IndexSpec> indexSpecs = IArrayList.make(IndexSpec.make(IndexType.primary, playerId, itemId));
-    return new InventoryTableContainer(inventoryTable, playerId, itemId, indexSpecs);
+    final NumericColumn playerId = Column.make("playerId", inventoryTable).asInt().primary();
+    final NumericColumn itemId = Column.make("itemId", inventoryTable).asInt().primary();
+//    final IList<Index> indexSpecs = IArrayList.make(Index.make(IndexType.primary, playerId, itemId));
+    return new InventoryTableContainer(inventoryTable, playerId, itemId);
   }
 }

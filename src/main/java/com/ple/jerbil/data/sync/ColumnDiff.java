@@ -13,7 +13,7 @@ public class ColumnDiff implements Diff<Column> {
   @Nullable public final ScalarDiff<String> name;
   @Nullable public final VectorDiff<ColumnAttribute> columnAttributes;
   @Nullable public final ScalarDiff<DataSpec> dataSpec;
-  @Nullable public final VectorDiff<IndexSpec> indexSpec;
+  @Nullable public final VectorDiff<Index> indexSpec;
   @Nullable public final ScalarDiff<Expression> generatedFrom;
   @Nullable public final ScalarDiff<Expression> defaultValue;
 //  private final ScalarDiff<String> comment;
@@ -22,7 +22,7 @@ public class ColumnDiff implements Diff<Column> {
   // IndexSpec has these fields: order (ASC or DESC), and size for prefixed indexes.
 
   protected ColumnDiff(@Nullable ScalarDiff<String> name, @Nullable VectorDiff<ColumnAttribute> columnAttributes,
-                       @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable VectorDiff<IndexSpec> indexSpec,
+                       @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable VectorDiff<Index> indexSpec,
                        @Nullable ScalarDiff<Expression> generatedFrom, @Nullable ScalarDiff<Expression> defaultValue) {
     this.name = name;
     this.columnAttributes = columnAttributes;
@@ -34,7 +34,7 @@ public class ColumnDiff implements Diff<Column> {
   }
 
   public static ColumnDiff make(ScalarDiff<String> name, VectorDiff<ColumnAttribute> columnAttributes,
-                                ScalarDiff<DataSpec> dataSpec, VectorDiff<IndexSpec> indexSpec,
+                                ScalarDiff<DataSpec> dataSpec, VectorDiff<Index> indexSpec,
                                 ScalarDiff<Expression> generatedFrom, ScalarDiff<Expression> defaultValue) {
     return new ColumnDiff(name, columnAttributes, dataSpec, indexSpec, generatedFrom, defaultValue);
   }

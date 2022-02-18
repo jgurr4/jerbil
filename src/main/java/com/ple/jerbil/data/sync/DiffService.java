@@ -218,7 +218,7 @@ public class DiffService {
     final VectorDiff<ColumnAttribute> columnAttributesDiff = compareColumnAttributes(c1, c2);
     final ScalarDiff<DataSpec> dataSpecDiff = c1.dataSpec.equals(c2.dataSpec) ? null : ScalarDiff.make(
       c1.dataSpec, c2.dataSpec);
-    final VectorDiff<IndexSpec> indexDiff = compareIndexes(c1, c2);
+    final VectorDiff<Index> indexDiff = compareIndexes(c1, c2);
     final ScalarDiff<Expression> generatedDiff = c1.generatedFrom.equals(
       c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
     final ScalarDiff<Expression> defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(
@@ -226,10 +226,10 @@ public class DiffService {
     return ColumnDiff.make(nameDiff, columnAttributesDiff, dataSpecDiff, indexDiff, generatedDiff, defaultDiff);
   }
 
-  private static VectorDiff<IndexSpec> compareIndexes(Column c1, Column c2) {
-    if (!c1.indexed && c2.indexed || c1.indexed && !c2.indexed) {
+  private static VectorDiff<Index> compareIndexes(Column c1, Column c2) {
+//    if (!c1.indexed && c2.indexed || c1.indexed && !c2.indexed) {
 
-    }
+//    }
 //    final IList<IndexSpec> create = IArrayList.make(IndexSet.primary);
 //    final IList<IndexSpec> delete = IArrayList.make(IndexSet.secondary);
 //    final IList<IndexSpec> update = IArrayList.make(IndexDiff.make(IndexSpec.make(Index.fulltext), IndexSpec.make(Index.secondary, 3, IndexSort.ascending)));
