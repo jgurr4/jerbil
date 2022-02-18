@@ -4,6 +4,7 @@ import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.DatabaseBuilder;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
@@ -21,10 +22,40 @@ public class SqlStructureTests {
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
   final InventoryTableContainer inventory = testDb.inventory;
+  final OrderTableContainer order = testDb.order;
 
   public SqlStructureTests() {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
+  }
+
+  @Test
+  void testCreateOrderTable() {
+    final CreateQuery q = order.create();
+    assertEquals("""
+        create table `order` (
+          orderId bigint unsigned auto_increment,
+          `add` varchar(255) unique default 'barter' not null,
+          phrase text,
+          userId int unsigned not null,
+          itemId int(10) unsigned not null,
+          scale mediumint unsigned not null,
+          quantity smallint unsigned not null,
+          price decimal(14, 2) not null,
+          total decimal(14, 2) as (quantity * price),
+          finalized boolean not null,
+          myDouble double not null,
+          myFloat float not null,
+          mySet set('weapon','armor','shield','accessory') default 'weapon',
+          saleDate date not null,
+          saleTime time not null,
+          saleDateTime datetime default current_timestamp on update current_timestamp not null,
+          myInvis int invisible,
+          primary key (orderId),
+          fulltext index phrs_idx (phrase),
+          key usr_itm_idx (userId, itemId)
+        ) ENGINE=Aria;
+        """, q.toSql());
   }
 
   @Test

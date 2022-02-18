@@ -91,4 +91,11 @@ public class CompleteQuery extends Query {
     return bridge.execute(toSql());
   }
 
+  public CompleteQuery explain() {
+    return null;
+  }
+
+  public CompleteQuery analyze() {
+    return null;
+  }
 }

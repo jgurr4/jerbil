@@ -47,7 +47,7 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   @Override
-  public BooleanExpression eq(String value) {
+  public BooleanExpression eq(Enum<?> value) {
     return null;
   }
 
@@ -163,6 +163,10 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public DateColumn asDateTime() {
+    return null;
+  }
+
+  public DateColumn asTimeStamp() {
     return null;
   }
 }

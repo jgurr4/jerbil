@@ -1,9 +1,7 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.Expression;
-import com.ple.jerbil.data.selectExpression.SelectExpression;
+import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
@@ -31,5 +29,17 @@ public class SelectQuery extends CompleteQuery {
 
   public SelectQuery groupBy(SelectExpression... groupBy) {
     return SelectQuery.make(where, fromExpression, queryType, select, IArrayList.make(groupBy), orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+  }
+
+  public CompleteQuery union(SelectQuery select) {
+    return null;
+  }
+
+  public CompleteQuery unionAll(SelectQuery select) {
+    return null;
+  }
+
+  public CompleteQuery whereMatch(StringColumn column, LiteralString valueToMatch) {
+    return null;
   }
 }

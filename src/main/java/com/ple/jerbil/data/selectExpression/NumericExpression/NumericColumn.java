@@ -94,6 +94,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   }
 
   public NumericColumn ai() {
+    //This has to be primary, it is implied.
     return null;
   }
 

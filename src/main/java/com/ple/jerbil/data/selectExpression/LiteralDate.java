@@ -17,9 +17,14 @@ import java.util.Objects;
 public class LiteralDate implements Literal, DateExpression {
 
     public final LocalDateTime dateTime;
+    public static final DateExpression currentTimestamp = LiteralDate.make(LocalDateTime.now());
 
     protected LiteralDate(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public static DateExpression make(LocalDateTime ldateTime) {
+        return null;
     }
 
     @Override
@@ -44,6 +49,11 @@ public class LiteralDate implements Literal, DateExpression {
 
     @Override
     public BooleanExpression eq(Expression item) {
+        return null;
+    }
+
+    @Override
+    public BooleanExpression eq(Enum<?> value) {
         return null;
     }
 

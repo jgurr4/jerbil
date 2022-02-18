@@ -1,6 +1,7 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.Index;
+import com.ple.jerbil.data.PotentialQuery;
 import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -96,4 +97,11 @@ public class TableContainer {
     return SelectQuery.make(table, IArrayList.make(selectExpressions));
   }
 
+  public PotentialQuery explain() {
+    return null;
+  }
+
+  public PotentialQuery analyze() {
+    return null;
+  }
 }

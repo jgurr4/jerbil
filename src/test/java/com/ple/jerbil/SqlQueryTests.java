@@ -24,6 +24,7 @@ public class SqlQueryTests {
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
   final InventoryTableContainer inventory = testDb.inventory;
+  final OrderTableContainer order = testDb.order;
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
@@ -35,15 +36,11 @@ public class SqlQueryTests {
 
   @Test
   void temporaryTest() {
-// Deciding between less verbose when reading or more clear when writing.
-    //This more verbose method makes it so that column names will never conflict with Database/Table properties/fields.
+    //This more verbose method makes it so that column names will never conflict with Database or Tables properties/fields.
     Column itemIdVerbose = testDb.tables.get("inventory").columns.get("itemId");
     NumericColumn itemId = testDb.inventory.itemId;
-//    CharSet charSet = testDb.charset;   //This would require the user to do more work to add Charset as field of TestDatabase class.
     CharSet charSet = testDb.charSet;
     NumericColumn playerId = testDb.inventory.playerId;
-    //TODO: Pull all attributes from inside Table into TableContainer except for tableName and Database
-    // Do the same with Database and DatabaseContainer. Pull everything out except for DatabaseName.
     StorageEngine storageEngine = testDb.item.storageEngine;
     DataSpec dataSpec = testDb.item.itemId.dataSpec;
     testDb.sync();
@@ -107,7 +104,7 @@ public class SqlQueryTests {
 
   @Test
   void testSelectEnum() {
-    final CompleteQuery q = item.where(item.type.eq(ItemType.weapon.toString())).selectAll();
+    final CompleteQuery q = item.where(item.type.eq(ItemType.weapon)).selectAll();
     assertEquals("""
       select *
       from item
@@ -155,6 +152,19 @@ public class SqlQueryTests {
   }
 
   @Test
+  void testRollup() {
+  }
+
+  @Test
+  void testHaving() {
+
+  }
+
+  @Test
+  void testOrderBy() {
+  }
+
+  @Test
   void testComplexExpressions() {
     final CompleteQuery q = item
       .select(item.price
@@ -177,31 +187,52 @@ public class SqlQueryTests {
   void testExpressionWithoutTable() {
     final CompleteQuery q = make(32).minus(make(15)).as("result").select();
     assertEquals("select 32 - 15 as result", q.toSql());
-//    Use this to test results from real mysql database, but this code doesn't belong here for unit tests. Only for integration tests.
-//    StepVerifier.create(q.execute().flatMap(results -> results.map((row, rowMetadata) -> row.get("result", Integer.class)))
-//      .doOnNext(System.out::println))
-//      .expectNext(17)
-//      .verifyComplete();
   }
 
   @Test
   void testUnion() {
-    final CompleteQuery q = null;
+    final CompleteQuery q = user.select(user.userId, user.name).union(user.select(user.userId, user.name));
+    assertEquals("""
+      select userId, name
+      from user
+      union
+      select userId, name
+      from player
+      """, q.toSql());
+  }
+
+  @Test
+  void testUnionAll() {
+    final CompleteQuery q = user.select(user.userId, user.name).unionAll(user.select(user.userId, user.name));
     assertEquals("""
       select userId, name
       from user
       union all
       select userId, name
-      from player;
+      from player
       """, q.toSql());
   }
 
   @Test
   void testMatchFullText() {
+    final CompleteQuery q = order.select(order.phrase).whereMatch(order.phrase, make("Hello there"));
+    assertEquals("""
+        select phrase from order
+        where match (phrase)
+        against ('hello there')
+        """, q.toSql());
   }
 
   @Test
-  void selectAnalyzeExplain() {
+  void testExplain() {
+    final CompleteQuery q1 = order.select().explain();
+    final CompleteQuery q2 = order.explain().select();
+  }
+
+  @Test
+  void testAnalyze() {
+    final CompleteQuery q1 = order.select().analyze();  //For mysqlbridge it would have to do explain analyze select, but for mariadbbridge it would just do analyze select.
+    final CompleteQuery q2 = order.analyze().select();  //For mysqlbridge it would have to do explain analyze select, but for mariadbbridge it would just do analyze select.
   }
 
 }

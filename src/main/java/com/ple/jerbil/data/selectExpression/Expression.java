@@ -24,5 +24,5 @@ public interface Expression extends SelectExpression {
 
   BooleanExpression eq(Expression item);
 
-  BooleanExpression eq(String value);
+  BooleanExpression eq(Enum<?> value);
 }

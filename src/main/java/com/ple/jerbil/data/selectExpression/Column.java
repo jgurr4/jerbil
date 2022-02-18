@@ -6,6 +6,7 @@ import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.sync.SyncResult;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Immutable
@@ -39,6 +40,14 @@ public abstract class Column <T extends Column> extends PartialColumn{
     public abstract T unique();
 
     public abstract T invisible();
+
+    public abstract T allowNull();
+
+    public abstract T defaultValue(Expression e);
+
+    public abstract T defaultValue(Enum<?> value);
+
+    public abstract T onUpdate(Expression e);
 
     public T generatedFrom(Expression generatedFrom) {
         return make(columnName, dataSpec, generatedFrom);

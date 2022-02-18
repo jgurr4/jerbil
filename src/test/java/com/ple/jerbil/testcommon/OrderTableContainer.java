@@ -58,11 +58,11 @@ public class OrderTableContainer extends TableContainer {
 
   public static OrderTableContainer make(Database db) {
     final Table orderTable = Table.make("order", db);
-    final NumericColumn orderId = Column.make("orderId", orderTable).asBigInt().primary().ai().unsigned();  //Alternatively just use .bigId() to replace all 3.
+    final NumericColumn orderId = Column.make("orderId", orderTable).asBigInt().ai().unsigned();  //Alternatively just use .bigId() to replace all 3.
     final StringColumn add = Column.make("add", orderTable).asVarchar().defaultValue(Literal.make("barter")).unique();  //Tests unique(), null and defaultValue()
-    final StringColumn phrase = Column.make("phrase", orderTable).asText().fullText();
-    final NumericColumn userId = Column.make("userId", orderTable).asIntUnsigned();
-    final NumericColumn itemId = Column.make("itemId", orderTable).asInt(10).indexed();  //Tests specifying the digits amount.
+    final StringColumn phrase = Column.make("phrase", orderTable).asText().fullText().allowNull();
+    final NumericColumn userId = Column.make("userId", orderTable).asIntUnsigned().indexed();  //TODO: Find out how users should specify to make composite index with these two columns
+    final NumericColumn itemId = Column.make("itemId", orderTable).asInt(10).unsigned().indexed();  //Tests specifying the digits amount.
     final NumericColumn scale = Column.make("scale", orderTable).asMediumIntUnsigned();
     final NumericColumn quantity = Column.make("quantity", orderTable).asSmallInt().unsigned();
     final NumericColumn price = Column.make("price", orderTable).asDecimal(14,2);
@@ -70,17 +70,17 @@ public class OrderTableContainer extends TableContainer {
     final BooleanColumn finalized = Column.make("finalized", orderTable).asBoolean();
     final NumericColumn myDouble = Column.make("myDouble", orderTable).asDouble();
     final NumericColumn myFloat = Column.make("myFloat", orderTable).asFloat();
-    final EnumeralColumn mySet = Column.make("mySet", orderTable).asSet(ItemType.class);
+    final EnumeralColumn mySet = Column.make("mySet", orderTable).asSet(ItemType.class).defaultValue(ItemType.weapon);
     final DateColumn saleDate = Column.make("saleDate", orderTable).asDate();
     final DateColumn saleTime = Column.make("saleTime", orderTable).asTime();
-    final DateColumn saleDateTime = Column.make("saleDateTime", orderTable).asDateTime();
+    final DateColumn saleDateTime = Column.make("saleDateTime", orderTable).asDateTime().defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
+//    Column.make("saleTimeStamp", orderTable).asTimeStamp().defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
     final NumericColumn myInvis = Column.make("myInvis", orderTable).asInt().invisible();
     final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add, phrase.columnName,
         phrase, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale, total.columnName, total,
         finalized.columnName, finalized, myDouble.columnName, myDouble, myFloat.columnName, myFloat, mySet.columnName,
         mySet, saleDate.columnName, saleDate, saleTime.columnName, saleTime, saleDateTime.columnName, saleDateTime,
         myInvis.columnName, myInvis);
-    //FIXME: Find a way to do compile-time checking for Fulltext. If not possible at least do checks at runtime.
 //    final IList<Index> indexSpecs = IArrayList.make(
 //        Index.make(IndexType.primary, orderId),
 //        Index.make(IndexType.secondary, itemId),
