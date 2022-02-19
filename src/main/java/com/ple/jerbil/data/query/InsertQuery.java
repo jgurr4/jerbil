@@ -35,6 +35,17 @@ public class InsertQuery extends CompleteQuery {
         false, false);
   }
 
+  public static InsertQuery make(Column column, Literal value, FromExpression fromExpression, boolean mayReplace) {
+    return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
+        null, null, IArrayList.make(IHashMap.make(column, value)), true, mayReplace,
+        false, false);
+  }
+
+  public static InsertQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression, boolean mayReplace) {
+    return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
+        null, null, set, true, mayReplace, false, false);
+  }
+
   public static InsertQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
     return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
         null, null, set, true, false, false, false);

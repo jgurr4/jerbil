@@ -20,43 +20,35 @@ import java.util.List;
 @Immutable
 public class PartialQueryWithValues extends PartialQuery {
 
-  protected PartialQueryWithValues(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
-  }
-
-  public CompleteQuery set(List<Column> columns, List<List<String>> values) {
-    IList<IMap<Column, Expression>> records = IArrayList.make();
-    for (int i = 0; i < values.size(); i++) {
-      for (int j = 0; j < columns.size(); j++) {
-        if (!(i >= records.toArray().length)) {
-          records.toArray()[i] = records.toArray()[i].put(columns.get(j), Literal.make(values.get(i).get(j)));
-        } else {
-          final IMap<Column, Expression> record = IHashMap.make(columns.get(j), Literal.make(values.get(i).get(j)));
-          records = records.add(record);
-        }
-      }
-    }
-    if (this instanceof PartialInsertQuery) {
-      return InsertQuery.make(records, fromExpression);
-    } else {
-      return UpdateQuery.make(records, fromExpression);
-    }
+  protected PartialQueryWithValues(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
+                                   @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
+                                   @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy,
+                                   @Nullable IList<BooleanExpression> having, @Nullable Limit limit,
+                                   @Nullable IList<IMap<Column, Expression>> set, @Nullable boolean mayInsert,
+                                   @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing,
+                                   @Nullable boolean mayThrowOnDuplicate) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace,
+        triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
 
   public CompleteQuery set(Column column, Literal value) {
     if (set == null) {
       if (this instanceof PartialInsertQuery) {
         return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
-      } else {
+      } else if (this instanceof PartialUpdateQuery){
         return UpdateQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
+      } else {
+        return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression, true);
       }
     }
     final IMap<Column, Expression> map = set.get(0).put(column, value);
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);
     if (this instanceof PartialInsertQuery) {
       return InsertQuery.make(records, fromExpression);
-    } else {
+    } else if (this instanceof PartialUpdateQuery){
       return UpdateQuery.make(records, fromExpression);
+    } else {
+      return InsertQuery.make(records, fromExpression, true);
     }
   }
 }
