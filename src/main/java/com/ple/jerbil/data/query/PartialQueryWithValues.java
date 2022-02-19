@@ -24,8 +24,7 @@ public class PartialQueryWithValues extends PartialQuery {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
   }
 
-  public InsertQuery set(List<Column> columns, List<List<String>> values) {
-
+  public CompleteQuery set(List<Column> columns, List<List<String>> values) {
     IList<IMap<Column, Expression>> records = IArrayList.make();
     for (int i = 0; i < values.size(); i++) {
       for (int j = 0; j < columns.size(); j++) {
@@ -37,16 +36,27 @@ public class PartialQueryWithValues extends PartialQuery {
         }
       }
     }
-    return InsertQuery.make(records, fromExpression);
+    if (this instanceof PartialInsertQuery) {
+      return InsertQuery.make(records, fromExpression);
+    } else {
+      return UpdateQuery.make(records, fromExpression);
+    }
   }
 
   public CompleteQuery set(Column column, Literal value) {
     if (set == null) {
-      return CompleteQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
+      if (this instanceof PartialInsertQuery) {
+        return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
+      } else {
+        return UpdateQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
+      }
     }
     final IMap<Column, Expression> map = set.get(0).put(column, value);
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);
-    return CompleteQuery.make(records, fromExpression);
+    if (this instanceof PartialInsertQuery) {
+      return InsertQuery.make(records, fromExpression);
+    } else {
+      return UpdateQuery.make(records, fromExpression);
+    }
   }
-
 }

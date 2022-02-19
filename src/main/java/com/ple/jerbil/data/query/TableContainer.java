@@ -82,6 +82,19 @@ public class TableContainer {
     return PartialInsertQuery.make(table);
   }
 
+  public DeleteQuery delete() {
+    return null;
+  }
+
+  public PartialUpdateQuery update() {
+    return null;
+  }
+
+  public PartialInsertQuery replace() {
+    // replace is just a insert with ignore, or on duplicate key update.
+    return null;
+  }
+
   public CompleteQuery select(CountAgg agg) {
     return SelectQuery.make(table, IArrayList.make(agg));
   }
@@ -115,14 +128,6 @@ public class TableContainer {
   }
 
   public SelectQuery selectDistinct(SelectExpression... selectExpressions) {
-    return null;
-  }
-
-  public DeleteQuery delete() {
-    return null;
-  }
-
-  public UpdateQuery update(SelectExpression... selectExpressions) {
     return null;
   }
 }
