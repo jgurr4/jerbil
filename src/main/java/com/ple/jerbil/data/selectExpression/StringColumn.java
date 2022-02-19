@@ -40,6 +40,26 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     return null;
   }
 
+  @Override
+  public StringColumn allowNull() {
+    return null;
+  }
+
+  @Override
+  public StringColumn defaultValue(Expression e) {
+    return null;
+  }
+
+  @Override
+  public StringColumn defaultValue(Enum<?> value) {
+    return null;
+  }
+
+  @Override
+  public StringColumn onUpdate(Expression e) {
+    return null;
+  }
+
   public static StringColumn make(String name, Table table, int size, Expression generatedFrom,
                                   StringExpression defaultValue, BuildingHints hints) {
     return new StringColumn(name, table, DataSpec.make(DataType.varchar, size), generatedFrom, defaultValue, hints);
@@ -63,7 +83,7 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     return new StringColumn(name, table, dataSpec, null, null, BuildingHints.make(0b00000000));
   }
 
-  public Equals eq(Expression value) {
+  public Equals eq(StringExpression value) {
     return Equals.make(this, value);
   }
 

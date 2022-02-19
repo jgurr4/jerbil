@@ -3,11 +3,8 @@ package com.ple.jerbil.data.query;
 import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.PotentialQuery;
 import com.ple.jerbil.data.StorageEngine;
-import com.ple.jerbil.data.selectExpression.AliasedExpression;
-import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.CountAgg;
+import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
-import com.ple.jerbil.data.selectExpression.SelectExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.util.IArrayList;
@@ -97,11 +94,35 @@ public class TableContainer {
     return SelectQuery.make(table, IArrayList.make(selectExpressions));
   }
 
+  public SelectQuery select() {
+    return null;
+  }
+
   public PotentialQuery explain() {
     return null;
   }
 
   public PotentialQuery analyze() {
+    return null;
+  }
+
+  public SelectQuery selectDistinct() {
+    return null;
+  }
+
+  public SelectQuery selectDistinct(AliasedExpression... aliasedExpressions) {
+    return null;
+  }
+
+  public SelectQuery selectDistinct(SelectExpression... selectExpressions) {
+    return null;
+  }
+
+  public DeleteQuery delete() {
+    return null;
+  }
+
+  public UpdateQuery update(SelectExpression... selectExpressions) {
     return null;
   }
 }

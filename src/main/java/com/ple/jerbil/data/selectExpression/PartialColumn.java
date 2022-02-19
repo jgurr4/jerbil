@@ -31,26 +31,23 @@ public class PartialColumn implements Expression, OrderedExpression {
     return new PartialColumn(name, table);
   }
 
-  @Override
+/*
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression eq(Expression item) {
     return null;
   }
 
-  @Override
   public BooleanExpression eq(Enum<?> value) {
     return null;
   }
-
+*/
   public NumericColumn asInt() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer));
   }

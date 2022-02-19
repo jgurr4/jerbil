@@ -20,6 +20,10 @@ public interface Literal extends Expression {
     return LiteralNumber.make(i);
   }
 
+  public static LiteralNumber make(double i) {
+    return LiteralNumber.make(i);
+  }
+
   public static LiteralDate make(LocalDateTime date) {
     return null;
   }

@@ -15,11 +15,11 @@ import java.util.Objects;
  * select price, amount from tablename;
  */
 @Immutable
-public class LiteralNumber implements Literal, NumericExpression {
+public class LiteralNumber<N extends Number> implements Literal, NumericExpression {
 
-    public final Integer value;
+    public final N value;
 
-    protected LiteralNumber(Integer value) {
+    protected LiteralNumber(N value) {
         this.value = value;
     }
 
@@ -27,17 +27,18 @@ public class LiteralNumber implements Literal, NumericExpression {
         return new LiteralNumber(value);
     }
 
-  @Override
+  public static LiteralNumber make(double i) {
+    return null;
+  }
+
   public GreaterThan isGreaterThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression eq(Expression item) {
       return null;
   }

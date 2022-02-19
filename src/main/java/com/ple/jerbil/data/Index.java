@@ -11,9 +11,9 @@ public class Index {
   @Nullable public final String indexName;
   public final IList<Column> columns;
   @Nullable public final int size;
-  @Nullable public final IndexSort order;
+  @Nullable public final Order order;
 
-  protected Index(IndexType type, @Nullable String indexName, IList<Column> columns, @Nullable int size, @Nullable IndexSort order) {
+  protected Index(IndexType type, @Nullable String indexName, IList<Column> columns, @Nullable int size, @Nullable Order order) {
     this.type = type;
     this.indexName = indexName;
     this.columns = columns;
@@ -21,7 +21,7 @@ public class Index {
     this.order = order;
   }
 
-  public static Index make(IndexType indexType, String indexName, int size, IndexSort order, Column... columns) {
+  public static Index make(IndexType indexType, String indexName, int size, Order order, Column... columns) {
     return new Index(indexType, indexName, IArrayList.make(columns), size, order);
   }
 
@@ -33,7 +33,7 @@ public class Index {
     return new Index(indexType, null, IArrayList.make(columns), 0, null);
   }
 
-  public static Index make(IndexType indexType, int size, IndexSort order, Column... columns) {
+  public static Index make(IndexType indexType, int size, Order order, Column... columns) {
     return new Index(indexType, null, IArrayList.make(columns), size, order);
   }
 

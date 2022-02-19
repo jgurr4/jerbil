@@ -491,6 +491,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   //TODO: Add support for specifying Null on a column. Leave not null off because that is default.
   public String toSql(Column column) {
+/* FIXME: broken after changes to database/table system.
+
     String sql = column.getColumnName() + " ";
     String primary = "";
     String autoIncrement = "";
@@ -528,6 +530,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
     sql = sql.replaceAll("not null primary key", "primary key");
     return sql;
+*/
+    return null;
   }
 
   @Override
@@ -601,6 +605,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private String gatherIndexes(IList<Column> columns) {
+
+/*  //FIXME: broken after change to new database/table system.
     String multiIndex = "";
     String separator = "";
     int primaryCount = 0;
@@ -632,6 +638,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       multiIndex += ")";
     }
     return multiIndex;
+*/
+    return null;
   }
 
   private String generateIndexName(String indexedColumns) {

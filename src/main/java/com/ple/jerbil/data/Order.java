@@ -1,6 +1,6 @@
 package com.ple.jerbil.data;
 
-public enum IndexSort {
+public enum Order {
   ascending,
   descending
 }

@@ -45,6 +45,26 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
     return null;
   }
 
+  @Override
+  public BooleanColumn allowNull() {
+    return null;
+  }
+
+  @Override
+  public BooleanColumn defaultValue(Expression e) {
+    return null;
+  }
+
+  @Override
+  public BooleanColumn defaultValue(Enum<?> value) {
+    return null;
+  }
+
+  @Override
+  public BooleanColumn onUpdate(Expression e) {
+    return null;
+  }
+
   public static Column make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
     return new BooleanColumn(columnName, table, dataSpec, null, null, hints);
   }

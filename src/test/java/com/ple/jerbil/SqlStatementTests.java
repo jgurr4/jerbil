@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Properties;
 
+import static com.ple.jerbil.data.selectExpression.Literal.make;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStatementTests {
@@ -20,6 +21,7 @@ public class SqlStatementTests {
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
   final InventoryTableContainer inventory = testDb.inventory;
+  final OrderTableContainer order = testDb.order;
 
   public SqlStatementTests() {
     final Properties props = ConfigProps.getProperties();
@@ -55,6 +57,26 @@ public class SqlStatementTests {
       ('shield of faith', 'shield'),
       ('breastplate of righteousness', 'armor')
       """, q.toSql());
+  }
+
+  @Test
+  void testDelete() {
+    final CompleteQuery q = order.delete().where(order.finalized.eq(make(false)));
+    assertEquals("""
+        delete from order
+        where finalized = false
+        """, q.toSql());
+  }
+
+  @Test
+  void testUpdate() {
+    final CompleteQuery q = order.update().set(order.finalized, make(true)).set(order.phrase, make("Something here"))
+        .where(order.finalized.eq(make(false)));
+    assertEquals("""
+        update order
+        set finalized = true,
+        phrase = 'Something here'
+        where finalized = false""", q.toSql());
   }
 
 /*

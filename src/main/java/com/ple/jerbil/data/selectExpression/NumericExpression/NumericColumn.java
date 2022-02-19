@@ -50,6 +50,26 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
     return null;
   }
 
+  @Override
+  public NumericColumn allowNull() {
+    return null;
+  }
+
+  @Override
+  public NumericColumn defaultValue(Expression e) {
+    return null;
+  }
+
+  @Override
+  public NumericColumn defaultValue(Enum<?> value) {
+    return null;
+  }
+
+  @Override
+  public NumericColumn onUpdate(Expression e) {
+    return null;
+  }
+
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression generatedFrom,
                                    NumericExpression defaultValue) {
     return new NumericColumn(columnName, table, dataSpec, generatedFrom, defaultValue, BuildingHints.make(0b00000000));

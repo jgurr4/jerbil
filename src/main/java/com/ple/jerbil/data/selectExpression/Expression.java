@@ -18,6 +18,15 @@ public interface Expression extends SelectExpression {
     return AliasedExpression.make(name, this);
   }
 
+  default BooleanExpression isNull() {
+    return null;
+  }
+
+  default BooleanExpression isNotNull() {
+    return null;
+  }
+
+/*
   BooleanExpression isGreaterThan(Expression i);
 
   BooleanExpression isLessThan(Expression i);
@@ -25,4 +34,5 @@ public interface Expression extends SelectExpression {
   BooleanExpression eq(Expression item);
 
   BooleanExpression eq(Enum<?> value);
+*/
 }

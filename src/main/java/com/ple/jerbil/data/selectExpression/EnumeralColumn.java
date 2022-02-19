@@ -45,6 +45,26 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
   }
 
   @Override
+  public EnumeralColumn allowNull() {
+    return null;
+  }
+
+  @Override
+  public EnumeralColumn defaultValue(Expression e) {
+    return null;
+  }
+
+  @Override
+  public EnumeralColumn defaultValue(Enum<?> value) {
+    return null;
+  }
+
+  @Override
+  public EnumeralColumn onUpdate(Expression e) {
+    return null;
+  }
+
+  @Override
   public AliasedExpression as(String name) {
     return null;
   }

@@ -5,10 +5,7 @@ import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.LanguageGenerator;
 import com.ple.jerbil.data.bridge.ReactiveWrapper;
-import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.Expression;
-import com.ple.jerbil.data.selectExpression.Literal;
-import com.ple.jerbil.data.selectExpression.SelectExpression;
+import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
 import com.ple.util.IHashMap;
@@ -74,13 +71,21 @@ public class CompleteQuery extends Query {
     return null;
   }
 
-  public InsertQuery set(Column column, Literal value) {
+  public CompleteQuery set(Column column, Literal value) {
     if (set == null) {
-      return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
+      if (this instanceof InsertQuery) {
+        return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
+      } else {
+        return UpdateQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
+      }
     }
     final IMap<Column, Expression> map = set.get(0).put(column, value);
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);
-    return InsertQuery.make(records, fromExpression);
+    if (this instanceof InsertQuery) {
+      return InsertQuery.make(records, fromExpression);
+    } else {
+      return UpdateQuery.make(records, fromExpression);
+    }
   }
 
   public ReactiveWrapper<Result> execute() {
@@ -98,4 +103,5 @@ public class CompleteQuery extends Query {
   public CompleteQuery analyze() {
     return null;
   }
+
 }

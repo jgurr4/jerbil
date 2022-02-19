@@ -52,7 +52,6 @@ public class LiteralDate implements Literal, DateExpression {
         return null;
     }
 
-    @Override
     public BooleanExpression eq(Enum<?> value) {
         return null;
     }

@@ -47,7 +47,17 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   }
 
   @Override
+  public DateColumn defaultValue(Expression e) {
+    return null;
+  }
+
+  @Override
   public DateColumn defaultValue(Enum<?> value) {
+    return null;
+  }
+
+  @Override
+  public DateColumn onUpdate(Expression e) {
     return null;
   }
 

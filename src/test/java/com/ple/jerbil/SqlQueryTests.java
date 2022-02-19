@@ -3,6 +3,7 @@ package com.ple.jerbil;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
@@ -29,8 +30,8 @@ public class SqlQueryTests {
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(
-      props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
-      props.getProperty("user"), props.getProperty("password")
+        props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
+        props.getProperty("user"), props.getProperty("password")
     );
   }
 
@@ -49,39 +50,41 @@ public class SqlQueryTests {
     InventoryTableContainer inventory = testDb.inventory;
     ItemTableContainer item = testDb.item;
     CompleteQuery q = testDb.inventory.select().where(inventory.itemId.eq(make(3)));
-    String name = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).blockFirst();
-    Mono<String> rName = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).next();
+    String name = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name")))
+        .blockFirst();
+    Mono<String> rName = q.execute().unwrapFlux()
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).next();
   }
 
   @Test
   void testSelect() {
     final CompleteQuery q = user.where(user.name.eq(make("john"))).select(user.userId);
     assertEquals("""
-      select userId
-      from user
-      where name = 'john'
-      """, q.toSql());
+        select userId
+        from user
+        where name = 'john'
+        """, q.toSql());
   }
 
   @Test
   void multipleWhereConditions() {
     final CompleteQuery q = user.where(
-      and(
-        user.name.eq(make("john")),
-        or(
-          user.userId.isGreaterThan(make(4)),
-          user.name.eq(make("bob"))
-        ),
-        user.age.eq(make(30))
-      )
+        and(
+            user.name.eq(make("john")),
+            or(
+                user.userId.isGreaterThan(make(4)),
+                user.name.eq(make("bob"))
+            ),
+            user.age.eq(make(30))
+        )
     ).select(user.userId);
     assertEquals("""
-      select userId
-      from user
-      where name = 'john'
-      and (userId > 4 or name = 'bob')
-      and age = 30
-      """, q.toSql());
+        select userId
+        from user
+        where name = 'john'
+        and (userId > 4 or name = 'bob')
+        and age = 30
+        """, q.toSql());
   }
 
   @Test
@@ -90,97 +93,152 @@ public class SqlQueryTests {
     final CompleteQuery q1 = base.where(user.name.eq(make("john")));
     final CompleteQuery q2 = base.where(user.name.eq(make("james")));
     assertEquals("""
-      select userId
-      from user
-      where name = 'john'
-      """, q1.toSql());
+        select userId
+        from user
+        where name = 'john'
+        """, q1.toSql());
 
     assertEquals("""
-      select userId
-      from user
-      where name = 'james'
-      """, q2.toSql());
+        select userId
+        from user
+        where name = 'james'
+        """, q2.toSql());
   }
 
   @Test
   void testSelectEnum() {
     final CompleteQuery q = item.where(item.type.eq(ItemType.weapon)).selectAll();
     assertEquals("""
-      select *
-      from item
-      where type = 'weapon'
-      """, q.toSql());
-
+        select *
+        from item
+        where type = 'weapon'
+        """, q.toSql());
   }
 
   //FIXME: If you switch player and inventory position, the results won't be what you expect.
   @Test
   void testSelectJoins() {
     final CompleteQuery q = player.join(inventory.table, item.table).where(
-      and(
-        item.name.eq("bob"),
-        player.name.eq("sword")
-      )
+        and(
+            item.name.eq("bob"),
+            player.name.eq("sword")
+        )
     ).select();
     assertEquals("""
-      select *
-      from player
-      inner join inventory using (playerId)
-      inner join item using (itemId)
-      where item.name = 'bob'
-      and player.name = 'sword'
-      """, q.toSql());
+        select *
+        from player
+        inner join inventory using (playerId)
+        inner join item using (itemId)
+        where item.name = 'bob'
+        and player.name = 'sword'
+        """, q.toSql());
   }
 
   @Test
   void testAggregation() {
     final CompleteQuery q = item.select(Agg.count);
     assertEquals("""
-      select count(*)
-      from item
-      """, q.toSql());
+        select count(*)
+        from item
+        """, q.toSql());
   }
 
   @Test
   void testGroupBy() {
     final CompleteQuery q = item.select(item.type, Agg.count.as("total")).groupBy(item.type);
     assertEquals("""
-      select type, count(*) as total
-      from item
-      group by type
-      """, q.toSql());
-  }
-
-  @Test
-  void testRollup() {
+        select type, count(*) as total
+        from item
+        group by type
+        """, q.toSql());
   }
 
   @Test
   void testHaving() {
+    final CompleteQuery q = item.select(item.name, Agg.sum(item.price)).groupBy(item.name)
+        .having(item.price.gt(make(100.00)));
+    assertEquals("""
+        select name, sum(price)
+        from item
+        group by name
+        having price > 100.00
+        """, q.toSql());
+  }
 
+  @Test
+  void testRollup() {
+    //TODO: Implement this.
   }
 
   @Test
   void testOrderBy() {
+    final CompleteQuery q = item.select(item.name, item.price).where(item.price.ge(make(2.32)))
+        .orderBy(item.price, Order.descending);
+    assertEquals("""
+        select name, price
+        from item
+        where price >= 2.32
+        order by price desc
+        """, q.toSql());
+  }
+
+  @Test
+  void testSelectDistinct() {
+    final CompleteQuery q = order.selectDistinct(order.total).where(order.finalized);
+    assertEquals("""
+        select distinct total
+        from `order`
+        where finalized = true
+        """, q.toSql());
+  }
+
+  @Test
+  void testSelectNull() {
+    final CompleteQuery q = item.select(item.itemId).where(item.type.isNull())
+        .union(item.select(item.itemId).where(item.type.isNotNull()));
+    assertEquals("""
+        select itemId
+        from item
+        where type is null
+        union
+        select itemId
+        from item
+        where type is not null
+        """, q.toSql());
+  }
+
+  @Test
+  void testSelectRegexp() {
+    final CompleteQuery q = item.select(item.name).where(item.name.isRegexp(make(".*ohn.*")))
+        .union(item.select(item.name).where(item.name.isNotRegexp(make(".*ohn.*"))));
+    assertEquals("""
+        select name
+        from item
+        where name regexp '.*ohn.*'
+        union
+        select name
+        from item
+        where name not regexp '.*ohn.*'
+        """, q.toSql());
   }
 
   @Test
   void testComplexExpressions() {
     final CompleteQuery q = item
-      .select(item.price
-        .times(make(42))
-        .minus(make(1))
-        .times(
-          make(3)
-            .plus(make(1))
-        )
-        .as("adjustedPrice"))
-      .where(item.price.dividedBy(make(4)).isGreaterThan(make(5)));
+        .select(item.price
+            .times(make(42))
+            .minus(make(1))
+            .times(
+                make(3)
+                    .plus(make(1))
+            )
+            .as("adjustedPrice"))
+        .where(item.price.dividedBy(make(4)).isGreaterThan(make(5)));
     assertEquals("""
-      select (price * 42 - 1) * (3 + 1) as adjustedPrice
-      from item
-      where price / 4 > 5
-      """, q.toSql());
+        select (price * 42 - 1) * (3 + 1) as adjustedPrice
+        from item
+        where price / 4 > 5
+        """, q.toSql());
   }
 
   @Test
@@ -190,27 +248,33 @@ public class SqlQueryTests {
   }
 
   @Test
-  void testUnion() {
-    final CompleteQuery q = user.select(user.userId, user.name).union(user.select(user.userId, user.name));
+  void testUnionAndBetween() {
+    final CompleteQuery q = user.select(user.userId, user.name).where(user.userId.isBetween(make(4), make(10)))
+        .union(user.select(user.userId, user.name).where(user.userId.isNotBetween(make(4), make(10))));
     assertEquals("""
-      select userId, name
-      from user
-      union
-      select userId, name
-      from player
-      """, q.toSql());
+        select userId, name
+        from user
+        where userId between 4 and 10
+        union
+        select userId, name
+        from player
+        where userId not between 4 and 10
+        """, q.toSql());
   }
 
   @Test
-  void testUnionAll() {
-    final CompleteQuery q = user.select(user.userId, user.name).unionAll(user.select(user.userId, user.name));
+  void testUnionAllAndLike() {
+    final CompleteQuery q = user.select(user.userId, user.name).where(user.name.isLike(make("%oh%")))
+        .unionAll(user.select(user.userId, user.name).where(user.name.isNotLike(make("%oh%"))));
     assertEquals("""
-      select userId, name
-      from user
-      union all
-      select userId, name
-      from player
-      """, q.toSql());
+        select userId, name
+        from user
+        where name like '%oh%'
+        union all
+        select userId, name
+        from player
+        where name not like '%oh%'
+        """, q.toSql());
   }
 
   @Test
@@ -227,12 +291,28 @@ public class SqlQueryTests {
   void testExplain() {
     final CompleteQuery q1 = order.select().explain();
     final CompleteQuery q2 = order.explain().select();
+    assertEquals("""
+        explain select *
+        from order
+        """, q1.toSql());
+    assertEquals("""
+        explain select *
+        from order
+        """, q2.toSql());
   }
 
   @Test
-  void testAnalyze() {
-    final CompleteQuery q1 = order.select().analyze();  //For mysqlbridge it would have to do explain analyze select, but for mariadbbridge it would just do analyze select.
-    final CompleteQuery q2 = order.analyze().select();  //For mysqlbridge it would have to do explain analyze select, but for mariadbbridge it would just do analyze select.
+  void testAnalyze() { //For mysqlbridge it would have to do explain analyze select, but for mariadbbridge it would just do analyze select.
+    final CompleteQuery q1 = order.select().analyze();
+    final CompleteQuery q2 = order.analyze().select();
+    assertEquals("""
+        analyze select *
+        from order
+        """, q1.toSql());
+    assertEquals("""
+        analyze select *
+        from order
+        """, q2.toSql());
   }
 
 }

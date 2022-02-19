@@ -10,7 +10,7 @@ import java.util.Objects;
  * Contrast that with selecting boolean columns:
  * select isTrue, isFalse from tablename;
  */
-public class LiteralBoolean implements BooleanExpression {
+public class LiteralBoolean implements BooleanExpression, Literal {
 
     public Boolean bool;
 
@@ -22,17 +22,14 @@ public class LiteralBoolean implements BooleanExpression {
         return new LiteralBoolean(bool);
     }
 
-    @Override
     public BooleanExpression isGreaterThan(Expression i) {
         return null;
     }
 
-    @Override
     public BooleanExpression isLessThan(Expression i) {
         return null;
     }
 
-    @Override
     public BooleanExpression eq(Expression item) {
         return null;
     }

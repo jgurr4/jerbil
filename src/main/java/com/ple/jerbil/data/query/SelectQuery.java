@@ -1,7 +1,9 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.Order;
 import com.ple.jerbil.data.selectExpression.*;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
@@ -40,6 +42,14 @@ public class SelectQuery extends CompleteQuery {
   }
 
   public CompleteQuery whereMatch(StringColumn column, LiteralString valueToMatch) {
+    return null;
+  }
+
+  public CompleteQuery orderBy(SelectExpression select, Order order) {
+    return null;
+  }
+
+  public SelectQuery having(BooleanExpression having) {
     return null;
   }
 }
