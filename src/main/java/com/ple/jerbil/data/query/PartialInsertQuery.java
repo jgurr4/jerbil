@@ -15,12 +15,16 @@ import java.util.List;
 
 public class PartialInsertQuery extends PartialQueryWithValues {
 
-  protected PartialInsertQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+  protected PartialInsertQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
+                               @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
+                               @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy,
+                               @Nullable IList<BooleanExpression> having, @Nullable Limit limit,
+                               @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }
 
   public static PartialInsertQuery make(Table table) {
-    return new PartialInsertQuery(null, table, null, null, null, null, null, null, null, false, false, false, false);
+    return new PartialInsertQuery(null, table, null, null, null, null, null, null, null, null);
   }
 
   public CompleteQuery set(List<Column> columns, List<List<String>> values) {

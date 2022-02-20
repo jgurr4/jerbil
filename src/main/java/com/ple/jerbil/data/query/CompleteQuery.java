@@ -13,7 +13,6 @@ import com.ple.util.IList;
 import com.ple.util.IMap;
 import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.Nullable;
-import reactor.core.publisher.Flux;
 
 /**
  * CompleteQuery represents any query that can be considered a full query without any additional clauses or values added.
@@ -36,16 +35,23 @@ import reactor.core.publisher.Flux;
 @Immutable
 public class CompleteQuery extends Query {
 
-  protected CompleteQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+  protected CompleteQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
+                          @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
+                          @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy,
+                          @Nullable IList<BooleanExpression> having, @Nullable Limit limit,
+                          @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }
 
   public static CompleteQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
-    return new CompleteQuery(null, fromExpression, null, null, null, null, null, null, set, false, false, false, false);
+    return new CompleteQuery(null, fromExpression, null, null, null, null, null, null, set, null);
   }
 
-  public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType, IList<SelectExpression> select, IList<SelectExpression> groupBy, IList<SelectExpression> orderBy, IList<BooleanExpression> having, Limit limit, IList<IMap<Column, Expression>> set, boolean mayInsert, boolean mayReplace, boolean triggerDeleteWhenReplacing, boolean mayThrowOnDuplicate) {
-    return new CompleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+  public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
+                                   IList<SelectExpression> select, IList<SelectExpression> groupBy,
+                                   IList<SelectExpression> orderBy, IList<BooleanExpression> having, Limit limit,
+                                   IList<IMap<Column, Expression>> set, InsertFlags insertFlags) {
+    return new CompleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }
 
   public String toSql() {
@@ -60,7 +66,8 @@ public class CompleteQuery extends Query {
   }
 
   public SelectQuery where(BooleanExpression condition) {
-    return SelectQuery.make(condition, this.fromExpression, this.queryType, this.select, this.groupBy, this.orderBy, this.having, this.limit, this.set, this.mayInsert, this.mayReplace, this.triggerDeleteWhenReplacing, this.mayThrowOnDuplicate);
+    return SelectQuery.make(condition, fromExpression, queryType, select, groupBy, orderBy,
+        having, limit, set, insertFlags);
   }
 
   public CompleteQuery and(BooleanExpression expression) {
@@ -104,4 +111,20 @@ public class CompleteQuery extends Query {
     return null;
   }
 
+  public CompleteQuery limit(int offset, int limit) {
+    if (this instanceof SelectQuery) {
+      return SelectQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, Limit.make(offset, limit), set, insertFlags);
+    } else if (this instanceof InsertQuery) {
+      return InsertQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, Limit.make(offset, limit), set, insertFlags);
+    } else if (this instanceof UpdateQuery) {
+      return UpdateQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, Limit.make(offset, limit), set, insertFlags);
+    } else if (this instanceof DeleteQuery) {
+      return DeleteQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, Limit.make(offset, limit), set, insertFlags);
+    }
+    return null;
+  }
+
+  public CompleteQuery limit(int limit) {
+    return null;
+  }
 }

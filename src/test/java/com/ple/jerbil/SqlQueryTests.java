@@ -3,7 +3,6 @@ package com.ple.jerbil;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
-import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
@@ -112,6 +111,16 @@ public class SqlQueryTests {
         select *
         from item
         where type = 'weapon'
+        """, q.toSql());
+  }
+
+  @Test
+  void testLimitOffset() {
+    final CompleteQuery q = player.select().limit(5, 10);
+    assertEquals("""
+        select *
+        from player
+        limit 10, 10
         """, q.toSql());
   }
 

@@ -22,12 +22,10 @@ public class LiteralString implements Literal, StringExpression {
         return new LiteralString(value);
     }
 
-    @Override
     public BooleanExpression isGreaterThan(Expression i) {
         return null;
     }
 
-    @Override
     public BooleanExpression isLessThan(Expression i) {
         return null;
     }

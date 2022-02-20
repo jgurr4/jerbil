@@ -24,7 +24,7 @@ public abstract class FromExpression extends PotentialQuery {
 
   @Override
   public SelectQuery select(SelectExpression... selectExpressions) {
-    return new SelectQuery(null, this, QueryType.select, IArrayList.make(selectExpressions), null, null, null, null, null, false, false, false, false);
+    return new SelectQuery(null, this, QueryType.select, IArrayList.make(selectExpressions), null, null, null, null, null, null);
   }
 
   public abstract IList<Table> tableList();

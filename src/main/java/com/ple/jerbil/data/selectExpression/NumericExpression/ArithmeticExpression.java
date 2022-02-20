@@ -23,17 +23,14 @@ public class ArithmeticExpression implements NumericExpression {
     return new ArithmeticExpression(e1, e2, type);
   }
 
-  @Override
   public GreaterThan isGreaterThan(Expression i) {
     return GreaterThan.make(this, i);
   }
 
-  @Override
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression eq(Expression item) {
     return null;
   }

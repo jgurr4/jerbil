@@ -95,7 +95,6 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     return GreaterThan.make(this, value);
   }
 
-  @Override
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }

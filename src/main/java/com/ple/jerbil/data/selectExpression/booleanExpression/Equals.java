@@ -25,17 +25,14 @@ public class Equals implements BooleanExpression {
    return new Equals(e1, e2);
   }
 
-  @Override
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression eq(Expression item) {
     return null;
   }

@@ -15,20 +15,25 @@ import org.jetbrains.annotations.Nullable;
 public class QueryWithFrom extends PartialQuery {
 
 
-  protected QueryWithFrom(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType, @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy, @Nullable IList<BooleanExpression> having, @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable boolean mayInsert, @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing, @Nullable boolean mayThrowOnDuplicate) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace, triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+  protected QueryWithFrom(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
+                          @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
+                          @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy,
+                          @Nullable IList<BooleanExpression> having, @Nullable Limit limit,
+                          @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }
 
   public static QueryWithFrom make(FromExpression fromExpression) {
-    return new QueryWithFrom(null, fromExpression, null, null, null, null, null, null, null, false, false, false, false);
+    return new QueryWithFrom(null, fromExpression, null, null, null, null, null, null, null, null);
   }
 
   public SelectQuery selectAll() {
-    return SelectQuery.make(this.where, this.fromExpression, QueryType.select, IArrayList.make(SelectExpression.selectAll), this.groupBy, this.orderBy, this.having, this.limit, this.set, this.mayInsert, this.mayReplace, this.triggerDeleteWhenReplacing, this.mayThrowOnDuplicate);
+    return SelectQuery.make(where, fromExpression, QueryType.select, IArrayList.make(SelectExpression.selectAll),
+        groupBy, orderBy, having, limit, set, insertFlags);
   }
 
   public QueryWithFrom where(BooleanExpression where) {
-    return new QueryWithFrom(where, this.fromExpression, null, null, null, null, null, null, null, false, false, false, false);
+    return new QueryWithFrom(where, fromExpression, null, null, null, null, null, null, null, insertFlags);
   }
 
 }

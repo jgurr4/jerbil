@@ -78,17 +78,14 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
         BuildingHints.make(0b00000000));
   }
 
-  @Override
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression eq(Expression item) {
     return null;
   }

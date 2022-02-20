@@ -93,7 +93,6 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
     return GreaterThan.make(this, value);
   }
 
-  @Override
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }

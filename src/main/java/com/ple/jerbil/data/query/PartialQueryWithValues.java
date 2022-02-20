@@ -24,11 +24,8 @@ public class PartialQueryWithValues extends PartialQuery {
                                    @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                                    @Nullable IList<SelectExpression> groupBy, @Nullable IList<SelectExpression> orderBy,
                                    @Nullable IList<BooleanExpression> having, @Nullable Limit limit,
-                                   @Nullable IList<IMap<Column, Expression>> set, @Nullable boolean mayInsert,
-                                   @Nullable boolean mayReplace, @Nullable boolean triggerDeleteWhenReplacing,
-                                   @Nullable boolean mayThrowOnDuplicate) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, mayInsert, mayReplace,
-        triggerDeleteWhenReplacing, mayThrowOnDuplicate);
+                                   @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }
 
   public CompleteQuery set(Column column, Literal value) {

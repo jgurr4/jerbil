@@ -87,22 +87,18 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
     return null;
   }
 
-  @Override
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }
 
-  @Override
   public BooleanExpression eq(Expression item) {
     return null;
   }
 
-  @Override
   public BooleanExpression eq(Enum<?> value) {
     return null;
   }
