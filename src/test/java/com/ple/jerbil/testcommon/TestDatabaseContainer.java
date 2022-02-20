@@ -34,7 +34,7 @@ public class TestDatabaseContainer extends DatabaseContainer {
                                            ItemTableContainer item, InventoryTableContainer inventory,
                                            OrderTableContainer order) {
     final IMap<String, TableContainer> tables = IArrayMap.make(user.tableName, user, player.tableName, player,
-        item.tableName, item, inventory.tableName, inventory);
+        item.tableName, item, inventory.tableName, inventory, order.tableName, order);
     return new TestDatabaseContainer(database, user, player, item, inventory, order, tables);
   }
 

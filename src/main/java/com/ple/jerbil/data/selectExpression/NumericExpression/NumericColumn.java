@@ -20,9 +20,8 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
     super(columnName, table, dataSpec, generatedFrom, defaultValue, hints);
   }
 
-  public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression generatedFrom,
-                                   NumericExpression defaultValue, BuildingHints hints) {
-    return new NumericColumn(columnName, table, dataSpec, generatedFrom, defaultValue, hints);
+  public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
+    return new NumericColumn(columnName, table, dataSpec, null, null, hints);
   }
 
   @Override
@@ -30,14 +29,24 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
     return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue, hints);
   }
 
+  public static NumericColumn make(String columnName, Table table, BuildingHints hints) {
+    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, null, hints);
+  }
+
+  public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression generatedFrom,
+                                   NumericExpression defaultValue, BuildingHints hints) {
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, defaultValue, hints);
+  }
+
+
   @Override
   public NumericColumn indexed() {
-    return null;
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue, BuildingHints.make(0b01000000 + hints.flags));
   }
 
   @Override
   public NumericColumn primary() {
-    return null;
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue, BuildingHints.make(0b10000000 + hints.flags));
   }
 
   @Override
@@ -47,7 +56,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   @Override
   public NumericColumn invisible() {
-    return null;
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue, BuildingHints.make(0b00001000 + hints.flags));
   }
 
   @Override
@@ -113,11 +122,10 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   }
 
   public NumericColumn ai() {
-    //This has to be primary, it is implied.
-    return null;
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue, BuildingHints.make(0b10000001 + hints.flags));
   }
 
   public NumericColumn unsigned() {
-    return null;
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue, BuildingHints.make(0b00000010 + hints.flags));
   }
 }

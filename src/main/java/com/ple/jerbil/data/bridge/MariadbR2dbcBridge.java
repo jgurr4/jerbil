@@ -118,7 +118,7 @@ public class MariadbR2dbcBridge implements DataBridge {
           return DataGlobal.bridge.getGenerator().fromSql(tblCreateStr, table);
         })
         .collectList()
-        .map(columns -> TableContainer.make(columns.get(0).table, IArrayMap.make(columns.toArray(Column.emptyArray))))
+//        .map(columns -> TableContainer.make(columns.get(0).table, IArrayMap.make(columns.toArray(Column.emptyArray))))
       )
     );
     //TODO: Finish implementing this method to return DatabaseContainer with all the TableContainers and Columns inside them.

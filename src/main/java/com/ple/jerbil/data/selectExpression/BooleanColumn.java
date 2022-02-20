@@ -65,15 +65,15 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
     return null;
   }
 
-  public static Column make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
+  public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
     return new BooleanColumn(columnName, table, dataSpec, null, null, hints);
   }
 
-  public static Column make(String columnName, Table table, DataSpec dataSpec) {
+  public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec) {
     return new BooleanColumn(columnName, table, dataSpec, null, null, BuildingHints.make(0b00000000));
   }
 
-  public static Column make(String columnName, Table table) {
+  public static BooleanColumn make(String columnName, Table table) {
     return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool), null, null,
         BuildingHints.make(0b00000000));
   }

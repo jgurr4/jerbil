@@ -6,7 +6,6 @@ import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
-import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 import java.util.Objects;
 
@@ -52,8 +51,8 @@ public class PartialColumn implements Expression, OrderedExpression {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer));
   }
 
-  public NumericColumn asInt(int i) {
-    return null;
+  public NumericColumn asInt(int size) {
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer, size));
   }
 
   public NumericColumn asBigInt() {
@@ -72,8 +71,12 @@ public class PartialColumn implements Expression, OrderedExpression {
     return StringColumn.make(columnName, table, size);
   }
 
-  public EnumeralColumn asEnum(Class enumObj) {
+  public EnumeralColumn asEnum(Class<?> enumObj) {
     return EnumeralColumn.make(columnName, table, DataSpec.make(DataType.enumeration, enumObj));
+  }
+
+  public EnumeralColumn asSet(Class<?> enumObj) {
+    return EnumeralColumn.make(columnName, table, DataSpec.make(DataType.set, enumObj));
   }
 
   public String getColumnName() {
@@ -111,59 +114,55 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn id() {
-    return null;
+    return NumericColumn.make(columnName, table, BuildingHints.make(0b10000001));
   }
 
   public StringColumn asText() {
-    return null;
+    return StringColumn.make(columnName, table, DataSpec.make(DataType.text));
   }
 
   public NumericColumn asIntUnsigned() {
-    return null;
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), BuildingHints.make(0b00000010));
   }
 
   public NumericColumn asMediumIntUnsigned() {
-    return null;
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.mediumint), BuildingHints.make(0b00000010));
   }
 
   public NumericColumn asSmallInt() {
-    return null;
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.smallint));
   }
 
   public NumericColumn asTinyInt() {
-    return null;
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.tinyint));
   }
 
   public BooleanColumn asBoolean() {
     //MySql uses tinyint(1) data type to make a boolean column.
-    return null;
+    return BooleanColumn.make(columnName, table, DataSpec.make(DataType.bool));
   }
 
   public NumericColumn asDouble() {
-    return null;
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.aDouble));
   }
 
   public NumericColumn asFloat() {
-    return null;
-  }
-
-  public EnumeralColumn asSet(Class<?> enumObj) {
-    return null;
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.aFloat));
   }
 
   public DateColumn asDate() {
-    return null;
+    return DateColumn.make(columnName, table, DataSpec.make(DataType.date));
   }
 
   public DateColumn asTime() {
-    return null;
+    return DateColumn.make(columnName, table, DataSpec.make(DataType.time));
   }
 
   public DateColumn asDateTime() {
-    return null;
+    return DateColumn.make(columnName, table, DataSpec.make(DataType.datetime));
   }
 
   public DateColumn asTimeStamp() {
-    return null;
+    return DateColumn.make(columnName, table, DataSpec.make(DataType.timestamp));
   }
 }

@@ -7,8 +7,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
+@Immutable
 public class DatabaseBuilder {
 
+  //FIXME: Now I just need this to create the indexes and autoIncrementColumn fields for each CustomTableContainer using
+  // BuildingHints from each column.
   public static <T extends DatabaseContainer> T generate(Class<T> customDbContainerClass, String dbName) {
     T t = null;
     try {
@@ -21,7 +24,7 @@ public class DatabaseBuilder {
         }
       }
       IList<Object> args = IArrayList.make(db);
-      IList<Class<?>> customDbContainerParams = IArrayList.make();
+      IList<Class<?>> customDbContainerParams = IArrayList.make(db.getClass());
       for (int i = 0; i < parameters.length; i++) {
         final Class<?> type = parameters[i].getType();
         if (type.getSuperclass() != null) {

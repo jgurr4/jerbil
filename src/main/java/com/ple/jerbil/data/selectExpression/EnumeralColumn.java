@@ -9,14 +9,13 @@ import org.jetbrains.annotations.Nullable;
 public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpression {
 
   protected EnumeralColumn(String columnName, Table table, DataSpec dataSpec,
-                           @Nullable Expression generatedFrom,
-                           @Nullable Expression defaultValue,
-                           BuildingHints hints) {
+                           @Nullable Expression generatedFrom, @Nullable Expression defaultValue,
+                           @Nullable BuildingHints hints) {
     super(columnName, table, dataSpec, generatedFrom, defaultValue, hints);
   }
 
-  public static EnumeralColumn make(String columnName, Table table, DataSpec make) {
-    return null;
+  public static EnumeralColumn make(String columnName, Table table, DataSpec dataSpec) {
+    return new EnumeralColumn(columnName, table, dataSpec, null, null, null);
   }
 
   @Override
@@ -51,12 +50,12 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
 
   @Override
   public EnumeralColumn defaultValue(Expression e) {
-    return null;
+    return new EnumeralColumn(columnName, table, dataSpec, generatedFrom, e, hints);
   }
 
   @Override
   public EnumeralColumn defaultValue(Enum<?> value) {
-    return null;
+    return new EnumeralColumn(columnName, table, dataSpec, generatedFrom, Literal.make(value.name()), hints);
   }
 
   @Override

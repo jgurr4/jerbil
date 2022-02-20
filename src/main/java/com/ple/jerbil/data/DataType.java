@@ -1,13 +1,22 @@
 package com.ple.jerbil.data;
 
 public enum DataType {
+  character,
   varchar,
+  enumeration,
+  set,
+  text,
   bigint,
   mediumint,
   integer,
-  datetime,
+  smallint,
   tinyint,
-  bool,
-  enumeration,
   decimal,
+  aDouble,
+  aFloat,
+  date,
+  time,
+  datetime,
+  timestamp,
+  bool,
 }
