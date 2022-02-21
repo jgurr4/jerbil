@@ -16,14 +16,16 @@ public abstract class Column <T extends Column> extends PartialColumn{
     @Nullable public final Expression generatedFrom;
     @Nullable public final Expression defaultValue;
     public static Column[] emptyArray = new Column[0];
+    public final Expression onUpdate;
     public final BuildingHints hints;
 
     protected Column(String columnName, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom,
-                     @Nullable Expression defaultValue, BuildingHints hints) {
+                     @Nullable Expression defaultValue, @Nullable Expression onUpdate, BuildingHints hints) {
         super(columnName, table);
         this.dataSpec = dataSpec;
         this.generatedFrom = generatedFrom;
         this.defaultValue = defaultValue;
+        this.onUpdate = onUpdate;
         this.hints = hints;
     }
 
@@ -48,6 +50,8 @@ public abstract class Column <T extends Column> extends PartialColumn{
     public abstract T defaultValue(Enum<?> value);
 
     public abstract T onUpdate(Expression e);
+
+    public abstract T onUpdate(Enum<?> value);
 
     public T generatedFrom(Expression generatedFrom) {
         return make(columnName, dataSpec, generatedFrom);

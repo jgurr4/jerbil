@@ -12,6 +12,7 @@ import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
 import com.ple.util.IList;
+import org.jetbrains.annotations.Nullable;
 
 @Immutable
 public class UserTableContainer extends TableContainer {
@@ -21,9 +22,10 @@ public class UserTableContainer extends TableContainer {
   public final String tableName;
 
   public UserTableContainer(Table table, NumericColumn userId,
-                            StringColumn name, NumericColumn age) {
+                            StringColumn name, NumericColumn age, @Nullable IList<Index> indexes,
+                            @Nullable NumericColumn autoIncrementColumn) {
     super(table, IArrayMap.make(userId.columnName, userId, name.columnName, name, age.columnName, age),
-        null, null, null);
+        null, indexes, autoIncrementColumn);
     this.userId = userId;
     this.name = name;
     this.age = age;
@@ -37,7 +39,7 @@ public class UserTableContainer extends TableContainer {
     final NumericColumn age = Column.make("age", userTable).asInt();
 //    final IList<Index> indexSpecs = IArrayList.make(Index.make(IndexType.secondary, name));
 //    final NumericColumn autoIncrementColumn = userId;
-    return new UserTableContainer(userTable, userId, name, age);
+    return new UserTableContainer(userTable, userId, name, age, null, null);
   }
 /* Alternative style that we may decide to support as well
   public final Column userId;

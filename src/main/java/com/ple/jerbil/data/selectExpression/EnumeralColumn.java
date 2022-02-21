@@ -9,13 +9,13 @@ import org.jetbrains.annotations.Nullable;
 public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpression {
 
   protected EnumeralColumn(String columnName, Table table, DataSpec dataSpec,
-                           @Nullable Expression generatedFrom, @Nullable Expression defaultValue,
-                           @Nullable BuildingHints hints) {
-    super(columnName, table, dataSpec, generatedFrom, defaultValue, hints);
+                           @Nullable Expression generatedFrom, @Nullable StringExpression defaultValue,
+                           @Nullable StringExpression onUpdate, @Nullable BuildingHints hints) {
+    super(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, hints);
   }
 
   public static EnumeralColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new EnumeralColumn(columnName, table, dataSpec, null, null, null);
+    return new EnumeralColumn(columnName, table, dataSpec, null, null, null, null);
   }
 
   @Override
@@ -50,16 +50,23 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
 
   @Override
   public EnumeralColumn defaultValue(Expression e) {
-    return new EnumeralColumn(columnName, table, dataSpec, generatedFrom, e, hints);
+    return new EnumeralColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) e,
+        (StringExpression) onUpdate, hints);
   }
 
   @Override
   public EnumeralColumn defaultValue(Enum<?> value) {
-    return new EnumeralColumn(columnName, table, dataSpec, generatedFrom, Literal.make(value.name()), hints);
+    return new EnumeralColumn(columnName, table, dataSpec, generatedFrom, Literal.make(value.name()),
+        (StringExpression) onUpdate, hints);
   }
 
   @Override
   public EnumeralColumn onUpdate(Expression e) {
+    return null;
+  }
+
+  @Override
+  public EnumeralColumn onUpdate(Enum<?> value) {
     return null;
   }
 

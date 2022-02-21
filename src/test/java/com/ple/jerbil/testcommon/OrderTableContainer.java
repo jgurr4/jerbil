@@ -14,7 +14,7 @@ public class OrderTableContainer extends TableContainer {
 
   public final NumericColumn orderId;
   public final StringColumn add;
-//  public final StringColumn phrase;
+  public final StringColumn phrase;
   public final NumericColumn userId;
   public final NumericColumn itemId;
   public final NumericColumn scale;
@@ -28,21 +28,22 @@ public class OrderTableContainer extends TableContainer {
   public final DateColumn saleDate;
   public final DateColumn saleTime;
   private final NumericColumn myInvis;
-//  public final DateColumn saleDateTime;
+  public final DateColumn saleDateTime;
   public final String tableName;
 
   protected OrderTableContainer(Table table, IMap<String, Column> columns,
                                 NumericColumn orderId, StringColumn add,
-                                NumericColumn userId, NumericColumn itemId, NumericColumn scale,
+                                StringColumn phrase, NumericColumn userId,
+                                NumericColumn itemId, NumericColumn scale,
                                 NumericColumn quantity, NumericColumn price, NumericColumn total,
                                 BooleanColumn finalized, NumericColumn myDouble, NumericColumn myFloat,
                                 EnumeralColumn mySet,
                                 DateColumn saleDate, DateColumn saleTime,
-                                NumericColumn myInvis) {
+                                DateColumn saleDateTime, NumericColumn myInvis) {
     super(table, columns, null, null, null);
     this.orderId = orderId;
     this.add = add;
-//    this.phrase = phrase;
+    this.phrase = phrase;
     this.quantity = quantity;
     this.price = price;
     this.total = total;
@@ -55,7 +56,7 @@ public class OrderTableContainer extends TableContainer {
     this.mySet = mySet;
     this.saleDate = saleDate;
     this.saleTime = saleTime;
-//    this.saleDateTime = saleDateTime;
+    this.saleDateTime = saleDateTime;
     this.myInvis = myInvis;
     this.tableName = table.tableName;
   }
@@ -64,7 +65,7 @@ public class OrderTableContainer extends TableContainer {
     final Table orderTable = Table.make("order", db);
     final NumericColumn orderId = Column.make("orderId", orderTable).asBigInt().ai().unsigned();  //Alternatively just use .bigId() to replace all 3.
     final StringColumn add = Column.make("add", orderTable).asVarchar().defaultValue(Literal.make("barter")).unique();  //Tests unique(), null and defaultValue()
-//    final StringColumn phrase = Column.make("phrase", orderTable).asText().fullText().allowNull();  //FIXME: Find out how to have allowNull inside BuildingHints.
+    final StringColumn phrase = Column.make("phrase", orderTable).asText().fullText().allowNull();
     final NumericColumn userId = Column.make("userId", orderTable).asIntUnsigned().indexed();  //TODO: Find out how users should specify to make composite index with these two columns
     final NumericColumn itemId = Column.make("itemId", orderTable).asInt(10).unsigned().indexed();  //Tests specifying the digits amount.
     final NumericColumn scale = Column.make("scale", orderTable).asMediumIntUnsigned();
@@ -77,7 +78,7 @@ public class OrderTableContainer extends TableContainer {
     final EnumeralColumn mySet = Column.make("mySet", orderTable).asSet(ItemType.class).defaultValue(ItemType.weapon);
     final DateColumn saleDate = Column.make("saleDate", orderTable).asDate();
     final DateColumn saleTime = Column.make("saleTime", orderTable).asTime();
-//    final DateColumn saleDateTime = Column.make("saleDateTime", orderTable).asDateTime().defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
+    final DateColumn saleDateTime = Column.make("saleDateTime", orderTable).asDateTime().defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
     //FIXME: Make .onUpdate() a field for columns, so that you can add .onUpdate() expression.
 //    Column.make("saleTimeStamp", orderTable).asTimeStamp().defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
     final NumericColumn myInvis = Column.make("myInvis", orderTable).asInt().invisible();
@@ -91,10 +92,8 @@ public class OrderTableContainer extends TableContainer {
     final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale, total.columnName, total,
         finalized.columnName, finalized, myDouble.columnName, myDouble, myFloat.columnName, myFloat, mySet.columnName,
         mySet, saleDate.columnName, saleDate, saleTime.columnName, saleTime, myInvis.columnName, myInvis);
-//    return new OrderTableContainer(orderTable, columns, orderId, add, phrase, userId,
-//        itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime, myInvis);
-    return new OrderTableContainer(orderTable, columns, orderId, add, userId,
-        itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, myInvis);
+    return new OrderTableContainer(orderTable, columns, orderId, add, phrase, userId,
+        itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime, myInvis);
   }
 
   //total decimal(14,2) as (price * quantity);

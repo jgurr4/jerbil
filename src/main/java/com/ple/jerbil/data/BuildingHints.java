@@ -13,12 +13,14 @@ package com.ple.jerbil.data;
  * 00000100 = unique
  * 00000010 = unsigned
  * 00000001 = auto_increment
+ * 000000001 = allowNull
+ * 0000000000000000   total number of bits = 16
  */
 public class BuildingHints {
-  public final byte flags;
+  public final short flags;
 
   protected BuildingHints(int flags) {
-    this.flags = (byte) flags;
+    this.flags = (short) flags;
   }
 
   public static BuildingHints make(int i) {
