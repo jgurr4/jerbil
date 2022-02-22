@@ -4,6 +4,6 @@ public enum IndexType {
   primary,
   secondary,
   foreign,
-//  fulltext,
+  fulltext,
 //  spatial
 }

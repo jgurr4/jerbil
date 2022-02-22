@@ -30,23 +30,23 @@ public class PartialColumn implements Expression, OrderedExpression {
     return new PartialColumn(name, table);
   }
 
-/*
-  public BooleanExpression isGreaterThan(Expression i) {
-    return null;
-  }
+  /*
+    public BooleanExpression isGreaterThan(Expression i) {
+      return null;
+    }
 
-  public BooleanExpression isLessThan(Expression i) {
-    return null;
-  }
+    public BooleanExpression isLessThan(Expression i) {
+      return null;
+    }
 
-  public BooleanExpression eq(Expression item) {
-    return null;
-  }
+    public BooleanExpression eq(Expression item) {
+      return null;
+    }
 
-  public BooleanExpression eq(Enum<?> value) {
-    return null;
-  }
-*/
+    public BooleanExpression eq(Enum<?> value) {
+      return null;
+    }
+  */
   public NumericColumn asInt() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer));
   }
@@ -106,7 +106,7 @@ public class PartialColumn implements Expression, OrderedExpression {
 
   public NumericColumn bigId() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), null, null,
-        BuildingHints.make(0b10000001));
+        null, BuildingHints.make(0b1000000100000000));
   }
 
   public NumericColumn mediumId() {
@@ -114,7 +114,7 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn id() {
-    return NumericColumn.make(columnName, table, BuildingHints.make(0b10000001));
+    return NumericColumn.make(columnName, table, BuildingHints.make(0b1000000100000000));
   }
 
   public StringColumn asText() {
@@ -122,11 +122,11 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn asIntUnsigned() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), BuildingHints.make(0b00000010));
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), BuildingHints.make(0b0000001000000000));
   }
 
   public NumericColumn asMediumIntUnsigned() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.mediumint), BuildingHints.make(0b00000010));
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.mediumint), BuildingHints.make(0b0000001000000000));
   }
 
   public NumericColumn asSmallInt() {

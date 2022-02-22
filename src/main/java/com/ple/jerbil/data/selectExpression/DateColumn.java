@@ -19,7 +19,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   @Override
   public DateColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
     return new DateColumn(columnName, table, dataSpec, generatedFrom, (DateExpression) defaultValue,
-        (DateExpression) onUpdate, BuildingHints.make(0b00000000));
+        (DateExpression) onUpdate, BuildingHints.make(0b0));
   }
 
   @Override
@@ -59,7 +59,8 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
 
   @Override
   public DateColumn onUpdate(Expression onUpdate) {
-    return new DateColumn(columnName, table, dataSpec, generatedFrom, (DateExpression) defaultValue, (DateExpression) onUpdate, hints);
+    return new DateColumn(columnName, table, dataSpec, generatedFrom, (DateExpression) defaultValue,
+        (DateExpression) onUpdate, hints);
   }
 
   @Override
@@ -72,11 +73,11 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   }
 
   public static DateColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new DateColumn(columnName, table, dataSpec, null, null, null, null);
+    return new DateColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b0));
   }
 
   public static DateColumn make(String columnName, Table table) {
-    return new DateColumn(columnName, table, DataSpec.make(DataType.datetime), null, null, null, null);
+    return new DateColumn(columnName, table, DataSpec.make(DataType.datetime), null, null, null, BuildingHints.make(0b0));
   }
 
   public DateColumn defaultValue(DateExpression dateExp) {

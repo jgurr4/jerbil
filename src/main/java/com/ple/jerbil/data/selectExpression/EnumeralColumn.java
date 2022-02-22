@@ -10,12 +10,12 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
 
   protected EnumeralColumn(String columnName, Table table, DataSpec dataSpec,
                            @Nullable Expression generatedFrom, @Nullable StringExpression defaultValue,
-                           @Nullable StringExpression onUpdate, @Nullable BuildingHints hints) {
+                           @Nullable StringExpression onUpdate, BuildingHints hints) {
     super(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, hints);
   }
 
   public static EnumeralColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new EnumeralColumn(columnName, table, dataSpec, null, null, null, null);
+    return new EnumeralColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b0));
   }
 
   @Override

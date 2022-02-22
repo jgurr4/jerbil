@@ -22,13 +22,13 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   @Override
   public BooleanColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
     return new BooleanColumn(columnName, table, dataSpec, generatedFrom, null, null,
-        BuildingHints.make(0b00000000));
+        BuildingHints.make(0b0));
   }
 
   @Override
   public BooleanColumn indexed() {
     return new BooleanColumn(columnName, table, dataSpec, generatedFrom, (BooleanExpression) defaultValue,
-        (BooleanExpression) onUpdate, BuildingHints.make(hints.flags + 0b01000000));
+        (BooleanExpression) onUpdate, BuildingHints.make(hints.flags + 0b0100000000000000));
   }
 
   @Override
@@ -81,7 +81,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
 
   public static BooleanColumn make(String columnName, Table table) {
     return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool), null, null,
-        null, BuildingHints.make(0b00000000));
+        null, BuildingHints.make(0b0));
   }
 
   public BooleanExpression isGreaterThan(Expression i) {

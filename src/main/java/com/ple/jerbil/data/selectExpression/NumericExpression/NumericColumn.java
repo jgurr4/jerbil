@@ -17,7 +17,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   protected NumericColumn(String columnName, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom,
                           @Nullable NumericExpression defaultValue, @Nullable NumericExpression onUpdate,
-                          @Nullable BuildingHints hints) {
+                          BuildingHints hints) {
     super(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, hints);
   }
 
@@ -45,13 +45,13 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   @Override
   public NumericColumn indexed() {
     return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue,
-        (NumericExpression) onUpdate, BuildingHints.make(0b01000000 + hints.flags));
+        (NumericExpression) onUpdate, BuildingHints.make(0b0100000000000000 + hints.flags));
   }
 
   @Override
   public NumericColumn primary() {
     return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue,
-        (NumericExpression) onUpdate, BuildingHints.make(0b10000000 + hints.flags));
+        (NumericExpression) onUpdate, BuildingHints.make(0b1000000000000000 + hints.flags));
   }
 
   @Override
@@ -62,7 +62,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   @Override
   public NumericColumn invisible() {
     return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue,
-        (NumericExpression) onUpdate, BuildingHints.make(0b00001000 + hints.flags));
+        (NumericExpression) onUpdate, BuildingHints.make(0b0000100000000000 + hints.flags));
   }
 
   @Override
@@ -92,21 +92,21 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression generatedFrom,
                                    NumericExpression defaultValue, NumericExpression onUpdate) {
-    return new NumericColumn(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, null);
+    return new NumericColumn(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, BuildingHints.make(0b0));
   }
 
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new NumericColumn(columnName, table, dataSpec, null, null, null, null);
+    return new NumericColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b0));
   }
 
   public static NumericColumn make(String columnName, Table table, int size) {
     return new NumericColumn(columnName, table, DataSpec.make(DataType.integer, size), null, null,
-        null, null);
+        null, BuildingHints.make(0b0));
   }
 
   public static NumericColumn make(String columnName, Table table) {
     return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, null,
-        null, null);
+        null, BuildingHints.make(0b0));
   }
 
   public GreaterThan isGreaterThan(Expression value) {
@@ -134,11 +134,11 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   public NumericColumn ai() {
     return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue,
-        (NumericExpression) onUpdate, BuildingHints.make(0b10000001 + hints.flags));
+        (NumericExpression) onUpdate, BuildingHints.make(0b1000000100000000 + hints.flags));
   }
 
   public NumericColumn unsigned() {
     return new NumericColumn(columnName, table, dataSpec, generatedFrom, (NumericExpression) defaultValue,
-        (NumericExpression) onUpdate, BuildingHints.make(0b00000010 + hints.flags));
+        (NumericExpression) onUpdate, BuildingHints.make(0b0000001000000000 + hints.flags));
   }
 }
