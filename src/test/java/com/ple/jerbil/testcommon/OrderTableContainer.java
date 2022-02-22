@@ -2,12 +2,15 @@ package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.util.IArrayMap;
+import com.ple.util.IList;
 import com.ple.util.IMap;
+import org.jetbrains.annotations.Nullable;
 
 @Immutable
 public class OrderTableContainer extends TableContainer {
@@ -27,20 +30,17 @@ public class OrderTableContainer extends TableContainer {
   public final EnumeralColumn mySet;
   public final DateColumn saleDate;
   public final DateColumn saleTime;
-  private final NumericColumn myInvis;
   public final DateColumn saleDateTime;
+  public final NumericColumn myInvis;
   public final String tableName;
 
-  protected OrderTableContainer(Table table, IMap<String, Column> columns,
-                                NumericColumn orderId, StringColumn add,
-                                StringColumn phrase, NumericColumn userId,
-                                NumericColumn itemId, NumericColumn scale,
-                                NumericColumn quantity, NumericColumn price, NumericColumn total,
-                                BooleanColumn finalized, NumericColumn myDouble, NumericColumn myFloat,
-                                EnumeralColumn mySet,
-                                DateColumn saleDate, DateColumn saleTime,
-                                DateColumn saleDateTime, NumericColumn myInvis) {
-    super(table, columns, null, null, null);
+  protected OrderTableContainer(Table table, IMap<String, Column> columns, NumericColumn orderId, StringColumn add,
+                                StringColumn phrase, NumericColumn userId, NumericColumn itemId, NumericColumn scale,
+                                NumericColumn quantity, NumericColumn price, NumericColumn total, BooleanColumn finalized,
+                                NumericColumn myDouble, NumericColumn myFloat, EnumeralColumn mySet, DateColumn saleDate,
+                                DateColumn saleTime, DateColumn saleDateTime, NumericColumn myInvis,
+                                @Nullable IList<Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
+    super(table, columns, null, indexes, autoIncrementColumn);
     this.orderId = orderId;
     this.add = add;
     this.phrase = phrase;
@@ -91,9 +91,10 @@ public class OrderTableContainer extends TableContainer {
 */
     final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale, total.columnName, total,
         finalized.columnName, finalized, myDouble.columnName, myDouble, myFloat.columnName, myFloat, mySet.columnName,
-        mySet, saleDate.columnName, saleDate, saleTime.columnName, saleTime, myInvis.columnName, myInvis);
+        mySet, saleDate.columnName, saleDate, saleTime.columnName, saleTime, saleDateTime.columnName, saleDateTime, myInvis.columnName, myInvis);
     return new OrderTableContainer(orderTable, columns, orderId, add, phrase, userId,
-        itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime, myInvis);
+        itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime,
+        myInvis, null, null);
   }
 
   //total decimal(14,2) as (price * quantity);

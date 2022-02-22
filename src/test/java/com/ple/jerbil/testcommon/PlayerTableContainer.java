@@ -6,9 +6,10 @@ import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.StringColumn;
-import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
 import com.ple.util.IList;
+import com.ple.util.IMap;
+import org.jetbrains.annotations.Nullable;
 
 @Immutable
 public class PlayerTableContainer extends TableContainer {
@@ -17,10 +18,13 @@ public class PlayerTableContainer extends TableContainer {
   public final StringColumn name;
   public final String tableName;
 
-  public PlayerTableContainer(Table table, NumericColumn playerId, NumericColumn userId,
-                              StringColumn name) {
-    super(table, IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId), StorageEngine.transactional,
-        null, null);
+  protected PlayerTableContainer(Table table,
+                                 IMap<String, Column> columns,
+                                 NumericColumn playerId, NumericColumn userId,
+                                 StringColumn name, @Nullable IList<Index> indexes,
+                                 @Nullable NumericColumn autoIncrementColumn) {
+    super(table, columns, StorageEngine.transactional,
+        indexes, autoIncrementColumn);
     this.playerId = playerId;
     this.userId = userId;
     this.tableName = table.tableName;
@@ -34,7 +38,8 @@ public class PlayerTableContainer extends TableContainer {
     final StringColumn name = Column.make("name", playerTable).asVarchar(20);
 //    final IList<Index> indexes = IArrayList.make(Index.make(IndexType.primary, playerId, userId));
 //    final NumericColumn autoIncrementColumn = playerId;
-    return new PlayerTableContainer(playerTable, playerId, userId, name);
+    final IMap<String, Column> columns = IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId);
+    return new PlayerTableContainer(playerTable, columns, playerId, userId, name, null, null);
   }
 
 }

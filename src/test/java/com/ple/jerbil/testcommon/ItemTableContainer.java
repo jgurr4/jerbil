@@ -2,6 +2,7 @@ package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -9,6 +10,9 @@ import com.ple.jerbil.data.selectExpression.EnumeralColumn;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.util.IArrayMap;
+import com.ple.util.IList;
+import com.ple.util.IMap;
+import org.jetbrains.annotations.Nullable;
 
 @Immutable
 public class ItemTableContainer extends TableContainer {
@@ -18,11 +22,10 @@ public class ItemTableContainer extends TableContainer {
   public final NumericColumn price;
   public final String tableName;
 
-  protected ItemTableContainer(Table table, NumericColumn itemId, StringColumn name, EnumeralColumn type,
-                               NumericColumn price) {
-    super(table, IArrayMap.make(
-        itemId.columnName, itemId, name.columnName, name, type.columnName, type, price.columnName, price), null,
-        null, null);
+  protected ItemTableContainer(Table table, IMap<String, Column> columns, NumericColumn itemId,
+                               StringColumn name, EnumeralColumn type, NumericColumn price, @Nullable IList<Index> indexes,
+                               @Nullable NumericColumn autoIncrementColumn) {
+    super(table, columns, null, indexes, autoIncrementColumn);
     this.itemId = itemId;
     this.name = name;
     this.type = type;
@@ -39,7 +42,9 @@ public class ItemTableContainer extends TableContainer {
 //    final IList<Index> indexSpecs = IArrayList.make(Index.make(IndexType.primary, itemId),
 //        Index.make(IndexType.secondary, name));
 //    final NumericColumn autoIncrementColumn = itemId;
-    return new ItemTableContainer(itemTable, itemId, name, type, price);
+    final IMap<String, Column> columns = IArrayMap.make(
+        itemId.columnName, itemId, name.columnName, name, type.columnName, type, price.columnName, price);
+    return new ItemTableContainer(itemTable, columns, itemId, name, type, price, null, null);
   }
 
 }

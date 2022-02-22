@@ -3,10 +3,7 @@ package com.ple.jerbil.data;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
-import com.ple.util.IArrayList;
-import com.ple.util.IEntry;
-import com.ple.util.IList;
-import com.ple.util.IMap;
+import com.ple.util.*;
 
 import java.lang.reflect.*;
 
@@ -16,14 +13,14 @@ public class DatabaseBuilder {
   //FIXME: Now I just need this to create the indexes and autoIncrementColumn fields for each CustomTableContainer using
   // BuildingHints from each column.
   public static <T extends DatabaseContainer> T generate(Class<T> customDbContainerClass, String dbName) {
-    Constructor<?>[] customTableConstructors = null;
-    Parameter[] customTableConstructorParams = null;
-    IList<Class<?>> customTableConstructorParamClasses = null;
-    Constructor<?> customTableConstructor = null;
-    AutoIncIndex columnAttributes = null;
-    Field[] customTableContainerFields = null;
+    Constructor<?>[] customTblConstructors = null;
+    Parameter[] customTblConstructorParams = null;
+    IList<Class<?>> customTblConstructorParamClasses = IArrayList.empty;
+    Constructor<?> customTblConstructor = null;
+    AutoIncIndex tblAutoIndexes = null;
+    Field[] customTblContainerFields = null;
     Object fieldValue = null;
-    IList<Object> customTableArgs = null;
+    IList<Object> customTblArgs = IArrayList.empty;
     T t = null;
     try {
       Parameter[] parameters = null;
@@ -34,7 +31,7 @@ public class DatabaseBuilder {
           parameters = declaredMethod.getParameters();
         }
       }
-      IList<Object> customDatabaseContainerArgs = IArrayList.make(db);
+      IList<Object> customDbContainerArgs = IArrayList.make(db);
       IList<Class<?>> customDbContainerParams = IArrayList.make(db.getClass());
       for (int i = 0; i < parameters.length; i++) {
         final Class<?> type = parameters[i].getType();
@@ -42,70 +39,73 @@ public class DatabaseBuilder {
           if (type.getSuperclass().equals(TableContainer.class)) {
             final Method method = type.getMethod("make", Database.class);
             TableContainer tc = (TableContainer) method.invoke(null, db);
-            final IMap<String, Column> columns = tc.columns;
-            for (IEntry<String, Column> column : columns) {
-              if (column.value.hints.flags > 0) {
-                customTableConstructors = type.getConstructors();
-                customTableConstructorParams = customTableConstructors[0].getParameters();
-                customTableConstructorParamClasses = IArrayList.make();
-                for (Parameter param : customTableConstructorParams) {
-                  customTableConstructorParamClasses = customTableConstructorParamClasses.add(param.getType());
-                }
-                customTableConstructor = type.getConstructor(customTableConstructorParamClasses.toArray());
-                columnAttributes = getColumnAttributes(column);
-              }
-              customTableArgs = IArrayList.make(tc.table);
-              // Get the values of fields from tc. Specifically the Table and all the Columns.
-              // Add them to the customTableArgs list.
-            }
-            customTableContainerFields = tc.getClass().getDeclaredFields();
-            for (Field field : customTableContainerFields) {
+            IList<Column> columns = IArrayList.empty;
+            customTblContainerFields = tc.getClass().getDeclaredFields();
+            customTblArgs = IArrayList.make(tc.table, tc.columns);
+            for (Field field : customTblContainerFields) {
               field.setAccessible(true);
               fieldValue = field.get(tc);
               if (fieldValue instanceof Column) {
-                customTableArgs = customTableArgs.add(fieldValue);
+                customTblArgs = customTblArgs.add(fieldValue);
+                columns = columns.add((Column) fieldValue);
               }
             }
-            customTableArgs = customTableArgs.add(columnAttributes.indexes);
-            customTableArgs = customTableArgs.add(columnAttributes.autoIncrementColumn);
+            tblAutoIndexes = getColumnAttributes(columns);
+            if (tblAutoIndexes.indexes != null || tblAutoIndexes.autoIncrementColumn != null) {
+              customTblConstructors = type.getDeclaredConstructors();
+              customTblConstructorParams = customTblConstructors[0].getParameters();
+              customTblConstructorParamClasses = IArrayList.make();
+              for (Parameter param : customTblConstructorParams) {
+                customTblConstructorParamClasses = customTblConstructorParamClasses.add(param.getType());
+              }
+              customTblConstructor = type.getDeclaredConstructor(customTblConstructorParamClasses.toArray());
+            }
+            customTblArgs = customTblArgs.add(tblAutoIndexes.indexes);
+            customTblArgs = customTblArgs.add(tblAutoIndexes.autoIncrementColumn);
             // replace customTableContainer with new instance which includes the indexes and autoIncrementColumn arguments.
-            tc = (TableContainer) customTableConstructor.newInstance(customTableArgs.toArray());
-            customDatabaseContainerArgs = customDatabaseContainerArgs.add(tc);
+            customTblConstructor.setAccessible(true);
+            tc = (TableContainer) customTblConstructor.newInstance(customTblArgs.toArray());
+            customDbContainerArgs = customDbContainerArgs.add(tc);
             customDbContainerParams = customDbContainerParams.add(type);
           }
         }
       }
       t = (T) customDbContainerClass.getMethod("make", customDbContainerParams.toArray())
-          .invoke(null, customDatabaseContainerArgs.toArray());
+          .invoke(null, customDbContainerArgs.toArray());
     } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException | InstantiationException e) {
       e.printStackTrace();
     }
     return t;
   }
 
-  private static AutoIncIndex getColumnAttributes(IEntry<String, Column> column) {
-    // Create the indexes and autoIncrementColumn objects here.
+  private static AutoIncIndex getColumnAttributes(IList<Column> columns) {
     IList<Index> indexes = IArrayList.make();
     NumericColumn autoIncColumn = null;
-    if ((column.value.hints.flags >> 8 & 1) == 1) { //Using rightshift and a number will move value at position to furthest to the right. Then using AND with a mask will obtain the last digit.
-      // means auto_increment is true.
-      indexes = indexes.add(Index.make(IndexType.primary, column.value));
-      autoIncColumn = (NumericColumn) column.value;
-    } else if ((column.value.hints.flags >> 15 & 1) == 1) {
-      // means primary key is true
-      indexes = indexes.add(Index.make(IndexType.primary, column.value));
-    }
-    if ((column.value.hints.flags >> 12 & 1) == 1) {
-      // means fulltext is true.
-      indexes = indexes.add(Index.make(IndexType.fulltext, column.value));
-    }
-    if ((column.value.hints.flags >> 13 & 1) == 1) {
-      // means foreign key is true.
-      indexes = indexes.add(Index.make(IndexType.foreign, column.value));
-    }
-    if ((column.value.hints.flags >> 14 & 1) == 1) {
-      // means index/secondary key is true.
-      indexes = indexes.add(Index.make(IndexType.secondary, column.value));
+    Index primary = null;  //This only works for multi-column primary keys. All other indexes I have to make a way for
+    // users to specify if it is part of another index, or if it is different index.
+    for (Column column : columns) {
+      if ((column.hints.flags >> 8 & 1) == 1) {
+        indexes = indexes.add(Index.make(IndexType.primary, column));
+        autoIncColumn = (NumericColumn) column;
+      } else if ((column.hints.flags >> 15 & 1) == 1) {
+        if (primary == null) {
+          primary = Index.make(IndexType.primary, column);
+          indexes = indexes.add(primary);
+        } else {
+          indexes = indexes.remove(primary);
+          primary = Index.make(IndexType.primary, primary.columns.add(column).toArray());
+          indexes = indexes.add(primary);
+        }
+      }
+      if ((column.hints.flags >> 12 & 1) == 1) {
+        indexes = indexes.add(Index.make(IndexType.fulltext, column));
+      }
+      if ((column.hints.flags >> 13 & 1) == 1) {
+        indexes = indexes.add(Index.make(IndexType.foreign, column));
+      }
+      if ((column.hints.flags >> 14 & 1) == 1) {
+        indexes = indexes.add(Index.make(IndexType.secondary, column));
+      }
     }
     return new AutoIncIndex(indexes, autoIncColumn);
   }
