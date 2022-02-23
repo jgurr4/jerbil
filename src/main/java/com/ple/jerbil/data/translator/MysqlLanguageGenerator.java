@@ -53,7 +53,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     final String formattedTable = formatTable(createTableString);
     //TODO: Finish implementing.
 
-     return null;
+    return null;
   }
 
 
@@ -82,7 +82,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     IList<Column> columns = IArrayList.make();
     if (formattedTable.contains("PRIMARY KEY (")) {
       final int primaryIndex = formattedTable.indexOf("PRIMARY KEY (") + 13;
-      final String[] primaryColumns = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex)).split(",");
+      final String[] primaryColumns = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex))
+          .split(",");
       indexedColumns = indexedColumns.put("PRIMARY KEY", primaryColumns);
     }
     if (formattedTable.contains("\n  KEY ")) {
@@ -176,11 +177,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private String[] formatToColumnLines(String formattedTable) {
     return formattedTable
-      .replaceAll("\n\\) ENGINE=.*", "")
-      .replaceAll("^CREATE TABLE .*\n", "")
-      .replaceAll("\n\s+PRIMARY KEY .*", "")
-      .replaceAll("\n\s+KEY .* \\(.*", "")
-      .split("\n");
+        .replaceAll("\n\\) ENGINE=.*", "")
+        .replaceAll("^CREATE TABLE .*\n", "")
+        .replaceAll("\n\s+PRIMARY KEY .*", "")
+        .replaceAll("\n\s+KEY .* \\(.*", "")
+        .split("\n");
   }
 
   private String formatTable(String tableInfo) {
@@ -367,7 +368,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       final LiteralNumber n = (LiteralNumber) e;
       output = n.value.toString();
     } else {
-      throw new RuntimeException("Unknown Expression: " + e.getClass().getName());
+      throw new RuntimeException("Unknown Expression ");
     }
     return output;
   }
@@ -460,11 +461,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         sql += toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1);
         sql += operator + getNumericExpression((NumericExpression) arExp.e2);
       } else if (arExp.e2 instanceof ArithmeticExpression && !(arExp.e1 instanceof ArithmeticExpression)) {
-        sql += getNumericExpression((NumericExpression) arExp.e1) + operator + "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e2) + ")";
+        sql += getNumericExpression((NumericExpression) arExp.e1) + operator + "(" + toSqlArithmetic(sql,
+            (ArithmeticExpression) arExp.e2) + ")";
       } else if (arExp.e1 instanceof ArithmeticExpression && arExp.e2 instanceof ArithmeticExpression) {
-        sql += "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1) + ")" + operator + "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e2) + ")";
+        sql += "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1) + ")" + operator + "(" + toSqlArithmetic(sql,
+            (ArithmeticExpression) arExp.e2) + ")";
       } else {
-        sql += getNumericExpression((NumericExpression) arExp.e1) + operator + getNumericExpression((NumericExpression) arExp.e2);
+        sql += getNumericExpression((NumericExpression) arExp.e1) + operator + getNumericExpression(
+            (NumericExpression) arExp.e2);
       }
       return sql;
     } catch (Exception e) {
@@ -480,7 +484,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else if (e instanceof LiteralNumber) {
       return ((LiteralNumber) e).value.toString();
     } else {
-      throw new ClassNotFoundException("This class " + e.getClass() + " is not supported in getNumericExpression() method. Must be added in order to support it's use.");
+      throw new ClassNotFoundException(
+          "This class " + e.getClass() + " is not supported in getNumericExpression() method. Must be added in order to support it's use.");
     }
   }
 
@@ -639,8 +644,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private String generateIndexName(String indexedColumns) {
     return indexedColumns.replaceAll(",", "_")
-      .replaceAll("[aeiou]", "")
-      .replaceAll("([a-z])\\1*", "$1");
+        .replaceAll("[aeiou]", "")
+        .replaceAll("([a-z])\\1*", "$1");
   }
 
 }

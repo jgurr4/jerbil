@@ -3,6 +3,8 @@ package com.ple.jerbil.data.selectExpression.NumericExpression;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.OrderedExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
+import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
 /**
  * NumberExpression is any expression that evaluates to a numeric value. For example:
@@ -36,7 +38,7 @@ public interface NumericExpression extends OrderedExpression {
     }
 
     default BooleanExpression isGreaterThan(NumericExpression numExp) {
-        return null;
+        return GreaterThan.make(this, numExp);
     }
 
     default BooleanExpression isGreaterThanOrEqual(NumericExpression numExp) {
@@ -60,8 +62,7 @@ public interface NumericExpression extends OrderedExpression {
     }
 
     default BooleanExpression eq(NumericExpression numExp) {
-        // TODO: Each of these shortcut convenience methods should point to the real ones, so code isn't duplicated.
-        return null;
+        return Equals.make(this, numExp);
     }
 
     default BooleanExpression ne(NumericExpression numExp) {

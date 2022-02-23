@@ -35,6 +35,7 @@ public class SqlQueryTests {
     );
   }
 
+/*
   @Test
   void temporaryTest() {
     //This more verbose method makes it so that column names will never conflict with Database or Tables properties/fields.
@@ -56,6 +57,7 @@ public class SqlQueryTests {
     Mono<String> rName = q.execute().unwrapFlux()
         .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).next();
   }
+*/
 
   @Test
   void testSelect() {
@@ -106,6 +108,7 @@ public class SqlQueryTests {
         """, q2.toSql());
   }
 
+  //FIXME
   @Test
   void testSelectEnum() {
     final CompleteQuery q = item.where(item.type.eq(ItemType.weapon)).selectAll();
@@ -116,6 +119,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testLimitOffset() {
     final CompleteQuery q = player.select().limit(5, 10);
@@ -156,6 +160,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testGroupBy() {
     final CompleteQuery q = item.select(item.type, Agg.count.as("total")).groupBy(item.type);
@@ -166,6 +171,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testHaving() {
     final CompleteQuery q = item.select(item.name, Agg.sum(item.price)).groupBy(item.name)
@@ -183,6 +189,7 @@ public class SqlQueryTests {
     //TODO: Implement this.
   }
 
+  //FIXME
   @Test
   void testOrderBy() {
     final CompleteQuery q = item.select(item.name, item.price).where(item.price.ge(make(2.32)))
@@ -195,6 +202,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testSelectDistinct() {
     final CompleteQuery q = order.selectDistinct(order.total).where(order.finalized);
@@ -205,6 +213,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testSelectNull() {
     final CompleteQuery q = item.select(item.itemId).where(item.type.isNull())
@@ -220,6 +229,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testSelectRegexp() {
     final CompleteQuery q = item.select(item.name).where(item.name.isRegexp(make(".*ohn.*")))
@@ -235,6 +245,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testComplexExpressions() {
     final CompleteQuery q = item
@@ -254,12 +265,14 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testExpressionWithoutTable() {
     final CompleteQuery q = make(32).minus(make(15)).as("result").select();
     assertEquals("select 32 - 15 as result", q.toSql());
   }
 
+  //FIXME
   @Test
   void testUnionAndBetween() {
     final CompleteQuery q = user.select(user.userId, user.name).where(user.userId.isBetween(make(4), make(10)))
@@ -275,6 +288,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testUnionAllAndLike() {
     final CompleteQuery q = user.select(user.userId, user.name).where(user.name.isLike(make("%oh%")))
@@ -290,18 +304,18 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
+  //FIXME
   @Test
   void testMatchFullText() {
-/*
     final CompleteQuery q = order.select(order.phrase).whereMatch(order.phrase, make("Hello there"));
     assertEquals("""
         select phrase from order
         where match (phrase)
         against ('hello there')
         """, q.toSql());
-*/
   }
 
+  //FIXME
   @Test
   void testExplain() {
     final CompleteQuery q1 = order.select().explain();
@@ -316,6 +330,7 @@ public class SqlQueryTests {
         """, q2.toSql());
   }
 
+  //FIXME
   @Test
   void testAnalyze() { //For mysqlbridge it would have to do explain analyze select, but for mariadbbridge it would just do analyze select.
     final CompleteQuery q1 = order.select().analyze();

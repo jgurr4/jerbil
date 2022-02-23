@@ -5,10 +5,6 @@ import com.ple.jerbil.data.selectExpression.Expression;
 
 import java.util.Objects;
 
-/**
- * Object representing GreaterThan BooleanExpression.
- *
- */
 @Immutable
 public class GreaterThan implements BooleanExpression {
 
@@ -25,6 +21,7 @@ public class GreaterThan implements BooleanExpression {
   }
 
 
+/*
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }
@@ -36,6 +33,7 @@ public class GreaterThan implements BooleanExpression {
   public BooleanExpression eq(Expression item) {
     return null;
   }
+*/
 
   @Override
   public boolean equals(Object o) {

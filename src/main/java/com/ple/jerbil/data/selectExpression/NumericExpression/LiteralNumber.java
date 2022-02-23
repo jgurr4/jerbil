@@ -27,8 +27,12 @@ public class LiteralNumber<N extends Number> implements Literal, NumericExpressi
         return new LiteralNumber(value);
     }
 
+  public static LiteralNumber make(int i) {
+    return new LiteralNumber(i);
+  }
+
   public static LiteralNumber make(double i) {
-    return null;
+    return new LiteralNumber(i);
   }
 
   public GreaterThan isGreaterThan(Expression i) {
