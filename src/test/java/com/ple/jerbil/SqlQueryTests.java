@@ -108,7 +108,6 @@ public class SqlQueryTests {
         """, q2.toSql());
   }
 
-  //FIXME
   @Test
   void testSelectEnum() {
     final CompleteQuery q = item.where(item.type.eq(ItemType.weapon)).selectAll();

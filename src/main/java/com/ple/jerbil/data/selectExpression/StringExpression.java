@@ -58,7 +58,7 @@ public interface StringExpression extends OrderedExpression {
   }
 
   default BooleanExpression eq(Enum<?> item) {
-    return null;
+    return Equals.make(this, Literal.make(item.toString()));
   }
 
   default BooleanExpression ne(StringExpression strExp) {
