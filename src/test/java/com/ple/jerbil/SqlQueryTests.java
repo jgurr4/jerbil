@@ -4,9 +4,12 @@ import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.selectExpression.Agg;
+import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
+import com.ple.util.IArrayList;
+import com.ple.util.IArrayMap;
 import com.ple.util.IList;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
@@ -158,7 +161,6 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testGroupBy() {
     final CompleteQuery q = item.select(item.type, Agg.count.as("total")).groupBy(item.type);
@@ -172,13 +174,17 @@ public class SqlQueryTests {
   //FIXME
   @Test
   void testHaving() {
-    final CompleteQuery q = item.select(item.name, Agg.sum(item.price)).groupBy(item.name)
-        .having(item.price.gt(make(100.00)));
+    final AliasedExpression total = Agg.sum(item.price).as("total");
+    final CompleteQuery q = item.select(item.name, total)
+        //FIXME: .where() should not compile with a aliasedExpression inside it. Probably create AliasedBooleanExpression class with all the Equals, GreaterThan, Or, And classes inside it.
+        .where(total.gt(make(100.00)))
+        .groupBy(item.name)
+        .having(total.gt(make(100.00)));
     assertEquals("""
-        select name, sum(price)
+        select name, sum(price) as total
         from item
         group by name
-        having price > 100.00
+        having total > 100.00
         """, q.toSql());
   }
 
@@ -187,11 +193,19 @@ public class SqlQueryTests {
     //TODO: Implement this.
   }
 
+  //TODO: Add functionality for any_value() and only_full_group_by to work between Mariadb or MySql. If MariaDb, use workaround, if Mysql use any_value().
   //FIXME
   @Test
   void testOrderBy() {
-    final CompleteQuery q = item.select(item.name, item.price).where(item.price.ge(make(2.32)))
-        .orderBy(item.price, Order.descending);
+    final AliasedExpression total = Agg.sum(item.price).as("total");
+    final CompleteQuery q = item.select(item.name, total)
+        .where(item.price.ge(make(2.32)))
+        .groupBy(item.name)
+        .orderBy(total, Order.descending);         //single-expression orderBy descending. Allows AliasedExpressions.
+//    .orderBy(item.price);                             //Single-expression orderBy ascending by default.
+//    .orderBy(Order.descending, item.price, item.name);  //multi-expression orderBy all descending.
+//    .orderBy(IArrayMap.make(item.price, Order.descending, item.name, Order.ascending)); //multi-expression orderBy each expression with specific order.
+//    .orderBy(item.price, item.name);                    //multi-expression orderBy ascending by default.
     assertEquals("""
         select name, price
         from item

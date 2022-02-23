@@ -1,15 +1,11 @@
 package com.ple.jerbil.data.selectExpression;
 
+import org.jetbrains.annotations.Nullable;
+
 public class CountAgg implements SelectExpression {
 
-  public final String alias;
-
-  protected CountAgg(String alias) {
-    this.alias = alias;
-  }
-
   public static CountAgg make() {
-    return new CountAgg(null);
+    return new CountAgg();
   }
 
   public AliasedExpression as(String alias) {

@@ -16,7 +16,7 @@ public class Agg {
   public static CountAgg count = CountAgg.make();
 
   public static Sum sum(NumericColumn i) {
-    return null;
+    return Sum.make(i);
   }
 
   public static Sum sum(NumericExpression... numericExpressions) {

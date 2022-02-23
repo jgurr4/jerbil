@@ -4,6 +4,7 @@ import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.OrderedExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
+import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterOrEqual;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
 /**
@@ -70,11 +71,11 @@ public interface NumericExpression extends OrderedExpression {
     }
 
     default BooleanExpression gt(NumericExpression numExp) {
-        return null;
+        return GreaterThan.make(this, numExp);
     }
 
     default BooleanExpression ge(NumericExpression numExp) {
-        return null;
+        return GreaterOrEqual.make(this, numExp);
     }
 
     default BooleanExpression lt(NumericExpression numExp) {

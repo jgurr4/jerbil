@@ -4,6 +4,7 @@ import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
+import com.ple.jerbil.data.selectExpression.NumericExpression.function.Sum;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.jerbil.data.sync.Diff;
 import com.ple.util.IArrayList;
@@ -11,8 +12,6 @@ import com.ple.util.IHashMap;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 public class MysqlLanguageGenerator implements LanguageGenerator {
 
@@ -207,6 +206,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         IList<SelectExpression> transformedGroupBy = transformColumns(selectQuery.groupBy, tableList);
         sql += "group by " + toSqlSelect(transformedGroupBy) + "\n";
       }
+      if (selectQuery.having != null) {
+        BooleanExpression transformedHaving = transformColumnsHaving(selectQuery.having, tableList);
+        sql += toSqlHaving(transformedHaving) + "\n";
+      }
+      if (selectQuery.orderBy != null) {
+        IList<SelectExpression> transformedOrderBy = transformColumns(selectQuery.orderBy, tableList);
+        sql += "order by " + toSqlOrderBy(transformedOrderBy) + "\n";
+      }
       if (selectQuery.limit != null) {
         sql += "limit " + selectQuery.limit.offset + ", " + selectQuery.limit.limit + "\n";
       }
@@ -214,6 +221,25 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       sql += "select " + toSqlSelect(selectQuery.select);
     }
     return sql;
+  }
+
+  private String toSqlOrderBy(IList<SelectExpression> selectExpressions) {
+    return null;
+  }
+
+  private IList<SelectExpression> transformColumns(IMap<SelectExpression, Order> orderBy,
+                                                   IList<TableContainer> tableList) {
+    return null;
+  }
+
+  private BooleanExpression transformColumnsHaving(IList<BooleanExpression> having, IList<TableContainer> tableList) {
+    //TODO: Implement this.
+    return null;
+  }
+
+  private String toSqlHaving(BooleanExpression transformedHaving) {
+    //TODO: Implement this.
+    return null;
   }
 
   //TODO: Make transformColumns work for ArithmeticExpressions or BooleanExpressions that contain columns
@@ -413,7 +439,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     for (int i = 0; i < selectArr.length; i++) {
       if (selectArr[i] instanceof QueriedColumn) {
         final Column column = ((QueriedColumn) selectArr[i]).column;
-        if (column instanceof NumericColumn || column instanceof StringColumn) {
+        if (column instanceof NumericColumn || column instanceof StringColumn || column instanceof EnumeralColumn || column instanceof DateColumn) {
           fullSelectList += column.columnName;
         }
       } else if (selectArr[i] instanceof SelectAllExpression) {
@@ -435,6 +461,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
           } else if (ae.expression instanceof ArithmeticExpression) {
             final ArithmeticExpression arExp = (ArithmeticExpression) ae.expression;
             fullSelectList += toSqlArithmetic(fullSelectList, arExp) + " as " + ae.alias;
+          } else if (ae.expression instanceof Sum) {
+            final Sum sum = (Sum) ae.expression;
+            fullSelectList += "sum(" + sum.numericColumn.columnName + ") as " + ae.alias;
           }
         }
       }
