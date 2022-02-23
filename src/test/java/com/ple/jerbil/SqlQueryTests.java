@@ -118,14 +118,13 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testLimitOffset() {
     final CompleteQuery q = player.select().limit(5, 10);
     assertEquals("""
         select *
         from player
-        limit 10, 10
+        limit 5, 10
         """, q.toSql());
   }
 

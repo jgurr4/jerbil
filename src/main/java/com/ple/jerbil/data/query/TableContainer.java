@@ -113,7 +113,7 @@ public class TableContainer extends FromExpression {
   }
 
   public SelectQuery select() {
-    return null;
+    return SelectQuery.make(this, IArrayList.make(SelectExpression.selectAll));
   }
 
   public PotentialQuery explain() {

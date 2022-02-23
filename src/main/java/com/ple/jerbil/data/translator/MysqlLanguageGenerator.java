@@ -207,6 +207,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         IList<SelectExpression> transformedGroupBy = transformColumns(selectQuery.groupBy, tableList);
         sql += "group by " + toSqlSelect(transformedGroupBy) + "\n";
       }
+      if (selectQuery.limit != null) {
+        sql += "limit " + selectQuery.limit.offset + ", " + selectQuery.limit.limit + "\n";
+      }
     } else {
       sql += "select " + toSqlSelect(selectQuery.select);
     }
