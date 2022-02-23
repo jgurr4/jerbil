@@ -24,8 +24,8 @@ public class CreateQuery extends CompleteQuery {
     this.db = db;
   }
 
-  public static CreateQuery make(Table table) {
-    return new CreateQuery(null, table, QueryType.create, null, null, null, null, null, null, null, null);
+  public static CreateQuery make(TableContainer tableContainer) {
+    return new CreateQuery(null, tableContainer, QueryType.create, null, null, null, null, null, null, null, null);
   }
 
   public static CompleteQuery make(Database db) {

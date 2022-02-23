@@ -23,8 +23,8 @@ public class SelectQuery extends CompleteQuery {
     return new SelectQuery(null, null, QueryType.select, selectExpressions, null, null, null, null, null, null);
   }
 
-  public static SelectQuery make(Table table, IArrayList<SelectExpression> selectExpressions) {
-    return new SelectQuery(null, table, QueryType.select, selectExpressions, null, null, null, null, null, null);
+  public static SelectQuery make(TableContainer tableContainer, IArrayList<SelectExpression> selectExpressions) {
+    return new SelectQuery(null, tableContainer, QueryType.select, selectExpressions, null, null, null, null, null, null);
   }
 
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,

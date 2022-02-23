@@ -16,7 +16,7 @@ import java.util.Objects;
  * Table is a database Object which contains columns.
  */
 @Immutable
-public class Table extends FromExpression {
+public class Table {
 
   public final String tableName;
   public final Database database;
@@ -31,30 +31,17 @@ public class Table extends FromExpression {
     return new Table(name, database);
   }
 
-  public String toSql() {
-    return CreateQuery.make(this).toSql();
-  }
 
-  public static Table fromSql(String showCreateTable, Database db) {
-    if (DataGlobal.bridge == null) {
-      throw new NullPointerException("Global.sqlGenerator not set.");
-    }
-    return fromSql(DataGlobal.bridge.getGenerator(), showCreateTable, db);
-  }
-
-  public static Table fromSql(LanguageGenerator generator, String showCreateTable, Database db) {
-    return generator.fromSql(showCreateTable, db);
-  }
-
+/*
   @Override
   protected void diffJoin() {
   }
-
-  @Override
-  public IList<Table> tableList() {
-    return null;
-  }
-
+*/
+  //  @Override
+//  public IList<Table> tableList() {
+//    return null;
+//  }
+//
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

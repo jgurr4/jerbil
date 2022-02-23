@@ -17,16 +17,17 @@ public abstract class FromExpression extends PotentialQuery {
   abstract protected void diffJoin();
 
   public FromExpression join() {
-   //fill with 2 common parts.
-   diffJoin();
-   return null;
+    //fill with 2 common parts.
+    diffJoin();
+    return null;
   }
 
   @Override
   public SelectQuery select(SelectExpression... selectExpressions) {
-    return new SelectQuery(null, this, QueryType.select, IArrayList.make(selectExpressions), null, null, null, null, null, null);
+    return new SelectQuery(null, this, QueryType.select, IArrayList.make(selectExpressions),
+        null, null, null, null, null, null);
   }
 
-  public abstract IList<Table> tableList();
+  public abstract IList<TableContainer> tableList();
 
 }

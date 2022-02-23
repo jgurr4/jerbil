@@ -38,7 +38,7 @@ public class PlayerTableContainer extends TableContainer {
     final StringColumn name = Column.make("name", playerTable).asVarchar(20);
 //    final IList<Index> indexes = IArrayList.make(Index.make(IndexType.primary, playerId, userId));
 //    final NumericColumn autoIncrementColumn = playerId;
-    final IMap<String, Column> columns = IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId);
+    final IMap<String, Column> columns = IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId, name.columnName, name);
     return new PlayerTableContainer(playerTable, columns, playerId, userId, name, null, null);
   }
 

@@ -7,6 +7,7 @@ import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
+import com.ple.util.IList;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 
@@ -43,6 +44,7 @@ public class SqlQueryTests {
     NumericColumn playerId = testDb.inventory.playerId;
     StorageEngine storageEngine = testDb.item.storageEngine;
     DataSpec dataSpec = testDb.item.itemId.dataSpec;
+    final IList<Index> indexes = testDb.order.indexes;
     testDb.sync();
     testDb.item.sync();
     testDb.item.itemId.sync();
@@ -124,10 +126,12 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME: If you switch player and inventory position, the results won't be what you expect.
+  //FIXME: test switching player and inventory position, see if results are what you expect.
+  //TODO: Make alternative method: player.select().join().where();
+  //TODO: Make leftJoin, rightJoin, and fullJoin.
   @Test
   void testSelectJoins() {
-    final CompleteQuery q = player.join(inventory.table, item.table).where(
+    final CompleteQuery q = player.join(inventory, item).where(
         and(
             item.name.eq("bob"),
             player.name.eq("sword")

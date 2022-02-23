@@ -10,8 +10,7 @@ import java.lang.reflect.*;
 @Immutable
 public class DatabaseBuilder {
 
-  //FIXME: Now I just need this to create the indexes and autoIncrementColumn fields for each CustomTableContainer using
-  // BuildingHints from each column.
+  //FIXME: Figure out a way to handle multi-column indexes for secondary, fulltext, and foreign.
   public static <T extends DatabaseContainer> T generate(Class<T> customDbContainerClass, String dbName) {
     Constructor<?>[] customTblConstructors = null;
     Parameter[] customTblConstructorParams = null;

@@ -23,7 +23,7 @@ public class PartialInsertQuery extends PartialQueryWithValues {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }
 
-  public static PartialInsertQuery make(Table table) {
+  public static PartialInsertQuery make(TableContainer table) {
     return new PartialInsertQuery(null, table, null, null, null, null, null, null, null, null);
   }
 
@@ -41,6 +41,5 @@ public class PartialInsertQuery extends PartialQueryWithValues {
     }
     return InsertQuery.make(records, fromExpression);
   }
-
 
 }

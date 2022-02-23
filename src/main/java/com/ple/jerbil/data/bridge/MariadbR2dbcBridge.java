@@ -114,7 +114,7 @@ public class MariadbR2dbcBridge implements DataBridge {
         .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName).unwrapFlux()
           .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
         .map(tblCreateStr -> {
-          final Table table = DataGlobal.bridge.getGenerator().fromSql(tblCreateStr, db);
+          final TableContainer table = DataGlobal.bridge.getGenerator().fromSql(tblCreateStr, db);
           return DataGlobal.bridge.getGenerator().fromSql(tblCreateStr, table);
         })
         .collectList()

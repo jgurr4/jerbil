@@ -48,7 +48,7 @@ public class DatabaseContainer {
   public QueryList createAll() {
     QueryList<CompleteQuery> completeQueries = QueryList.make(CreateQuery.make(database));
     for (IEntry<String, TableContainer> entry : tables) {
-      completeQueries = completeQueries.add(CreateQuery.make(entry.value.table));
+      completeQueries = completeQueries.add(CreateQuery.make(entry.value));
     }
     return completeQueries;
   }

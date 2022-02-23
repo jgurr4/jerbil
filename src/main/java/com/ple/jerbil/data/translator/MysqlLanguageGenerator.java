@@ -12,6 +12,8 @@ import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public class MysqlLanguageGenerator implements LanguageGenerator {
 
   public static LanguageGenerator make() {
@@ -38,7 +40,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   @Override
-  public Table fromSql(String createTableString, Database db) {
+  public TableContainer fromSql(String createTableString, Database db) {
     final String tableName = getTableNameFromSql(createTableString);
     final StorageEngine engine = getEngineFromSql(createTableString);
 //FIXME: broken after changes to tables and datbases.
@@ -47,7 +49,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   @Override
-  public Column fromSql(String createTableString, Table table) {
+  public Column fromSql(String createTableString, TableContainer table) {
     final String formattedTable = formatTable(createTableString);
     //TODO: Finish implementing.
 
@@ -187,11 +189,15 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private String toSql(SelectQuery selectQuery) {
     String sql = "";
-    final IList<Table> tableList;
+    final IList<TableContainer> tableList;
     if (selectQuery.fromExpression != null) {
       tableList = selectQuery.fromExpression.tableList();
-      IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
-      sql += "select " + toSqlSelect(transformedSelect) + "\n" + "from " + toSql(selectQuery.fromExpression) + "\n";
+      if (selectQuery.select.size() == 1 && selectQuery.select.toArray()[0] instanceof SelectAllExpression) {
+        sql += "select *\nfrom " + toSql(selectQuery.fromExpression) + "\n";
+      } else {
+        IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
+        sql += "select " + toSqlSelect(transformedSelect) + "\n" + "from " + toSql(selectQuery.fromExpression) + "\n";
+      }
       if (selectQuery.where != null) {
         BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
         sql += toSqlWhere(transformedWhere) + "\n";
@@ -207,23 +213,21 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   //TODO: Make transformColumns work for ArithmeticExpressions or BooleanExpressions that contain columns
-  private IList<SelectExpression> transformColumns(IList<SelectExpression> select, IList<Table> tableList) {
+  private IList<SelectExpression> transformColumns(IList<SelectExpression> select, IList<TableContainer> tableList) {
     final SelectExpression[] selectArr = select.toArray();
     String tableName = "";
     int matchingColumns = 0;
-/*
-//FIXME: broken after changes to tables and datbases.
     for (int i = 0; i < selectArr.length; i++) {
       if (selectArr[i] instanceof Column && !(selectArr[i] instanceof QueriedColumn)) {
         final Column column = (Column) selectArr[i];
-        for (Table table : tableList) {
-          for (int j = 0; j < table.columns.toArray().length; j++) {
-            if (table.columns.get(j).getName() == column.getColumnName()) {
+        for (TableContainer table : tableList) {
+          for (int j = 0; j < table.columns.size(); j++) {
+            if (table.columns.values().get(j).columnName.equals(column.getColumnName())) {
               matchingColumns++;
             }
           }
           if (matchingColumns > 1) {
-            tableName = table.tableName;
+            tableName = table.table.tableName;
           }
           matchingColumns = 0;
         }
@@ -231,11 +235,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         tableName = "";
       }
     }
-*/
     return select;
   }
 
-  private BooleanExpression transformColumns(BooleanExpression be, IList<Table> tableList) {
+  private BooleanExpression transformColumns(BooleanExpression be, IList<TableContainer> tableList) {
     final BooleanExpression result;
     if (be instanceof Or) {
       Or or = (Or) be;
@@ -246,7 +249,6 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       result = or.make(list);
     } else if (be instanceof And) {
       And and = (And) be;
-      //FIXME: find out if there is a better way to make IArrayList and actually add values to it while remaining immutable.
       IList<BooleanExpression> list = IArrayList.make();
       for (BooleanExpression condition : and.conditions) {
         list = list.add(transformColumns(condition, tableList));
@@ -268,24 +270,19 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return result;
   }
 
-  private Expression transformColumns(Expression e, IList<Table> tableList) {
+  private Expression transformColumns(Expression e, IList<TableContainer> tableList) {
     String tableName = "";
     Column col;
     Boolean requiresTableName = false;
     int matchingColumns = 0;
-/*
-//FIXME: broken after changes to tables and datbases.
     if (e instanceof Column) {
       col = (Column) e;
-      for (Table table : tableList) {
-        for (int i = 0; i < table.columns.toArray().length; i++) {
-          if (table.columns.get(i).getName() == col.getColumnName()) {
+      for (TableContainer table : tableList) {
+        for (int i = 0; i < table.columns.size(); i++) {
+          if (table.columns.values().get(i).columnName.equals(col.getColumnName())) {
             matchingColumns++;
-            if (table.columns.get(i) == col) {
-              tableName = table.tableName;
-            }
-            if (matchingColumns > 1) {
-              requiresTableName = true;
+            if (table.columns.values().get(i).equals(col)) {
+              tableName = col.table.tableName;
             }
           }
         }
@@ -293,12 +290,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else {
       return e;
     }
-    if (requiresTableName == false) {
+    if (matchingColumns <= 1) {
       tableName = "";
     }
     return QueriedColumn.make(col, tableName);
-*/
-    return null;
   }
 
   private String toSqlWhere(BooleanExpression where) {
@@ -379,9 +374,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private String toSql(FromExpression fromExpression) {
     String fullFromExpressionList = "";
-    if (fromExpression instanceof Table) {
-      Table table = (Table) fromExpression;
-      fullFromExpressionList += table.tableName;
+    if (fromExpression instanceof TableContainer) {
+      TableContainer table = (TableContainer) fromExpression;
+      fullFromExpressionList += table.table.tableName;
     } else if (fromExpression instanceof Join) {
       Join join = (Join) fromExpression;
       fullFromExpressionList += getJoinString(join);
@@ -394,13 +389,13 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String result = "";
     if (join.fe1 instanceof Join) {
       result += getJoinString((Join) join.fe1);
-      Table t2 = (Table) join.fe2;
+      TableContainer t2 = (TableContainer) join.fe2;
       //FIXME: using needs to choose the name of the field based on primary key of the fromexpression and if a matching field exists in compared fromexpression. If not, this needs to throw an error.
-      result += "\ninner join " + t2.tableName + " using (" + t2.tableName + "Id)";
+      result += "\ninner join " + t2.table.tableName + " using (" + t2.table.tableName + "Id)";
     } else {
-      Table t1 = (Table) join.fe1;
-      Table t2 = (Table) join.fe2;
-      result += t1.tableName + "\ninner join " + t2.tableName + " using (" + t1.tableName + "Id)";
+      TableContainer t1 = (TableContainer) join.fe1;
+      TableContainer t2 = (TableContainer) join.fe2;
+      result += t1.table.tableName + "\ninner join " + t2.table.tableName + " using (" + t1.table.tableName + "Id)";
     }
     return result;
   }

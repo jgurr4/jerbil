@@ -64,10 +64,10 @@ public class OrderTableContainer extends TableContainer {
   public static OrderTableContainer make(Database db) {
     final Table orderTable = Table.make("order", db);
     final NumericColumn orderId = Column.make("orderId", orderTable).asBigInt().ai().unsigned();  //Alternatively just use .bigId() to replace all 3.
-    final StringColumn add = Column.make("add", orderTable).asVarchar().defaultValue(Literal.make("barter")).unique();  //Tests unique(), null and defaultValue()
+    final StringColumn add = Column.make("add", orderTable).asVarchar().defaultValue(Literal.make("barter")).unique();
     final StringColumn phrase = Column.make("phrase", orderTable).asText().fullText().allowNull();
     final NumericColumn userId = Column.make("userId", orderTable).asIntUnsigned().indexed();  //TODO: Find out how users should specify to make composite index with these two columns
-    final NumericColumn itemId = Column.make("itemId", orderTable).asInt(10).unsigned().indexed();  //Tests specifying the digits amount.
+    final NumericColumn itemId = Column.make("itemId", orderTable).asInt(10).unsigned().indexed();
     final NumericColumn scale = Column.make("scale", orderTable).asMediumIntUnsigned();
     final NumericColumn quantity = Column.make("quantity", orderTable).asSmallInt().unsigned();
     final NumericColumn price = Column.make("price", orderTable).asDecimal(14,2);
@@ -79,16 +79,7 @@ public class OrderTableContainer extends TableContainer {
     final DateColumn saleDate = Column.make("saleDate", orderTable).asDate();
     final DateColumn saleTime = Column.make("saleTime", orderTable).asTime();
     final DateColumn saleDateTime = Column.make("saleDateTime", orderTable).asDateTime().defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
-    //FIXME: Make .onUpdate() a field for columns, so that you can add .onUpdate() expression.
-//    Column.make("saleTimeStamp", orderTable).asTimeStamp().defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
     final NumericColumn myInvis = Column.make("myInvis", orderTable).asInt().invisible();
-/*
-    final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add, phrase.columnName,
-        phrase, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale, total.columnName, total,
-        finalized.columnName, finalized, myDouble.columnName, myDouble, myFloat.columnName, myFloat, mySet.columnName,
-        mySet, saleDate.columnName, saleDate, saleTime.columnName, saleTime, saleDateTime.columnName, saleDateTime,
-        myInvis.columnName, myInvis);
-*/
     final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale, total.columnName, total,
         finalized.columnName, finalized, myDouble.columnName, myDouble, myFloat.columnName, myFloat, mySet.columnName,
         mySet, saleDate.columnName, saleDate, saleTime.columnName, saleTime, saleDateTime.columnName, saleDateTime, myInvis.columnName, myInvis);
@@ -97,7 +88,4 @@ public class OrderTableContainer extends TableContainer {
         myInvis, null, null);
   }
 
-  //total decimal(14,2) as (price * quantity);
-  //to insert on generated columns without specifying each column name use `default`: insert into experimental values (0, 2.34, 15, default);
-  // add support for
 }

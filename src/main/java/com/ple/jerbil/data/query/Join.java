@@ -23,7 +23,7 @@ public class Join extends FromExpression {
   }
 
   @Override
-  public IList<Table> tableList() {
+  public IList<TableContainer> tableList() {
     return fe1.tableList().addAll(fe2.tableList());
   }
 

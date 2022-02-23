@@ -1,8 +1,6 @@
 package com.ple.jerbil.data.query;
 
-import com.ple.jerbil.data.Index;
-import com.ple.jerbil.data.PotentialQuery;
-import com.ple.jerbil.data.StorageEngine;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
@@ -12,7 +10,7 @@ import com.ple.util.IList;
 import com.ple.util.IMap;
 import reactor.util.annotation.Nullable;
 
-public class TableContainer {
+public class TableContainer extends FromExpression {
   public final Table table;
   public final IMap<String, Column> columns;
   @Nullable public final StorageEngine storageEngine;
@@ -20,8 +18,7 @@ public class TableContainer {
   @Nullable public final NumericColumn autoIncrementColumn;
 
   protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
-                           @Nullable IList<Index> indexes,
-                           @Nullable NumericColumn autoIncrementColumn) {
+                           @Nullable IList<Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
     this.table = table;
     this.columns = columns;
     this.storageEngine = storageEngine;
@@ -55,11 +52,11 @@ public class TableContainer {
   }
 
   public QueryWithFrom where(BooleanExpression condition) {
-    return QueryWithFrom.make(table).where(condition);
+    return QueryWithFrom.make(this).where(condition);
   }
 
   public QueryWithFrom join(FromExpression... tables) {
-    FromExpression result = table;
+    FromExpression result = this;
     for (FromExpression table : tables) {
       result = Join.make(result, table);
     }
@@ -67,7 +64,7 @@ public class TableContainer {
   }
 
   public CreateQuery create() {
-    return CreateQuery.make(table);
+    return CreateQuery.make(this);
   }
 
   public Table set(Column column) {
@@ -79,7 +76,7 @@ public class TableContainer {
   }
 
   public PartialInsertQuery insert() {
-    return PartialInsertQuery.make(table);
+    return PartialInsertQuery.make(this);
   }
 
   public DeleteQuery delete() {
@@ -96,15 +93,23 @@ public class TableContainer {
   }
 
   public CompleteQuery select(CountAgg agg) {
-    return SelectQuery.make(table, IArrayList.make(agg));
+    return SelectQuery.make(this, IArrayList.make(agg));
   }
 
   public SelectQuery select(AliasedExpression... aliasedExpressions) {
-    return SelectQuery.make(table, IArrayList.make(aliasedExpressions));
+    return SelectQuery.make(this, IArrayList.make(aliasedExpressions));
   }
 
+  @Override
+  protected void diffJoin() {}
+
   public SelectQuery select(SelectExpression... selectExpressions) {
-    return SelectQuery.make(table, IArrayList.make(selectExpressions));
+    return SelectQuery.make(this, IArrayList.make(selectExpressions));
+  }
+
+  @Override
+  public IList<TableContainer> tableList() {
+    return IArrayList.make(this);
   }
 
   public SelectQuery select() {
@@ -129,5 +134,20 @@ public class TableContainer {
 
   public SelectQuery selectDistinct(SelectExpression... selectExpressions) {
     return null;
+  }
+
+  public String toSql() {
+    return CreateQuery.make(this).toSql();
+  }
+
+  public static TableContainer fromSql(String showCreateTable, Database db) {
+    if (DataGlobal.bridge == null) {
+      throw new NullPointerException("Global.sqlGenerator not set.");
+    }
+    return fromSql(DataGlobal.bridge.getGenerator(), showCreateTable, db);
+  }
+
+  public static TableContainer fromSql(LanguageGenerator generator, String showCreateTable, Database db) {
+    return generator.fromSql(showCreateTable, db);
   }
 }

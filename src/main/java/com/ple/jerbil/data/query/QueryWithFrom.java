@@ -11,6 +11,9 @@ import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
 
 
+/**
+ * A partial Query that includes a tablename, but has not specified a crud operation/QueryType yet.
+ */
 @Immutable
 public class QueryWithFrom extends PartialQuery {
 
@@ -24,7 +27,8 @@ public class QueryWithFrom extends PartialQuery {
   }
 
   public static QueryWithFrom make(FromExpression fromExpression) {
-    return new QueryWithFrom(null, fromExpression, null, null, null, null, null, null, null, null);
+    return new QueryWithFrom(null, fromExpression, null, null, null, null, null,
+        null, null, null);
   }
 
   public SelectQuery selectAll() {
@@ -33,7 +37,8 @@ public class QueryWithFrom extends PartialQuery {
   }
 
   public QueryWithFrom where(BooleanExpression where) {
-    return new QueryWithFrom(where, fromExpression, null, null, null, null, null, null, null, insertFlags);
+    return new QueryWithFrom(where, fromExpression, null, null, null, null, null,
+        null, null, insertFlags);
   }
 
 }
