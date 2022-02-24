@@ -23,7 +23,7 @@ public class Query extends PotentialQuery {
   @Nullable public final IList<SelectExpression> select;
   @Nullable public final IList<SelectExpression> groupBy;
   @Nullable public final IMap<SelectExpression, Order> orderBy;
-  @Nullable public final IList<BooleanExpression> having;
+  @Nullable public final BooleanExpression having;
   @Nullable public final Limit limit;
   @Nullable public final IList<IMap<Column, Expression>> set;
   @Nullable public final InsertFlags insertFlags;
@@ -31,7 +31,7 @@ public class Query extends PotentialQuery {
   protected Query(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                   @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                   @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
-                  @Nullable IList<BooleanExpression> having, @Nullable Limit limit,
+                  @Nullable BooleanExpression having, @Nullable Limit limit,
                   @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
     this.where = where;
     this.fromExpression = fromExpression;

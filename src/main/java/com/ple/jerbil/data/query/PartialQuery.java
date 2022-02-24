@@ -16,7 +16,7 @@ public class PartialQuery extends Query {
   protected PartialQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                          @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                          @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
-                         @Nullable IList<BooleanExpression> having, @Nullable Limit limit,
+                         @Nullable BooleanExpression having, @Nullable Limit limit,
                          @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }

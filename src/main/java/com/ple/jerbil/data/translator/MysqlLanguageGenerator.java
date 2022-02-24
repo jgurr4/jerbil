@@ -207,7 +207,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         sql += "group by " + toSqlSelect(transformedGroupBy) + "\n";
       }
       if (selectQuery.having != null) {
-        BooleanExpression transformedHaving = transformColumnsHaving(selectQuery.having, tableList);
+        BooleanExpression transformedHaving = transformColumns(selectQuery.having, tableList);
         sql += toSqlHaving(transformedHaving) + "\n";
       }
       if (selectQuery.orderBy != null) {
@@ -229,16 +229,6 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private IList<SelectExpression> transformColumns(IMap<SelectExpression, Order> orderBy,
                                                    IList<TableContainer> tableList) {
-    return null;
-  }
-
-  private BooleanExpression transformColumnsHaving(IList<BooleanExpression> having, IList<TableContainer> tableList) {
-    //TODO: Implement this.
-    return null;
-  }
-
-  private String toSqlHaving(BooleanExpression transformedHaving) {
-    //TODO: Implement this.
     return null;
   }
 
@@ -286,13 +276,13 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       result = and.make(list);
     } else if (be instanceof Equals) {
       Equals eq = (Equals) be;
-      final Expression e1 = transformColumns(eq.e1, tableList);
-      final Expression e2 = transformColumns(eq.e2, tableList);
+      final SelectExpression e1 = transformColumns(eq.e1, tableList);
+      final SelectExpression e2 = transformColumns(eq.e2, tableList);
       result = Equals.make(e1, e2);
     } else if (be instanceof GreaterThan) {
       GreaterThan gt = (GreaterThan) be;
-      final Expression e1 = transformColumns(gt.e1, tableList);
-      final Expression e2 = transformColumns(gt.e2, tableList);
+      final SelectExpression e1 = transformColumns(gt.e1, tableList);
+      final SelectExpression e2 = transformColumns(gt.e2, tableList);
       result = GreaterThan.make(e1, e2);
     } else {
       result = be;
@@ -300,7 +290,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return result;
   }
 
-  private Expression transformColumns(Expression e, IList<TableContainer> tableList) {
+  private SelectExpression transformColumns(SelectExpression e, IList<TableContainer> tableList) {
     String tableName = "";
     Column col;
     Boolean requiresTableName = false;
@@ -326,6 +316,20 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return QueriedColumn.make(col, tableName);
   }
 
+  //TODO combine this method with toSqlWhere
+  private String toSqlHaving(BooleanExpression having) {
+    if (having == null) {
+      return "";
+    }
+    String fullHavingClause = "having ";
+    fullHavingClause += toSqlBooleanExpression(having);
+    if (fullHavingClause.endsWith(")")) {
+      fullHavingClause = fullHavingClause.replaceAll("where \\(", "where ").replaceAll("\\)\\z", "");
+    }
+    return fullHavingClause;
+  }
+
+  //TODO: Make this work for both having and where.
   private String toSqlWhere(BooleanExpression where) {
     if (where == null) {
       return "";
@@ -380,7 +384,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return boolExpString;
   }
 
-  private String toSql(Expression e) {
+  private String toSql(SelectExpression e) {
     final String output;
     if (e instanceof QueriedColumn) {
       //TODO: Check if column name has space and if so put `backticks` around it.
@@ -396,6 +400,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else if (e instanceof LiteralNumber) {
       final LiteralNumber n = (LiteralNumber) e;
       output = n.value.toString();
+    } else if (e instanceof AliasedExpression) {
+      final AliasedExpression ae = (AliasedExpression) e;
+      output = ae.alias;
     } else {
       throw new RuntimeException("Unknown Expression ");
     }

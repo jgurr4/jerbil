@@ -35,7 +35,7 @@ public class AliasedExpression implements SelectExpression {
     return new AliasedExpression(alias, null, null);
   }
 
-  public BooleanExpression gt(NumericExpression numExp) {
-    return GreaterThan.make(expression, numExp);
+  public BooleanExpression<AliasedExpression> gt(NumericExpression numExp) {
+    return GreaterThan.make(this, numExp);
   }
 }

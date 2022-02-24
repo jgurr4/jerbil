@@ -12,7 +12,7 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
  * .eq() evaluates to a BooleanExpression. Example: select 1 = 1; //returns 1
  */
 @Immutable
-public interface Expression extends SelectExpression {
+public interface Expression extends UnaliasedExpression {
 
   default AliasedExpression as(String name) {
     return AliasedExpression.make(name, this);

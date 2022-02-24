@@ -15,7 +15,7 @@ public class SelectQuery extends CompleteQuery {
 
   SelectQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType,
               @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy,
-              @Nullable IMap<SelectExpression, Order> orderBy, @Nullable IList<BooleanExpression> having,
+              @Nullable IMap<SelectExpression, Order> orderBy, @Nullable BooleanExpression having,
               @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }
@@ -31,7 +31,7 @@ public class SelectQuery extends CompleteQuery {
 
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> selectExpressions, IList<SelectExpression> groupBy,
-                                 IMap<SelectExpression, Order> orderBy, IList<BooleanExpression> having, Limit limit,
+                                 IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
                                  IList<IMap<Column, Expression>> set, InsertFlags insertFlags) {
     return new SelectQuery(where, fromExpression, queryType, selectExpressions, groupBy, orderBy, having, limit, set,
         insertFlags);
@@ -83,7 +83,7 @@ public class SelectQuery extends CompleteQuery {
   }
 
   public SelectQuery having(BooleanExpression having) {
-    return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, IArrayList.make(having), limit,
+    return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit,
         set, insertFlags);
   }
 

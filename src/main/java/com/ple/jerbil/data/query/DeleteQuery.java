@@ -16,14 +16,14 @@ public class DeleteQuery extends CompleteQuery {
   protected DeleteQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                         @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                         @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
-                        @Nullable IList<BooleanExpression> having, @Nullable Limit limit,
+                        @Nullable BooleanExpression having, @Nullable Limit limit,
                         @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }
 
   public static DeleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> select, IList<SelectExpression> groupBy,
-                                 IMap<SelectExpression, Order> orderBy, IList<BooleanExpression> having, Limit limit,
+                                 IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
                                  IList<IMap<Column, Expression>> set, InsertFlags insertFlags) {
     return new DeleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
   }

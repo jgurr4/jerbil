@@ -1,8 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
-import org.jetbrains.annotations.Nullable;
-
-public class CountAgg implements SelectExpression {
+public class CountAgg implements UnaliasedExpression {
 
   public static CountAgg make() {
     return new CountAgg();

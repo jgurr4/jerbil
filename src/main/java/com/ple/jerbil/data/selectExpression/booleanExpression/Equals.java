@@ -2,6 +2,7 @@ package com.ple.jerbil.data.selectExpression.booleanExpression;
 
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.Expression;
+import com.ple.jerbil.data.selectExpression.SelectExpression;
 
 import java.util.Objects;
 
@@ -11,20 +12,21 @@ import java.util.Objects;
  * select where 5 = false;
  */
 @Immutable
-public class Equals implements BooleanExpression {
+public class Equals<T extends SelectExpression> implements BooleanExpression<T> {
 
-  public final Expression e1;
-  public final Expression e2;
+  public final T e1;
+  public final T e2;
 
-  protected Equals(Expression e1, Expression e2) {
+  protected Equals(T e1, T e2) {
     this.e1 = e1;
     this.e2 = e2;
   }
 
-  public static Equals make(Expression e1, Expression e2) {
+  public static <T extends SelectExpression> Equals make(T e1, T e2) {
    return new Equals(e1, e2);
   }
 
+/*
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }
@@ -37,6 +39,7 @@ public class Equals implements BooleanExpression {
     return null;
   }
 
+*/
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;

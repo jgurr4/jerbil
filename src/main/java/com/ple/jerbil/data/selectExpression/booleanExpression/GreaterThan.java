@@ -1,22 +1,22 @@
 package com.ple.jerbil.data.selectExpression.booleanExpression;
 
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.selectExpression.Expression;
+import com.ple.jerbil.data.selectExpression.*;
+import com.ple.jerbil.data.selectExpression.AliasedExpression;
 
 import java.util.Objects;
 
 @Immutable
-public class GreaterThan implements BooleanExpression {
+public class GreaterThan<T extends SelectExpression> implements BooleanExpression<T> {
+  public final T e1;
+  public final T e2;
 
-  public final Expression e1;
-  public final Expression e2;
-
-  protected GreaterThan(Expression e1, Expression e2) {
+  protected GreaterThan(T e1, T e2) {
     this.e1 = e1;
     this.e2 = e2;
   }
 
-  public static GreaterThan make(Expression e1, Expression e2) {
+  public static <T extends SelectExpression> GreaterThan make(T e1, T e2) {
     return new GreaterThan(e1, e2);
   }
 
