@@ -187,8 +187,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   private String toSql(SelectQuery selectQuery) {
     String sql = "";
     final IList<TableContainer> tableList;
-    if ((selectQuery.queryFlags.flags >> 7 & 1) == 1) {
-      sql += "select distinct ";
+    if (selectQuery.queryFlags != null) {
+      if ((selectQuery.queryFlags.flags >> 7 & 1) == 1) {
+        sql += "select distinct ";
+      }
     } else {
       sql += "select ";
     }
@@ -236,7 +238,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       } else {
         order = " desc";
       }
-        sql += separator + toSql(entry.key) + order;
+      sql += separator + toSql(entry.key) + order;
       separator = ", ";
     }
     return sql;
@@ -384,6 +386,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       }
     } else if (booleanExpression instanceof BooleanColumn) {
       boolExpString += ((BooleanColumn) booleanExpression).columnName + " = 1";
+    } else if (booleanExpression instanceof True) {
+      boolExpString += toSql(((True) booleanExpression).expression) + " = 1";
+    } else if (booleanExpression instanceof False) {
+      boolExpString += toSql(((False) booleanExpression).expression) + " <> 1";
+    } else if (booleanExpression instanceof Null) {
+      boolExpString += toSql(((Null) booleanExpression).expression) + " is null";
+    } else if (booleanExpression instanceof NonNull) {
+      boolExpString += toSql(((NonNull) booleanExpression).expression) + " is not null";
     } else if (booleanExpression instanceof GreaterOrEqual) {
       final GreaterOrEqual ge = (GreaterOrEqual) booleanExpression;
       if (ge.e1 instanceof ArithmeticExpression) {
@@ -440,6 +450,12 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else if (e instanceof AliasedExpression) {
       final AliasedExpression ae = (AliasedExpression) e;
       output = ae.alias;
+    } else if (e instanceof BooleanColumn) {
+      final BooleanColumn bc = (BooleanColumn) e;
+      output = bc.columnName;
+    } else if (e instanceof EnumeralColumn) {
+      final EnumeralColumn ec = (EnumeralColumn) e;
+      output = ((EnumeralColumn) e).columnName;
     } else {
       throw new RuntimeException("Unknown Expression ");
     }

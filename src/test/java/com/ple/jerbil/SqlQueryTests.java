@@ -213,16 +213,20 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
-  //TODO: Make it possible for user to specify (is not true) for order.finalized. Perhaps .where(order.finalized.isFalse)
   // Here is interesting reason why we use finalized = 1 or <> 1 instead of finalized is true or is not true: https://stackoverflow.com/questions/24800881/mysql-true-vs-is-true-on-boolean-when-is-it-advisable-to-use-which-one
+  //FIXME: Need to implement dictionary to put backticks around reserved words.
   @Test
   void testSelectDistinct() {
-    final CompleteQuery q = order.selectDistinct(order.total).where(order.finalized);
+    final CompleteQuery q = order.selectDistinct(order.total).where(order.finalized.isTrue())
+        .union(order.selectDistinct(order.total).where(order.finalized.isFalse()));
     assertEquals("""
         select distinct total
         from `order`
         where finalized = 1
+        union
+        select distinct total
+        from `order`
+        where finalized <> 1
         """, q.toSql());
   }
 

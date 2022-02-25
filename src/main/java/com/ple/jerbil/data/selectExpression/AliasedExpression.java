@@ -1,10 +1,11 @@
 package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.selectExpression.NumericExpression.LiteralNumber;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
+import com.ple.jerbil.data.selectExpression.booleanExpression.NonNull;
+import com.ple.jerbil.data.selectExpression.booleanExpression.Null;
 
 /**
  * AliasedExpression is any expression which is given an alias. For example:
@@ -37,5 +38,13 @@ public class AliasedExpression implements SelectExpression {
 
   public BooleanExpression<AliasedExpression> gt(NumericExpression numExp) {
     return GreaterThan.make(this, numExp);
+  }
+
+  public BooleanExpression<AliasedExpression> isNull() {
+    return Null.make(this);
+  }
+
+  public BooleanExpression<AliasedExpression> isNotNull() {
+    return NonNull.make(this);
   }
 }

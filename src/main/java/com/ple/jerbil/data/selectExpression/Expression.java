@@ -1,7 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 
 /**
  * Expression is more specific than SelectExpression because it doesn't include AliasedExpressions.
@@ -18,13 +17,6 @@ public interface Expression extends UnaliasedExpression {
     return AliasedExpression.make(name, this);
   }
 
-  default BooleanExpression isNull() {
-    return null;
-  }
-
-  default BooleanExpression isNotNull() {
-    return null;
-  }
 
 /*
   BooleanExpression isGreaterThan(Expression i);

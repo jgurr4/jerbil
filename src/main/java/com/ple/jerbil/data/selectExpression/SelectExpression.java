@@ -1,7 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.util.IArrayList;
 
@@ -21,5 +20,4 @@ public interface SelectExpression {
   default SelectQuery select() {
     return SelectQuery.make(IArrayList.make(this));
   }
-
 }

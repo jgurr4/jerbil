@@ -5,6 +5,8 @@ import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.data.selectExpression.booleanExpression.False;
+import com.ple.jerbil.data.selectExpression.booleanExpression.True;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -84,6 +86,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
         null, BuildingHints.make(0b0));
   }
 
+/*
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }
@@ -91,8 +94,10 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   public BooleanExpression isLessThan(Expression i) {
     return null;
   }
+*/
 
-  public BooleanExpression eq(Expression item) {
+  //TODO: Decide whether or not to include .eq(make(false)) option for users on BooleanColumn.
+  public BooleanExpression eq(LiteralBoolean item) {
     return null;
   }
 
@@ -100,4 +105,11 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
     return new BooleanColumn(columnName, table, dataSpec, generatedFrom, bool, (BooleanExpression) onUpdate, hints);
   }
 
+  public BooleanExpression<UnaliasedExpression> isFalse() {
+    return False.make(this);
+  }
+
+  public BooleanExpression<UnaliasedExpression> isTrue() {
+    return True.make(this);
+  }
 }
