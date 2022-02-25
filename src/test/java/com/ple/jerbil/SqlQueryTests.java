@@ -214,13 +214,15 @@ public class SqlQueryTests {
   }
 
   //FIXME
+  //TODO: Make it possible for user to specify (is not true) for order.finalized. Perhaps .where(order.finalized.isFalse)
+  // Here is interesting reason why we use finalized = 1 or <> 1 instead of finalized is true or is not true: https://stackoverflow.com/questions/24800881/mysql-true-vs-is-true-on-boolean-when-is-it-advisable-to-use-which-one
   @Test
   void testSelectDistinct() {
     final CompleteQuery q = order.selectDistinct(order.total).where(order.finalized);
     assertEquals("""
         select distinct total
         from `order`
-        where finalized = true
+        where finalized = 1
         """, q.toSql());
   }
 
@@ -320,7 +322,7 @@ public class SqlQueryTests {
   void testMatchFullText() {
     final CompleteQuery q = order.select(order.phrase).whereMatch(order.phrase, make("Hello there"));
     assertEquals("""
-        select phrase from order
+        select phrase from `order`
         where match (phrase)
         against ('hello there')
         """, q.toSql());
@@ -333,11 +335,11 @@ public class SqlQueryTests {
     final CompleteQuery q2 = order.explain().select();
     assertEquals("""
         explain select *
-        from order
+        from `order`
         """, q1.toSql());
     assertEquals("""
         explain select *
-        from order
+        from `order`
         """, q2.toSql());
   }
 
@@ -348,11 +350,11 @@ public class SqlQueryTests {
     final CompleteQuery q2 = order.analyze().select();
     assertEquals("""
         analyze select *
-        from order
+        from `order`
         """, q1.toSql());
     assertEquals("""
         analyze select *
-        from order
+        from `order`
         """, q2.toSql());
   }
 

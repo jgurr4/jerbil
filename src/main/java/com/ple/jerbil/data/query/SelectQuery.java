@@ -16,8 +16,8 @@ public class SelectQuery extends CompleteQuery {
   SelectQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType,
               @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy,
               @Nullable IMap<SelectExpression, Order> orderBy, @Nullable BooleanExpression having,
-              @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
+              @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
   }
 
   public static SelectQuery make(IList<SelectExpression> selectExpressions) {
@@ -32,14 +32,20 @@ public class SelectQuery extends CompleteQuery {
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> selectExpressions, IList<SelectExpression> groupBy,
                                  IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
-                                 IList<IMap<Column, Expression>> set, InsertFlags insertFlags) {
+                                 IList<IMap<Column, Expression>> set, QueryFlags queryFlags) {
     return new SelectQuery(where, fromExpression, queryType, selectExpressions, groupBy, orderBy, having, limit, set,
-        insertFlags);
+        queryFlags);
+  }
+
+  public static SelectQuery make(TableContainer tableContainer, IList<SelectExpression> selectExpressions,
+                                 QueryFlags queryFlags) {
+    return new SelectQuery(null, tableContainer, QueryType.select, selectExpressions, null, null,
+        null, null, null, queryFlags);
   }
 
   public SelectQuery groupBy(SelectExpression... groupBy) {
     return new SelectQuery(where, fromExpression, queryType, select, IArrayList.make(groupBy), orderBy, having, limit,
-        set, insertFlags);
+        set, queryFlags);
   }
 
   public CompleteQuery union(SelectQuery select) {
@@ -55,13 +61,14 @@ public class SelectQuery extends CompleteQuery {
   }
 
   public SelectQuery orderBy(SelectExpression expression, Order order) {
-    return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, IArrayMap.make(expression, order), having, limit, set,
-        insertFlags);
+    return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, IArrayMap.make(expression, order),
+        having, limit, set,
+        queryFlags);
   }
 
   public SelectQuery orderBy(IMap<SelectExpression, Order> orderBy) {
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
-        insertFlags);
+        queryFlags);
   }
 
   public SelectQuery orderBy(Order order, SelectExpression... selectExpressions) {
@@ -70,7 +77,7 @@ public class SelectQuery extends CompleteQuery {
       orderBy = orderBy.put(selectExpression, order);
     }
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
-        insertFlags);
+        queryFlags);
   }
 
   public SelectQuery orderBy(SelectExpression... selectExpressions) {
@@ -79,12 +86,12 @@ public class SelectQuery extends CompleteQuery {
       orderBy = orderBy.put(selectExpression, Order.ascending);
     }
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
-        insertFlags);
+        queryFlags);
   }
 
   public SelectQuery having(BooleanExpression having) {
     return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit,
-        set, insertFlags);
+        set, queryFlags);
   }
 
 /*

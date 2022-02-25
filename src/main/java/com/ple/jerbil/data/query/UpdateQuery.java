@@ -18,8 +18,8 @@ public class UpdateQuery extends CompleteQuery {
                         @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                         @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                         @Nullable BooleanExpression having, @Nullable Limit limit,
-                        @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
+                        @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
   }
 
   public static UpdateQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
@@ -30,8 +30,8 @@ public class UpdateQuery extends CompleteQuery {
   public static UpdateQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                    IList<SelectExpression> select, IList<SelectExpression> groupBy,
                                    IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
-                                   IList<IMap<Column, Expression>> set, InsertFlags insertFlags) {
-    return new UpdateQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
+                                   IList<IMap<Column, Expression>> set, QueryFlags queryFlags) {
+    return new UpdateQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
   }
 
 /*

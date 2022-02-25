@@ -23,8 +23,8 @@ public class InsertQuery extends CompleteQuery {
                         @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                         @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                         @Nullable BooleanExpression having, @Nullable Limit limit,
-                        @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
+                        @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
   }
 
   public static InsertQuery make(Column column, Literal value, FromExpression fromExpression) {
@@ -51,8 +51,8 @@ public class InsertQuery extends CompleteQuery {
   public static InsertQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> select, IList<SelectExpression> groupBy,
                                  IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
-                                 IList<IMap<Column, Expression>> set, InsertFlags insertFlags) {
-    return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
+                                 IList<IMap<Column, Expression>> set, QueryFlags queryFlags) {
+    return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
   }
 
 /*

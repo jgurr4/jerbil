@@ -13,8 +13,6 @@ import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
-
 /**
  * For use with PartialUpdate, PartialInsert and PartialReplace queries, because they require .set method to list columns and the values to put in/replace.
  */
@@ -25,8 +23,8 @@ public class PartialQueryWithValues extends PartialQuery {
                                    @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                                    @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                                    @Nullable BooleanExpression having, @Nullable Limit limit,
-                                   @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, insertFlags);
+                                   @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
   }
 
   public CompleteQuery set(Column column, Literal value) {

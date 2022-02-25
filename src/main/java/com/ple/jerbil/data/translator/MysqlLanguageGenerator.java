@@ -187,13 +187,18 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   private String toSql(SelectQuery selectQuery) {
     String sql = "";
     final IList<TableContainer> tableList;
+    if ((selectQuery.queryFlags.flags >> 7 & 1) == 1) {
+      sql += "select distinct ";
+    } else {
+      sql += "select ";
+    }
     if (selectQuery.fromExpression != null) {
       tableList = selectQuery.fromExpression.tableList();
       if (selectQuery.select.size() == 1 && selectQuery.select.toArray()[0] instanceof SelectAllExpression) {
-        sql += "select *\nfrom " + toSql(selectQuery.fromExpression) + "\n";
+        sql += "*\nfrom " + toSql(selectQuery.fromExpression) + "\n";
       } else {
         IList<SelectExpression> transformedSelect = transformColumns(selectQuery.select, tableList);
-        sql += "select " + toSqlSelect(transformedSelect) + "\n" + "from " + toSql(selectQuery.fromExpression) + "\n";
+        sql += toSqlSelect(transformedSelect) + "\n" + "from " + toSql(selectQuery.fromExpression) + "\n";
       }
       if (selectQuery.where != null) {
         BooleanExpression transformedWhere = transformColumns(selectQuery.where, tableList);
@@ -377,6 +382,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       } else {
         boolExpString += toSql(gt.e1) + " > " + toSql(gt.e2);
       }
+    } else if (booleanExpression instanceof BooleanColumn) {
+      boolExpString += ((BooleanColumn) booleanExpression).columnName + " = 1";
     } else if (booleanExpression instanceof GreaterOrEqual) {
       final GreaterOrEqual ge = (GreaterOrEqual) booleanExpression;
       if (ge.e1 instanceof ArithmeticExpression) {

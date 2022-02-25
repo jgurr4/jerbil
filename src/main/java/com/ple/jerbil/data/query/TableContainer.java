@@ -133,7 +133,7 @@ public class TableContainer extends FromExpression {
   }
 
   public SelectQuery selectDistinct(SelectExpression... selectExpressions) {
-    return null;
+    return SelectQuery.make(this, IArrayList.make(selectExpressions), QueryFlags.make(0b10000000));
   }
 
   public String toSql() {

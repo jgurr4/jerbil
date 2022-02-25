@@ -1,7 +1,6 @@
 package com.ple.jerbil.data.query;
 
 
-import com.ple.jerbil.data.DelayedImmutable;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.Order;
 import com.ple.jerbil.data.PotentialQuery;
@@ -26,13 +25,13 @@ public class Query extends PotentialQuery {
   @Nullable public final BooleanExpression having;
   @Nullable public final Limit limit;
   @Nullable public final IList<IMap<Column, Expression>> set;
-  @Nullable public final InsertFlags insertFlags;
+  @Nullable public final QueryFlags queryFlags;
 
   protected Query(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                   @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                   @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                   @Nullable BooleanExpression having, @Nullable Limit limit,
-                  @Nullable IList<IMap<Column, Expression>> set, @Nullable InsertFlags insertFlags) {
+                  @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
     this.where = where;
     this.fromExpression = fromExpression;
     this.queryType = queryType;
@@ -42,17 +41,17 @@ public class Query extends PotentialQuery {
     this.having = having;
     this.limit = limit;
     this.set = set;
-    this.insertFlags = insertFlags;
+    this.queryFlags = queryFlags;
   }
 
   @Override
   public SelectQuery select(SelectExpression... selectExpressions) {
     return SelectQuery.make(where, fromExpression, QueryType.select, IArrayList.make(selectExpressions), groupBy,
-        orderBy, having, limit, set, insertFlags);
+        orderBy, having, limit, set, queryFlags);
   }
 
   public SelectQuery select() {
     return SelectQuery.make(where, fromExpression, QueryType.select, IArrayList.make(SelectExpression.selectAll), groupBy,
-        orderBy, having, limit, set, insertFlags);
+        orderBy, having, limit, set, queryFlags);
   }
 }
