@@ -171,7 +171,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME: Figure out how to make it preserve 0 after decimal point.
+  //TODO: Figure out how to make it preserve 0 after decimal point.
   @Test
   void testHaving() {
     final AliasedExpression total = Agg.sum(item.price).as("total");
@@ -193,7 +193,6 @@ public class SqlQueryTests {
   }
 
   //TODO: Add functionality for any_value() and only_full_group_by to work between Mariadb or MySql. If MariaDb, use workaround, if Mysql use any_value().
-  //FIXME
   @Test
   void testOrderBy() {
     final AliasedExpression total = Agg.sum(item.price).as("total");
@@ -206,10 +205,11 @@ public class SqlQueryTests {
 //    .orderBy(IArrayMap.make(item.price, Order.descending, item.name, Order.ascending)); //multi-expression orderBy each expression with specific order.
 //    .orderBy(item.price, item.name);                    //multi-expression orderBy ascending by default.
     assertEquals("""
-        select name, price
+        select name, sum(price) as total
         from item
         where price >= 2.32
-        order by price desc
+        group by name
+        order by total desc
         """, q.toSql());
   }
 

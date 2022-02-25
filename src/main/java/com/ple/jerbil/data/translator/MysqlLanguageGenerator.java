@@ -7,10 +7,7 @@ import com.ple.jerbil.data.selectExpression.NumericExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.function.Sum;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.jerbil.data.sync.Diff;
-import com.ple.util.IArrayList;
-import com.ple.util.IHashMap;
-import com.ple.util.IList;
-import com.ple.util.IMap;
+import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
 public class MysqlLanguageGenerator implements LanguageGenerator {
@@ -211,7 +208,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         sql += toSqlHaving(transformedHaving) + "\n";
       }
       if (selectQuery.orderBy != null) {
-        IList<SelectExpression> transformedOrderBy = transformColumns(selectQuery.orderBy, tableList);
+        IMap<SelectExpression, Order> transformedOrderBy = transformColumns(selectQuery.orderBy, tableList);
         sql += "order by " + toSqlOrderBy(transformedOrderBy) + "\n";
       }
       if (selectQuery.limit != null) {
@@ -223,13 +220,35 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     return sql;
   }
 
-  private String toSqlOrderBy(IList<SelectExpression> selectExpressions) {
-    return null;
+  //TODO: make it possible for Order to be null, so that nothing is specified in language generator and default is used from mysql instead.
+  private String toSqlOrderBy(IMap<SelectExpression, Order> orderBy) {
+    String sql = "";
+    String order = "";
+    String separator = "";
+    for (IEntry<SelectExpression, Order> entry : orderBy) {
+      if (entry.value.equals(Order.ascending)) {
+        order = " asc";
+      } else {
+        order = " desc";
+      }
+        sql += separator + toSql(entry.key) + order;
+      separator = ", ";
+    }
+    return sql;
   }
 
-  private IList<SelectExpression> transformColumns(IMap<SelectExpression, Order> orderBy,
-                                                   IList<TableContainer> tableList) {
-    return null;
+  private IMap<SelectExpression, Order> transformColumns(IMap<SelectExpression, Order> orderBy,
+                                                         IList<TableContainer> tableList) {
+    IMap<SelectExpression, Order> transformedMap = IArrayMap.empty;
+    for (IEntry<SelectExpression, Order> entry : orderBy) {
+      //TODO: handle aliasedExpressions here.
+      if (entry.key instanceof Column) {
+        transformedMap = transformedMap.put(transformColumns(entry.key, tableList), entry.value);
+      } else {
+        transformedMap = transformedMap.put(entry.key, entry.value);
+      }
+    }
+    return transformedMap;
   }
 
   //TODO: Make transformColumns work for ArithmeticExpressions or BooleanExpressions that contain columns
@@ -284,6 +303,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       final SelectExpression e1 = transformColumns(gt.e1, tableList);
       final SelectExpression e2 = transformColumns(gt.e2, tableList);
       result = GreaterThan.make(e1, e2);
+    } else if (be instanceof GreaterOrEqual) {
+      GreaterOrEqual ge = (GreaterOrEqual) be;
+      final SelectExpression e1 = transformColumns(ge.e1, tableList);
+      final SelectExpression e2 = transformColumns(ge.e2, tableList);
+      result = GreaterOrEqual.make(e1, e2);
     } else {
       result = be;
     }
@@ -293,7 +317,6 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   private SelectExpression transformColumns(SelectExpression e, IList<TableContainer> tableList) {
     String tableName = "";
     Column col;
-    Boolean requiresTableName = false;
     int matchingColumns = 0;
     if (e instanceof Column) {
       col = (Column) e;
@@ -353,6 +376,13 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         boolExpString += toSqlArithmetic("", (ArithmeticExpression) gt.e1) + " > " + toSql(gt.e2);
       } else {
         boolExpString += toSql(gt.e1) + " > " + toSql(gt.e2);
+      }
+    } else if (booleanExpression instanceof GreaterOrEqual) {
+      final GreaterOrEqual ge = (GreaterOrEqual) booleanExpression;
+      if (ge.e1 instanceof ArithmeticExpression) {
+        boolExpString += toSqlArithmetic("", (ArithmeticExpression) ge.e1) + " >= " + toSql(ge.e2);
+      } else {
+        boolExpString += toSql(ge.e1) + " >= " + toSql(ge.e2);
       }
     } else if (booleanExpression instanceof And) {
       final And and = (And) booleanExpression;
