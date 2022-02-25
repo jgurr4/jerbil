@@ -2,10 +2,7 @@ package com.ple.jerbil.data.selectExpression.NumericExpression;
 
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.OrderedExpression;
-import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
-import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
-import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterOrEqual;
-import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
+import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 
 /**
  * NumberExpression is any expression that evaluates to a numeric value. For example:
@@ -54,12 +51,12 @@ public interface NumericExpression extends OrderedExpression {
         return null;
     }
 
-    default BooleanExpression isBetween(NumericExpression numExp, NumericExpression numExp2) {
-        return null;
+    default BooleanExpression isBetween(LiteralNumber n1, LiteralNumber n2) {
+        return Between.make(this, n1, n2);
     }
 
-    default BooleanExpression isNotBetween(NumericExpression numExp, NumericExpression numExp2) {
-        return null;
+    default BooleanExpression isNotBetween(LiteralNumber n1, LiteralNumber n2) {
+        return NotBetween.make(this, n1, n2);
     }
 
     default BooleanExpression eq(NumericExpression numExp) {

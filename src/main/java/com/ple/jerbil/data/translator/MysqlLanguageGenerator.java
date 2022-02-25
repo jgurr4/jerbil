@@ -405,7 +405,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else if (booleanExpression instanceof Regexp) {
       boolExpString += toSql(((Regexp) booleanExpression).e1) + " regexp '" + ((Regexp) booleanExpression).e2.value + "'";
     } else if (booleanExpression instanceof NotRegexp) {
-      boolExpString += toSql(((NotRegexp) booleanExpression).e1) + " not regexp '" + ((NotRegexp) booleanExpression).e2.value + "'";
+      boolExpString += toSql(
+          ((NotRegexp) booleanExpression).e1) + " not regexp '" + ((NotRegexp) booleanExpression).e2.value + "'";
+    } else if (booleanExpression instanceof Between) {
+      final Between bt = (Between) booleanExpression;
+      boolExpString += toSql(bt.n1) + " between " + bt.n2.value + " and " + bt.n3.value;
+    } else if (booleanExpression instanceof NotBetween) {
+      final NotBetween bt = (NotBetween) booleanExpression;
+      boolExpString += toSql(bt.n1) + " not between " + bt.n2.value + " and " + bt.n3.value;
     } else if (booleanExpression instanceof GreaterOrEqual) {
       final GreaterOrEqual ge = (GreaterOrEqual) booleanExpression;
       if (ge.e1 instanceof ArithmeticExpression) {

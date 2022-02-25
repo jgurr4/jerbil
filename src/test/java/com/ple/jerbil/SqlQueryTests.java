@@ -285,7 +285,6 @@ public class SqlQueryTests {
     assertEquals("select 32 - 15 as result", q.toSql());
   }
 
-  //FIXME
   @Test
   void testBetween() {
     final CompleteQuery q = user.select(user.userId, user.name).where(user.userId.isBetween(make(4), make(10)))
@@ -296,7 +295,7 @@ public class SqlQueryTests {
         where userId between 4 and 10
         union
         select userId, name
-        from player
+        from user
         where userId not between 4 and 10
         """, q.toSql());
   }
