@@ -26,12 +26,13 @@ public class Query extends PotentialQuery {
   @Nullable public final Limit limit;
   @Nullable public final IList<IMap<Column, Expression>> set;
   @Nullable public final QueryFlags queryFlags;
+  @Nullable public final Union union;
 
   protected Query(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                   @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                   @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
-                  @Nullable BooleanExpression having, @Nullable Limit limit,
-                  @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
+                  @Nullable BooleanExpression having, @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set,
+                  @Nullable QueryFlags queryFlags, @Nullable Union union) {
     this.where = where;
     this.fromExpression = fromExpression;
     this.queryType = queryType;
@@ -42,16 +43,17 @@ public class Query extends PotentialQuery {
     this.limit = limit;
     this.set = set;
     this.queryFlags = queryFlags;
+    this.union = union;
   }
 
   @Override
   public SelectQuery select(SelectExpression... selectExpressions) {
     return SelectQuery.make(where, fromExpression, QueryType.select, IArrayList.make(selectExpressions), groupBy,
-        orderBy, having, limit, set, queryFlags);
+        orderBy, having, limit, set, queryFlags, union);
   }
 
   public SelectQuery select() {
     return SelectQuery.make(where, fromExpression, QueryType.select, IArrayList.make(SelectExpression.selectAll), groupBy,
-        orderBy, having, limit, set, queryFlags);
+        orderBy, having, limit, set, queryFlags, union);
   }
 }

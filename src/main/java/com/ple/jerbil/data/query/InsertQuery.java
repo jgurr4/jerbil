@@ -23,36 +23,38 @@ public class InsertQuery extends CompleteQuery {
                         @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                         @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                         @Nullable BooleanExpression having, @Nullable Limit limit,
-                        @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+                        @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
+                        @Nullable Union union) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
   public static InsertQuery make(Column column, Literal value, FromExpression fromExpression) {
     return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
-        null, null, IArrayList.make(IHashMap.make(column, value)), null);
+        null, null, IArrayList.make(IHashMap.make(column, value)), null, null);
   }
 
   public static InsertQuery make(Column column, Literal value, FromExpression fromExpression, boolean mayReplace) {
     return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
-        null, null, IArrayList.make(IHashMap.make(column, value)), null);
+        null, null, IArrayList.make(IHashMap.make(column, value)), null, null);
   }
 
   public static InsertQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression,
                                  boolean mayReplace) {
     return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
-        null, null, set, null);
+        null, null, set, null, null);
   }
 
   public static InsertQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
     return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
-        null, null, set, null);
+        null, null, set, null, null);
   }
 
   public static InsertQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> select, IList<SelectExpression> groupBy,
                                  IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
-                                 IList<IMap<Column, Expression>> set, QueryFlags queryFlags) {
-    return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+                                 IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
+    return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
+        union);
   }
 
 /*

@@ -23,23 +23,24 @@ public class QueryWithFrom extends PartialQuery {
                           @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                           @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                           @Nullable BooleanExpression having, @Nullable Limit limit,
-                          @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+                          @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
+                          @Nullable Union union) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
   public static QueryWithFrom make(FromExpression fromExpression) {
     return new QueryWithFrom(null, fromExpression, null, null, null, null, null,
-        null, null, null);
+        null, null, null, null);
   }
 
   public SelectQuery selectAll() {
     return SelectQuery.make(where, fromExpression, QueryType.select, IArrayList.make(SelectExpression.selectAll),
-        groupBy, orderBy, having, limit, set, queryFlags);
+        groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
   public QueryWithFrom where(BooleanExpression where) {
     return new QueryWithFrom(where, fromExpression, null, null, null, null, null,
-        null, null, queryFlags);
+        null, null, queryFlags, null);
   }
 
 }

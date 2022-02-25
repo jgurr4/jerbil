@@ -230,7 +230,6 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testSelectNull() {
     final CompleteQuery q = item.select(item.itemId).where(item.type.isNull())
@@ -291,7 +290,7 @@ public class SqlQueryTests {
 
   //FIXME
   @Test
-  void testUnionAndBetween() {
+  void testBetween() {
     final CompleteQuery q = user.select(user.userId, user.name).where(user.userId.isBetween(make(4), make(10)))
         .union(user.select(user.userId, user.name).where(user.userId.isNotBetween(make(4), make(10))));
     assertEquals("""
@@ -307,7 +306,7 @@ public class SqlQueryTests {
 
   //FIXME
   @Test
-  void testUnionAllAndLike() {
+  void testLike() {
     final CompleteQuery q = user.select(user.userId, user.name).where(user.name.isLike(make("%oh%")))
         .unionAll(user.select(user.userId, user.name).where(user.name.isNotLike(make("%oh%"))));
     assertEquals("""

@@ -36,19 +36,22 @@ public class CompleteQuery extends Query {
                           @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                           @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                           @Nullable BooleanExpression having, @Nullable Limit limit,
-                          @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+                          @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
+                          @Nullable Union union) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
   public static CompleteQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
-    return new CompleteQuery(null, fromExpression, null, null, null, null, null, null, set, null);
+    return new CompleteQuery(null, fromExpression, null, null, null, null,
+        null, null, set, null, null);
   }
 
   public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                    IList<SelectExpression> select, IList<SelectExpression> groupBy,
                                    IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
-                                   IList<IMap<Column, Expression>> set, QueryFlags queryFlags) {
-    return new CompleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+                                   IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
+    return new CompleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set,
+        queryFlags, union);
   }
 
   public String toSql() {
@@ -64,7 +67,7 @@ public class CompleteQuery extends Query {
 
   public SelectQuery where(BooleanExpression<UnaliasedExpression> condition) {
     return SelectQuery.make(condition, fromExpression, queryType, select, groupBy, orderBy,
-        having, limit, set, queryFlags);
+        having, limit, set, queryFlags, union);
   }
 
   public CompleteQuery and(BooleanExpression expression) {
@@ -110,17 +113,20 @@ public class CompleteQuery extends Query {
 
   public CompleteQuery limit(int offset, int limit) {
     if (this instanceof SelectQuery) {
-      return SelectQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, Limit.make(offset, limit), set,
-          queryFlags);
+      return SelectQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having,
+          Limit.make(offset, limit), set, queryFlags, union);
     } else if (this instanceof InsertQuery) {
-      return InsertQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, Limit.make(offset, limit), set,
-          queryFlags);
+      return InsertQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having,
+          Limit.make(offset, limit), set,
+          queryFlags, union);
     } else if (this instanceof UpdateQuery) {
-      return UpdateQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, Limit.make(offset, limit), set,
-          queryFlags);
+      return UpdateQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having,
+          Limit.make(offset, limit), set,
+          queryFlags, union);
     } else if (this instanceof DeleteQuery) {
-      return DeleteQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, Limit.make(offset, limit), set,
-          queryFlags);
+      return DeleteQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having,
+          Limit.make(offset, limit), set,
+          queryFlags, union);
     }
     return null;
   }

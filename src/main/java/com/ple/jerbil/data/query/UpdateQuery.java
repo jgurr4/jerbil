@@ -18,20 +18,22 @@ public class UpdateQuery extends CompleteQuery {
                         @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                         @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                         @Nullable BooleanExpression having, @Nullable Limit limit,
-                        @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+                        @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
+                        @Nullable Union union) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
   public static UpdateQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
     return new UpdateQuery(null, fromExpression, null, null, null, null,
-        null, null, set, null);
+        null, null, set, null, null);
   }
 
   public static UpdateQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
-                                   IList<SelectExpression> select, IList<SelectExpression> groupBy,
-                                   IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
-                                   IList<IMap<Column, Expression>> set, QueryFlags queryFlags) {
-    return new UpdateQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+                                 IList<SelectExpression> select, IList<SelectExpression> groupBy,
+                                 IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
+                                 IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
+    return new UpdateQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
+        union);
   }
 
 /*

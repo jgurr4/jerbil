@@ -16,48 +16,50 @@ public class SelectQuery extends CompleteQuery {
   SelectQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType,
               @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy,
               @Nullable IMap<SelectExpression, Order> orderBy, @Nullable BooleanExpression having,
-              @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+              @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
+              @Nullable Union union) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
   public static SelectQuery make(IList<SelectExpression> selectExpressions) {
-    return new SelectQuery(null, null, QueryType.select, selectExpressions, null, null, null, null, null, null);
+    return new SelectQuery(null, null, QueryType.select, selectExpressions, null, null, null, null, null, null,
+        null);
   }
 
   public static SelectQuery make(TableContainer tableContainer, IArrayList<SelectExpression> selectExpressions) {
     return new SelectQuery(null, tableContainer, QueryType.select, selectExpressions, null, null, null, null, null,
-        null);
+        null, null);
   }
 
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> selectExpressions, IList<SelectExpression> groupBy,
                                  IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
-                                 IList<IMap<Column, Expression>> set, QueryFlags queryFlags) {
+                                 IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
     return new SelectQuery(where, fromExpression, queryType, selectExpressions, groupBy, orderBy, having, limit, set,
-        queryFlags);
+        queryFlags, union);
   }
 
   public static SelectQuery make(TableContainer tableContainer, IList<SelectExpression> selectExpressions,
                                  QueryFlags queryFlags) {
     return new SelectQuery(null, tableContainer, QueryType.select, selectExpressions, null, null,
-        null, null, null, queryFlags);
+        null, null, null, queryFlags, null);
   }
 
   public SelectQuery groupBy(SelectExpression... groupBy) {
     return new SelectQuery(where, fromExpression, queryType, select, IArrayList.make(groupBy), orderBy, having, limit,
-        set, queryFlags);
+        set, queryFlags, null);
   }
 
   //TODO: Add a field to Query that includes unionSelect. Then make an class called UnionSelect which contains a selectQuery as well as a non-null parameter called "UnionType" which will be all or distinct based on whether users specified unionAll or union.
   public CompleteQuery union(SelectQuery selectQuery) {
-//    return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, selectQuery);
-    return null;
+    return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
+        Union.make(selectQuery, UnionType.distinct));
   }
 
-  public CompleteQuery unionAll(SelectQuery select) {
-    return null;
+  public CompleteQuery unionAll(SelectQuery selectQuery) {
+    return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
+        Union.make(selectQuery, UnionType.all));
   }
-
   public CompleteQuery whereMatch(StringColumn column, LiteralString valueToMatch) {
     return null;
   }
@@ -65,12 +67,12 @@ public class SelectQuery extends CompleteQuery {
   public SelectQuery orderBy(SelectExpression expression, Order order) {
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, IArrayMap.make(expression, order),
         having, limit, set,
-        queryFlags);
+        queryFlags, union);
   }
 
   public SelectQuery orderBy(IMap<SelectExpression, Order> orderBy) {
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
-        queryFlags);
+        queryFlags, union);
   }
 
   public SelectQuery orderBy(Order order, SelectExpression... selectExpressions) {
@@ -79,7 +81,7 @@ public class SelectQuery extends CompleteQuery {
       orderBy = orderBy.put(selectExpression, order);
     }
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
-        queryFlags);
+        queryFlags, union);
   }
 
   public SelectQuery orderBy(SelectExpression... selectExpressions) {
@@ -88,12 +90,12 @@ public class SelectQuery extends CompleteQuery {
       orderBy = orderBy.put(selectExpression, Order.ascending);
     }
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
-        queryFlags);
+        queryFlags, union);
   }
 
   public SelectQuery having(BooleanExpression having) {
     return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit,
-        set, queryFlags);
+        set, queryFlags, union);
   }
 
 /*

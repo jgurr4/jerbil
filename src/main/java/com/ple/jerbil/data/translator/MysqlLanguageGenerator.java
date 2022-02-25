@@ -224,6 +224,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else {
       sql += "select " + toSqlSelect(selectQuery.select);
     }
+    if (selectQuery.union != null) {
+      if (selectQuery.union.unionType.equals(UnionType.all)) {
+        sql += "union all\n";
+      } else {
+        sql += "union\n";
+      }
+      sql += toSql(selectQuery.union.selectQuery);
+    }
     return sql;
   }
 

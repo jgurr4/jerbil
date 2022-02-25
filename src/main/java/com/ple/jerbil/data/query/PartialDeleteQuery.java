@@ -15,7 +15,8 @@ public class PartialDeleteQuery extends PartialQuery {
                                @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                                @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
                                @Nullable BooleanExpression having, @Nullable Limit limit,
-                               @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags) {
-    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags);
+                               @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
+                               @Nullable Union union) {
+    super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 }
