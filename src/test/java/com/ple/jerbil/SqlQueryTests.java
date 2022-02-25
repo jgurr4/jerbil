@@ -260,7 +260,6 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testComplexExpressions() {
     final CompleteQuery q = item
@@ -280,7 +279,6 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testExpressionWithoutTable() {
     final CompleteQuery q = make(32).minus(make(15)).as("result").select();

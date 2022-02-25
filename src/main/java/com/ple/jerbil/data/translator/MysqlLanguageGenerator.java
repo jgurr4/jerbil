@@ -222,7 +222,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         sql += "limit " + selectQuery.limit.offset + ", " + selectQuery.limit.limit + "\n";
       }
     } else {
-      sql += "select " + toSqlSelect(selectQuery.select);
+      sql += toSqlSelect(selectQuery.select);
     }
     if (selectQuery.union != null) {
       if (selectQuery.union.unionType.equals(UnionType.all)) {
