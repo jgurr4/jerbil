@@ -419,6 +419,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else if (booleanExpression instanceof NotLike) {
       final NotLike nl = (NotLike) booleanExpression;
       boolExpString += toSql(nl.s1) + " not like '" + nl.s2.value + "'";
+    } else if (booleanExpression instanceof Match) {
+      boolExpString += "match(" + toSql(((Match) booleanExpression).s1) + ") against('" + ((Match) booleanExpression).s2.value + "')";
     } else if (booleanExpression instanceof GreaterOrEqual) {
       final GreaterOrEqual ge = (GreaterOrEqual) booleanExpression;
       if (ge.e1 instanceof ArithmeticExpression) {

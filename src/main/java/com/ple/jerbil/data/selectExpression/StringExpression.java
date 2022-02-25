@@ -51,6 +51,10 @@ public interface StringExpression extends OrderedExpression {
     return NotRegexp.make(this, regex);
   }
 
+  default BooleanExpression match(LiteralString s) {
+    return Match.make(this, s);
+  }
+
   default BooleanExpression eq(StringExpression strExp) {
     // TODO: Each of these shortcut convenience methods should point to the real ones, so code isn't duplicated.
     return null;

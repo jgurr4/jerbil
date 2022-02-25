@@ -60,9 +60,6 @@ public class SelectQuery extends CompleteQuery {
     return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
         Union.make(selectQuery, UnionType.all));
   }
-  public CompleteQuery whereMatch(StringColumn column, LiteralString valueToMatch) {
-    return null;
-  }
 
   public SelectQuery orderBy(SelectExpression expression, Order order) {
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, IArrayMap.make(expression, order),

@@ -318,11 +318,11 @@ public class SqlQueryTests {
   //FIXME
   @Test
   void testMatchFullText() {
-    final CompleteQuery q = order.select(order.phrase).whereMatch(order.phrase, make("Hello there"));
+    final CompleteQuery q = order.select(order.phrase).where(order.phrase.match(make("Hello there")));
     assertEquals("""
-        select phrase from `order`
-        where match (phrase)
-        against ('hello there')
+        select phrase
+        from `order`
+        where match(phrase) against('Hello there')
         """, q.toSql());
   }
 
