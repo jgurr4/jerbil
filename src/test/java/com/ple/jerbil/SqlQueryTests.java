@@ -300,7 +300,6 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testLike() {
     final CompleteQuery q = user.select(user.userId, user.name).where(user.name.isLike(make("%oh%")))
@@ -311,7 +310,7 @@ public class SqlQueryTests {
         where name like '%oh%'
         union all
         select userId, name
-        from player
+        from user
         where name not like '%oh%'
         """, q.toSql());
   }

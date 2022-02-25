@@ -413,6 +413,12 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else if (booleanExpression instanceof NotBetween) {
       final NotBetween bt = (NotBetween) booleanExpression;
       boolExpString += toSql(bt.n1) + " not between " + bt.n2.value + " and " + bt.n3.value;
+    } else if (booleanExpression instanceof Like) {
+      final Like l = (Like) booleanExpression;
+      boolExpString += toSql(l.s1) + " like '" + l.s2.value + "'";
+    } else if (booleanExpression instanceof NotLike) {
+      final NotLike nl = (NotLike) booleanExpression;
+      boolExpString += toSql(nl.s1) + " not like '" + nl.s2.value + "'";
     } else if (booleanExpression instanceof GreaterOrEqual) {
       final GreaterOrEqual ge = (GreaterOrEqual) booleanExpression;
       if (ge.e1 instanceof ArithmeticExpression) {
