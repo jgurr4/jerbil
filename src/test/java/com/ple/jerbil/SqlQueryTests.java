@@ -245,7 +245,6 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testSelectRegexp() {
     final CompleteQuery q = item.select(item.name).where(item.name.isRegexp(make(".*ohn.*")))

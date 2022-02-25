@@ -3,6 +3,8 @@ package com.ple.jerbil.data.selectExpression;
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
+import com.ple.jerbil.data.selectExpression.booleanExpression.NotRegexp;
+import com.ple.jerbil.data.selectExpression.booleanExpression.Regexp;
 
 /**
  * StringExpression is any expression that evaluates to a String. For example:
@@ -44,12 +46,12 @@ public interface StringExpression extends OrderedExpression {
     return null;
   }
 
-  default BooleanExpression isRegexp(StringExpression strExp) {
-    return null;
+  default BooleanExpression isRegexp(LiteralString regex) {
+    return Regexp.make(this, regex);
   }
 
-  default BooleanExpression isNotRegexp(StringExpression strExp) {
-    return null;
+  default BooleanExpression isNotRegexp(LiteralString regex) {
+    return NotRegexp.make(this, regex);
   }
 
   default BooleanExpression eq(StringExpression strExp) {

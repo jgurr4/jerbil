@@ -402,6 +402,10 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       boolExpString += toSql(((Null) booleanExpression).expression) + " is null";
     } else if (booleanExpression instanceof NonNull) {
       boolExpString += toSql(((NonNull) booleanExpression).expression) + " is not null";
+    } else if (booleanExpression instanceof Regexp) {
+      boolExpString += toSql(((Regexp) booleanExpression).e1) + " regexp '" + ((Regexp) booleanExpression).e2.value + "'";
+    } else if (booleanExpression instanceof NotRegexp) {
+      boolExpString += toSql(((NotRegexp) booleanExpression).e1) + " not regexp '" + ((NotRegexp) booleanExpression).e2.value + "'";
     } else if (booleanExpression instanceof GreaterOrEqual) {
       final GreaterOrEqual ge = (GreaterOrEqual) booleanExpression;
       if (ge.e1 instanceof ArithmeticExpression) {
@@ -458,12 +462,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else if (e instanceof AliasedExpression) {
       final AliasedExpression ae = (AliasedExpression) e;
       output = ae.alias;
-    } else if (e instanceof BooleanColumn) {
-      final BooleanColumn bc = (BooleanColumn) e;
-      output = bc.columnName;
-    } else if (e instanceof EnumeralColumn) {
-      final EnumeralColumn ec = (EnumeralColumn) e;
-      output = ((EnumeralColumn) e).columnName;
+    } else if (e instanceof Column) {
+      output = ((Column)e).columnName;
     } else {
       throw new RuntimeException("Unknown Expression ");
     }
