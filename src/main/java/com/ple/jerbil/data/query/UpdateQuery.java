@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 @Immutable
 public class UpdateQuery extends CompleteQuery {
 
-
   protected UpdateQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                         @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
                         @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,

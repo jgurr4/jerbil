@@ -8,6 +8,8 @@ import com.ple.jerbil.data.Immutable;
  * 01000000 = "insert|replace|update|delete ignore" = doNotThrowOnDuplicateKey
  * 00100000 = "replace into" = triggerDeleteWhenReplacing. either inserts, or deletes then inserts. Incompatible with insert ont duplicate key update.
  * 00010000 = "insert on duplicate key update" = triggerUpdateWhenInserting. Either inserts or updates then inserts. Incompatible with replace into.
+ * 00001000 = "explain"
+ * 00000100 = "analyze"
  * Normal "replace into" statement will trigger delete on duplicate key and then it inserts. However,
  * "insert into ... on duplicate key update" will trigger an "update" instead of a "delete".
  * This is relevant when using triggers for updates, deletes or inserts.

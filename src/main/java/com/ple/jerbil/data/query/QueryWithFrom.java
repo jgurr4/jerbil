@@ -2,6 +2,7 @@ package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.Order;
+import com.ple.jerbil.data.PotentialQuery;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
@@ -30,7 +31,12 @@ public class QueryWithFrom extends PartialQuery {
 
   public static QueryWithFrom make(FromExpression fromExpression) {
     return new QueryWithFrom(null, fromExpression, null, null, null, null, null,
-        null, null, null, null);
+        null, null, QueryFlags.make(0b0), null);
+  }
+
+  public static QueryWithFrom make(TableContainer tableContainer, QueryFlags queryFlags) {
+    return new QueryWithFrom(null, tableContainer, null, null, null, null, null,
+        null, null, queryFlags, null);
   }
 
   public SelectQuery selectAll() {

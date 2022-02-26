@@ -22,13 +22,13 @@ public class SelectQuery extends CompleteQuery {
   }
 
   public static SelectQuery make(IList<SelectExpression> selectExpressions) {
-    return new SelectQuery(null, null, QueryType.select, selectExpressions, null, null, null, null, null, null,
+    return new SelectQuery(null, null, QueryType.select, selectExpressions, null, null, null, null, null, QueryFlags.make(0b0),
         null);
   }
 
   public static SelectQuery make(TableContainer tableContainer, IArrayList<SelectExpression> selectExpressions) {
     return new SelectQuery(null, tableContainer, QueryType.select, selectExpressions, null, null, null, null, null,
-        null, null);
+        QueryFlags.make(0b0), null);
   }
 
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
@@ -93,6 +93,16 @@ public class SelectQuery extends CompleteQuery {
   public SelectQuery having(BooleanExpression having) {
     return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit,
         set, queryFlags, union);
+  }
+
+  public CompleteQuery explain() {
+    return SelectQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set,
+        QueryFlags.make(0b00001000 + queryFlags.flags), union);
+  }
+
+  public CompleteQuery analyze() {
+    return SelectQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set,
+        QueryFlags.make(0b00000100 + queryFlags.flags), union);
   }
 
 /*

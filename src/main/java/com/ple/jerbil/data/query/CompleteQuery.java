@@ -103,14 +103,6 @@ public class CompleteQuery extends Query {
     return bridge.execute(toSql());
   }
 
-  public CompleteQuery explain() {
-    return null;
-  }
-
-  public CompleteQuery analyze() {
-    return null;
-  }
-
   public CompleteQuery limit(int offset, int limit) {
     if (this instanceof SelectQuery) {
       return SelectQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having,

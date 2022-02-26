@@ -186,14 +186,24 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   private String toSql(SelectQuery selectQuery) {
     String sql = "";
+    String preSelect = "";
+    String postSelect = "";
+    String separator = "";
     final IList<TableContainer> tableList;
     if (selectQuery.queryFlags != null) {
       if ((selectQuery.queryFlags.flags >> 7 & 1) == 1) {
-        sql += "select distinct ";
+        postSelect += "distinct ";
       }
-    } else {
-      sql += "select ";
+      if ((selectQuery.queryFlags.flags >> 3 & 1) == 1) {
+        preSelect += "explain";
+        separator = " ";
+      }
+      if ((selectQuery.queryFlags.flags >> 2 & 1) == 1) {
+        preSelect += separator + "analyze";
+        separator = " ";
+      }
     }
+    sql += preSelect + separator + "select " + postSelect;
     if (selectQuery.fromExpression != null) {
       tableList = selectQuery.fromExpression.tableList();
       if (selectQuery.select.size() == 1 && selectQuery.select.toArray()[0] instanceof SelectAllExpression) {
@@ -361,20 +371,21 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
     String fullHavingClause = "having ";
     fullHavingClause += toSqlBooleanExpression(having);
-    if (fullHavingClause.endsWith(")")) {
+    if (fullHavingClause.endsWith(")") && !fullHavingClause.contains(") against(")) {
       fullHavingClause = fullHavingClause.replaceAll("where \\(", "where ").replaceAll("\\)\\z", "");
     }
     return fullHavingClause;
   }
 
   //TODO: Make this work for both having and where.
+  //FIXME: Currently, this makes use of having + AND or OR incompatible. because of if (fullWhereClause.endsWith(")").
   private String toSqlWhere(BooleanExpression where) {
     if (where == null) {
       return "";
     }
     String fullWhereClause = "where ";
     fullWhereClause += toSqlBooleanExpression(where);
-    if (fullWhereClause.endsWith(")")) {
+    if (fullWhereClause.endsWith(")") && !fullWhereClause.contains(") against(")) {
       fullWhereClause = fullWhereClause.replaceAll("where \\(", "where ").replaceAll("\\)\\z", "");
     }
     return fullWhereClause;
@@ -403,7 +414,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     } else if (booleanExpression instanceof NonNull) {
       boolExpString += toSql(((NonNull) booleanExpression).expression) + " is not null";
     } else if (booleanExpression instanceof Regexp) {
-      boolExpString += toSql(((Regexp) booleanExpression).e1) + " regexp '" + ((Regexp) booleanExpression).e2.value + "'";
+      boolExpString += toSql(
+          ((Regexp) booleanExpression).e1) + " regexp '" + ((Regexp) booleanExpression).e2.value + "'";
     } else if (booleanExpression instanceof NotRegexp) {
       boolExpString += toSql(
           ((NotRegexp) booleanExpression).e1) + " not regexp '" + ((NotRegexp) booleanExpression).e2.value + "'";
@@ -420,7 +432,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       final NotLike nl = (NotLike) booleanExpression;
       boolExpString += toSql(nl.s1) + " not like '" + nl.s2.value + "'";
     } else if (booleanExpression instanceof Match) {
-      boolExpString += "match(" + toSql(((Match) booleanExpression).s1) + ") against('" + ((Match) booleanExpression).s2.value + "')";
+      boolExpString += "match(" + toSql(
+          ((Match) booleanExpression).s1) + ") against('" + ((Match) booleanExpression).s2.value + "')";
     } else if (booleanExpression instanceof GreaterOrEqual) {
       final GreaterOrEqual ge = (GreaterOrEqual) booleanExpression;
       if (ge.e1 instanceof ArithmeticExpression) {
@@ -478,7 +491,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       final AliasedExpression ae = (AliasedExpression) e;
       output = ae.alias;
     } else if (e instanceof Column) {
-      output = ((Column)e).columnName;
+      output = ((Column) e).columnName;
     } else {
       throw new RuntimeException("Unknown Expression ");
     }

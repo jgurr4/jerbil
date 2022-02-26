@@ -117,11 +117,11 @@ public class TableContainer extends FromExpression {
   }
 
   public PotentialQuery explain() {
-    return null;
+    return QueryWithFrom.make(this, QueryFlags.make(0b00001000));
   }
 
   public PotentialQuery analyze() {
-    return null;
+    return QueryWithFrom.make(this, QueryFlags.make(0b00000100));
   }
 
   public SelectQuery selectDistinct() {

@@ -213,7 +213,7 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  // Here is interesting reason why we use finalized = 1 or <> 1 instead of finalized is true or is not true: https://stackoverflow.com/questions/24800881/mysql-true-vs-is-true-on-boolean-when-is-it-advisable-to-use-which-one
+  // Here is interesting reason why we use finalized = 1 or <> 1 instead of 'finalized is true' or 'is not true': https://stackoverflow.com/questions/24800881/mysql-true-vs-is-true-on-boolean-when-is-it-advisable-to-use-which-one
   //FIXME: Need to implement dictionary to put backticks around reserved words.
   @Test
   void testSelectDistinct() {
@@ -221,11 +221,11 @@ public class SqlQueryTests {
         .union(order.selectDistinct(order.total).where(order.finalized.isFalse()));
     assertEquals("""
         select distinct total
-        from `order`
+        from order
         where finalized = 1
         union
         select distinct total
-        from `order`
+        from order
         where finalized <> 1
         """, q.toSql());
   }
@@ -315,44 +315,41 @@ public class SqlQueryTests {
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testMatchFullText() {
     final CompleteQuery q = order.select(order.phrase).where(order.phrase.match(make("Hello there")));
     assertEquals("""
         select phrase
-        from `order`
+        from order
         where match(phrase) against('Hello there')
         """, q.toSql());
   }
 
-  //FIXME
   @Test
   void testExplain() {
     final CompleteQuery q1 = order.select().explain();
     final CompleteQuery q2 = order.explain().select();
     assertEquals("""
         explain select *
-        from `order`
+        from order
         """, q1.toSql());
     assertEquals("""
         explain select *
-        from `order`
+        from order
         """, q2.toSql());
   }
 
-  //FIXME
   @Test
   void testAnalyze() { //For mysqlbridge it would have to do explain analyze select, but for mariadbbridge it would just do analyze select.
     final CompleteQuery q1 = order.select().analyze();
     final CompleteQuery q2 = order.analyze().select();
     assertEquals("""
         analyze select *
-        from `order`
+        from order
         """, q1.toSql());
     assertEquals("""
         analyze select *
-        from `order`
+        from order
         """, q2.toSql());
   }
 
