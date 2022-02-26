@@ -3,6 +3,7 @@ package com.ple.jerbil;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -95,7 +96,7 @@ public class SqlQueryTests {
 
   @Test
   void testReusableQueryBase() {
-    final CompleteQuery base = user.select(user.userId);
+    final SelectQuery base = user.select(user.userId);
     final CompleteQuery q1 = base.where(user.name.eq(make("john")));
     final CompleteQuery q2 = base.where(user.name.eq(make("james")));
     assertEquals("""

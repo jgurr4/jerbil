@@ -90,12 +90,42 @@ public class DataSpec {
   }
 
   public String getSqlName() {
-    if (this.dataType.name() == "integer") {
+    if (this.dataType.equals(DataType.integer)) {
       return "int";
-    } else if (this.dataType.name() == "bool") {
+    } else if (this.dataType.equals(DataType.tinyint)) {
+      return "tinyint";
+    } else if (this.dataType.equals(DataType.smallint)) {
+      return "smallint";
+    } else if (this.dataType.equals(DataType.mediumint)) {
+      return "mediumint";
+    } else if (this.dataType.equals(DataType.bigint)) {
+      return "bigint";
+    } else if (this.dataType.equals(DataType.aDouble)) {
+      return "double";
+    } else if (this.dataType.equals(DataType.aFloat)) {
+      return "float";
+    } else if (this.dataType.equals(DataType.decimal)) {
+      return "decimal";
+    } else if (this.dataType.equals(DataType.bool)) {
       return "boolean";
-    } else if (this.dataType.name() == "enumeration") {
+    } else if (this.dataType.equals(DataType.enumeration)) {
       return "enum";
+    } else if (this.dataType.equals(DataType.set)) {
+      return "set";
+    } else if (this.dataType.equals(DataType.varchar)) {
+      return "varchar";
+    } else if (this.dataType.equals(DataType.character)) {
+      return "char";
+    } else if (this.dataType.equals(DataType.text)) {
+      return "text";
+    } else if (this.dataType.equals(DataType.date)) {
+      return "date";
+    } else if (this.dataType.equals(DataType.datetime)) {
+      return "datetime";
+    } else if (this.dataType.equals(DataType.time)) {
+      return "time";
+    } else if (this.dataType.equals(DataType.timestamp)) {
+      return "timestamp";
     }
     return this.dataType.name();
   }

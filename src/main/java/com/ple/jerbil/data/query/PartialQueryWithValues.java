@@ -28,24 +28,4 @@ public class PartialQueryWithValues extends PartialQuery {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
-  public CompleteQuery set(Column column, Literal value) {
-    if (set == null) {
-      if (this instanceof PartialInsertQuery) {
-        return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
-      } else if (this instanceof PartialUpdateQuery){
-        return UpdateQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
-      } else {
-        return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression, true);
-      }
-    }
-    final IMap<Column, Expression> map = set.get(0).put(column, value);
-    final IList<IMap<Column, Expression>> records = IArrayList.make(map);
-    if (this instanceof PartialInsertQuery) {
-      return InsertQuery.make(records, fromExpression);
-    } else if (this instanceof PartialUpdateQuery){
-      return UpdateQuery.make(records, fromExpression);
-    } else {
-      return InsertQuery.make(records, fromExpression, true);
-    }
-  }
 }

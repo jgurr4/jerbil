@@ -2,15 +2,9 @@ package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.DelayedImmutable;
 import com.ple.jerbil.data.Order;
-import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.Expression;
-import com.ple.jerbil.data.selectExpression.Literal;
-import com.ple.jerbil.data.selectExpression.SelectExpression;
+import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
-import com.ple.util.IArrayList;
-import com.ple.util.IHashMap;
-import com.ple.util.IList;
-import com.ple.util.IMap;
+import com.ple.util.*;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -55,6 +49,20 @@ public class InsertQuery extends CompleteQuery {
                                  IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
     return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
         union);
+  }
+
+  public InsertQuery where(BooleanExpression<UnaliasedExpression> condition) {
+    return InsertQuery.make(condition, fromExpression, queryType, select, groupBy, orderBy,
+        having, limit, set, queryFlags, union);
+  }
+
+  public InsertQuery set(Column column, Literal value) {
+    if (set == null) {
+      return InsertQuery.make(IArrayList.make(IArrayMap.make(column, value)), fromExpression);
+    }
+    final IMap<Column, Expression> map = set.get(0).put(column, value);
+    final IList<IMap<Column, Expression>> records = IArrayList.make(map);
+    return InsertQuery.make(records, fromExpression);
   }
 
 /*

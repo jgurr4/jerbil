@@ -189,7 +189,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String preSelect = "";
     String postSelect = "";
     String separator = "";
-    final IList<TableContainer> tableList;
+    IList<TableContainer> tableList = IArrayList.empty;
     if (selectQuery.queryFlags != null) {
       if ((selectQuery.queryFlags.flags >> 7 & 1) == 1) {
         postSelect += "distinct ";
@@ -205,7 +205,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
     sql += preSelect + separator + "select " + postSelect;
     if (selectQuery.fromExpression != null) {
-      tableList = selectQuery.fromExpression.tableList();
+      if (selectQuery.fromExpression instanceof Join) {
+        tableList = tableList.addAll(selectQuery.fromExpression.tableList());
+      } else if (selectQuery.fromExpression instanceof TableContainer){
+        tableList = tableList.add((TableContainer) selectQuery.fromExpression);
+      }
       if (selectQuery.select.size() == 1 && selectQuery.select.toArray()[0] instanceof SelectAllExpression) {
         sql += "*\nfrom " + toSql(selectQuery.fromExpression) + "\n";
       } else {
@@ -492,6 +496,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       output = ae.alias;
     } else if (e instanceof Column) {
       output = ((Column) e).columnName;
+    } else if (e instanceof ArithmeticExpression) {
+      output = toSqlArithmetic("", (ArithmeticExpression) e);
     } else {
       throw new RuntimeException("Unknown Expression ");
     }
@@ -619,47 +625,68 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   //TODO: Add support for specifying Null on a column. Leave not null off because that is default.
   public String toSql(Column column) {
-/* FIXME: broken after changes to database/table system.
-
+    //Order: name + dataspec + nullVal + defaultVal + onUpdateVal + autoInc + unique + invisible + generatedVal
     String sql = column.getColumnName() + " ";
-    String primary = "";
+    String dataSpec = dataTypeToSql(column);
+    String nullVal = " not null";
+    String defaultVal = "";
+    String onUpdateVal = "";
     String autoIncrement = "";
-    String preciseScale = "";
-    if (column.isPrimary()) {
-      primary = " primary key";
+    String unique = "";
+    String invisible = "";
+    String generatedFrom = "";
+    if (column instanceof NumericColumn && (column.hints.flags >> 8 & 1) == 1) {
+      autoIncrement = " auto_increment";
     }
+    if ((column.hints.flags >> 7 & 1) == 1) {
+      nullVal = "";
+    }
+    if (column.defaultValue != null) {
+      defaultVal = toSql(column.defaultValue);
+    }
+    if (column.onUpdate != null) {
+      onUpdateVal = toSql(column.onUpdate);
+    }
+    if ((column.hints.flags >> 9 & 1) == 1) {
+      unique = " unique";
+    }
+    if ((column.hints.flags >> 10 & 1) == 1) {
+      invisible = " invisible";
+    }
+    if (column.generatedFrom != null) {
+      generatedFrom = " as (" + toSql(column.generatedFrom) + ")";
+    }
+    sql += dataSpec + nullVal + defaultVal + onUpdateVal + autoIncrement + unique + invisible + generatedFrom;
+    return sql;
+  }
+
+  private String dataTypeToSql(Column column) {
+    String sql = " " + column.dataSpec.getSqlName();
     if (column instanceof NumericColumn) {
-      final NumericColumn numCol = (NumericColumn) column;
-      if (numCol.dataSpec.preciseScale != null) {
-        preciseScale = "(" + numCol.dataSpec.preciseScale[0] + ", " + numCol.dataSpec.preciseScale[1] + ")";
-      }
-      if (numCol.isAutoIncrement()) {
-        autoIncrement = " auto_increment";
-      }
-      if (numCol.generatedFrom != null) {
-        sql += numCol.dataSpec.getSqlName() + preciseScale + " as (" + toSqlArithmetic(sql, (ArithmeticExpression) numCol.generatedFrom) + ")";
-      } else {
-        sql += numCol.dataSpec.getSqlName() + preciseScale + " not null" + primary + autoIncrement;
+      if (column.dataSpec.preciseScale != null) {
+        sql += "(" + column.dataSpec.preciseScale[0] + ", " + column.dataSpec.preciseScale[1] + ")";
+      } else if (column.dataSpec.size != 0) {
+        sql += "(" + column.dataSpec.size + ")";
       }
     } else if (column instanceof StringColumn) {
-      final StringColumn strCol = (StringColumn) column;
-      if (strCol.dataSpec.dataType == DataType.varchar) {
-        sql += strCol.dataSpec.dataType.name() + "(" + strCol.dataSpec.size + ")" + " not null" + primary;
-      } else if (strCol.dataSpec.dataType == DataType.enumeration) {
-        final EnumSpec enumSpec = (EnumSpec) strCol.dataSpec;
-        sql += "enum(";
-        String separator = "'";
-        for (String value : enumSpec.values) {
-          sql += separator + value + "'";
-          separator = ",'";
-        }
-        sql += ") not null" + primary;
-      }
+      sql += "(" + column.dataSpec.size + ")";
+    } else if (column instanceof EnumeralColumn) {
+      final EnumSpec enumSpec = (EnumSpec) column.dataSpec;
+      sql += toSql(enumSpec);
     }
-    sql = sql.replaceAll("not null primary key", "primary key");
     return sql;
-*/
-    return null;
+  }
+
+  private String toSql(EnumSpec enumSpec) {
+    String sql = "";
+    sql += " " + enumSpec.getSqlName();
+    String separator = "'";
+    for (String value : enumSpec.values) {
+      sql += separator + value + "'";
+      separator = ",'";
+    }
+    sql += ")";
+    return sql;
   }
 
   @Override
@@ -676,7 +703,15 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   public String toSql(InsertQuery insertQuery) {
-    String sql = "insert into " + toSql(insertQuery.fromExpression) + "\n(";
+    String sql = "";
+    if (insertQuery.queryFlags != null) {
+      if ((insertQuery.queryFlags.flags << 5 & 1) == 1) {
+        sql += "replace ";
+      } else {
+        sql += "insert ";
+      }
+    }
+    sql += "into " + toSql(insertQuery.fromExpression) + "\n(";
     String separator = "";
     for (Column column : insertQuery.set.get(0).keys()) {
       sql += separator + column.getColumnName();
@@ -702,74 +737,72 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   public String toSql(CreateQuery createQuery) {
-/*
-//FIXME: broken after changes to tables and datbases.
+    String sql = "";
+    String indexes = "";
     if (createQuery.db != null) {
       return "create database " + createQuery.db.databaseName;
     }
     String engine = "";
-    if (createQuery.fromExpression.tableList().get(0).storageEngine == StorageEngine.simple) {
-      engine = "Aria";
-    } else if (createQuery.fromExpression.tableList().get(0).storageEngine == StorageEngine.transactional) {
-      engine = "Innodb";
-    }
-    String sql = "create table " + toSql(createQuery.fromExpression) + " (\n";
-    final IList<Column> columns = createQuery.fromExpression.tableList().get(0).columns;
-    String separator = "  ";
-    for (int i = 0; i < columns.toArray().length; i++) {
-      sql += separator + toSql(columns.get(i));
-      separator = ",\n  ";
-    }
-    String indexes = gatherIndexes(columns);
-    if (indexes != "") {
-      if (indexes.contains("primary")) {
-        sql = sql.replaceAll(" primary key", "");
+    if (createQuery.fromExpression instanceof TableContainer) {
+      final TableContainer t = (TableContainer) createQuery.fromExpression;
+      if (t.storageEngine == StorageEngine.simple) {
+        engine = "Aria";
+      } else if (t.storageEngine == StorageEngine.transactional) {
+        engine = "Innodb";
       }
+      sql = "create table " + t.table.tableName + " (\n";
+      final IMap<String, Column> columns = t.columns;
+      String separator = "  ";
+      for (IEntry<String, Column> column : columns) {
+        sql += separator + toSql(column.value);
+        separator = ",\n  ";
+      }
+      indexes = toSql(t.indexes);
     }
     sql += indexes + "\n) ENGINE=" + engine + "\n";
     return sql;
-*/
-    return null;
   }
 
-  private String gatherIndexes(IList<Column> columns) {
+  private String toSql(IList<Index> indexes) {
+    String separtor = "  ";
+    String sql = "";
+    String references = "";
+    boolean generateName = true;
+    for (Index index : indexes) {
+      if (index.type.equals(IndexType.primary)) {
+        sql += separtor + "\n  primary";
+        generateName = false;
+      } else if (index.type.equals(IndexType.secondary)) {
+        sql += separtor + "\n  key";
+      } else if (index.type.equals(IndexType.fulltext)) {
+        sql += separtor + "\n fulltext";
+      } else if (index.type.equals(IndexType.foreign)) {
+        sql += separtor + "\n foreign key";
+//        references = toSql(index.fkReference); //TODO: Finish implementing foreign key with Index.
+      }
+      separtor = ",";
+      sql += " " + toSqlIndexColumns(index.columns, generateName);
+    }
+    return sql;
+  }
 
-/*  //FIXME: broken after change to new database/table system.
-    String multiIndex = "";
+  private String toSqlIndexColumns(IList<Column> columns, boolean generateName) {
+    String sql = "";
     String separator = "";
-    int primaryCount = 0;
-    int indexCount = 0;
     String indexedColumns = "";
+    String indexName = "";
     for (Column column : columns) {
-      if (column.isPrimary()) {
-        primaryCount++;
-      } else if (column.isIndexed()) {
-        indexCount++;
-        indexedColumns += separator + column.getColumnName();
-        separator = ",";
-      }
+      indexedColumns += separator + column.columnName;
+      separator = ",";
     }
-    separator = "";
-    if (primaryCount > 0) {
-      multiIndex += ",\n  primary key (";
-      for (Column column : columns) {
-        if (column.isPrimary()) {
-          multiIndex += separator + column.getColumnName();
-          separator = ",";
-        }
-      }
-      multiIndex += ")";
+    if (generateName) {
+      indexName = generateIndexName(indexedColumns) + "_idx ";
     }
-    if (indexCount > 0) {
-      multiIndex += ",\n  key " + generateIndexName(indexedColumns) + "_idx (";
-      multiIndex += indexedColumns;
-      multiIndex += ")";
-    }
-    return multiIndex;
-*/
-    return null;
+    sql += indexName + "(" + indexedColumns + ")";
+    return sql;
   }
 
+  //FIXME: Make this save the first vowel if it exists at the start of the columnname. example: allowance,edible becomes: alwnc_edbl_idx
   private String generateIndexName(String indexedColumns) {
     return indexedColumns.replaceAll(",", "_")
         .replaceAll("[aeiou]", "")

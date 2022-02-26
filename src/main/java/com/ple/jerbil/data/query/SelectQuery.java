@@ -50,6 +50,11 @@ public class SelectQuery extends CompleteQuery {
         set, queryFlags, null);
   }
 
+  public SelectQuery where(BooleanExpression<UnaliasedExpression> condition) {
+    return SelectQuery.make(condition, fromExpression, queryType, select, groupBy, orderBy,
+        having, limit, set, queryFlags, union);
+  }
+
   //TODO: Add a field to Query that includes unionSelect. Then make an class called UnionSelect which contains a selectQuery as well as a non-null parameter called "UnionType" which will be all or distinct based on whether users specified unionAll or union.
   public CompleteQuery union(SelectQuery selectQuery) {
     return new SelectQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,

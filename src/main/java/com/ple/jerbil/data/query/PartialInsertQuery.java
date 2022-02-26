@@ -6,10 +6,7 @@ import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.data.selectExpression.SelectExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
-import com.ple.util.IArrayList;
-import com.ple.util.IHashMap;
-import com.ple.util.IList;
-import com.ple.util.IMap;
+import com.ple.util.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -26,11 +23,16 @@ public class PartialInsertQuery extends PartialQueryWithValues {
   }
 
   public static PartialInsertQuery make(TableContainer table) {
-    return new PartialInsertQuery(null, table, null, null, null, null, null,
+    return new PartialInsertQuery(null, table, QueryType.insert, null, null, null, null,
         null, null, null, null);
   }
 
-  public CompleteQuery set(List<Column> columns, List<List<String>> values) {
+  public static PartialInsertQuery make(TableContainer tableContainer, QueryFlags queryFlags) {
+    return new PartialInsertQuery(null, tableContainer, QueryType.insert, null, null, null,
+        null, null, null, queryFlags, null);
+  }
+
+  public InsertQuery set(List<Column> columns, List<List<String>> values) {
     IList<IMap<Column, Expression>> records = IArrayList.make();
     for (int i = 0; i < values.size(); i++) {
       for (int j = 0; j < columns.size(); j++) {
@@ -43,6 +45,10 @@ public class PartialInsertQuery extends PartialQueryWithValues {
       }
     }
     return InsertQuery.make(records, fromExpression);
+  }
+
+  public InsertQuery set(Column column, Literal value) {
+    return InsertQuery.make(IArrayList.make(IArrayMap.make(column, value)), fromExpression);
   }
 
 }

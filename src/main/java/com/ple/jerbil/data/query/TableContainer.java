@@ -88,8 +88,7 @@ public class TableContainer extends FromExpression {
   }
 
   public PartialInsertQuery replace() {
-    // replace is just a insert with ignore, or on duplicate key update.
-    return null;
+    return PartialInsertQuery.make(this, QueryFlags.make(0b00100000));
   }
 
   public CompleteQuery select(CountAgg agg) {

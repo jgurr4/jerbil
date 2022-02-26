@@ -22,7 +22,6 @@ public class Join extends FromExpression {
   protected void diffJoin() {
   }
 
-  @Override
   public IList<TableContainer> tableList() {
     return fe1.tableList().addAll(fe2.tableList());
   }

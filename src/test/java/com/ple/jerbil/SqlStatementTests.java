@@ -4,6 +4,7 @@ import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.DatabaseBuilder;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.PartialInsertQuery;
 import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.testcommon.*;
@@ -26,39 +27,50 @@ public class SqlStatementTests {
 
   public SqlStatementTests() {
     final Properties props = ConfigProps.getProperties();
-    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
+    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"),
+        Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
   }
 
+  //FIXME: get set to work without specifying any columns, just values.
   @Test
   void testInsertSingle() {
-    final CompleteQuery q = item.insert().set(item.name, Literal.make("sword of spirit")).set(
-      item.type,
-      Literal.make(ItemType.weapon.toString())
-    );
+/*
+    final PartialInsertQuery base = item.insert();
+    final CompleteQuery q1 = base.set(item.name, make("sword of spirit")).set(
+        item.type, make(ItemType.weapon));
+    final CompleteQuery q2 = base.set(make(0), make("sword of spirit"), make(ItemType.weapon), make(200))
+        .set(make(0), make("serpent barding"), make(ItemType.armor), make(450));
     assertEquals("""
-      insert into item
-      (name, type) values
-      ('sword of spirit', 'weapon')
-      """, q.toSql());
+        insert into item
+        (name, type) values
+        ('sword of spirit', 'weapon')
+        """, q1.toSql());
+    assertEquals("""
+        insert into item
+        values
+        (0, 'sword of spirit', 'weapon', 200),
+        (0, 'serpent barding', 'armor', 450)
+        """, q2.toSql());
+*/
   }
 
   @Test
   void testInsertMulti() {
     final CompleteQuery q = item.insert().set(
-      List.of(item.name, item.type),
-      List.of(
-        List.of("sword of spirit", ItemType.weapon.toString()),
-        List.of("shield of faith", ItemType.shield.toString()),
-        List.of("breastplate of righteousness", ItemType.armor.toString())
-      )
+        List.of(item.name, item.type),
+        List.of(
+            List.of("sword of spirit", ItemType.weapon.toString()),
+            List.of("shield of faith", ItemType.shield.toString()),
+            List.of("breastplate of righteousness", ItemType.armor.toString())
+        )
     );
     assertEquals("""
-      insert into item
-      (name, type) values
-      ('sword of spirit', 'weapon'),
-      ('shield of faith', 'shield'),
-      ('breastplate of righteousness', 'armor')
-      """, q.toSql());
+        insert into item
+        (name, type) values
+        ('sword of spirit', 'weapon'),
+        ('shield of faith', 'shield'),
+        ('breastplate of righteousness', 'armor')
+        """, q.toSql());
   }
 
   @Test
@@ -84,12 +96,10 @@ public class SqlStatementTests {
 
   @Test
   void testMultiTableDelete() {
-
   }
 
   @Test
   void testUpdate() {
-/*
     final CompleteQuery q = order.update().set(order.finalized, make(true)).set(order.phrase, make("Something here"))
         .where(order.finalized.eq(make(false)));
     assertEquals("""
@@ -97,28 +107,24 @@ public class SqlStatementTests {
         set finalized = true,
         phrase = 'Something here'
         where finalized = false""", q.toSql());
-*/
   }
 
   @Test
   void testUpdateMulti() {
-
   }
 
   @Test
   void testMultiTableUpdate() {
-
   }
 
   @Test
   void testReplaceSingle() {
-    // replace is just a insert with ignore, or on duplicate key update.
-    final CompleteQuery q = player.replace().set(player.name, make("bob")).where(player.playerId.eq(make(0)));
+    final CompleteQuery q = player.replace().set(player.name, make("bob")).where(player.playerId.eq(make(5)));
     assertEquals("""
         replace into player
         (name) values
         ('bob')
-        where playerId = 0
+        where playerId = 5
         """, q.toSql());
   }
 
@@ -128,42 +134,32 @@ public class SqlStatementTests {
 
   @Test
   void testMultiTableReplace() {
-
-  }
-
-  @Test
-  void testIgnore() {
-    //insert ignore and update ignore.
-  }
-
-  @Test
-  void testOnDuplicateKeyUpdate() {
   }
 
   @Test
   void testTableCreate() {
     final CompleteQuery q = item.create();
     assertEquals("""
-      create table item (
-        itemId int auto_increment,
-        name varchar(20) not null,
-        type enum('weapon','armor','shield','accessory') not null,
-        price int not null,
-        primary key (itemId),
-        key nm_idx (name)
-      ) ENGINE=Aria
-      """, q.toSql());
+        create table item (
+          itemId int auto_increment,
+          name varchar(20) not null,
+          type enum('weapon','armor','shield','accessory') not null,
+          price int not null,
+          primary key (itemId),
+          key nm_idx (name)
+        ) ENGINE=Aria
+        """, q.toSql());
   }
 
   @Test
   void testMultiColumnPrimaryKey() {
     final CompleteQuery q = inventory.create();
     assertEquals("""
-      create table inventory (
-        playerId int,
-        itemId int,
-        primary key (playerId,itemId)
-      ) ENGINE=Aria
-      """, q.toSql());
+        create table inventory (
+          playerId int,
+          itemId int,
+          primary key (playerId,itemId)
+        ) ENGINE=Aria
+        """, q.toSql());
   }
 }

@@ -41,11 +41,13 @@ public class CompleteQuery extends Query {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
+/*
   public static CompleteQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
     return new CompleteQuery(null, fromExpression, null, null, null, null,
         null, null, set, null, null);
   }
 
+/*
   public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                    IList<SelectExpression> select, IList<SelectExpression> groupBy,
                                    IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
@@ -53,6 +55,7 @@ public class CompleteQuery extends Query {
     return new CompleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set,
         queryFlags, union);
   }
+*/
 
   public String toSql() {
     if (DataGlobal.bridge == null) {
@@ -65,34 +68,12 @@ public class CompleteQuery extends Query {
     return generator.toSql(this);
   }
 
-  public SelectQuery where(BooleanExpression<UnaliasedExpression> condition) {
-    return SelectQuery.make(condition, fromExpression, queryType, select, groupBy, orderBy,
-        having, limit, set, queryFlags, union);
-  }
-
   public CompleteQuery and(BooleanExpression expression) {
     return null;
   }
 
   public Expression minus(int i) {
     return null;
-  }
-
-  public CompleteQuery set(Column column, Literal value) {
-    if (set == null) {
-      if (this instanceof InsertQuery) {
-        return InsertQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
-      } else {
-        return UpdateQuery.make(IArrayList.make(IHashMap.make(column, value)), fromExpression);
-      }
-    }
-    final IMap<Column, Expression> map = set.get(0).put(column, value);
-    final IList<IMap<Column, Expression>> records = IArrayList.make(map);
-    if (this instanceof InsertQuery) {
-      return InsertQuery.make(records, fromExpression);
-    } else {
-      return UpdateQuery.make(records, fromExpression);
-    }
   }
 
   public ReactiveWrapper<Result> execute() {

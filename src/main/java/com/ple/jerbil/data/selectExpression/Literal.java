@@ -16,6 +16,10 @@ public interface Literal extends Expression {
     return LiteralString.make(s);
   }
 
+  public static LiteralString make(Enum<?> e) {
+    return LiteralString.make(e.name());
+  }
+
   public static LiteralNumber make(int i) {
     return LiteralNumber.make(i);
   }

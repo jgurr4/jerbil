@@ -34,12 +34,12 @@ public class SqlStructureTests {
     final CreateQuery q = order.create();
     assertEquals("""
         create table `order` (
-          orderId bigint unsigned auto_increment,
+          orderId bigint(20) unsigned auto_increment,
           `add` varchar(255) unique default 'barter' not null,
           phrase text,
-          userId int unsigned not null,
+          userId int(11) unsigned not null,
           itemId int(10) unsigned not null,
-          scale mediumint unsigned not null,
+          scale mediumint(9) unsigned not null,
           quantity smallint unsigned not null,
           price decimal(14, 2) not null,
           total decimal(14, 2) as (quantity * price),
@@ -50,7 +50,7 @@ public class SqlStructureTests {
           saleDate date not null,
           saleTime time not null,
           saleDateTime datetime default current_timestamp on update current_timestamp not null,
-          myInvis int invisible,
+          myInvis int(11) invisible,
           primary key (orderId),
           fulltext index phrs_idx (phrase),
           key usr_itm_idx (userId, itemId)
@@ -89,6 +89,28 @@ public class SqlStructureTests {
         playerId int,
         itemId int,
         primary key (playerId,itemId)
+      ) ENGINE=Aria;
+      create table `order` (
+        orderId bigint unsigned auto_increment,
+        `add` varchar(255) unique default 'barter' not null,
+        phrase text,
+        userId int unsigned not null,
+        itemId int(10) unsigned not null,
+        scale mediumint unsigned not null,
+        quantity smallint unsigned not null,
+        price decimal(14, 2) not null,
+        total decimal(14, 2) as (quantity * price),
+        finalized boolean not null,
+        myDouble double not null,
+        myFloat float not null,
+        mySet set('weapon','armor','shield','accessory') default 'weapon',
+        saleDate date not null,
+        saleTime time not null,
+        saleDateTime datetime default current_timestamp on update current_timestamp not null,
+        myInvis int invisible,
+        primary key (orderId),
+        fulltext index phrs_idx (phrase),
+        key usr_itm_idx (userId, itemId)
       ) ENGINE=Aria;
       """, testCreateAll.toSql());
   }

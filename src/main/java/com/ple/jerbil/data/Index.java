@@ -12,6 +12,7 @@ public class Index {
   public final IList<Column> columns;
   @Nullable public final int size;
   @Nullable public final Order order;
+//  @Nullable public final FkReference fkReference;
 
   protected Index(IndexType type, @Nullable String indexName, IList<Column> columns, @Nullable int size, @Nullable Order order) {
     this.type = type;
