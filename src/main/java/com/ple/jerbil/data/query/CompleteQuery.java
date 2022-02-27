@@ -41,22 +41,6 @@ public class CompleteQuery extends Query {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
-/*
-  public static CompleteQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
-    return new CompleteQuery(null, fromExpression, null, null, null, null,
-        null, null, set, null, null);
-  }
-
-/*
-  public static CompleteQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
-                                   IList<SelectExpression> select, IList<SelectExpression> groupBy,
-                                   IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
-                                   IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
-    return new CompleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set,
-        queryFlags, union);
-  }
-*/
-
   public String toSql() {
     if (DataGlobal.bridge == null) {
       throw new NullPointerException("Global.sqlGenerator not set.");
@@ -66,14 +50,6 @@ public class CompleteQuery extends Query {
 
   public String toSql(LanguageGenerator generator) {
     return generator.toSql(this);
-  }
-
-  public CompleteQuery and(BooleanExpression expression) {
-    return null;
-  }
-
-  public Expression minus(int i) {
-    return null;
   }
 
   public ReactiveWrapper<Result> execute() {
@@ -105,6 +81,6 @@ public class CompleteQuery extends Query {
   }
 
   public CompleteQuery limit(int limit) {
-    return null;
+    return limit(0, limit);
   }
 }

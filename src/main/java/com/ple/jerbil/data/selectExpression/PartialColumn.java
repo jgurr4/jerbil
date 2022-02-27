@@ -68,7 +68,15 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public StringColumn asVarchar(int size) {
-    return StringColumn.make(columnName, table, size);
+    return StringColumn.make(columnName, table, DataSpec.make(DataType.varchar, size));
+  }
+
+  public StringColumn asChar() {
+    return StringColumn.make(columnName, table, DataSpec.make(DataType.character, 255));
+  }
+
+  public StringColumn asChar(int size) {
+    return StringColumn.make(columnName, table, DataSpec.make(DataType.character, size));
   }
 
   public EnumeralColumn asEnum(Class<?> enumObj) {
@@ -165,4 +173,5 @@ public class PartialColumn implements Expression, OrderedExpression {
   public DateColumn asTimeStamp() {
     return DateColumn.make(columnName, table, DataSpec.make(DataType.timestamp));
   }
+
 }

@@ -22,13 +22,13 @@ public class SelectQuery extends CompleteQuery {
   }
 
   public static SelectQuery make(IList<SelectExpression> selectExpressions) {
-    return new SelectQuery(null, null, QueryType.select, selectExpressions, null, null, null, null, null, QueryFlags.make(0b0),
-        null);
+    return new SelectQuery(null, null, QueryType.select, selectExpressions, null, null,
+        null, null, null, QueryFlags.make(), null);
   }
 
   public static SelectQuery make(TableContainer tableContainer, IArrayList<SelectExpression> selectExpressions) {
-    return new SelectQuery(null, tableContainer, QueryType.select, selectExpressions, null, null, null, null, null,
-        QueryFlags.make(0b0), null);
+    return new SelectQuery(null, tableContainer, QueryType.select, selectExpressions, null, null,
+        null, null, null, QueryFlags.make(), null);
   }
 
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
@@ -102,21 +102,11 @@ public class SelectQuery extends CompleteQuery {
 
   public CompleteQuery explain() {
     return SelectQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set,
-        QueryFlags.make(0b00001000 + queryFlags.flags), union);
+        queryFlags.explain(), union);
   }
 
   public CompleteQuery analyze() {
     return SelectQuery.make(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set,
-        QueryFlags.make(0b00000100 + queryFlags.flags), union);
+        queryFlags.analyze(), union);
   }
-
-/*
-  public CompleteQuery limit(int offset, int limit) {
-    return null;
-  }
-
-  public CompleteQuery limit(int limit) {
-    return null;
-  }
-*/
 }

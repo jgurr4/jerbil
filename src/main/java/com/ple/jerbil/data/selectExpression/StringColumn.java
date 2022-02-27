@@ -87,11 +87,6 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
         null, BuildingHints.make());
   }
 
-  public static StringColumn make(String columnName, Table table) {
-    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar), null, null,
-        null, BuildingHints.make());
-  }
-
   public static StringColumn make(String columnName, Table table, DataSpec dataSpec) {
     return new StringColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make());
   }

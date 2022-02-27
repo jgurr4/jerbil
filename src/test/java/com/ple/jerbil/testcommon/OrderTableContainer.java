@@ -84,6 +84,7 @@ public class OrderTableContainer extends TableContainer {
     final DateColumn saleDateTime = Column.make("saleDateTime", orderTable).asDateTime()
         .defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
     final NumericColumn myInvis = Column.make("myInvis", orderTable).asInt().invisible();
+//    final StringColumn myChar = Column.make("myChar", orderTable).asChar();
     final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add,
         phrase.columnName, phrase, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale, quantity.columnName, quantity,
         price.columnName, price, total.columnName, total, finalized.columnName, finalized, myDouble.columnName, myDouble,

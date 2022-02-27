@@ -191,14 +191,14 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String separator = "";
     IList<TableContainer> tableList = IArrayList.empty;
     if (selectQuery.queryFlags != null) {
-      if ((selectQuery.queryFlags.flags >> 7 & 1) == 1) {
+      if (selectQuery.queryFlags.isDistinct()) {
         postSelect += "distinct ";
       }
-      if ((selectQuery.queryFlags.flags >> 3 & 1) == 1) {
+      if (selectQuery.queryFlags.isExplain()) {
         preSelect += "explain";
         separator = " ";
       }
-      if ((selectQuery.queryFlags.flags >> 2 & 1) == 1) {
+      if (selectQuery.queryFlags.isAnalyze()) {
         preSelect += separator + "analyze";
         separator = " ";
       }

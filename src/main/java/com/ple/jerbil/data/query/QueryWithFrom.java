@@ -14,7 +14,8 @@ import org.jetbrains.annotations.Nullable;
 
 
 /**
- * A partial Query that includes a tablename, but has not specified a crud operation/QueryType yet.
+ * A partial Query that includes a tablename, but has not specified a crud operation/QueryType yet. This is required to
+ * allow users to build a query in any order they want.
  */
 @Immutable
 public class QueryWithFrom extends PartialQuery {
@@ -31,7 +32,7 @@ public class QueryWithFrom extends PartialQuery {
 
   public static QueryWithFrom make(FromExpression fromExpression) {
     return new QueryWithFrom(null, fromExpression, null, null, null, null, null,
-        null, null, QueryFlags.make(0b0), null);
+        null, null, QueryFlags.make(), null);
   }
 
   public static QueryWithFrom make(TableContainer tableContainer, QueryFlags queryFlags) {

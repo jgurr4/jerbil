@@ -24,7 +24,7 @@ public class UpdateQuery extends CompleteQuery {
 
   public static UpdateQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression, QueryType queryType) {
     return new UpdateQuery(null, fromExpression, queryType, null, null, null,
-        null, null, set, null, null);
+        null, null, set, QueryFlags.make(), null);
   }
 
   public static UpdateQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
@@ -48,15 +48,4 @@ public class UpdateQuery extends CompleteQuery {
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);
     return UpdateQuery.make(records, fromExpression, queryType);
   }
-
-/*
-  public CompleteQuery limit(int offset, int limit) {
-    return null;
-  }
-
-  public CompleteQuery limit(int limit) {
-    return null;
-  }
-
-*/
 }

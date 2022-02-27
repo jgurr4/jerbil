@@ -45,13 +45,6 @@ public class InsertQuery extends CompleteQuery {
     return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
         union);
   }
-/*
-
-  public InsertQuery where(BooleanExpression<UnaliasedExpression> condition) {
-    return InsertQuery.make(condition, fromExpression, queryType, select, groupBy, orderBy,
-        having, limit, set, queryFlags, union);
-  }
-*/
 
   public InsertQuery set(Column column, Literal value) {
     if (set == null) {

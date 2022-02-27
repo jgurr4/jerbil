@@ -70,9 +70,8 @@ public class DataSpec {
   // Just make the size 0 if not specified by the user explicitely.
   public static DataSpec make(DataType type) {
     int maxSize = 0;
-    if (type == DataType.varchar || type == DataType.enumeration) {
+    if (type == DataType.varchar || type == DataType.enumeration || type == DataType.character) {
       maxSize = DefaultSize.varchar.getSize();
-      //TODO: Add char default max size here.
 /*  //Uncomment this if we want int(11) and other default sizes specified explicitely in table create statements.
     } else if (type == DataType.bigint) {
       maxSize = DefaultSize.bigint.getSize();

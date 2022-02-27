@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.query;
 
+import com.ple.jerbil.data.Immutable;
 import com.ple.jerbil.data.Order;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
@@ -11,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+@Immutable
 public class PartialInsertQuery extends PartialQueryWithValues {
 
   protected PartialInsertQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
@@ -24,7 +26,7 @@ public class PartialInsertQuery extends PartialQueryWithValues {
 
   public static PartialInsertQuery make(TableContainer table) {
     return new PartialInsertQuery(null, table, QueryType.insert, null, null, null, null,
-        null, null, null, null);
+        null, null, QueryFlags.make(), null);
   }
 
   public static PartialInsertQuery make(TableContainer tableContainer, QueryFlags queryFlags) {
@@ -44,11 +46,10 @@ public class PartialInsertQuery extends PartialQueryWithValues {
         }
       }
     }
-    return InsertQuery.make(records, fromExpression);
+    return InsertQuery.make(records, fromExpression, queryFlags);
   }
 
   public InsertQuery set(Column column, Literal value) {
     return InsertQuery.make(IArrayList.make(IArrayMap.make(column, value)), fromExpression, queryFlags);
   }
-
 }

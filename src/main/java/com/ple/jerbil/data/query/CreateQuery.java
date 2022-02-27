@@ -29,12 +29,12 @@ public class CreateQuery extends CompleteQuery {
 
   public static CreateQuery make(TableContainer tableContainer) {
     return new CreateQuery(null, tableContainer, QueryType.create, null, null, null,
-        null, null, null, null, null, null);
+        null, null, null, QueryFlags.make(), null, null);
   }
 
   public static CompleteQuery make(Database db) {
     return new CreateQuery(null, null, QueryType.create, null, null, null,
-        null, null, null, null, null, db);
+        null, null, null, QueryFlags.make(), null, db);
   }
 
 }

@@ -9,7 +9,7 @@ import com.ple.util.IList;
 /**
  * All tables are FromExpressions, but not all FromExpressions are Tables.
  * For instance FromExpressions can be subqueries, joins and tables. Joins join two fromExpressions together.
- * FromExpressions are defined as anything you can put to the right of a From in sql statement.
+ * FromExpressions are defined as anything you can put to the right of From clause in a sql statement.
  */
 @Immutable
 public abstract class FromExpression extends PotentialQuery {

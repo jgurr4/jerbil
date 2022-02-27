@@ -31,32 +31,22 @@ public class SqlStatementTests {
         Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
   }
 
-  //FIXME: get set to work without specifying any columns, just values.
   @Test
   void testInsertSingle() {
-/*
     final PartialInsertQuery base = item.insert();
-    final CompleteQuery q1 = base.set(item.name, make("sword of spirit")).set(
+    final CompleteQuery q = base.set(item.name, make("sword of spirit")).set(
         item.type, make(ItemType.weapon));
-    final CompleteQuery q2 = base.set(make(0), make("sword of spirit"), make(ItemType.weapon), make(200))
-        .set(make(0), make("serpent barding"), make(ItemType.armor), make(450));
     assertEquals("""
         insert into item
         (name, type) values
         ('sword of spirit', 'weapon')
-        """, q1.toSql());
-    assertEquals("""
-        insert into item
-        values
-        (0, 'sword of spirit', 'weapon', 200),
-        (0, 'serpent barding', 'armor', 450)
-        """, q2.toSql());
-*/
+        """, q.toSql());
   }
 
+  //FIXME: Figure out how to get .set() to work without specifying any columns, just values.
   @Test
   void testInsertMulti() {
-    final CompleteQuery q = item.insert().set(
+    final CompleteQuery q1 = item.insert().set(
         List.of(item.name, item.type),
         List.of(
             List.of("sword of spirit", ItemType.weapon.toString()),
@@ -64,13 +54,25 @@ public class SqlStatementTests {
             List.of("breastplate of righteousness", ItemType.armor.toString())
         )
     );
+//    final CompleteQuery q2 = item.insert().set(
+//        List.of(
+//            List.of(make(0), make("sword of spirit"), make(ItemType.weapon), make(200)),
+//            List.of(make(0), make("serpent barding"), make(ItemType.armor), make(450))
+//        )
+//    );
     assertEquals("""
         insert into item
         (name, type) values
         ('sword of spirit', 'weapon'),
         ('shield of faith', 'shield'),
         ('breastplate of righteousness', 'armor')
-        """, q.toSql());
+        """, q1.toSql());
+//    assertEquals("""
+//        insert into item
+//        values
+//        (0, 'sword of spirit', 'weapon', 200),
+//        (0, 'serpent barding', 'armor', 450)
+//        """, q2.toSql());
   }
 
   @Test

@@ -32,8 +32,8 @@ public class DeleteQuery extends CompleteQuery {
   }
 
   public static DeleteQuery make(BooleanExpression where, TableContainer tableContainer) {
-    return new DeleteQuery(where, tableContainer, QueryType.delete, null, null, null, null, null, null,
-        QueryFlags.make(), null);
+    return new DeleteQuery(where, tableContainer, QueryType.delete, null, null, null, null,
+        null, null, QueryFlags.make(), null);
   }
 
   public DeleteQuery where(BooleanExpression<UnaliasedExpression> condition) {
@@ -41,14 +41,4 @@ public class DeleteQuery extends CompleteQuery {
         having, limit, set, queryFlags, union);
   }
 
-/*
-  public CompleteQuery limit(int offset, int limit) {
-    return null;
-  }
-
-  public CompleteQuery limit(int limit) {
-    return null;
-  }
-
-*/
 }

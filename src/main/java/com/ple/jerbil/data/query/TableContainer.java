@@ -10,6 +10,8 @@ import com.ple.util.IList;
 import com.ple.util.IMap;
 import reactor.util.annotation.Nullable;
 
+import java.util.Objects;
+
 public class TableContainer extends FromExpression {
   public final Table table;
   public final IMap<String, Column> columns;
@@ -37,16 +39,6 @@ public class TableContainer extends FromExpression {
   public static TableContainer make(Table table, IMap<String, Column> columns) {
     return new TableContainer(table, columns, null, null, null);
   }
-
-/*
-  public TableContainer add(Column... columnArr) {
-    IMap<String, Column> newColumns = columns;
-    for (Column column : columnArr) {
-      newColumns = newColumns.put(column.columnName, column);
-    }
-    return new TableContainer(table, newColumns, storageEngine, indexes, autoIncrementColumn);
-  }
-*/
 
   public TableContainer add(Column... columnArr) {
     IMap<String, Column> newColumns = columns;
@@ -86,10 +78,6 @@ public class TableContainer extends FromExpression {
 
   public CreateQuery create() {
     return CreateQuery.make(this);
-  }
-
-  public Table set(Column column) {
-    return null;
   }
 
   public Table remove(Column column) {
@@ -138,11 +126,11 @@ public class TableContainer extends FromExpression {
   }
 
   public PotentialQuery explain() {
-    return QueryWithFrom.make(this, QueryFlags.make(0b00001000));
+    return QueryWithFrom.make(this, QueryFlags.make().explain());
   }
 
   public PotentialQuery analyze() {
-    return QueryWithFrom.make(this, QueryFlags.make(0b00000100));
+    return QueryWithFrom.make(this, QueryFlags.make().analyze());
   }
 
   public SelectQuery selectDistinct() {
@@ -154,7 +142,7 @@ public class TableContainer extends FromExpression {
   }
 
   public SelectQuery selectDistinct(SelectExpression... selectExpressions) {
-    return SelectQuery.make(this, IArrayList.make(selectExpressions), QueryFlags.make(0b10000000));
+    return SelectQuery.make(this, IArrayList.make(selectExpressions), QueryFlags.make().distinct());
   }
 
   public String toSql() {
@@ -170,5 +158,31 @@ public class TableContainer extends FromExpression {
 
   public static TableContainer fromSql(LanguageGenerator generator, String showCreateTable, Database db) {
     return generator.fromSql(showCreateTable, db);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof TableContainer)) return false;
+    TableContainer that = (TableContainer) o;
+    return table.equals(that.table) && columns.equals(
+        that.columns) && storageEngine == that.storageEngine && Objects.equals(indexes,
+        that.indexes) && Objects.equals(autoIncrementColumn, that.autoIncrementColumn);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(table, columns, storageEngine, indexes, autoIncrementColumn);
+  }
+
+  @Override
+  public String toString() {
+    return "TableContainer{" +
+        "table=" + table +
+        ", columns=" + columns +
+        ", storageEngine=" + storageEngine +
+        ", indexes=" + indexes +
+        ", autoIncrementColumn=" + autoIncrementColumn +
+        '}';
   }
 }

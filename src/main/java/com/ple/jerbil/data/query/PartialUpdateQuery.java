@@ -25,7 +25,7 @@ public class PartialUpdateQuery extends PartialQueryWithValues {
 
   public static PartialUpdateQuery make(FromExpression fromExpression) {
     return new PartialUpdateQuery(null, fromExpression, QueryType.update, null, null, null,
-        null, null, null, null, null);
+        null, null, null, QueryFlags.make(), null);
   }
 
   public UpdateQuery set(Column column, Literal value) {
