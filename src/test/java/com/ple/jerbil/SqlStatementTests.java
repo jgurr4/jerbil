@@ -89,7 +89,7 @@ public class SqlStatementTests {
   void testDelete() {
     final CompleteQuery q = order.delete().where(order.finalized.eq(make(false)));
     assertEquals("""
-        delete from order
+        delete from `order`
         where finalized = false
         """, q.toSql());
   }
@@ -120,12 +120,11 @@ public class SqlStatementTests {
 
   @Test
   void testReplaceSingle() {
-    final CompleteQuery q = player.replace().set(player.name, make("bob")).where(player.playerId.eq(make(5)));
+    final CompleteQuery q = player.replace().set(player.name, make("bob"));
     assertEquals("""
         replace into player
         (name) values
         ('bob')
-        where playerId = 5
         """, q.toSql());
   }
 
@@ -135,32 +134,5 @@ public class SqlStatementTests {
 
   @Test
   void testMultiTableReplace() {
-  }
-
-  @Test
-  void testTableCreate() {
-    final CompleteQuery q = item.create();
-    assertEquals("""
-        create table item (
-          itemId int auto_increment,
-          name varchar(20) not null,
-          type enum('weapon','armor','shield','accessory') not null,
-          price int not null,
-          primary key (itemId),
-          key nm_idx (name)
-        ) ENGINE=Aria
-        """, q.toSql());
-  }
-
-  @Test
-  void testMultiColumnPrimaryKey() {
-    final CompleteQuery q = inventory.create();
-    assertEquals("""
-        create table inventory (
-          playerId int,
-          itemId int,
-          primary key (playerId,itemId)
-        ) ENGINE=Aria
-        """, q.toSql());
   }
 }

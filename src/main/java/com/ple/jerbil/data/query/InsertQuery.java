@@ -24,23 +24,18 @@ public class InsertQuery extends CompleteQuery {
 
   public static InsertQuery make(Column column, Literal value, FromExpression fromExpression) {
     return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
-        null, null, IArrayList.make(IHashMap.make(column, value)), null, null);
-  }
-
-  public static InsertQuery make(Column column, Literal value, FromExpression fromExpression, boolean mayReplace) {
-    return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
-        null, null, IArrayList.make(IHashMap.make(column, value)), null, null);
+        null, null, IArrayList.make(IHashMap.make(column, value)), QueryFlags.make(), null);
   }
 
   public static InsertQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression,
-                                 boolean mayReplace) {
+                                 QueryFlags queryFlags) {
     return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
-        null, null, set, null, null);
+        null, null, set, queryFlags, null);
   }
 
   public static InsertQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
     return new InsertQuery(null, fromExpression, QueryType.insert, null, null, null,
-        null, null, set, null, null);
+        null, null, set, QueryFlags.make(), null);
   }
 
   public static InsertQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
@@ -50,29 +45,22 @@ public class InsertQuery extends CompleteQuery {
     return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
         union);
   }
+/*
 
   public InsertQuery where(BooleanExpression<UnaliasedExpression> condition) {
     return InsertQuery.make(condition, fromExpression, queryType, select, groupBy, orderBy,
         having, limit, set, queryFlags, union);
   }
+*/
 
   public InsertQuery set(Column column, Literal value) {
     if (set == null) {
-      return InsertQuery.make(IArrayList.make(IArrayMap.make(column, value)), fromExpression);
+      return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit,
+          IArrayList.make(IArrayMap.make(column, value)), queryFlags, union);
     }
     final IMap<Column, Expression> map = set.get(0).put(column, value);
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);
-    return InsertQuery.make(records, fromExpression);
+    return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, records,
+        queryFlags, union);
   }
-
-/*
-  public CompleteQuery limit(int offset, int limit) {
-    return null;
-  }
-
-  public CompleteQuery limit(int limit) {
-    return null;
-  }
-
-*/
 }

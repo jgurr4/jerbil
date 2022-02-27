@@ -109,7 +109,7 @@ public class TableContainer extends FromExpression {
   }
 
   public PartialInsertQuery replace() {
-    return PartialInsertQuery.make(this, QueryFlags.make(0b00100000));
+    return PartialInsertQuery.make(this, QueryFlags.make().replace());
   }
 
   public CompleteQuery select(CountAgg agg) {

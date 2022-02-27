@@ -772,13 +772,11 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
 
   public String toSql(InsertQuery insertQuery) {
     String sql = "";
-    if (insertQuery.queryFlags != null) {
-      if ((insertQuery.queryFlags.flags << 5 & 1) == 1) {
+      if (insertQuery.queryFlags.isReplace()) {
         sql += "replace ";
       } else {
         sql += "insert ";
       }
-    }
     sql += "into " + toSql(insertQuery.fromExpression) + "\n(";
     String separator = "";
     for (Column column : insertQuery.set.get(0).keys()) {

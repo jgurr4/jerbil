@@ -70,31 +70,31 @@ public class BuildingHints {
   }
 
   public boolean isPrimary() {
-    return (flags >> 14 & 1) == 1;
+    return (flags & primary) > 0;
   }
   public boolean isIndexed() {
-    return (flags >> 13 & 1) == 1;
+    return (flags & secondary) > 0;
   }
   public boolean isForeign() {
-    return (flags >> 12 & 1) == 1;
+    return (flags & foreign) > 0;
   }
   public boolean isFulltext() {
-    return (flags >> 11 & 1) == 1;
+    return (flags & fulltext) > 0;
   }
   public boolean isInvisible() {
-    return (flags >> 10 & 1) == 1;
+    return (flags & invisible) > 0;
  }
   public boolean isUnique() {
-    return (flags >> 9 & 1) == 1;
+    return (flags & unique) > 0;
  }
   public boolean isUnsigned() {
-    return (flags >> 8 & 1) == 1;
+    return (flags & unsigned) > 0;
  }
   public boolean isAutoInc() {
-    return (flags >> 7 & 1) == 1;
+    return (flags & autoInc) > 0;
  }
   public boolean isAllowNull() {
-    return (flags >> 6 & 1) == 1;
+    return (flags & allowNull) > 0;
  }
 
 }

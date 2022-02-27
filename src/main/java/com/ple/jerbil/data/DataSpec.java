@@ -66,15 +66,14 @@ public class DataSpec {
     return EnumSpec.make(type, enums.length, enums);
   }
 
+  //TODO: Pull this code out of here and place inside MysqlLanguageGenerator, because this is specific to mysql only. Won't necessarily work for other dbms.
+  // Just make the size 0 if not specified by the user explicitely.
   public static DataSpec make(DataType type) {
-/*
-    if (type == DataType.varchar || type == DataType.bigint || type == DataType.integer) {
-      return new DataSpec(type, defaultMaxSize);
-    }
-*/
     int maxSize = 0;
     if (type == DataType.varchar || type == DataType.enumeration) {
       maxSize = DefaultSize.varchar.getSize();
+      //TODO: Add char default max size here.
+/*  //Uncomment this if we want int(11) and other default sizes specified explicitely in table create statements.
     } else if (type == DataType.bigint) {
       maxSize = DefaultSize.bigint.getSize();
     } else if (type == DataType.mediumint) {
@@ -85,6 +84,7 @@ public class DataSpec {
       maxSize = DefaultSize.tinyint.getSize();
     } else if (type == DataType.bool) {
       maxSize = DefaultSize.bool.getSize();
+*/
     }
     return new DataSpec(type, maxSize, null);
   }

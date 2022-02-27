@@ -48,7 +48,7 @@ public class PartialInsertQuery extends PartialQueryWithValues {
   }
 
   public InsertQuery set(Column column, Literal value) {
-    return InsertQuery.make(IArrayList.make(IArrayMap.make(column, value)), fromExpression);
+    return InsertQuery.make(IArrayList.make(IArrayMap.make(column, value)), fromExpression, queryFlags);
   }
 
 }
