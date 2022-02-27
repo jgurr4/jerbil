@@ -647,7 +647,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String unique = "";
     String invisible = "";
     String generatedFrom = "";
-    if (column.hints.isAllowNull() || column.hints.isPrimary() || column.generatedFrom != null || column.defaultValue != null) {
+    if (column.hints.isAllowNull() || column.hints.isPrimary() || column.generatedFrom != null || column.defaultValue != null || column.hints.isInvisible()) {
       nullVal = "";
     }
     if (column instanceof NumericColumn && column.hints.isAutoInc()) {
@@ -658,9 +658,15 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
     if (column.defaultValue != null) {
       defaultVal = " default (" + toSql(column.defaultValue) + ")";
+      if (defaultVal.contains("current_timestamp")) {
+        defaultVal = defaultVal.replace("(","").replace(")","");
+      }
     }
     if (column.onUpdate != null) {
       onUpdateVal = " on update (" + toSql(column.onUpdate) + ")";
+      if (onUpdateVal.contains("current_timestamp")) {
+        onUpdateVal = onUpdateVal.replace("(","").replace(")","");
+      }
     }
     if (column.hints.isUnique()) {
       unique = " unique";
@@ -671,7 +677,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     if (column.generatedFrom != null) {
       generatedFrom = " as (" + toSql(column.generatedFrom) + ")";
     }
-    sql += dataSpec + nullVal + defaultVal + onUpdateVal + autoIncrement + unsigned + unique + invisible + generatedFrom;
+    sql += dataSpec + unsigned + nullVal + defaultVal + onUpdateVal + autoIncrement + unique + invisible + generatedFrom;
     return sql;
   }
 

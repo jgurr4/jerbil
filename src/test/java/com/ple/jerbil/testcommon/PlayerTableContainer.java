@@ -33,8 +33,8 @@ public class PlayerTableContainer extends TableContainer {
 
   public static PlayerTableContainer make(Database db) {
     Table playerTable = Table.make("player", db);
-    final NumericColumn playerId = Column.make("playerId", playerTable).asInt().primary();
-    final NumericColumn userId = Column.make("userId", playerTable).asInt().primary();
+    final NumericColumn playerId = Column.make("playerId", playerTable).asInt().ai();
+    final NumericColumn userId = Column.make("userId", playerTable).asInt();
     final StringColumn name = Column.make("name", playerTable).asVarchar(20);
 //    final IList<Index> indexes = IArrayList.make(Index.make(IndexType.primary, playerId, userId));
 //    final NumericColumn autoIncrementColumn = playerId;

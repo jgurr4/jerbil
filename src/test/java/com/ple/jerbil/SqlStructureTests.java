@@ -35,13 +35,13 @@ public class SqlStructureTests {
     final CreateQuery q = order.create();
     assertEquals("""
         create table `order` (
-          orderId bigint(20) auto_increment unsigned,
+          orderId bigint(20) unsigned auto_increment,
           `add` varchar(255) default ('barter') unique,
           phrase text,
-          userId int(11) not null unsigned,
-          itemId int(10) not null unsigned,
-          scale mediumint(9) not null unsigned,
-          quantity smallint not null unsigned,
+          userId int(11) unsigned not null,
+          itemId int(10) unsigned not null,
+          scale mediumint(9) unsigned not null,
+          quantity smallint unsigned not null,
           price decimal(14, 2) not null,
           total decimal(14, 2) as (quantity * price),
           finalized boolean not null,
@@ -50,8 +50,8 @@ public class SqlStructureTests {
           mySet set('weapon','armor','shield','accessory') default ('weapon'),
           saleDate date not null,
           saleTime time not null,
-          saleDateTime datetime default (current_timestamp) on update (current_timestamp),
-          myInvis int(11) not null invisible,
+          saleDateTime datetime default current_timestamp on update current_timestamp,
+          myInvis int(11) invisible,
           key usrd_itmd_idx (userId,itemId),
           primary key (orderId),
           fulltext index phrs_idx (phrase)
@@ -66,39 +66,39 @@ public class SqlStructureTests {
         create database test;
         use test;
         create table user (
-          userId int auto_increment,
+          userId bigint(20) auto_increment,
           name varchar(255) not null,
-          age int not null,
+          age int(11) not null,
           primary key (userId),
           key nm_idx (name)
         ) ENGINE=Aria;
         create table player (
-          playerId int auto_increment,
-          userId int not null,
+          playerId int(11) auto_increment,
+          userId int(11) not null,
           name varchar(20) not null,
           primary key (playerId)
         ) ENGINE=Innodb;
         create table item (
-          itemId int auto_increment,
+          itemId int(11) auto_increment,
           name varchar(20) not null,
           type enum('weapon','armor','shield','accessory') not null,
-          price int not null,
+          price int(11) not null,
           primary key (itemId),
           key nm_idx (name)
         ) ENGINE=Aria;
         create table inventory (
-          playerId int,
-          itemId int,
+          playerId int(11),
+          itemId int(11),
           primary key (playerId,itemId)
         ) ENGINE=Aria;
         create table `order` (
-          orderId bigint(20) auto_increment unsigned,
+          orderId bigint(20) unsigned auto_increment,
           `add` varchar(255) default ('barter') unique,
           phrase text,
-          userId int(11) not null unsigned,
-          itemId int(10) not null unsigned,
-          scale mediumint(9) not null unsigned,
-          quantity smallint not null unsigned,
+          userId int(11) unsigned not null,
+          itemId int(10) unsigned not null,
+          scale mediumint(9) unsigned not null,
+          quantity smallint unsigned not null,
           price decimal(14, 2) not null,
           total decimal(14, 2) as (quantity * price),
           finalized boolean not null,
@@ -107,12 +107,12 @@ public class SqlStructureTests {
           mySet set('weapon','armor','shield','accessory') default ('weapon'),
           saleDate date not null,
           saleTime time not null,
-          saleDateTime datetime default (current_timestamp) on update (current_timestamp),
-          myInvis int(11) not null invisible,
+          saleDateTime datetime default current_timestamp on update current_timestamp,
+          myInvis int(11) invisible,
           key usrd_itmd_idx (userId,itemId),
           primary key (orderId),
           fulltext index phrs_idx (phrase)
-        ) ENGINE=Aria
+        ) ENGINE=Aria;
         """, testCreateAll.toSql());
   }
 
