@@ -22,8 +22,8 @@ public class UpdateQuery extends CompleteQuery {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
   }
 
-  public static UpdateQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression) {
-    return new UpdateQuery(null, fromExpression, null, null, null, null,
+  public static UpdateQuery make(IList<IMap<Column, Expression>> set, FromExpression fromExpression, QueryType queryType) {
+    return new UpdateQuery(null, fromExpression, queryType, null, null, null,
         null, null, set, null, null);
   }
 
@@ -42,11 +42,11 @@ public class UpdateQuery extends CompleteQuery {
 
   public UpdateQuery set(Column column, Literal value) {
     if (set == null) {
-      return UpdateQuery.make(IArrayList.make(IArrayMap.make(column, value)), fromExpression);
+      return UpdateQuery.make(IArrayList.make(IArrayMap.make(column, value)), fromExpression, queryType);
     }
     final IMap<Column, Expression> map = set.get(0).put(column, value);
     final IList<IMap<Column, Expression>> records = IArrayList.make(map);
-    return UpdateQuery.make(records, fromExpression);
+    return UpdateQuery.make(records, fromExpression, queryType);
   }
 
 /*

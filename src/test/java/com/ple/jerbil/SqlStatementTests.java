@@ -103,10 +103,11 @@ public class SqlStatementTests {
     final CompleteQuery q = order.update().set(order.finalized, make(true)).set(order.phrase, make("Something here"))
         .where(order.finalized.eq(make(false)));
     assertEquals("""
-        update order
+        update `order`
         set finalized = true,
         phrase = 'Something here'
-        where finalized = false""", q.toSql());
+        where finalized = false
+        """, q.toSql());
   }
 
   @Test

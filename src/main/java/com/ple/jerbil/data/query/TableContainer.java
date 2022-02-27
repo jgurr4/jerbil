@@ -105,7 +105,7 @@ public class TableContainer extends FromExpression {
   }
 
   public PartialUpdateQuery update() {
-    return null;
+    return PartialUpdateQuery.make(this);
   }
 
   public PartialInsertQuery replace() {

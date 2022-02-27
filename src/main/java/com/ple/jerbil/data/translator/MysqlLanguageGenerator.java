@@ -719,12 +719,37 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   public String toSql(UpdateQuery updateQuery) {
-    return null;
+    String sql = "update " + checkToAddBackticks(toSql(updateQuery.fromExpression)) + "\nset ";
+    IList<TableContainer> tableList = IArrayList.empty;
+    String separator = "";
+    final IList<Column> keys = updateQuery.set.get(0).keys();
+    final IList<Expression> values = updateQuery.set.get(0).values();
+    for (int i = 0; i < keys.size(); i++) {
+      sql += separator + keys.get(i).columnName + " = " + toSql(values.get(i));
+      separator = ",\n";
+    }
+    sql += "\n";
+    if (updateQuery.fromExpression instanceof Join) {
+      tableList = tableList.addAll(updateQuery.fromExpression.tableList());
+    } else if (updateQuery.fromExpression instanceof TableContainer){
+      tableList = tableList.add((TableContainer) updateQuery.fromExpression);
+    }
+    if (updateQuery.where != null) {
+      BooleanExpression transformedWhere = transformColumns(updateQuery.where, tableList);
+      sql += toSqlWhere(transformedWhere) + "\n";
+    }
+    if (updateQuery.orderBy != null) {
+      IMap<SelectExpression, Order> transformedOrderBy = transformColumns(updateQuery.orderBy, tableList);
+      sql += "order by " + toSqlOrderBy(transformedOrderBy) + "\n";
+    }
+    if (updateQuery.limit != null) {
+      sql += "limit " + updateQuery.limit.offset + ", " + updateQuery.limit.limit + "\n";
+    }
+    return sql;
   }
 
   public String toSql(DeleteQuery deleteQuery) {
-    //Delete has: fromExpression, where, orderby and limit.
-    String sql = "delete from " + toSql(deleteQuery.fromExpression) + "\n";
+    String sql = "delete from " + checkToAddBackticks(toSql(deleteQuery.fromExpression)) + "\n";
     IList<TableContainer> tableList = IArrayList.empty;
     if (deleteQuery.fromExpression instanceof Join) {
       tableList = tableList.addAll(deleteQuery.fromExpression.tableList());
