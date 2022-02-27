@@ -6,6 +6,7 @@ import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
@@ -109,7 +110,7 @@ public class SqlStructureTests {
           saleTime time not null,
           saleDateTime datetime default current_timestamp on update current_timestamp,
           myInvis int(11) invisible,
-          key usrd_itmd_idx (userId,itemId),
+          key usrd_itmd_idx (userId,itemId)columns.put(column.columnName, column),
           primary key (orderId),
           fulltext index phrs_idx (phrase)
         ) ENGINE=Aria;
@@ -118,25 +119,24 @@ public class SqlStructureTests {
 
   @Test
   void testAddColumn() {
-    final CompleteQuery q2 = item.create();
     Column newColumn = Column.make("quantity", item.table).asInt().indexed();
-    item.add(newColumn);
-    final CompleteQuery q = item.create();
+    TableContainer newTable = item.add(newColumn);
+    final CompleteQuery q = newTable.create();
     assertEquals("""
         create table item (
-          itemId int auto_increment,
+          itemId int(11) auto_increment,
           name varchar(20) not null,
           type enum('weapon','armor','shield','accessory') not null,
-          price int not null,
-          quantity int not null,
+          price int(11) not null,
+          quantity int(11) not null,
           primary key (itemId),
-          key nm_qnty_idx (name,quantity)
+          key nm_idx (name),
+          key qnty_idx (quantity)
         ) ENGINE=Aria
         """, q.toSql());
   }
 
   /*
-
     @Test
     void dropDatabase() {
 
@@ -162,17 +162,16 @@ public class SqlStructureTests {
   @Test
   void testGeneratedColumn() {
     NumericColumn quantity = Column.make("quantity", item.table).asInt();
-    item.add(quantity);
     Column total = Column.make("total", item.table).asDecimal(14, 2).generatedFrom(item.price.times(quantity));
-    item.add(total);
-    final CompleteQuery q = item.create();
+    TableContainer newTable = item.add(quantity, total);
+    final CompleteQuery q = newTable.create();
     assertEquals("""
         create table item (
-          itemId int auto_increment,
+          itemId int(11) auto_increment,
           name varchar(20) not null,
           type enum('weapon','armor','shield','accessory') not null,
-          price int not null,
-          quantity int not null,
+          price int(11) not null,
+          quantity int(11) not null,
           total decimal(14, 2) as (price * quantity),
           primary key (itemId),
           key nm_idx (name)
@@ -180,6 +179,7 @@ public class SqlStructureTests {
         """, q.toSql());
   }
 
+  /*
   //ALTER TABLE tests:
   @Test
   void testModifyColumn() {
@@ -290,4 +290,5 @@ public class SqlStructureTests {
   void testIfNotExists() {  // create table if not exists.
   }
 
+   */
 }

@@ -13,9 +13,12 @@ import reactor.util.annotation.Nullable;
 public class TableContainer extends FromExpression {
   public final Table table;
   public final IMap<String, Column> columns;
-  @Nullable public final StorageEngine storageEngine;
-  @Nullable public final IList<Index> indexes;
-  @Nullable public final NumericColumn autoIncrementColumn;
+  @Nullable
+  public final StorageEngine storageEngine;
+  @Nullable
+  public final IList<Index> indexes;
+  @Nullable
+  public final NumericColumn autoIncrementColumn;
 
   protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
                            @Nullable IList<Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
@@ -26,7 +29,8 @@ public class TableContainer extends FromExpression {
     this.autoIncrementColumn = autoIncrementColumn;
   }
 
-  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine, IList<Index> indexSpecs, NumericColumn autoIncrementColumn) {
+  public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine,
+                                    IList<Index> indexSpecs, NumericColumn autoIncrementColumn) {
     return new TableContainer(table, columns, storageEngine, indexSpecs, autoIncrementColumn);
   }
 
@@ -34,6 +38,7 @@ public class TableContainer extends FromExpression {
     return new TableContainer(table, columns, null, null, null);
   }
 
+/*
   public TableContainer add(Column... columnArr) {
     IMap<String, Column> newColumns = columns;
     for (Column column : columnArr) {
@@ -41,10 +46,26 @@ public class TableContainer extends FromExpression {
     }
     return new TableContainer(table, newColumns, storageEngine, indexes, autoIncrementColumn);
   }
+*/
 
-  public TableContainer add(Column column) {
-    final IMap<String, Column> newColumns = columns.put(column.columnName, column);
-    return new TableContainer(table, newColumns, storageEngine, indexes, autoIncrementColumn);
+  public TableContainer add(Column... columnArr) {
+    IMap<String, Column> newColumns = columns;
+    IList<Index> indexList = indexes;
+    NumericColumn autoIncCol = autoIncrementColumn;
+    for (Column column : columnArr) {
+      newColumns = newColumns.put(column.columnName, column);
+      if (column.hints.isAutoInc()) {
+        autoIncCol = (NumericColumn) column;
+        indexList = indexList.add(Index.make(IndexType.primary, column));
+      } else if (column.hints.isPrimary()) {
+        indexList = indexList.add(Index.make(IndexType.primary, column));
+      } else if (column.hints.isIndexed()) {
+        indexList = indexList.add(Index.make(IndexType.secondary, column));
+      } else if (column.hints.isFulltext()) {
+        indexList = indexList.add(Index.make(IndexType.fulltext, column));
+      }
+    }
+    return new TableContainer(table, newColumns, storageEngine, indexList, autoIncCol);
   }
 
   public SyncResult sync() {
@@ -100,7 +121,8 @@ public class TableContainer extends FromExpression {
   }
 
   @Override
-  protected void diffJoin() {}
+  protected void diffJoin() {
+  }
 
   public SelectQuery select(SelectExpression... selectExpressions) {
     return SelectQuery.make(this, IArrayList.make(selectExpressions));
