@@ -5,6 +5,7 @@ import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.data.selectExpression.booleanExpression.Equals;
 import com.ple.jerbil.data.selectExpression.booleanExpression.False;
 import com.ple.jerbil.data.selectExpression.booleanExpression.True;
 import org.jetbrains.annotations.Nullable;
@@ -96,9 +97,8 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   }
 */
 
-  //TODO: Decide whether or not to include .eq(make(false)) option for users on BooleanColumn.
-  public BooleanExpression eq(LiteralBoolean item) {
-    return null;
+  public BooleanExpression eq(LiteralBoolean bool) {
+    return Equals.make(this, bool);
   }
 
   public BooleanColumn defaultValue(BooleanExpression bool) {

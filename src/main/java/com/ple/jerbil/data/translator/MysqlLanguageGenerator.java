@@ -500,6 +500,8 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       output = toSqlArithmetic("", (ArithmeticExpression) e);
     } else if (e instanceof DateExpression) {
       output = toSqlDate((DateExpression) e);
+    } else if (e instanceof LiteralBoolean) {
+      output = ((LiteralBoolean) e).bool.toString();
     } else {
       throw new RuntimeException("Unknown Expression ");
     }
@@ -721,7 +723,26 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   public String toSql(DeleteQuery deleteQuery) {
-    return null;
+    //Delete has: fromExpression, where, orderby and limit.
+    String sql = "delete from " + toSql(deleteQuery.fromExpression) + "\n";
+    IList<TableContainer> tableList = IArrayList.empty;
+    if (deleteQuery.fromExpression instanceof Join) {
+      tableList = tableList.addAll(deleteQuery.fromExpression.tableList());
+    } else if (deleteQuery.fromExpression instanceof TableContainer){
+      tableList = tableList.add((TableContainer) deleteQuery.fromExpression);
+    }
+    if (deleteQuery.where != null) {
+      BooleanExpression transformedWhere = transformColumns(deleteQuery.where, tableList);
+      sql += toSqlWhere(transformedWhere) + "\n";
+    }
+    if (deleteQuery.orderBy != null) {
+      IMap<SelectExpression, Order> transformedOrderBy = transformColumns(deleteQuery.orderBy, tableList);
+      sql += "order by " + toSqlOrderBy(transformedOrderBy) + "\n";
+    }
+    if (deleteQuery.limit != null) {
+      sql += "limit " + deleteQuery.limit.offset + ", " + deleteQuery.limit.limit + "\n";
+    }
+    return sql;
   }
 
   public String toSql(InsertQuery insertQuery) {

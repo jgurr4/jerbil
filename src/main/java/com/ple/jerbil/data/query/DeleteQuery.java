@@ -27,7 +27,13 @@ public class DeleteQuery extends CompleteQuery {
                                  IList<SelectExpression> select, IList<SelectExpression> groupBy,
                                  IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
                                  IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
-    return new DeleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
+    return new DeleteQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
+        union);
+  }
+
+  public static DeleteQuery make(BooleanExpression where, TableContainer tableContainer) {
+    return new DeleteQuery(where, tableContainer, QueryType.delete, null, null, null, null, null, null,
+        QueryFlags.make(), null);
   }
 
   public DeleteQuery where(BooleanExpression<UnaliasedExpression> condition) {

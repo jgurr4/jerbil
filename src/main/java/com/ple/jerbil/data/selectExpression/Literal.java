@@ -12,28 +12,28 @@ import java.time.LocalDateTime;
  */
 public interface Literal extends Expression {
 
-  public static LiteralString make(String s) {
+  static LiteralString make(String s) {
     return LiteralString.make(s);
   }
 
-  public static LiteralString make(Enum<?> e) {
+  static LiteralString make(Enum<?> e) {
     return LiteralString.make(e.name());
   }
 
-  public static LiteralNumber make(int i) {
+  static LiteralNumber make(int i) {
     return LiteralNumber.make(i);
   }
 
-  public static LiteralNumber make(double i) {
+  static LiteralNumber make(double i) {
     return LiteralNumber.make(i);
   }
 
-  public static LiteralDate make(LocalDateTime date) {
-    return null;
+  static LiteralDate make(LocalDateTime date) {
+    return LiteralDate.make(date);
   }
 
-  public static LiteralBoolean make(Boolean b) {
-    return null;
+  static LiteralBoolean make(Boolean b) {
+    return LiteralBoolean.make(b);
   }
 
 

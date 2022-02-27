@@ -26,4 +26,8 @@ public class QueryFlags {
   public static QueryFlags make(int flags) {
     return new QueryFlags(flags);
   }
+
+  public static QueryFlags make() {
+    return new QueryFlags(0b0);
+  }
 }

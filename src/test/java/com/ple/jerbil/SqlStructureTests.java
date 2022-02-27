@@ -110,7 +110,7 @@ public class SqlStructureTests {
           saleTime time not null,
           saleDateTime datetime default current_timestamp on update current_timestamp,
           myInvis int(11) invisible,
-          key usrd_itmd_idx (userId,itemId)columns.put(column.columnName, column),
+          key usrd_itmd_idx (userId,itemId),
           primary key (orderId),
           fulltext index phrs_idx (phrase)
         ) ENGINE=Aria;

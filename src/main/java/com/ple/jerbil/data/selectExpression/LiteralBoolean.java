@@ -18,7 +18,7 @@ public class LiteralBoolean implements BooleanExpression, Literal {
         this.bool = bool;
     }
 
-    public LiteralBoolean make(Boolean bool) {
+    public static LiteralBoolean make(Boolean bool) {
         return new LiteralBoolean(bool);
     }
 

@@ -23,7 +23,7 @@ public class LiteralDate implements Literal, DateExpression {
         this.dateTime = dateTime;
     }
 
-    public static DateExpression make(LocalDateTime ldateTime) {
+    public static LiteralDate make(LocalDateTime ldateTime) {
         return new LiteralDate(ldateTime);
     }
 /*

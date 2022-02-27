@@ -101,7 +101,7 @@ public class TableContainer extends FromExpression {
   }
 
   public DeleteQuery delete() {
-    return null;
+    return DeleteQuery.make(null, this);
   }
 
   public PartialUpdateQuery update() {
