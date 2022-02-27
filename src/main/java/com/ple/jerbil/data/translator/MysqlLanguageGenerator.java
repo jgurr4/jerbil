@@ -10,8 +10,6 @@ import com.ple.jerbil.data.sync.Diff;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Locale;
-
 public class MysqlLanguageGenerator implements LanguageGenerator {
 
   public static LanguageGenerator make() {
@@ -639,7 +637,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   //TODO: Add support for specifying Null on a column. Leave not null off because that is default.
   public String toSql(Column column) {
     //Order: name + dataspec + nullVal + defaultVal + onUpdateVal + autoInc + unique + invisible + generatedVal
-    String sql = column.getColumnName();
+    String sql = checkToAddBackticks(column.getColumnName());
     String dataSpec = dataTypeToSql(column);
     String nullVal = " not null";
     String defaultVal = "";
@@ -758,7 +756,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String sql = "";
     String indexes = "";
     if (createQuery.db != null) {
-      return "create database " + createQuery.db.databaseName;
+      return "create database " + checkToAddBackticks(createQuery.db.databaseName);
     }
     String engine = "";
     if (createQuery.fromExpression instanceof TableContainer) {
@@ -768,7 +766,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       } else if (t.storageEngine == StorageEngine.transactional) {
         engine = "Innodb";
       }
-      sql = "create table " + t.table.tableName + " (\n";
+      sql = "create table " + checkToAddBackticks(t.table.tableName) + " (\n";
       final IMap<String, Column> columns = t.columns;
       String separator = "  ";
       for (IEntry<String, Column> column : columns) {
@@ -780,6 +778,13 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     }
     sql += indexes + "\n) ENGINE=" + engine + "\n";
     return sql;
+  }
+
+  private String checkToAddBackticks(String name) {
+    if (MariadbReservedWords.wordsHashSet.contains(name)) {
+      return "`" + name + "`";
+    }
+    return name;
   }
 
   private String toSql(IList<Index> indexes) {
@@ -813,7 +818,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String indexedColumns = "";
     String indexName = "";
     for (Column column : columns) {
-      indexedColumns += separator + column.columnName;
+      indexedColumns += separator + checkToAddBackticks(column.columnName);
       separator = ",";
     }
     if (generateName) {
