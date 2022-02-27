@@ -10,6 +10,8 @@ import com.ple.jerbil.data.sync.Diff;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 public class MysqlLanguageGenerator implements LanguageGenerator {
 
   public static LanguageGenerator make() {
@@ -498,10 +500,21 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       output = ((Column) e).columnName;
     } else if (e instanceof ArithmeticExpression) {
       output = toSqlArithmetic("", (ArithmeticExpression) e);
+    } else if (e instanceof DateExpression) {
+      output = toSqlDate((DateExpression) e);
     } else {
       throw new RuntimeException("Unknown Expression ");
     }
     return output;
+  }
+
+  private String toSqlDate(DateExpression e) {
+    if (e instanceof CurrentTimestamp) {
+      return "current_timestamp";
+    } else if (e instanceof LiteralDate) {
+      return ((LiteralDate) e).dateTime.toString();
+    }
+    return null;
   }
 
   private String toSql(FromExpression fromExpression) {
@@ -626,37 +639,41 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   //TODO: Add support for specifying Null on a column. Leave not null off because that is default.
   public String toSql(Column column) {
     //Order: name + dataspec + nullVal + defaultVal + onUpdateVal + autoInc + unique + invisible + generatedVal
-    String sql = column.getColumnName() + " ";
+    String sql = column.getColumnName();
     String dataSpec = dataTypeToSql(column);
     String nullVal = " not null";
     String defaultVal = "";
     String onUpdateVal = "";
     String autoIncrement = "";
+    String unsigned = "";
     String unique = "";
     String invisible = "";
     String generatedFrom = "";
-    if (column instanceof NumericColumn && (column.hints.flags >> 8 & 1) == 1) {
-      autoIncrement = " auto_increment";
-    }
-    if ((column.hints.flags >> 7 & 1) == 1) {
+    if (column.hints.isAllowNull() || column.hints.isPrimary() || column.generatedFrom != null || column.defaultValue != null) {
       nullVal = "";
     }
+    if (column instanceof NumericColumn && column.hints.isAutoInc()) {
+      autoIncrement = " auto_increment";
+    }
+    if (column instanceof NumericColumn && column.hints.isUnsigned()) {
+      unsigned = " unsigned";
+    }
     if (column.defaultValue != null) {
-      defaultVal = toSql(column.defaultValue);
+      defaultVal = " default (" + toSql(column.defaultValue) + ")";
     }
     if (column.onUpdate != null) {
-      onUpdateVal = toSql(column.onUpdate);
+      onUpdateVal = " on update (" + toSql(column.onUpdate) + ")";
     }
-    if ((column.hints.flags >> 9 & 1) == 1) {
+    if (column.hints.isUnique()) {
       unique = " unique";
     }
-    if ((column.hints.flags >> 10 & 1) == 1) {
+    if (column.hints.isInvisible()) {
       invisible = " invisible";
     }
     if (column.generatedFrom != null) {
       generatedFrom = " as (" + toSql(column.generatedFrom) + ")";
     }
-    sql += dataSpec + nullVal + defaultVal + onUpdateVal + autoIncrement + unique + invisible + generatedFrom;
+    sql += dataSpec + nullVal + defaultVal + onUpdateVal + autoIncrement + unsigned + unique + invisible + generatedFrom;
     return sql;
   }
 
@@ -669,7 +686,9 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         sql += "(" + column.dataSpec.size + ")";
       }
     } else if (column instanceof StringColumn) {
-      sql += "(" + column.dataSpec.size + ")";
+      if (!column.dataSpec.dataType.equals(DataType.text)) {
+        sql += "(" + column.dataSpec.size + ")";
+      }
     } else if (column instanceof EnumeralColumn) {
       final EnumSpec enumSpec = (EnumSpec) column.dataSpec;
       sql += toSql(enumSpec);
@@ -678,8 +697,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(EnumSpec enumSpec) {
-    String sql = "";
-    sql += " " + enumSpec.getSqlName();
+    String sql = "(";
     String separator = "'";
     for (String value : enumSpec.values) {
       sql += separator + value + "'";
@@ -745,7 +763,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
     String engine = "";
     if (createQuery.fromExpression instanceof TableContainer) {
       final TableContainer t = (TableContainer) createQuery.fromExpression;
-      if (t.storageEngine == StorageEngine.simple) {
+      if (t.storageEngine == StorageEngine.simple || t.storageEngine == null) {
         engine = "Aria";
       } else if (t.storageEngine == StorageEngine.transactional) {
         engine = "Innodb";
@@ -757,6 +775,7 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
         sql += separator + toSql(column.value);
         separator = ",\n  ";
       }
+      sql += ",";
       indexes = toSql(t.indexes);
     }
     sql += indexes + "\n) ENGINE=" + engine + "\n";
@@ -764,28 +783,30 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(IList<Index> indexes) {
-    String separtor = "  ";
+    String separtor = "";
     String sql = "";
     String references = "";
     boolean generateName = true;
     for (Index index : indexes) {
       if (index.type.equals(IndexType.primary)) {
-        sql += separtor + "\n  primary";
+        sql += separtor + "\n  primary key";
         generateName = false;
       } else if (index.type.equals(IndexType.secondary)) {
         sql += separtor + "\n  key";
       } else if (index.type.equals(IndexType.fulltext)) {
-        sql += separtor + "\n fulltext";
+        sql += separtor + "\n  fulltext index";
       } else if (index.type.equals(IndexType.foreign)) {
         sql += separtor + "\n foreign key";
 //        references = toSql(index.fkReference); //TODO: Finish implementing foreign key with Index.
       }
       separtor = ",";
       sql += " " + toSqlIndexColumns(index.columns, generateName);
+      generateName = true;
     }
     return sql;
   }
 
+  //TODO: Add formatting to handle weird column names. For example item_id should become itemid.
   private String toSqlIndexColumns(IList<Column> columns, boolean generateName) {
     String sql = "";
     String separator = "";
@@ -796,17 +817,28 @@ public class MysqlLanguageGenerator implements LanguageGenerator {
       separator = ",";
     }
     if (generateName) {
-      indexName = generateIndexName(indexedColumns) + "_idx ";
+      indexName = generateIndexName(indexedColumns) + "idx ";
     }
     sql += indexName + "(" + indexedColumns + ")";
     return sql;
   }
 
-  //FIXME: Make this save the first vowel if it exists at the start of the columnname. example: allowance,edible becomes: alwnc_edbl_idx
+  //FIXME: Make it remove Id or _id and also handle camelcase and _ separated words differently. For example: itemId and item_id should become itm_idx.
+  // Or also user_info or userInfo = usrinf instead of usrnf
   private String generateIndexName(String indexedColumns) {
-    return indexedColumns.replaceAll(",", "_")
-        .replaceAll("[aeiou]", "")
-        .replaceAll("([a-z])\\1*", "$1");
+    final String[] split = indexedColumns.toLowerCase().split(",");
+    String result = "";
+    for (String s : split) {
+        result += s.replaceAll("\\B[aeiou]", "")
+          .replaceAll("([a-z])\\1*", "$1") + "_";
+    }
+    return result;
   }
+
+/*
+    return indexedColumns.toLowerCase().replaceAll(",", "_")
+        .replaceAll("\\B[aeiou]", "")
+        .replaceAll("([a-z])\\1*", "$1");
+*/
 
 }

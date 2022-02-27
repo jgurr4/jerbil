@@ -49,7 +49,11 @@ public class DatabaseBuilder {
                 columns = columns.add((Column) fieldValue);
               }
             }
-            tblAutoIndexes = getColumnAttributes(columns);
+            IList<Index> indexes = IArrayList.empty;
+            if (tc.indexes != null) {
+              indexes = tc.indexes;
+            }
+            tblAutoIndexes = getColumnAttributes(columns, indexes);
             if (tblAutoIndexes.indexes != null || tblAutoIndexes.autoIncrementColumn != null) {
               customTblConstructors = type.getDeclaredConstructors();
               customTblConstructorParams = customTblConstructors[0].getParameters();
@@ -77,16 +81,15 @@ public class DatabaseBuilder {
     return t;
   }
 
-  private static AutoIncIndex getColumnAttributes(IList<Column> columns) {
-    IList<Index> indexes = IArrayList.make();
+  private static AutoIncIndex getColumnAttributes(IList<Column> columns, IList<Index> indexes) {
     NumericColumn autoIncColumn = null;
     Index primary = null;  //This only works for multi-column primary keys. All other indexes I have to make a way for
     // users to specify if it is part of another index, or if it is different index.
     for (Column column : columns) {
-      if ((column.hints.flags >> 8 & 1) == 1) {
+      if (column.hints.isAutoInc()) {
         indexes = indexes.add(Index.make(IndexType.primary, column));
         autoIncColumn = (NumericColumn) column;
-      } else if ((column.hints.flags >> 15 & 1) == 1) {
+      } else if (column.hints.isPrimary()) {
         if (primary == null) {
           primary = Index.make(IndexType.primary, column);
           indexes = indexes.add(primary);
@@ -96,13 +99,13 @@ public class DatabaseBuilder {
           indexes = indexes.add(primary);
         }
       }
-      if ((column.hints.flags >> 12 & 1) == 1) {
+      if (column.hints.isFulltext()) {
         indexes = indexes.add(Index.make(IndexType.fulltext, column));
       }
-      if ((column.hints.flags >> 13 & 1) == 1) {
+      if (column.hints.isForeign()) {
         indexes = indexes.add(Index.make(IndexType.foreign, column));
       }
-      if ((column.hints.flags >> 14 & 1) == 1) {
+      if (column.hints.isIndexed()) {
         indexes = indexes.add(Index.make(IndexType.secondary, column));
       }
     }

@@ -16,8 +16,18 @@ package com.ple.jerbil.data;
  * 000000001 = allowNull
  * 0000000000000000   total number of bits = 16
  */
+@Immutable
 public class BuildingHints {
   public final short flags;
+  private static final short primary = 1 << 14;
+  private static final short secondary = 1 << 13;
+  private static final short foreign = 1 << 12;
+  private static final short fulltext = 1 << 11;
+  private static final short invisible = 1 << 10;
+  private static final short unique = 1 << 9;
+  private static final short unsigned = 1 << 8;
+  private static final short autoInc = 1 << 7;
+  private static final short allowNull = 1 << 6;
 
   protected BuildingHints(int flags) {
     this.flags = (short) flags;
@@ -26,5 +36,65 @@ public class BuildingHints {
   public static BuildingHints make(int i) {
     return new BuildingHints(i);
   }
+
+  public static BuildingHints make() {
+    return new BuildingHints(0b0);
+  }
+
+  public BuildingHints primary() {
+   return new BuildingHints(primary|flags);
+  }
+  public BuildingHints index() {
+    return new BuildingHints(secondary|flags);
+  }
+  public BuildingHints foreign() {
+    return new BuildingHints(foreign|flags);
+  }
+  public BuildingHints fulltext() {
+    return new BuildingHints(fulltext|flags);
+  }
+  public BuildingHints invisible() {
+    return new BuildingHints(invisible|flags);
+  }
+  public BuildingHints unique() {
+    return new BuildingHints(unique|flags);
+  }
+  public BuildingHints unsigned() {
+    return new BuildingHints(unsigned|flags);
+  }
+  public BuildingHints autoInc() {
+    return new BuildingHints(autoInc|flags);
+  }
+  public BuildingHints allowNull() {
+    return new BuildingHints(allowNull|flags);
+  }
+
+  public boolean isPrimary() {
+    return (flags >> 14 & 1) == 1;
+  }
+  public boolean isIndexed() {
+    return (flags >> 13 & 1) == 1;
+  }
+  public boolean isForeign() {
+    return (flags >> 12 & 1) == 1;
+  }
+  public boolean isFulltext() {
+    return (flags >> 11 & 1) == 1;
+  }
+  public boolean isInvisible() {
+    return (flags >> 10 & 1) == 1;
+ }
+  public boolean isUnique() {
+    return (flags >> 9 & 1) == 1;
+ }
+  public boolean isUnsigned() {
+    return (flags >> 8 & 1) == 1;
+ }
+  public boolean isAutoInc() {
+    return (flags >> 7 & 1) == 1;
+ }
+  public boolean isAllowNull() {
+    return (flags >> 6 & 1) == 1;
+ }
 
 }

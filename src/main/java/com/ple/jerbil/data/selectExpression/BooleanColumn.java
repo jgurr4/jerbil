@@ -30,7 +30,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   @Override
   public BooleanColumn indexed() {
     return new BooleanColumn(columnName, table, dataSpec, generatedFrom, (BooleanExpression) defaultValue,
-        (BooleanExpression) onUpdate, BuildingHints.make(hints.flags + 0b0100000000000000));
+        (BooleanExpression) onUpdate, hints.index());
   }
 
   @Override
@@ -78,7 +78,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   }
 
   public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new BooleanColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b00000000));
+    return new BooleanColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b0));
   }
 
   public static BooleanColumn make(String columnName, Table table) {

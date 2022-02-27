@@ -84,6 +84,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
     return new DateColumn(columnName, table, dataSpec, generatedFrom, dateExp, (DateExpression) onUpdate, hints);
   }
 
+/*
   @Override
   public DateExpression plus(DateInterval dateInterval) {
     return null;
@@ -94,6 +95,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
     return null;
   }
 
+*/
   public BooleanExpression isGreaterThan(Expression i) {
     return null;
   }

@@ -17,8 +17,10 @@ import com.ple.jerbil.data.Immutable;
 @Immutable
 public interface DateExpression extends OrderedExpression {
 
+/*
     public DateExpression plus(DateInterval dateInterval);
 
     public DateExpression minus(DateInterval dateInterval);
+*/
 
 }

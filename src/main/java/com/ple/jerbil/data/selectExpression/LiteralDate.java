@@ -17,16 +17,16 @@ import java.util.Objects;
 public class LiteralDate implements Literal, DateExpression {
 
     public final LocalDateTime dateTime;
-    public static final DateExpression currentTimestamp = LiteralDate.make(LocalDateTime.now());
+    public static final DateExpression currentTimestamp = CurrentTimestamp.make();
 
     protected LiteralDate(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
 
     public static DateExpression make(LocalDateTime ldateTime) {
-        return null;
+        return new LiteralDate(ldateTime);
     }
-
+/*
     @Override
     public DateExpression plus(DateInterval dateInterval) {
         return null;
@@ -37,6 +37,7 @@ public class LiteralDate implements Literal, DateExpression {
         return null;
     }
 
+*/
     public BooleanExpression isGreaterThan(Expression i) {
         return null;
     }

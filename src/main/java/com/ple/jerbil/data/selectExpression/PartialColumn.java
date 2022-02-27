@@ -106,7 +106,7 @@ public class PartialColumn implements Expression, OrderedExpression {
 
   public NumericColumn bigId() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), null, null,
-        null, BuildingHints.make(0b1000000100000000));
+        null, BuildingHints.make().primary().autoInc());
   }
 
   public NumericColumn mediumId() {
@@ -114,7 +114,7 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn id() {
-    return NumericColumn.make(columnName, table, BuildingHints.make(0b1000000100000000));
+    return NumericColumn.make(columnName, table, BuildingHints.make().primary().autoInc());
   }
 
   public StringColumn asText() {
@@ -122,11 +122,11 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn asIntUnsigned() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), BuildingHints.make(0b0000001000000000));
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), BuildingHints.make().unsigned());
   }
 
   public NumericColumn asMediumIntUnsigned() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.mediumint), BuildingHints.make(0b0000001000000000));
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.mediumint), BuildingHints.make().unsigned());
   }
 
   public NumericColumn asSmallInt() {

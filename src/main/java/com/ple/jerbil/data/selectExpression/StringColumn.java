@@ -26,7 +26,7 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
   @Override
   public StringColumn indexed() {
     return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
-        (StringExpression) onUpdate, BuildingHints.make(0b0100000000000000 + hints.flags));
+        (StringExpression) onUpdate, hints.index());
   }
 
   @Override
@@ -37,7 +37,7 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
   @Override
   public StringColumn unique() {
     return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
-        (StringExpression) onUpdate, BuildingHints.make(0b0000010000000000 + hints.flags));
+        (StringExpression) onUpdate, hints.unique());
   }
 
   @Override
@@ -48,7 +48,7 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
   @Override
   public StringColumn allowNull() {
     return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
-        (StringExpression) onUpdate, BuildingHints.make(0b0000000010000000 + hints.flags));
+        (StringExpression) onUpdate, hints.allowNull());
   }
 
   @Override
@@ -79,21 +79,21 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
 
   public static StringColumn make(String columnName, Table table, int size, BuildingHints hints) {
     return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), null, null,
-        null, BuildingHints.make(0b0));
+        null, BuildingHints.make());
   }
 
   public static StringColumn make(String columnName, Table table, int size) {
     return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), null, null,
-        null, BuildingHints.make(0b0));
+        null, BuildingHints.make());
   }
 
   public static StringColumn make(String columnName, Table table) {
     return new StringColumn(columnName, table, DataSpec.make(DataType.varchar), null, null,
-        null, BuildingHints.make(0b0));
+        null, BuildingHints.make());
   }
 
   public static StringColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new StringColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b0));
+    return new StringColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make());
   }
 
   public Equals eq(StringExpression value) {
@@ -118,6 +118,6 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
 
   public StringColumn fullText() {
     return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
-        (StringExpression) onUpdate, BuildingHints.make(0b0001000000000000 + hints.flags));
+        (StringExpression) onUpdate, hints.fulltext());
   }
 }
