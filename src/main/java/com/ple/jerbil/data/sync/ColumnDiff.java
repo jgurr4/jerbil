@@ -18,13 +18,13 @@ public class ColumnDiff implements Diff<Column> {
   @Nullable public final ScalarDiff<Expression> generatedFrom;
   @Nullable public final ScalarDiff<Expression> defaultValue;
   @Nullable public final ScalarDiff<Expression> onUpdate;
-  @Nullable public final VectorDiff<BuildingHints> buildingHints;
+  @Nullable public final ScalarDiff<BuildingHints> buildingHints;
 //  private final ScalarDiff<String> comment;
 
   protected ColumnDiff(@Nullable ScalarDiff<String> name, @Nullable ScalarDiff<Table> table,
                        @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable ScalarDiff<Expression> generatedFrom,
                        @Nullable ScalarDiff<Expression> defaultValue, @Nullable ScalarDiff<Expression> onUpdate,
-                       @Nullable VectorDiff<BuildingHints> buildingHints) {
+                       @Nullable ScalarDiff<BuildingHints> buildingHints) {
     this.name = name;
     this.table = table;
     this.dataSpec = dataSpec;
@@ -38,7 +38,7 @@ public class ColumnDiff implements Diff<Column> {
   public static ColumnDiff make(ScalarDiff<String> name, ScalarDiff<Table> table,
                                 ScalarDiff<DataSpec> dataSpec, ScalarDiff<Expression> generatedFrom,
                                 ScalarDiff<Expression> defaultValue, ScalarDiff<Expression> onUpdate,
-                                VectorDiff<BuildingHints> buildingHints) {
+                                ScalarDiff<BuildingHints> buildingHints) {
     return new ColumnDiff(name, table, dataSpec, generatedFrom, defaultValue, onUpdate, buildingHints);
   }
 

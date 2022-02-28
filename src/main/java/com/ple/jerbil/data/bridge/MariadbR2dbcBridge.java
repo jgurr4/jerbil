@@ -6,7 +6,7 @@ import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.jerbil.data.GenericInterfaces.ReactorFlux;
 import com.ple.jerbil.data.GenericInterfaces.ReactorMono;
 import com.ple.jerbil.data.query.TableContainer;
-import com.ple.jerbil.data.translator.MysqlLanguageGenerator;
+import com.ple.jerbil.data.translator.MariadbLanguageGenerator;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Result;
@@ -20,7 +20,7 @@ import java.time.Duration;
 @Immutable
 public class MariadbR2dbcBridge implements DataBridge {
 
-  public final LanguageGenerator generator = MysqlLanguageGenerator.make();
+  public final LanguageGenerator generator = MariadbLanguageGenerator.make();
   public final String driver;
   public final String host;
   public final int port;

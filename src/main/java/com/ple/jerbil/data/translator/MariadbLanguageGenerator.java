@@ -10,10 +10,10 @@ import com.ple.jerbil.data.sync.Diff;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
-public class MysqlLanguageGenerator implements LanguageGenerator {
+public class MariadbLanguageGenerator implements LanguageGenerator {
 
   public static LanguageGenerator make() {
-    return new MysqlLanguageGenerator();
+    return new MariadbLanguageGenerator();
   }
 
   @Override

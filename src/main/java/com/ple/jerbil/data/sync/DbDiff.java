@@ -2,12 +2,13 @@ package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
+import com.ple.util.IList;
 
 public class DbDiff implements Diff<Database> {
 
-  public final ScalarDiff<String> name;
+  public final ScalarDiff<String> databaseName;
+  public final IList<TableDiff> tableDiffs;
   public final VectorDiff<TableContainer> tables;
 //  public final VectorDiff<ViewTable> views;
 //  public final ScalarDiff<CharSet> charSet;
@@ -16,8 +17,9 @@ public class DbDiff implements Diff<Database> {
 //  public final VectorDiff<StoredEvent> events;
 //  public final VectorDiff<StoredTrigger> triggers;
 
-  protected DbDiff(ScalarDiff<String> name, VectorDiff<TableContainer> tables) {
-    this.name = name;
+  protected DbDiff(ScalarDiff<String> databaseName, IList<TableDiff> tableDiffs, VectorDiff<TableContainer> tables) {
+    this.databaseName = databaseName;
+    this.tableDiffs = tableDiffs;
     this.tables = tables;
 //    this.views = views;
 //    this.charSet = charSet;
@@ -27,8 +29,8 @@ public class DbDiff implements Diff<Database> {
 //    this.triggers = triggers;
   }
 
-  public static DbDiff make(ScalarDiff<String> name, VectorDiff<TableContainer> tables) {
-    return new DbDiff(name, tables);
+  public static DbDiff make(ScalarDiff<String> name, IList<TableDiff> tableDiffs, VectorDiff<TableContainer> tables) {
+    return new DbDiff(name, tableDiffs, tables);
   }
 
   /**

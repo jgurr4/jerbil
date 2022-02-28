@@ -10,6 +10,7 @@ import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
+import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
 
@@ -37,12 +38,23 @@ public class BridgeTests {
   @Test
   void testCompareDatabases() {
     final DbDiff diffs = DiffService.compareDatabases(testDb.wrap(), testDb.wrap()).unwrap();
-    assertNull(diffs.name);
+    assertNull(diffs.databaseName);
     assertNull(diffs.tables);
     assertEquals(0, diffs.getTotalDiffs());
     assertNull(diffs.toSql());
-    //FIXME: I need this to be a TableDiff, not a Diff<TableContainer>
-    final Diff<TableContainer> tableContainerDiff = diffs.tables.update.get(0);
+    //How to access each diff type inside DbDiff: (Note that you would want to iterate over each list.)
+    final IList<TableContainer> createTables = diffs.tables.create;
+    final IList<TableContainer> deleteTables = diffs.tables.delete;
+    final IList<Diff<TableContainer>> updateTables = diffs.tables.update;
+    final IList<TableDiff> tableDiffs = diffs.tableDiffs;
+    final IList<Column> createColumns = tableDiffs.get(0).columns.create;
+    final IList<Column> deleteColumns = tableDiffs.get(0).columns.delete;
+    final IList<Diff<Column>> updateColumns = tableDiffs.get(0).columns.update;
+    final ColumnDiff columnDiff = tableDiffs.get(0).columnDiffs.get(0);
+    if (columnDiff.buildingHints != null) {
+      System.out.println(columnDiff.buildingHints.before);
+      System.out.println(columnDiff.buildingHints.after);
+    }
   }
 
   @Test
@@ -170,7 +182,7 @@ public class BridgeTests {
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create();
     final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
-    assertNotNull(((DbDiff) syncResult.diff.unwrap()).name);
+    assertNotNull(((DbDiff) syncResult.diff.unwrap()).databaseName);
   }
 
   @Test
