@@ -1,5 +1,6 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;

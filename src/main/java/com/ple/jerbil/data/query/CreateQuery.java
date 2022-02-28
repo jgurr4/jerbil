@@ -1,13 +1,11 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.DelayedImmutable;
-import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.Order;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.SelectExpression;
-import com.ple.jerbil.data.selectExpression.UnaliasedExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IList;
 import com.ple.util.IMap;

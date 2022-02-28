@@ -3,7 +3,7 @@ package com.ple.jerbil.data.selectExpression;
 import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
-import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 

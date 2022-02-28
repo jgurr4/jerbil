@@ -25,7 +25,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   @Override
   public BooleanColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
     return new BooleanColumn(columnName, table, dataSpec, generatedFrom, null, null,
-        BuildingHints.make(0b0));
+        BuildingHints.make());
   }
 
   @Override
@@ -79,12 +79,12 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   }
 
   public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new BooleanColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b0));
+    return new BooleanColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make());
   }
 
   public static BooleanColumn make(String columnName, Table table) {
     return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool), null, null,
-        null, BuildingHints.make(0b0));
+        null, BuildingHints.make());
   }
 
 /*

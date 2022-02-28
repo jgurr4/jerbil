@@ -1,7 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
-import com.ple.jerbil.data.DateInterval;
-import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 
 /**
  * DateExpression is any expression which evaluates to a date. For example:

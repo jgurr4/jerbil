@@ -15,7 +15,8 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
   }
 
   public static EnumeralColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new EnumeralColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b0));
+    return new EnumeralColumn(columnName, table, dataSpec, null, null, null,
+        BuildingHints.make());
   }
 
   @Override

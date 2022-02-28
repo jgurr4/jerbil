@@ -1,4 +1,4 @@
-package com.ple.jerbil.data;
+package com.ple.jerbil.data.translator;
 
 import java.util.HashSet;
 import java.util.List;

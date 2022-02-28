@@ -1,7 +1,6 @@
-package com.ple.jerbil.data.bridge;
+package com.ple.jerbil.data.GenericInterfaces;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.publisher.Mono;
 
 public class ReactorMono<T> implements ReactiveWrapper<T> {

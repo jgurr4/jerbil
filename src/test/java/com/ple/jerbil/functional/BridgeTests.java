@@ -24,6 +24,7 @@ public class BridgeTests {
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
   final InventoryTableContainer inventory = testDb.inventory;
+  final OrderTableContainer order = testDb.order;
 
   public BridgeTests() {
     final Properties props = ConfigProps.getProperties();
@@ -35,7 +36,13 @@ public class BridgeTests {
 
   @Test
   void testCompareDatabases() {
-//    DiffService.compareDatabases();
+    final DbDiff diffs = DiffService.compareDatabases(testDb.wrap(), testDb.wrap()).unwrap();
+    assertNull(diffs.name);
+    assertNull(diffs.tables);
+    assertEquals(0, diffs.getTotalDiffs());
+    assertNull(diffs.toSql());
+    //FIXME: I need this to be a TableDiff, not a Diff<TableContainer>
+    final Diff<TableContainer> tableContainerDiff = diffs.tables.update.get(0);
   }
 
   @Test
@@ -123,16 +130,14 @@ public class BridgeTests {
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
     final Table extraTable = Table.make("extra", testDb.database);
     final IMap<String, Column> extraTableColumns = IArrayMap.make(Column.make("id", extraTable).bigId());
-
     //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
-
     final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns, StorageEngine.transactional, null, null);
     final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
-
     final DbDiff diff = DiffService.compareDatabases(
         testDb.wrap(), DatabaseContainer.make(Database.make("myDb"),
             IArrayMap.make(user, player, alteredItemTableContainer, extraTableContainer)
         ).wrap()).unwrap();
+//    diff.filter(DdlOption.make(0b010));
     //inventory needs create, alteredItem needs update, extraTable needs delete.
 //    assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.length());
 //    assertEquals(0, diff.filter(DdlOption.make().create()).tables.delete.length());

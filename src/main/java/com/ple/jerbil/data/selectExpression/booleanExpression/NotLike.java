@@ -1,7 +1,7 @@
 package com.ple.jerbil.data.selectExpression.booleanExpression;
 
 
-import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.selectExpression.LiteralString;
 import com.ple.jerbil.data.selectExpression.StringExpression;
 

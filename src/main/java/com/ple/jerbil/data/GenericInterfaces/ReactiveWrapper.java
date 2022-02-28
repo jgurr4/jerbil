@@ -1,4 +1,4 @@
-package com.ple.jerbil.data.bridge;
+package com.ple.jerbil.data.GenericInterfaces;
 
 import com.ple.jerbil.data.Database;
 import reactor.core.publisher.Flux;

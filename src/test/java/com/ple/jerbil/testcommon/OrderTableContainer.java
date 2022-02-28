@@ -1,7 +1,7 @@
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.IndexType;
 import com.ple.jerbil.data.query.TableContainer;

@@ -1,9 +1,8 @@
 package com.ple.jerbil.data;
 
-import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.SelectExpression;
-import com.ple.jerbil.data.selectExpression.StringColumn;
 
 /**
  * Potential Query represents any type of query, but adds the important 'select' method.

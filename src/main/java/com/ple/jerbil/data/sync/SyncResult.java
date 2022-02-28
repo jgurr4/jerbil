@@ -1,11 +1,10 @@
 package com.ple.jerbil.data.sync;
 
-import com.ple.jerbil.data.Immutable;
-import com.ple.jerbil.data.bridge.ReactiveWrapper;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import io.r2dbc.spi.Result;
-import reactor.core.publisher.Mono;
 
 @Immutable
 public class SyncResult<D extends Diff> {

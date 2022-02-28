@@ -1,6 +1,7 @@
 package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +20,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   @Override
   public DateColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
     return new DateColumn(columnName, table, dataSpec, generatedFrom, (DateExpression) defaultValue,
-        (DateExpression) onUpdate, BuildingHints.make(0b0));
+        (DateExpression) onUpdate, BuildingHints.make());
   }
 
   @Override
@@ -73,11 +74,12 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   }
 
   public static DateColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new DateColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make(0b0));
+    return new DateColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make());
   }
 
   public static DateColumn make(String columnName, Table table) {
-    return new DateColumn(columnName, table, DataSpec.make(DataType.datetime), null, null, null, BuildingHints.make(0b0));
+    return new DateColumn(columnName, table, DataSpec.make(DataType.datetime), null, null,
+        null, BuildingHints.make());
   }
 
   public DateColumn defaultValue(DateExpression dateExp) {

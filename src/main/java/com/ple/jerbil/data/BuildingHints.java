@@ -1,5 +1,7 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
+
 /**
  * BuildingHints allows users to skip manually defining IndexSpec for each index of their tables.
  * The DatabaseBuilder will review the flags of each column and generate the IndexSpecs based on that.

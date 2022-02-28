@@ -1,10 +1,10 @@
 package com.ple.jerbil.data.sync;
 
 /**
- * Configure how the bridge will handle diffs between the schema object and the actual schema inside the database.
+ * For use with the filter methods of Diffs, in order to eliminate certain diffs which violate parameters set by the user.
  *
- * The options are as follows: Each one above create is a lower level of preserving existing schema data and higher
- * level of altering existing database structure.
+ * For example, if you don't want to allow a sync() to delete extra tables or columns that exist in the database, then
+ * you would pass in a ddloption which contains create and update only and leave off delete.
  *
  **/
 
@@ -20,10 +20,10 @@ public class DdlOption {
 
   //FIXME: Empty make should be create and update by default. Delete has to be explicit from developer.
   public static DdlOption make() {
-    return new DdlOption(0b000);
+    return new DdlOption(0b0);
   }
 
-  public static DdlOption make(byte i) {
+  public static DdlOption make(int i) {
     return new DdlOption(i);
   }
 

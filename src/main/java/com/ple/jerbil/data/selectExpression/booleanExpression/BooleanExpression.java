@@ -1,8 +1,7 @@
 package com.ple.jerbil.data.selectExpression.booleanExpression;
 
-import com.ple.jerbil.data.Immutable;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.selectExpression.OrderedExpression;
-import com.ple.jerbil.data.selectExpression.SelectExpression;
 
 /**
  * BooleanExpression is any expression which evaluates to a boolean data type. For example:

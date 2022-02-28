@@ -1,6 +1,7 @@
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;

@@ -1,5 +1,7 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
+
 @Immutable
 public class DbName {
 

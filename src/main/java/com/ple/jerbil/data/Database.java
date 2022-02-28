@@ -1,5 +1,7 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
+
 /**
  * Database is a object representing the database and it's tables.
  */

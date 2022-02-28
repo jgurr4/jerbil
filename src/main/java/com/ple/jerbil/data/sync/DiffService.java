@@ -1,9 +1,9 @@
 package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.bridge.ReactiveWrapper;
-import com.ple.jerbil.data.bridge.ReactorMono;
-import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
+import com.ple.jerbil.data.GenericInterfaces.ReactorMono;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
@@ -43,26 +43,26 @@ public class DiffService {
     return null;
   }
 
-  public static VectorDiff<Table> compareListOfTables(IList<Table> leftTables, IList<Table> rightTables) {
-    IList<Table> create = getMissingTables(leftTables, rightTables);
-    final IList<Table> noExactMatchesList = filterOutMatchingTables(leftTables, rightTables);
-    IList<Table> matches = IArrayList.make();
-    IList<Table> nonMatches = IArrayList.make();
-    for (Table table : noExactMatchesList) {
+  public static VectorDiff<TableContainer> compareListOfTables(IList<TableContainer> leftTables, IList<TableContainer> rightTables) {
+    IList<TableContainer> create = getMissingTables(leftTables, rightTables);
+    final IList<TableContainer> noExactMatchesList = filterOutMatchingTables(leftTables, rightTables);
+    IList<TableContainer> matches = IArrayList.make();
+    IList<TableContainer> nonMatches = IArrayList.make();
+    for (TableContainer table : noExactMatchesList) {
       if (checkTableNameInList(leftTables, table)) {
         matches = matches.add(table);
       } else {
         nonMatches = nonMatches.add(table);
       }
     }
-    IList<Diff<Table>> update = getListOfTableDiffs(leftTables, matches);
-    IList<Table> delete = getExtraTables(leftTables, nonMatches);
-    return new VectorDiff<>(create, delete, update);
+    IList<Diff<TableContainer>> update = getListOfTableDiffs(leftTables, matches);
+    IList<TableContainer> delete = getExtraTables(leftTables, nonMatches);
+    return new VectorDiff<TableContainer>(create, delete, update);
   }
 
-  public static IList<Table> getMissingTables(IList<Table> leftTables, IList<Table> rightTables) {
-    IList<Table> result = IArrayList.make();
-    for (Table lTable : leftTables) {
+  public static IList<TableContainer> getMissingTables(IList<TableContainer> leftTables, IList<TableContainer> rightTables) {
+    IList<TableContainer> result = IArrayList.make();
+    for (TableContainer lTable : leftTables) {
       if (!rightTables.contains(lTable) && !checkTableNameInList(rightTables, lTable)) {
         result = result.add(lTable);
       }
@@ -73,9 +73,9 @@ public class DiffService {
     return result;
   }
 
-  public static IList<Table> getExtraTables(IList<Table> leftTables, IList<Table> rightTables) {
-    IList<Table> result = IArrayList.make();
-    for (Table rTable : rightTables) {
+  public static IList<TableContainer> getExtraTables(IList<TableContainer> leftTables, IList<TableContainer> rightTables) {
+    IList<TableContainer> result = IArrayList.make();
+    for (TableContainer rTable : rightTables) {
       if (!leftTables.contains(rTable) && !checkTableNameInList(leftTables, rTable)) {
         result = result.add(rTable);
       }
@@ -86,21 +86,21 @@ public class DiffService {
     return result;
   }
 
-  public static IList<Diff<Table>> getListOfTableDiffs(IList<Table> leftTables, IList<Table> rightTables) {
+  public static IList<Diff<TableContainer>> getListOfTableDiffs(IList<TableContainer> leftTables, IList<TableContainer> rightTables) {
     //TODO: Ask if this is bad practice to use Streams or declarative style programming for accomplishing intermediate
     // operation in a synchronous/mostly imperative style method.
     return Flux.fromIterable(rightTables)
       .filter(Objects::nonNull)
-      .map(table -> compareTables(getTableMatchingName(leftTables, table.tableName), table))
+      .map(table -> compareTables(getTableMatchingName(leftTables, table.table.tableName), table))
       .collectList()
       .map(tableDiffs -> IArrayList.make(tableDiffs.toArray(TableDiff.empty)))
       .defaultIfEmpty(null)
       .block();
   }
 
-  public static IList<Table> filterOutMatchingTables(IList<Table> leftTables, IList<Table> rightTables) {
-    IList<Table> nonMatchingTables = IArrayList.make();
-    for (Table rightTable : rightTables) {
+  public static IList<TableContainer> filterOutMatchingTables(IList<TableContainer> leftTables, IList<TableContainer> rightTables) {
+    IList<TableContainer> nonMatchingTables = IArrayList.make();
+    for (TableContainer rightTable : rightTables) {
       if (!leftTables.contains(rightTable)) {
         nonMatchingTables = nonMatchingTables.add(rightTable);
       }
@@ -108,7 +108,7 @@ public class DiffService {
     return nonMatchingTables;
   }
 
-  public static Diff<Table> compareTables(Table t1, Table t2) {
+  public static Diff<TableContainer> compareTables(TableContainer t1, TableContainer t2) {
 /*
 //FIXME: broken after updates to database and tables.
     ScalarDiff<String> nameDiff = t1.tableName.equals(t2.tableName) ? null : ScalarDiff.make(t1.tableName, t2.tableName);
@@ -120,10 +120,10 @@ public class DiffService {
     return null;
   }
 
-  public static Table getTableMatchingName(IList<Table> tables, String name) {
-    Table result = null;
-    for (Table t : tables) {
-      if (t.tableName.equals(name)) {
+  public static TableContainer getTableMatchingName(IList<TableContainer> tables, String name) {
+    TableContainer result = null;
+    for (TableContainer t : tables) {
+      if (t.table.tableName.equals(name)) {
         result = t;
       }
     }
@@ -215,7 +215,6 @@ public class DiffService {
 
   public static Diff<Column> compareColumns(Column c1, Column c2) {
     final ScalarDiff<String> nameDiff = c1.columnName.equals(c2.columnName) ? null : ScalarDiff.make(c1.columnName, c2.columnName);
-    final VectorDiff<ColumnAttribute> columnAttributesDiff = compareColumnAttributes(c1, c2);
     final ScalarDiff<DataSpec> dataSpecDiff = c1.dataSpec.equals(c2.dataSpec) ? null : ScalarDiff.make(
       c1.dataSpec, c2.dataSpec);
     final VectorDiff<Index> indexDiff = compareIndexes(c1, c2);
@@ -223,7 +222,8 @@ public class DiffService {
       c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
     final ScalarDiff<Expression> defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(
       c1.defaultValue, c2.defaultValue);
-    return ColumnDiff.make(nameDiff, columnAttributesDiff, dataSpecDiff, indexDiff, generatedDiff, defaultDiff);
+//    return ColumnDiff.make(nameDiff, dataSpecDiff, indexDiff, generatedDiff, defaultDiff);
+    return null;
   }
 
   private static VectorDiff<Index> compareIndexes(Column c1, Column c2) {
@@ -237,13 +237,10 @@ public class DiffService {
     return null;
   }
 
-  private static VectorDiff<ColumnAttribute> compareColumnAttributes(Column c1, Column c2) {
-    return null;
-  }
 
-  public static boolean checkTableNameInList(IList<Table> tables, Table t1) {
-    for (Table table : tables) {
-      if (table.tableName.equals(t1.tableName)) {
+  public static boolean checkTableNameInList(IList<TableContainer> tables, TableContainer t1) {
+    for (TableContainer table : tables) {
+      if (table.table.tableName.equals(t1.table.tableName)) {
         return true;
       }
     }

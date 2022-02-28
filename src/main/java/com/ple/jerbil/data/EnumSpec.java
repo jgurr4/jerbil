@@ -1,5 +1,7 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
+
 import java.util.Arrays;
 
 public class EnumSpec extends DataSpec {

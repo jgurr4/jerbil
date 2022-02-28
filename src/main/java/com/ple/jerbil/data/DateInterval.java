@@ -1,5 +1,7 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
+
 /**
  * The purpose of DateInterval is for RDBMs which support using interval syntax for operations on temporal data types.
  * For example:

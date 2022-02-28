@@ -1,12 +1,11 @@
 package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.sync.SyncResult;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Immutable

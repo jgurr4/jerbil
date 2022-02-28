@@ -1,5 +1,6 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
@@ -7,7 +8,7 @@ import com.ple.util.*;
 
 import java.lang.reflect.*;
 
-@Immutable
+@com.ple.jerbil.data.GenericInterfaces.Immutable
 public class DatabaseBuilder {
 
   //FIXME: Figure out a way to handle multi-column indexes for secondary, fulltext, and foreign.

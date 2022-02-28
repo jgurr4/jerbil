@@ -1,9 +1,7 @@
 package com.ple.jerbil.data;
 
-import com.ple.jerbil.data.bridge.ReactiveWrapper;
+import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import io.r2dbc.spi.Result;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 /**
  * Bridge is responsible for connecting and sending data to and from a database.
