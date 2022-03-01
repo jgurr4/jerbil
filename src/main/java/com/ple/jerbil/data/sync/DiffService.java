@@ -5,12 +5,12 @@ import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.jerbil.data.GenericInterfaces.ReactorMono;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
+import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import com.ple.util.IMap;
-import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -41,7 +41,7 @@ public class DiffService {
     return null;
   }
 
-  private static DbDiff compareDatabaseProps(Database leftDb, Database rightDb) {
+  public static DbDiff compareDatabaseProps(Database leftDb, Database rightDb) {
     //TODO: This method should compare the database properties only. Not tables or columns.
     return null;
   }
@@ -213,7 +213,7 @@ public class DiffService {
     return result;
   }
 
-  private static IList<Diff<Index>> getListOfIndexDiffs(IList<Index> leftIndexes, IList<Index> rightIndexes) {
+  public static IList<Diff<Index>> getListOfIndexDiffs(IList<Index> leftIndexes, IList<Index> rightIndexes) {
     return Flux.fromIterable(rightIndexes)
         .filter(Objects::nonNull)
         .map(rIndex -> compareIndexes(getIndexMatchingName(leftIndexes, rIndex), rIndex))
@@ -223,7 +223,7 @@ public class DiffService {
         .block();
   }
 
-  private static Index getIndexMatchingName(IList<Index> leftIndexes, Index rIndex) {
+  public static Index getIndexMatchingName(IList<Index> leftIndexes, Index rIndex) {
     for (Index leftIndex : leftIndexes) {
       if (leftIndex.indexName.equals(rIndex.indexName)) {
         return leftIndex;
@@ -232,30 +232,30 @@ public class DiffService {
     return null;
   }
 
-  public static IList<Diff<Column>> getListOfColumnDiffs(IMap<String, Column> leftColumns,
-                                                         IMap<String, Column> rightColumns) {
+  public static IList<Diff<Column>> getListOfColumnDiffs(IList<Column> leftColumns,
+                                                         IList<Column> rightColumns) {
     return Flux.fromIterable(rightColumns)
         .filter(Objects::nonNull)
-        .map(entry -> entry.value)
-        .map(rColumn -> compareColumns(getColumnMatchingName(leftColumns.values(), rColumn.columnName), rColumn))
+        .map(rColumn -> compareColumns(getColumnMatchingName(leftColumns, rColumn.columnName), rColumn))
         .collectList()
         .map(columnDiffs -> IArrayList.make(columnDiffs.toArray(ColumnDiff.empty)))
         .defaultIfEmpty(null)
         .block();
   }
 
-  private static Diff<Index> compareIndexes(Index leftIndex, Index rightIndex) {
+  public static IndexDiff compareIndexes(Index leftIndex, Index rightIndex) {
     ScalarDiff<IndexType> typeDiff = leftIndex.type.equals(rightIndex.type) ? null : ScalarDiff.make(leftIndex.type,
         rightIndex.type);
     ScalarDiff<String> nameDiff = leftIndex.indexName.equals(rightIndex.indexName) ? null : ScalarDiff.make(
         leftIndex.indexName,
         rightIndex.indexName);
     VectorDiff<Column> columnsDiff = compareListOfColumns(leftIndex.columns, rightIndex.columns);
+    IList<ColumnDiff> listOfColumnsDiff = null; //FIXME: Make this return list of columnDiffs.
     ScalarDiff<Integer> sizeDiff = leftIndex.size == rightIndex.size ? null : ScalarDiff.make(leftIndex.size,
         rightIndex.size);
     ScalarDiff<Order> orderDiff = leftIndex.order.equals(rightIndex.order) ? null : ScalarDiff.make(
         leftIndex.order, rightIndex.order);
-    return IndexDiff.make(typeDiff, nameDiff, columnsDiff, sizeDiff, orderDiff);
+    return IndexDiff.make(typeDiff, nameDiff, columnsDiff, listOfColumnsDiff, sizeDiff, orderDiff);
   }
 
   public static Diff<Column> compareColumns(Column c1, Column c2) {

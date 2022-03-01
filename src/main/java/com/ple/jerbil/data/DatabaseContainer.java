@@ -35,11 +35,14 @@ public class DatabaseContainer {
 
   // This method is for convenience, it automatically retrieves a database object from rdbms which has the same name.
   public SyncResult sync(DdlOption ddlOption) {
+/*
     ReactiveWrapper<DatabaseContainer> existingDb = getDbContainer(this.database.databaseName);
     ReactiveWrapper<DbDiff> dbDiff = DiffService.compareDatabases(SynchronousObject.make(this), existingDb);
     ReactiveWrapper<DbDiff> filteredDiff = ReactorMono.make(dbDiff.unwrapMono().map(diffs -> diffs.filter(ddlOption)));
     ReactiveWrapper<String> sql = ReactorMono.make(filteredDiff.unwrapMono().map(fDiff -> fDiff.toSql()));
     return SyncResult.make(DataGlobal.bridge.execute(sql), dbDiff);
+*/
+    return null;
     //TODO: Consider making an executeAll() method that executes each statement individually and returns a flux of results.
     // If one statement has a error then it should prevent further statements.
 //    return SyncResult.compare(this, existingDb).filter(ddlOption).toSql().execute();
@@ -47,7 +50,7 @@ public class DatabaseContainer {
 
   // This method is when you already have two databaseContainer objects ready to compare.
   public SyncResult sync(DatabaseContainer db, DdlOption ddlOption) {
-
+    return null;
   }
 
   public QueryList createAll() {

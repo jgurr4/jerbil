@@ -16,7 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 @Immutable
 public class OrderTableContainer extends TableContainer {
-
   public final NumericColumn orderId;
   public final StringColumn add;
   public final StringColumn phrase;
@@ -42,7 +41,7 @@ public class OrderTableContainer extends TableContainer {
                                 BooleanColumn finalized,
                                 NumericColumn myDouble, NumericColumn myFloat, EnumeralColumn mySet,
                                 DateColumn saleDate, DateColumn saleTime, DateColumn saleDateTime, NumericColumn myInvis,
-                                @Nullable IList<Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
+                                IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
     super(table, columns, null, indexes, autoIncrementColumn);
     this.orderId = orderId;
     this.add = add;
@@ -90,7 +89,7 @@ public class OrderTableContainer extends TableContainer {
         price.columnName, price, total.columnName, total, finalized.columnName, finalized, myDouble.columnName, myDouble,
         myFloat.columnName, myFloat, mySet.columnName, mySet, saleDate.columnName, saleDate, saleTime.columnName,
         saleTime, saleDateTime.columnName, saleDateTime, myInvis.columnName, myInvis);
-    final IList<Index> indexes = IArrayList.make(Index.make(IndexType.secondary, userId, itemId));
+    final IMap<String, Index> indexes = IArrayMap.make("usr_itm_idx", Index.make(IndexType.secondary, userId, itemId));
     return new OrderTableContainer(orderTable, columns, orderId, add, phrase, userId,
         itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime,
         myInvis, indexes, null);

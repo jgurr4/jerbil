@@ -23,8 +23,8 @@ public class ItemTableContainer extends TableContainer {
   public final String tableName;
 
   protected ItemTableContainer(Table table, IMap<String, Column> columns, NumericColumn itemId,
-                               StringColumn name, EnumeralColumn type, NumericColumn price, @Nullable IList<Index> indexes,
-                               @Nullable NumericColumn autoIncrementColumn) {
+                               StringColumn name, EnumeralColumn type, NumericColumn price,
+                               @Nullable IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
     super(table, columns, null, indexes, autoIncrementColumn);
     this.itemId = itemId;
     this.name = name;

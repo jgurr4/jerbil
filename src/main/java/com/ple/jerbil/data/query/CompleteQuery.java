@@ -3,8 +3,10 @@ package com.ple.jerbil.data.query;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
+import com.ple.jerbil.data.bridge.DataBridge;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
+import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 import io.r2dbc.spi.Result;
@@ -56,7 +58,8 @@ public class CompleteQuery extends Query {
   }
 
   private ReactiveWrapper<Result> execute(DataBridge bridge) {
-    return bridge.execute(toSql());
+//    return bridge.execute(toSql());
+    return null;
   }
 
   public CompleteQuery limit(int offset, int limit) {

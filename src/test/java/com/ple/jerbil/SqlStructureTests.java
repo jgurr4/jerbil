@@ -167,7 +167,7 @@ public class SqlStructureTests {
   @Test
   void testGeneratedColumn() {
     NumericColumn quantity = Column.make("quantity", item.table).asInt();
-    Column total = Column.make("total", item.table).asDecimal(14, 2).generatedFrom(item.price.times(quantity));
+    NumericColumn total = Column.make("total", item.table).asDecimal(14, 2).generatedFrom(item.price.times(quantity));
     TableContainer newTable = item.add(quantity, total);
     final CompleteQuery q = newTable.create();
     assertEquals("""

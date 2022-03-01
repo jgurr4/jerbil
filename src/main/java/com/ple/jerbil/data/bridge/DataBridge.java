@@ -1,6 +1,10 @@
-package com.ple.jerbil.data;
+package com.ple.jerbil.data.bridge;
 
+import com.ple.jerbil.data.DatabaseContainer;
+import com.ple.jerbil.data.GenericInterfaces.Failable;
 import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
+import com.ple.jerbil.data.GenericInterfaces.ReactorFlux;
+import com.ple.jerbil.data.translator.LanguageGenerator;
 import io.r2dbc.spi.Result;
 
 /**
@@ -11,10 +15,10 @@ import io.r2dbc.spi.Result;
 public interface DataBridge {
   LanguageGenerator getGenerator();
 
-  ReactiveWrapper<Result> execute(String toSql);
+  <T extends Result> ReactiveWrapper<Failable<T>> execute(String toSql);
 
   ReactiveWrapper<Result> execute(ReactiveWrapper<String> toSql);
 
-  ReactiveWrapper<DatabaseContainer> getDb(String name);
+  Failable<ReactiveWrapper<DatabaseContainer>> getDb(String name);
 
 }

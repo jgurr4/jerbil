@@ -4,6 +4,7 @@ import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.sync.SyncResult;
+import com.ple.jerbil.data.translator.LanguageGenerator;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;

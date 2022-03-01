@@ -30,6 +30,7 @@ public class StatementExecutionTests {
     DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
   }
 
+  /*
   @Test
   @Order(1)
   void dropDbTest() {
@@ -118,4 +119,5 @@ public class StatementExecutionTests {
       .expectNext("200", "300")
       .verifyComplete();
   }
+   */
 }

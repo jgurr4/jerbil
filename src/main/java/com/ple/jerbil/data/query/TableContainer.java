@@ -5,6 +5,7 @@ import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.sync.SyncResult;
+import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import com.ple.util.IMap;
@@ -16,11 +17,11 @@ public class TableContainer extends FromExpression {
   public final Table table;
   public final IMap<String, Column> columns;
   @Nullable public final StorageEngine storageEngine;
-  @Nullable public final IList<Index> indexes;
+  @Nullable public final IMap<String, Index> indexes;
   @Nullable public final NumericColumn autoIncrementColumn;
 
   protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
-                           @Nullable IList<Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
+                           @Nullable IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
     this.table = table;
     this.columns = columns;
     this.storageEngine = storageEngine;
@@ -29,7 +30,7 @@ public class TableContainer extends FromExpression {
   }
 
   public static TableContainer make(Table table, IMap<String, Column> columns, StorageEngine storageEngine,
-                                    IList<Index> indexSpecs, NumericColumn autoIncrementColumn) {
+                                    IMap<String, Index> indexSpecs, NumericColumn autoIncrementColumn) {
     return new TableContainer(table, columns, storageEngine, indexSpecs, autoIncrementColumn);
   }
 
@@ -39,19 +40,24 @@ public class TableContainer extends FromExpression {
 
   public TableContainer add(Column... columnArr) {
     IMap<String, Column> newColumns = columns;
-    IList<Index> indexList = indexes;
+    IMap<String, Index> indexList = indexes;
     NumericColumn autoIncCol = autoIncrementColumn;
     for (Column column : columnArr) {
+      final String indexName = DatabaseService.generateIndexName(column);
+      IndexType indexType = null;
       newColumns = newColumns.put(column.columnName, column);
       if (column.hints.isAutoInc()) {
         autoIncCol = (NumericColumn) column;
-        indexList = indexList.add(Index.make(IndexType.primary, column));
+        indexType = IndexType.primary;
       } else if (column.hints.isPrimary()) {
-        indexList = indexList.add(Index.make(IndexType.primary, column));
+        indexType = IndexType.primary;
       } else if (column.hints.isIndexed()) {
-        indexList = indexList.add(Index.make(IndexType.secondary, column));
+        indexType = IndexType.secondary;
       } else if (column.hints.isFulltext()) {
-        indexList = indexList.add(Index.make(IndexType.fulltext, column));
+        indexType = IndexType.fulltext;
+      }
+      if (indexType != null) {
+        indexList = indexList.put(indexName, Index.make(indexType, indexName, column));
       }
     }
     return new TableContainer(table, newColumns, storageEngine, indexList, autoIncCol);

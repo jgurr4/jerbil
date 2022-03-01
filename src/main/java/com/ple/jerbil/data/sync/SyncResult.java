@@ -6,31 +6,19 @@ import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import io.r2dbc.spi.Result;
 
-//FIXME: Make syncResult no longer try to contain errorMessage or warnings, instead make failable functor contain syncresult.
-// Sync result should only contain the result and the diffs.
 @Immutable
 public class SyncResult<D extends Diff> {
 
   public final ReactiveWrapper<Result> result;
   public final ReactiveWrapper<D> diff;
-  public final String errorMessage;
-  public final IList<String> warnings;
 
-  protected SyncResult(ReactiveWrapper<Result> result, ReactiveWrapper<D> diff, String errorMessage, IList<String> warnings) {
+  protected SyncResult(ReactiveWrapper<Result> result, ReactiveWrapper<D> diff) {
     this.result = result;
     this.diff = diff;
-    this.errorMessage = errorMessage;
-    this.warnings = warnings;
   }
 
-  public static <D extends Diff> SyncResult make(ReactiveWrapper<Result> result, ReactiveWrapper<D> diffs, String errorMessage, IList<String> warnings) {
-    return new SyncResult(result, diffs, errorMessage, warnings);
-  }
-
-  public static <D extends Diff> SyncResult make(ReactiveWrapper<Result> result, ReactiveWrapper<D> diff) {
-    String error = "";
-    IList<String> warnings = IArrayList.make();
-    return new SyncResult(result, diff, error, warnings);
+  public static <D extends Diff> SyncResult make(ReactiveWrapper<Result> result, ReactiveWrapper<D> diffs) {
+    return new SyncResult(result, diffs);
   }
 
   @Override
@@ -40,19 +28,6 @@ public class SyncResult<D extends Diff> {
       ", diffs=" + diff +
       '}';
   }
-/*
-  public boolean hasError() {
-    return errorMessage != null;
-  }
-
-  public boolean firstTimeGenerated() {
-    if (generatedType != null) {
-      return generatedType == GeneratedType.generated;
-    }
-    return false;
-  }
-
-*/
 /*
   protected Mono<SyncResult> createSchema(Create createOption) {
     if (hasError()) {

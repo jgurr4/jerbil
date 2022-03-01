@@ -19,11 +19,8 @@ public class PlayerTableContainer extends TableContainer {
   public final StringColumn name;
   public final String tableName;
 
-  protected PlayerTableContainer(Table table,
-                                 IMap<String, Column> columns,
-                                 NumericColumn playerId, NumericColumn userId,
-                                 StringColumn name, @Nullable IList<Index> indexes,
-                                 @Nullable NumericColumn autoIncrementColumn) {
+  protected PlayerTableContainer(Table table, IMap<String, Column> columns, NumericColumn playerId, NumericColumn userId,
+                                 StringColumn name, IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
     super(table, columns, StorageEngine.transactional,
         indexes, autoIncrementColumn);
     this.playerId = playerId;
@@ -39,7 +36,8 @@ public class PlayerTableContainer extends TableContainer {
     final StringColumn name = Column.make("name", playerTable).asVarchar(20);
 //    final IList<Index> indexes = IArrayList.make(Index.make(IndexType.primary, playerId, userId));
 //    final NumericColumn autoIncrementColumn = playerId;
-    final IMap<String, Column> columns = IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId, name.columnName, name);
+    final IMap<String, Column> columns = IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId,
+        name.columnName, name);
     return new PlayerTableContainer(playerTable, columns, playerId, userId, name, null, null);
   }
 

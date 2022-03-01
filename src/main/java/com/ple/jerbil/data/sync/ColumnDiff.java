@@ -4,6 +4,7 @@ package com.ple.jerbil.data.sync;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import org.jetbrains.annotations.Nullable;

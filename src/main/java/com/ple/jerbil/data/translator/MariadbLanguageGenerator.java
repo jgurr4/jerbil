@@ -815,7 +815,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         separator = ",\n  ";
       }
       sql += ",";
-      indexes = toSql(t.indexes);
+      indexes = toSql(t.indexes.values());
     }
     sql += indexes + "\n) ENGINE=" + engine + "\n";
     return sql;
@@ -855,30 +855,18 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   //TODO: Add formatting to handle weird column names. For example item_id should become itemid.
   private String toSqlIndexColumns(IList<Column> columns, boolean generateName) {
     String sql = "";
-    String separator = "";
-    String indexedColumns = "";
     String indexName = "";
+    String indexedColumns = "";
+    String separator = "";
     for (Column column : columns) {
       indexedColumns += separator + checkToAddBackticks(column.columnName);
       separator = ",";
     }
     if (generateName) {
-      indexName = generateIndexName(indexedColumns) + "idx ";
+      indexName = DatabaseService.formatIndexName(indexedColumns) + "idx ";
     }
     sql += indexName + "(" + indexedColumns + ")";
     return sql;
-  }
-
-  //FIXME: Make it remove Id or _id and also handle camelcase and _ separated words differently. For example: itemId and item_id should become itm_idx.
-  // Or also user_info or userInfo = usrinf instead of usrnf
-  private String generateIndexName(String indexedColumns) {
-    final String[] split = indexedColumns.toLowerCase().split(",");
-    String result = "";
-    for (String s : split) {
-      result += s.replaceAll("\\B[aeiou]", "")
-          .replaceAll("([a-z])\\1*", "$1") + "_";
-    }
-    return result;
   }
 
 /*

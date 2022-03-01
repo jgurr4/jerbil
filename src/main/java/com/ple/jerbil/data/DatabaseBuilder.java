@@ -50,7 +50,7 @@ public class DatabaseBuilder {
                 columns = columns.add((Column) fieldValue);
               }
             }
-            IList<Index> indexes = IArrayList.empty;
+            IMap<String, Index> indexes = IArrayMap.empty;
             if (tc.indexes != null) {
               indexes = tc.indexes;
             }
@@ -82,32 +82,32 @@ public class DatabaseBuilder {
     return t;
   }
 
-  private static AutoIncIndex getColumnAttributes(IList<Column> columns, IList<Index> indexes) {
+  private static AutoIncIndex getColumnAttributes(IList<Column> columns, IMap<String, Index> indexes) {
     NumericColumn autoIncColumn = null;
     Index primary = null;  //This only works for multi-column primary keys. All other indexes I have to make a way for
     // users to specify if it is part of another index, or if it is different index.
     for (Column column : columns) {
+      final String indexName = DatabaseService.generateIndexName(column);
       if (column.hints.isAutoInc()) {
-        indexes = indexes.add(Index.make(IndexType.primary, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.primary, column));
         autoIncColumn = (NumericColumn) column;
       } else if (column.hints.isPrimary()) {
         if (primary == null) {
-          primary = Index.make(IndexType.primary, column);
-          indexes = indexes.add(primary);
+          primary = Index.make(IndexType.primary, "primary", column);
+          indexes = indexes.put("primary", primary);
         } else {
-          indexes = indexes.remove(primary);
-          primary = Index.make(IndexType.primary, primary.columns.add(column).toArray());
-          indexes = indexes.add(primary);
+          primary = Index.make(IndexType.primary, "primary", primary.columns.add(column).toArray());
+          indexes = indexes.put("primary", primary);
         }
       }
       if (column.hints.isFulltext()) {
-        indexes = indexes.add(Index.make(IndexType.fulltext, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.fulltext, column));
       }
       if (column.hints.isForeign()) {
-        indexes = indexes.add(Index.make(IndexType.foreign, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.foreign, column));
       }
       if (column.hints.isIndexed()) {
-        indexes = indexes.add(Index.make(IndexType.secondary, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.secondary, column));
       }
     }
     return new AutoIncIndex(indexes, autoIncColumn);
@@ -115,10 +115,10 @@ public class DatabaseBuilder {
 
   @Immutable
   private static class AutoIncIndex {
-    public final IList<Index> indexes;
+    public final IMap<String, Index> indexes;
     public final NumericColumn autoIncrementColumn;
 
-    private AutoIncIndex(IList<Index> indexes,
+    private AutoIncIndex(IMap<String, Index> indexes,
                          NumericColumn autoIncrementColumn) {
       this.indexes = indexes;
       this.autoIncrementColumn = autoIncrementColumn;

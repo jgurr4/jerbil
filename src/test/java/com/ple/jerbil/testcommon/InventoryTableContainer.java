@@ -19,7 +19,7 @@ public class InventoryTableContainer extends TableContainer {
   public final String tableName;
 
   protected InventoryTableContainer(Table table, IMap<String, Column> columns, NumericColumn playerId, NumericColumn itemId,
-                                    @Nullable IList<Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
+                                    IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
     super(table, columns, null, indexes, autoIncrementColumn);
     this.playerId = playerId;
     this.itemId = itemId;

@@ -21,7 +21,7 @@ public class UserTableContainer extends TableContainer {
   public final String tableName;
 
   protected UserTableContainer(Table table, IMap<String, Column> columns, NumericColumn userId,
-                               StringColumn name, NumericColumn age, @Nullable IList<Index> indexes,
+                               StringColumn name, NumericColumn age, IMap<String, Index> indexes,
                                @Nullable NumericColumn autoIncrementColumn) {
     super(table, columns,null, indexes, autoIncrementColumn);
     this.userId = userId;

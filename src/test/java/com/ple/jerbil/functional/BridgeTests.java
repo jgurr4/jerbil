@@ -65,6 +65,18 @@ public class BridgeTests {
   }
 
   @Test
+  void testCompareIndexes() {
+    final Index leftIdx = inventory.indexes.get("primary");
+    final Index rightIdx = item.indexes.get("primary");
+    final IndexDiff indexDiff = DiffService.compareIndexes(leftIdx, rightIdx);
+    assertNull(indexDiff.indexName);
+    assertEquals(IArrayList.make(inventory.playerId), indexDiff.columns.create);
+    assertNull(indexDiff.columns.delete);
+    assertEquals(inventory.table.tableName, indexDiff.columnDiffs.get(0).table.before);
+    assertEquals(item.table.tableName, indexDiff.columnDiffs.get(0).table.after);
+  }
+
+  @Test
   void testCompareColumns() {
 //    DiffService.compareColumns();
   }

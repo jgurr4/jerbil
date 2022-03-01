@@ -1,9 +1,11 @@
-package com.ple.jerbil.data;
+package com.ple.jerbil.data.translator;
 
+import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.sync.Diff;
+import com.ple.util.IList;
 
 public interface LanguageGenerator {
 
