@@ -1,13 +1,14 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.GenericInterfaces.Functor;
+import com.ple.jerbil.data.GenericInterfaces.Failable;
 import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
+import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IList;
 import org.junit.jupiter.api.Test;
@@ -71,18 +72,25 @@ public class SqlQueryTests {
 
     //FIXME: Figure out how to get Functor.map() to return the failed result at the end of all the .maps.
     //Generate functor naturally:
-    Functor<DatabaseContainer> db = DatabaseService.getDb();
+    Failable<ReactiveWrapper<DatabaseContainer>> db = DatabaseContainer.getDbContainer("testdb");
     // If any failures occurred, failResult will be returned, otherwise successful object is returned.
-    final Object result = db.map(db1 -> db1.sync()).get();
+    final Object diff = db.map(db1 -> db1.unwrap().sync())
+        .map(syncResult -> syncResult.diff.unwrap())
+        .object;
     //Wrap object in functor:
-    final Functor<ReactiveWrapper> functorR = Functor.make(testDb, null, null)
+    final Failable<ReactiveWrapper> failableR = Failable.make(testDb, null, null)
         .map(db1 -> db1.sync())
         .map(syncResult -> syncResult.diff);
-    functorR.get();
+    if (failableR.object != null) {
+      System.out.println(failableR.object);
+    } else {
+      System.out.println(failableR.failMessage);;
+      System.out.println(failableR.exception);
+    }
     //how to unwrap the functor:
-    final DatabaseContainer object = db.object;
-    final IList<String> warnings = db.warnings;
-    final Exception exception = db.exception;
+    final DatabaseContainer resultDb = db.object.unwrap();
+    final String failMessage = db.failMessage;
+    final Throwable exception = db.exception;
   }
 
   @Test

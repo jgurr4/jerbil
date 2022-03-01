@@ -1,7 +1,6 @@
 package com.ple.jerbil.data.translator;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.GenericInterfaces.Functor;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
