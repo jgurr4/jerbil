@@ -1,42 +1,44 @@
 package com.ple.jerbil.data.GenericInterfaces;
 
 import com.ple.util.IList;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Optional;
+import java.util.function.Function;
 
 @Immutable
-public class Functor<T>{
-  private final Optional<T> object;
-  private final Optional<Exception> ex;
-  private final Optional<IList<String>> warnings;
+public class Functor<T, T2>{
+  public final T object;
+  public final Exception exception;
+  public final IList<String> warnings;
+  @Nullable public final T2 failResult;
 
-  protected Functor(Optional<T> object, Optional<Exception> ex, Optional<IList<String>> warnings) {
+  protected Functor(T object, Exception exception, IList<String> warnings, T2 failResult) {
     this.object = object;
-    this.ex = ex;
+    this.exception = exception;
     this.warnings = warnings;
+    this.failResult = failResult;
   }
 
-  public static <T> Functor<T> make(Optional<T> object, Optional<Exception> ex, Optional<IList<String>> warnings) {
-    return new Functor<>(object, ex, warnings);
+  public static <T, T2> Functor<T, T2> make(T object, Exception ex, IList<String> warnings) {
+    return new Functor<>(object, ex, warnings, null);
   }
 
-  public boolean isPresent() {
-    if (object.isPresent()) {
-      return true;
+  public <R> Functor<R, T> map(Function<? super T, ? extends R> mapper) {
+    R result;
+    if (this.object != null) {
+      result = mapper.apply(this.object);
+    } else {
+      return new Functor<>(null, exception, warnings, object);
+      //FIXME: Figure out how to make it return the failed functor result at the end of the chain of .map().
     }
-    return false;
+    return new Functor<>(result, null, null, null);
   }
 
-  public T get() {
-    return object.get();
-  }
-
-  public Exception getEx() {
-    return ex.get();
-  }
-
-  public IList<String> getWarnings() {
-    return warnings.get();
+  public Object get() {
+    if (object != null) {
+      return object;
+    }
+    return failResult;
   }
 
 }

@@ -15,12 +15,9 @@ import java.util.Objects;
 public class TableContainer extends FromExpression {
   public final Table table;
   public final IMap<String, Column> columns;
-  @Nullable
-  public final StorageEngine storageEngine;
-  @Nullable
-  public final IList<Index> indexes;
-  @Nullable
-  public final NumericColumn autoIncrementColumn;
+  @Nullable public final StorageEngine storageEngine;
+  @Nullable public final IList<Index> indexes;
+  @Nullable public final NumericColumn autoIncrementColumn;
 
   protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
                            @Nullable IList<Index> indexes, @Nullable NumericColumn autoIncrementColumn) {

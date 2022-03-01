@@ -1,5 +1,6 @@
 package com.ple.jerbil.data;
 
+import com.ple.jerbil.data.GenericInterfaces.Functor;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;

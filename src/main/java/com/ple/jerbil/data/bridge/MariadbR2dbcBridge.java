@@ -26,8 +26,7 @@ public class MariadbR2dbcBridge implements DataBridge {
   public final int port;
   public final String username;
   public final String password;
-  @Nullable
-  public final String database;
+  @Nullable public final String database;
   public final ConnectionPool pool;
 
   protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password,

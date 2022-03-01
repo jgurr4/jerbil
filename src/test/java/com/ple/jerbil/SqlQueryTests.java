@@ -1,14 +1,14 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.DatabaseBuilder;
-import com.ple.jerbil.data.Order;
+import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.GenericInterfaces.Functor;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.testcommon.*;
+import com.ple.util.IList;
 import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
@@ -67,6 +67,21 @@ public class SqlQueryTests {
         from user
         where name = 'john'
         """, q.toSql());
+
+    //FIXME: Figure out how to get Functor.map() to return the failed result at the end of all the .maps.
+    //Generate functor naturally:
+    Functor<DatabaseContainer, OldObject> db = DatabaseService.getDb();
+    // If any failures occured, failResult will be returned, otherwise successful object is returned.
+    final Object result = db.map(db1 -> db1.sync())
+        .get();
+    //Wrap object in functor:
+    Functor.make(testDb, null, null)
+        .map(db1 -> db1.sync())
+        .map(syncResult -> syncResult.diff);
+    //how to unwrap the functor:
+    final DatabaseContainer object = db.object;
+    final IList<String> warnings = db.warnings;
+    final Exception exception = db.exception;
   }
 
   @Test

@@ -1,6 +1,7 @@
 package com.ple.jerbil.data.translator;
 
 import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.GenericInterfaces.Functor;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
@@ -207,7 +208,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     if (selectQuery.fromExpression != null) {
       if (selectQuery.fromExpression instanceof Join) {
         tableList = tableList.addAll(selectQuery.fromExpression.tableList());
-      } else if (selectQuery.fromExpression instanceof TableContainer){
+      } else if (selectQuery.fromExpression instanceof TableContainer) {
         tableList = tableList.add((TableContainer) selectQuery.fromExpression);
       }
       if (selectQuery.select.size() == 1 && selectQuery.select.toArray()[0] instanceof SelectAllExpression) {
@@ -592,47 +593,38 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   private String toSqlArithmetic(String sql, ArithmeticExpression arExp) {
     String operator = "";
     sql = "";
-    try {
-      if (arExp.type == Operator.plus) {
-        operator = " + ";
-      } else if (arExp.type == Operator.minus) {
-        operator = " - ";
-      } else if (arExp.type == Operator.times) {
-        operator = " * ";
-      } else if (arExp.type == Operator.dividedby) {
-        operator = " / ";
-      } else if (arExp.type == Operator.modulus) {
-        operator = " % ";
-      }
-      if (arExp.e1 instanceof ArithmeticExpression && !(arExp.e2 instanceof ArithmeticExpression)) {
-        sql += toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1);
-        sql += operator + getNumericExpression((NumericExpression) arExp.e2);
-      } else if (arExp.e2 instanceof ArithmeticExpression && !(arExp.e1 instanceof ArithmeticExpression)) {
-        sql += getNumericExpression((NumericExpression) arExp.e1) + operator + "(" + toSqlArithmetic(sql,
-            (ArithmeticExpression) arExp.e2) + ")";
-      } else if (arExp.e1 instanceof ArithmeticExpression && arExp.e2 instanceof ArithmeticExpression) {
-        sql += "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1) + ")" + operator + "(" + toSqlArithmetic(sql,
-            (ArithmeticExpression) arExp.e2) + ")";
-      } else {
-        sql += getNumericExpression((NumericExpression) arExp.e1) + operator + getNumericExpression(
-            (NumericExpression) arExp.e2);
-      }
-      return sql;
-    } catch (Exception e) {
-      //TODO: Ask if this is good practice to do these types of error messages and catching of exceptions in framework.
-      System.out.println(e.getMessage());
+    if (arExp.type == Operator.plus) {
+      operator = " + ";
+    } else if (arExp.type == Operator.minus) {
+      operator = " - ";
+    } else if (arExp.type == Operator.times) {
+      operator = " * ";
+    } else if (arExp.type == Operator.dividedby) {
+      operator = " / ";
+    } else if (arExp.type == Operator.modulus) {
+      operator = " % ";
+    }
+    if (arExp.e1 instanceof ArithmeticExpression && !(arExp.e2 instanceof ArithmeticExpression)) {
+      sql += toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1);
+      sql += operator + getNumericExpression((NumericExpression) arExp.e2);
+    } else if (arExp.e2 instanceof ArithmeticExpression && !(arExp.e1 instanceof ArithmeticExpression)) {
+      sql += getNumericExpression((NumericExpression) arExp.e1) + operator + "(" + toSqlArithmetic(sql,
+          (ArithmeticExpression) arExp.e2) + ")";
+    } else if (arExp.e1 instanceof ArithmeticExpression && arExp.e2 instanceof ArithmeticExpression) {
+      sql += "(" + toSqlArithmetic(sql, (ArithmeticExpression) arExp.e1) + ")" + operator + "(" + toSqlArithmetic(sql,
+          (ArithmeticExpression) arExp.e2) + ")";
+    } else {
+      sql += getNumericExpression((NumericExpression) arExp.e1) + operator + getNumericExpression(
+          (NumericExpression) arExp.e2);
     }
     return sql;
   }
 
-  private String getNumericExpression(NumericExpression e) throws ClassNotFoundException {
+  private String getNumericExpression(NumericExpression e) {
     if (e instanceof NumericColumn) {
       return ((NumericColumn) e).columnName;
-    } else if (e instanceof LiteralNumber) {
-      return ((LiteralNumber) e).value.toString();
     } else {
-      throw new ClassNotFoundException(
-          "This class " + e.getClass() + " is not supported in getNumericExpression() method. Must be added in order to support it's use.");
+      return ((LiteralNumber) e).value.toString();
     }
   }
 
@@ -661,13 +653,13 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     if (column.defaultValue != null) {
       defaultVal = " default (" + toSql(column.defaultValue) + ")";
       if (defaultVal.contains("current_timestamp")) {
-        defaultVal = defaultVal.replace("(","").replace(")","");
+        defaultVal = defaultVal.replace("(", "").replace(")", "");
       }
     }
     if (column.onUpdate != null) {
       onUpdateVal = " on update (" + toSql(column.onUpdate) + ")";
       if (onUpdateVal.contains("current_timestamp")) {
-        onUpdateVal = onUpdateVal.replace("(","").replace(")","");
+        onUpdateVal = onUpdateVal.replace("(", "").replace(")", "");
       }
     }
     if (column.hints.isUnique()) {
@@ -731,7 +723,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     sql += "\n";
     if (updateQuery.fromExpression instanceof Join) {
       tableList = tableList.addAll(updateQuery.fromExpression.tableList());
-    } else if (updateQuery.fromExpression instanceof TableContainer){
+    } else if (updateQuery.fromExpression instanceof TableContainer) {
       tableList = tableList.add((TableContainer) updateQuery.fromExpression);
     }
     if (updateQuery.where != null) {
@@ -753,7 +745,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     IList<TableContainer> tableList = IArrayList.empty;
     if (deleteQuery.fromExpression instanceof Join) {
       tableList = tableList.addAll(deleteQuery.fromExpression.tableList());
-    } else if (deleteQuery.fromExpression instanceof TableContainer){
+    } else if (deleteQuery.fromExpression instanceof TableContainer) {
       tableList = tableList.add((TableContainer) deleteQuery.fromExpression);
     }
     if (deleteQuery.where != null) {
@@ -772,11 +764,11 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 
   public String toSql(InsertQuery insertQuery) {
     String sql = "";
-      if (insertQuery.queryFlags.isReplace()) {
-        sql += "replace ";
-      } else {
-        sql += "insert ";
-      }
+    if (insertQuery.queryFlags.isReplace()) {
+      sql += "replace ";
+    } else {
+      sql += "insert ";
+    }
     sql += "into " + toSql(insertQuery.fromExpression) + "\n(";
     String separator = "";
     for (Column column : insertQuery.set.get(0).keys()) {
@@ -884,7 +876,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final String[] split = indexedColumns.toLowerCase().split(",");
     String result = "";
     for (String s : split) {
-        result += s.replaceAll("\\B[aeiou]", "")
+      result += s.replaceAll("\\B[aeiou]", "")
           .replaceAll("([a-z])\\1*", "$1") + "_";
     }
     return result;
