@@ -6,30 +6,29 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 @Immutable
-public class Functor<T, T2>{
+public class Functor<T>{
   public final T object;
   public final Exception exception;
   public final IList<String> warnings;
-  @Nullable public final T2 failResult;
+  @Nullable public final Object failResult;
 
-  protected Functor(T object, Exception exception, IList<String> warnings, T2 failResult) {
+  protected Functor(T object, Exception exception, IList<String> warnings, Object failResult) {
     this.object = object;
     this.exception = exception;
     this.warnings = warnings;
     this.failResult = failResult;
   }
 
-  public static <T, T2> Functor<T, T2> make(T object, Exception ex, IList<String> warnings) {
+  public static <T> Functor<T> make(T object, Exception ex, IList<String> warnings) {
     return new Functor<>(object, ex, warnings, null);
   }
 
-  public <R> Functor<R, T> map(Function<? super T, ? extends R> mapper) {
+  public <R> Functor<R> map(Function<T, R> mapper) {
     R result;
-    if (this.object != null) {
-      result = mapper.apply(this.object);
+    if (object != null) {
+      result = mapper.apply(object);
     } else {
-      return new Functor<>(null, exception, warnings, object);
-      //FIXME: Figure out how to make it return the failed functor result at the end of the chain of .map().
+      return new Functor<>(null, exception, warnings, failResult);
     }
     return new Functor<>(result, null, null, null);
   }

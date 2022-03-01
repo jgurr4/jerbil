@@ -2,6 +2,7 @@ package com.ple.jerbil;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.Functor;
+import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.SelectQuery;
@@ -70,14 +71,14 @@ public class SqlQueryTests {
 
     //FIXME: Figure out how to get Functor.map() to return the failed result at the end of all the .maps.
     //Generate functor naturally:
-    Functor<DatabaseContainer, OldObject> db = DatabaseService.getDb();
-    // If any failures occured, failResult will be returned, otherwise successful object is returned.
-    final Object result = db.map(db1 -> db1.sync())
-        .get();
+    Functor<DatabaseContainer> db = DatabaseService.getDb();
+    // If any failures occurred, failResult will be returned, otherwise successful object is returned.
+    final Object result = db.map(db1 -> db1.sync()).get();
     //Wrap object in functor:
-    Functor.make(testDb, null, null)
+    final Functor<ReactiveWrapper> functorR = Functor.make(testDb, null, null)
         .map(db1 -> db1.sync())
         .map(syncResult -> syncResult.diff);
+    functorR.get();
     //how to unwrap the functor:
     final DatabaseContainer object = db.object;
     final IList<String> warnings = db.warnings;
