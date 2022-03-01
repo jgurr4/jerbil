@@ -6,6 +6,8 @@ import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import io.r2dbc.spi.Result;
 
+//FIXME: Make syncResult no longer try to contain errorMessage or warnings, instead make failable functor contain syncresult.
+// Sync result should only contain the result and the diffs.
 @Immutable
 public class SyncResult<D extends Diff> {
 

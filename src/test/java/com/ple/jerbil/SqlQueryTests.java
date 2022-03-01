@@ -69,28 +69,6 @@ public class SqlQueryTests {
         from user
         where name = 'john'
         """, q.toSql());
-
-    //FIXME: Figure out how to get Functor.map() to return the failed result at the end of all the .maps.
-    //Generate functor naturally:
-    Failable<ReactiveWrapper<DatabaseContainer>> db = DatabaseContainer.getDbContainer("testdb");
-    // If any failures occurred, failResult will be returned, otherwise successful object is returned.
-    final Object diff = db.map(db1 -> db1.unwrap().sync())
-        .map(syncResult -> syncResult.diff.unwrap())
-        .object;
-    //Wrap object in functor:
-    final Failable<ReactiveWrapper> failableR = Failable.make(testDb, null, null)
-        .map(db1 -> db1.sync())
-        .map(syncResult -> syncResult.diff);
-    if (failableR.object != null) {
-      System.out.println(failableR.object);
-    } else {
-      System.out.println(failableR.failMessage);;
-      System.out.println(failableR.exception);
-    }
-    //how to unwrap the functor:
-    final DatabaseContainer resultDb = db.object.unwrap();
-    final String failMessage = db.failMessage;
-    final Throwable exception = db.exception;
   }
 
   @Test

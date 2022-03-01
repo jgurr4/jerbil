@@ -1,6 +1,8 @@
 package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.GenericInterfaces.Failable;
+import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
@@ -124,6 +126,19 @@ public class BridgeTests {
   }
 
   @Test
+  void testGetExtraIndexes() {
+  }
+  @Test
+  void testGetMissingIndexes() {
+  }
+  @Test
+  void testGetMatchingIndexes() {
+  }
+  @Test
+  void testGetListOfIndexDiffs() {
+  }
+
+  @Test
   void testCompareMissingTable() {
     final DbDiff diffs = DiffService.compareDatabases(
             testDb.wrap(), DatabaseContainer.make(Database.make("myDb"), IArrayMap.make(user, player, item)).wrap())
@@ -166,15 +181,36 @@ public class BridgeTests {
     // diff.filter().tables.update.get(0).update.get(0). ;  //TODO: Ask what is inside ColumnDiff.update?
   }
 
-
   @Test
   void testGetDb() {
-    final DatabaseContainer test = DatabaseContainer.getDbContainer("test").unwrap();
+    final DatabaseContainer test = DatabaseContainer.getDbContainer("test").object.unwrap();
     assertEquals("test", test.database.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
     System.out.println(test.toString().replaceAll("Table\\{", "\nTable{"));
     assertTrue(test.database.databaseName.equals("test"));
     assertTrue(test.tables.get("item").equals(item.table));
+
+    // New functor method:
+    //Generate failable functor naturally:
+    Failable<ReactiveWrapper<DatabaseContainer>> db = DatabaseContainer.getDbContainer("test");
+    // If any failures occurred, failResult will be returned, otherwise successful object is returned.
+    final Object diff = db.map(db1 -> db1.unwrap().sync())
+        .map(syncResult -> syncResult.diff.unwrap())
+        .object;
+    //Wrap object in failable functor:
+    final Failable<ReactiveWrapper> failableR = Failable.make(testDb, null, null)
+        .map(db1 -> db1.sync())
+        .map(syncResult -> syncResult.diff);
+    if (failableR.object != null) {
+      System.out.println(failableR.object);
+    } else {
+      System.out.println(failableR.failMessage);;
+      System.out.println(failableR.exception);
+    }
+    //how to unwrap the failable functor:
+    final DatabaseContainer resultDb = db.object.unwrap();
+    final String failMessage = db.failMessage;
+    final Throwable exception = db.exception;
   }
 
   @Test
