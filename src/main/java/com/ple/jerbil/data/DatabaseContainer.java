@@ -69,7 +69,7 @@ public class DatabaseContainer {
     return new DatabaseContainer(database, newTablesMap, charSet);
   }
 
-  public static Failable<ReactiveWrapper<DatabaseContainer>> getDbContainer(String name) {
+  public static ReactiveWrapper<Failable<DatabaseContainer>> getDbContainer(String name) {
     return DataGlobal.bridge.getDb(name);
     // This is how I would make a functor in case something fails inside the getDb() method.
 //    return Failable.make(DataGlobal.bridge.getDb(name), "This was wrong", new RuntimeException("Fail"));

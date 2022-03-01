@@ -3,8 +3,12 @@ package com.ple.jerbil.data.bridge;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.*;
 import com.ple.jerbil.data.query.TableContainer;
+import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.jerbil.data.translator.MariadbLanguageGenerator;
+import com.ple.util.IArrayMap;
+import com.ple.util.IEntry;
+import com.ple.util.IMap;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Result;
@@ -15,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.List;
 
 @Immutable
 public class MariadbR2dbcBridge implements DataBridge {
@@ -90,48 +95,62 @@ public class MariadbR2dbcBridge implements DataBridge {
     );
   }
 
+  //FIXME: This does not return the Failable in case the object is null. which means I cannot get the original exception
+  // and error message from execute().
+  public Flux<Result> executeAndUnwrap(String sql) {
+    return execute(sql).unwrapFlux().map(result -> result.object).filter(obj -> obj != null);
+  }
+
   @Override
-  public ReactiveWrapper<Result> execute(ReactiveWrapper<String> sql) {
-/*
+  public ReactiveWrapper<Result> execute(ReactorMono<String> sql) {
     return ReactorFlux.make(
         sql.unwrapMono()
             .flatMapMany(
-                sqlString -> execute(sqlString).unwrapFlux()
+                sqlString -> executeAndUnwrap(sqlString)
             )
     );
-*/
-    return null;
   }
 
-  public Failable<ReactiveWrapper<DatabaseContainer>> getDb(String name) {
-/*
-    ReactorMono.make(DataGlobal.bridge.execute("show databases").unwrapFlux()
-            .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
-            .filter(db -> db.equals(name))
-            .next()
-            .map(db -> DataGlobal.bridge.execute("show create database " + db))
-            //Here is where you put more methods to retrieve database level properties to put into database, like obtaining charset and
-            .flatMapMany(
-                db -> db.unwrapFlux()
-                    .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create database"))))
-            .next()
-            .map(dbCreateString -> DataGlobal.bridge.getGenerator().fromSql(dbCreateString))
-            .flatMap(db -> DataGlobal.bridge.execute("use " + name + "; show tables").unwrapFlux()
-                    .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
-                    .flatMap(tblName -> DataGlobal.bridge.execute("use " + name + "; show create table " + tblName).unwrapFlux()
-                        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
-                    .map(tblCreateStr -> {
-                      final TableContainer table = DataGlobal.bridge.getGenerator().fromSql(tblCreateStr, db);
-                      return DataGlobal.bridge.getGenerator().fromSql(tblCreateStr, table);
-                    })
-                    .collectList()
-//        .map(columns -> TableContainer.make(columns.get(0).table, IArrayMap.make(columns.toArray(Column.emptyArray))))
-            )
+  public ReactiveWrapper<Failable<DatabaseContainer>> getDb(String name) {
+    Database database = Database.make(name);
+    return ReactorMono.make(executeAndUnwrap("show databases")
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+        .filter(db -> db.equals(name))
+        .next()
+        .map(db -> executeAndUnwrap("show create database " + db))
+        //Here is where you put more methods to retrieve database level properties to put into database, like obtaining charset and
+        .flatMapMany(
+            db -> db
+                .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create database"))))
+        .next()
+        .map(dbCreateString -> getGenerator().fromSql(dbCreateString))
+        .flatMapMany(db -> executeAndUnwrap("use " + name + "; show tables")
+                .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+                .flatMap(tblName -> executeAndUnwrap("use " + name + "; show create table " + tblName)
+                    .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
+                .map(tblCreateStr -> {
+                  final TableContainer table = getGenerator().fromSql(tblCreateStr, db);
+                  return getGenerator().fromSql(tblCreateStr, table);
+                })
+                .collectList()
+                .map(columns -> TableContainer.make(columns.get(0).table,
+                    IArrayMap.make(columns.toArray(Column.emptyArray))))
+        )
+            .collectList()
+            .map(tables -> convertListToIMap(tables))
+            .map(tables -> DatabaseContainer.make(database, tables))
+        //FIXME: After getting executeAndUnwrap fixed, replace this code to match those changes.
+        .map(list -> Failable.make(list, null, null))
+        .defaultIfEmpty(Failable.make(null, "failed", new RuntimeException("failed for some reason.")))
     );
-*/
-    //TODO: Finish implementing this method to return DatabaseContainer with all the TableContainers, indexes and columns
-    // and also make it work now that .execute() returns a failable<ReactiveWrapper<Result>>.
-    return null;
+  }
+
+  private IMap<String, TableContainer> convertListToIMap(List<TableContainer> tables) {
+    IMap<String, TableContainer> map = IArrayMap.empty;
+    for (TableContainer table : tables) {
+      map = map.put(table.table.tableName, table);
+    }
+    return map;
   }
 
   private Mono<MariadbR2dbcBridge> createConnectionPool() {

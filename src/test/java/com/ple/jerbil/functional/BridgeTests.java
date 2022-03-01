@@ -195,18 +195,16 @@ public class BridgeTests {
 
   @Test
   void testGetDb() {
-    final DatabaseContainer test = DatabaseContainer.getDbContainer("test").object.unwrap();
-    assertEquals("test", test.database.databaseName);
-    System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
-    System.out.println(test.toString().replaceAll("Table\\{", "\nTable{"));
-    assertTrue(test.database.databaseName.equals("test"));
-    assertTrue(test.tables.get("item").equals(item.table));
-
     // New functor method:
     //Generate failable functor naturally:
-    Failable<ReactiveWrapper<DatabaseContainer>> db = DatabaseContainer.getDbContainer("test");
+    final Failable<DatabaseContainer> test = DatabaseContainer.getDbContainer("test").unwrap();
+    assertEquals("test", test.object.database.databaseName);
+    System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
+    System.out.println(test.toString().replaceAll("Table\\{", "\nTable{"));
+    assertTrue(test.object.database.databaseName.equals("test"));
+    assertTrue(test.object.tables.get("item").equals(item.table));
     // If any failures occurred, failResult will be returned, otherwise successful object is returned.
-    final Object diff = db.map(db1 -> db1.unwrap().sync())
+    final Object diff = test.map(db1 -> db1.sync())
         .map(syncResult -> syncResult.diff.unwrap())
         .object;
     //Wrap object in failable functor:
@@ -220,9 +218,9 @@ public class BridgeTests {
       System.out.println(failableR.exception);
     }
     //how to unwrap the failable functor:
-    final DatabaseContainer resultDb = db.object.unwrap();
-    final String failMessage = db.failMessage;
-    final Throwable exception = db.exception;
+    final DatabaseContainer resultDb = test.object;
+    final String failMessage = test.failMessage;
+    final Throwable exception = test.exception;
   }
 
   @Test
