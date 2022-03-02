@@ -113,17 +113,27 @@ public class MariadbR2dbcBridge implements DataBridge {
 
   public ReactiveWrapper<Failable<DatabaseContainer>> getDb(String name) {
     Database database = Database.make(name);
-    return ReactorMono.make(executeAndUnwrap("show databases")
-        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
-        .filter(db -> db.equals(name))
-        .next()
-        .map(db -> executeAndUnwrap("show create database " + db))
+    return ReactorMono.make(execute("show create database " + name)
+                .unwrapFlux()
         //Here is where you put more methods to retrieve database level properties to put into database, like obtaining charset and
-        .flatMapMany(
-            db -> db
-                .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create database"))))
+        //FIXME: this needs to return a Flux<Failable<String>>>
+        .map(dbFailable -> {
+              return dbFailable.map(result -> {
+                return result.map((row, rowMetadata) -> (String) row.get("create database"));
+              });
+            })
+//              if (dbFailable.object != null) {
+//                return Mono.from(dbFailable.object.map((row, rowMetadata) -> (String) row.get("create database")))
+//                    .map(x -> Failable.make(x, null, null));
+//              }
+//              return Mono.just((Failable<String>)((Failable) dbFailable));
+//            }
+//          )
+//                .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create database"))))
         .next()
-        .map(dbCreateString -> getGenerator().fromSql(dbCreateString))
+        .map(failableDbCreateString -> {
+          return getGenerator().fromSql(failableDbCreateString);
+        })
         .flatMapMany(db -> executeAndUnwrap("use " + name + "; show tables")
                 .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
                 .flatMap(tblName -> executeAndUnwrap("use " + name + "; show create table " + tblName)

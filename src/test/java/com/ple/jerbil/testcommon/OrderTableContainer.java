@@ -89,7 +89,7 @@ public class OrderTableContainer extends TableContainer {
         price.columnName, price, total.columnName, total, finalized.columnName, finalized, myDouble.columnName, myDouble,
         myFloat.columnName, myFloat, mySet.columnName, mySet, saleDate.columnName, saleDate, saleTime.columnName,
         saleTime, saleDateTime.columnName, saleDateTime, myInvis.columnName, myInvis);
-    final IMap<String, Index> indexes = IArrayMap.make("usr_itm_idx", Index.make(IndexType.secondary, userId, itemId));
+    final IMap<String, Index> indexes = IArrayMap.make("usr_itm_idx", Index.make(IndexType.secondary, orderTable, userId, itemId));
     return new OrderTableContainer(orderTable, columns, orderId, add, phrase, userId,
         itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime,
         myInvis, indexes, null);

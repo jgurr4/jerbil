@@ -45,12 +45,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   @Override
-  public Column fromSql(String createTableString, TableContainer table) {
+  public Column fromSql(String createTableString, Table table) {
     final String formattedTable = formatTable(createTableString);
     //TODO: Finish implementing.
 
     return null;
   }
+
+  public Index fromSql(String createTableString, )
 
 
   private StorageEngine getEngineFromSql(String createTableSql) {

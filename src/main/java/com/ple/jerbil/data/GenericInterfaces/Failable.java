@@ -40,4 +40,7 @@ public class Failable<T> {
     return new Failable<>(result, null, null);
   }
 
+  public Failable<T> setObject(T object) {
+    return new Failable<>(object, null, null);
+  }
 }

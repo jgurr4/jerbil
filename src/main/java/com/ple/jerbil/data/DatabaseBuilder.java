@@ -1,6 +1,7 @@
 package com.ple.jerbil.data;
 
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
@@ -39,6 +40,7 @@ public class DatabaseBuilder {
           if (type.getSuperclass().equals(TableContainer.class)) {
             final Method method = type.getMethod("make", Database.class);
             TableContainer tc = (TableContainer) method.invoke(null, db);
+            final Table customTable = tc.table;
             IList<Column> columns = IArrayList.empty;
             customTblContainerFields = tc.getClass().getDeclaredFields();
             customTblArgs = IArrayList.make(tc.table, tc.columns);
@@ -54,7 +56,7 @@ public class DatabaseBuilder {
             if (tc.indexes != null) {
               indexes = tc.indexes;
             }
-            tblAutoIndexes = getColumnAttributes(columns, indexes);
+            tblAutoIndexes = getColumnAttributes(columns, indexes, customTable);
             if (tblAutoIndexes.indexes != null || tblAutoIndexes.autoIncrementColumn != null) {
               customTblConstructors = type.getDeclaredConstructors();
               customTblConstructorParams = customTblConstructors[0].getParameters();
@@ -82,32 +84,33 @@ public class DatabaseBuilder {
     return t;
   }
 
-  private static AutoIncIndex getColumnAttributes(IList<Column> columns, IMap<String, Index> indexes) {
+  private static AutoIncIndex getColumnAttributes(IList<Column> columns, IMap<String, Index> indexes,
+                                                  Table customTable) {
     NumericColumn autoIncColumn = null;
     Index primary = null;  //This only works for multi-column primary keys. All other indexes I have to make a way for
     // users to specify if it is part of another index, or if it is different index.
     for (Column column : columns) {
       final String indexName = DatabaseService.generateIndexName(column);
       if (column.hints.isAutoInc()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.primary, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.primary, customTable, column));
         autoIncColumn = (NumericColumn) column;
       } else if (column.hints.isPrimary()) {
         if (primary == null) {
-          primary = Index.make(IndexType.primary, "primary", column);
+          primary = Index.make(IndexType.primary, "primary", customTable, column);
           indexes = indexes.put("primary", primary);
         } else {
-          primary = Index.make(IndexType.primary, "primary", primary.columns.add(column).toArray());
+          primary = Index.make(IndexType.primary, "primary", customTable, primary.columns.add(column).toArray());
           indexes = indexes.put("primary", primary);
         }
       }
       if (column.hints.isFulltext()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.fulltext, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.fulltext, customTable, column));
       }
       if (column.hints.isForeign()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.foreign, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.foreign, customTable, column));
       }
       if (column.hints.isIndexed()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.secondary, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.secondary, customTable, column));
       }
     }
     return new AutoIncIndex(indexes, autoIncColumn);

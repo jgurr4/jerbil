@@ -1,15 +1,28 @@
 package com.ple.jerbil.data.GenericInterfaces;
 
-import com.ple.jerbil.data.Database;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public interface ReactiveWrapper<T> {
+import java.util.function.Function;
 
-  public T unwrap();
+public abstract class ReactiveWrapper<T> {
+  public final String failMessage;
+  public final Throwable exception;
 
-  public Mono<T> unwrapMono();
+  protected ReactiveWrapper(String failMessage, Throwable exception) {
+    this.failMessage = failMessage;
+    this.exception = exception;
+  }
 
-  public Flux<T> unwrapFlux();
+  public abstract T unwrap();
+
+  public abstract Mono<T> unwrapMono();
+
+  public abstract Flux<T> unwrapFlux();
+
+  public abstract <R> ReactiveWrapper<R> map(Function<? super T, ? extends R> mapper);
+
+  public abstract <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<? extends R>> mapper);
 
 }

@@ -1,31 +1,44 @@
 package com.ple.jerbil.data.GenericInterfaces;
 
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-public class ReactorFlux<T> implements ReactiveWrapper<T> {
+import java.util.function.Function;
 
-  private final Flux<T> fluxObject;
+public class ReactorFlux<T> extends ReactiveWrapper<T> {
+  private final Flux<T> flux;
 
-  public ReactorFlux(Flux<T> fluxObject) {
-    this.fluxObject = fluxObject;
+  protected ReactorFlux(Flux<T> flux, String failMessage, Throwable exception) {
+    super(failMessage, exception);
+    this.flux = flux;
   }
 
   public static <T> ReactorFlux<T> make(Flux<T> value) {
-    return new ReactorFlux<T>(value);
+    return new ReactorFlux<T>(value, null, null);
   }
 
   public Flux<T> unwrapFlux() {
-    return fluxObject;
+    return flux;
+  }
+
+  @Override
+  public <R> ReactiveWrapper<R> map(Function<? super T, ? extends R> mapper) {
+    return null;
+  }
+
+  @Override
+  public <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<? extends R>> mapper) {
+    return null;
   }
 
   @Override
   public T unwrap() {
-    return fluxObject.blockLast();
+    return flux.blockLast();
   }
 
   public Mono<T> unwrapMono() {
-    return fluxObject.next();
+    return flux.next();
   }
 
 }
