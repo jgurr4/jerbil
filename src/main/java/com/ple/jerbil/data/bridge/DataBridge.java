@@ -1,10 +1,7 @@
 package com.ple.jerbil.data.bridge;
 
 import com.ple.jerbil.data.DatabaseContainer;
-import com.ple.jerbil.data.GenericInterfaces.Failable;
 import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
-import com.ple.jerbil.data.GenericInterfaces.ReactorFlux;
-import com.ple.jerbil.data.GenericInterfaces.ReactorMono;
 import com.ple.jerbil.data.translator.LanguageGenerator;
 import io.r2dbc.spi.Result;
 

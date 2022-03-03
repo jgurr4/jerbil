@@ -1,7 +1,6 @@
 package com.ple.jerbil.data.GenericInterfaces;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -19,6 +18,10 @@ public class SynchronousObject<T> extends ReactiveWrapper<T> {
     return new SynchronousObject(value, null, null);
   }
 
+  public static <T> SynchronousObject<T> make(Mono<T> value, String failMessage, Throwable exception) {
+    return new SynchronousObject(value, failMessage, exception);
+  }
+
   public T unwrap() {
     return object;
   }
@@ -34,7 +37,7 @@ public class SynchronousObject<T> extends ReactiveWrapper<T> {
   }
 
   @Override
-  public <R> ReactiveWrapper<R> map(Function<? super T, R> mapper) {
+  public <R> SynchronousObject<R> map(Function<? super T, R> mapper) {
     R result;
     if (object != null) {
       result = mapper.apply(object);
@@ -45,7 +48,7 @@ public class SynchronousObject<T> extends ReactiveWrapper<T> {
   }
 
   @Override
-  public <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper) {
+  public <R> SynchronousObject<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper) {
     R result;
     if (object != null) {
       result = Mono.from(mapper.apply(object)).block();
@@ -53,6 +56,16 @@ public class SynchronousObject<T> extends ReactiveWrapper<T> {
       return (SynchronousObject<R>) this;
     }
     return new SynchronousObject<>(result, null, null);
+  }
+
+  @Override
+  public <R> ReactiveFlux<R> flatMapMany(Function<? super T, R> mapper) {
+    return null;
+  }
+
+  @Override
+  public <R> ReactiveMono<R> next() {
+    return null;
   }
 
 }

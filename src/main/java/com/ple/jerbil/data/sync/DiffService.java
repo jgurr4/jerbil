@@ -2,7 +2,7 @@ package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
-import com.ple.jerbil.data.GenericInterfaces.ReactorMono;
+import com.ple.jerbil.data.GenericInterfaces.ReactiveMono;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.BuildingHints;
@@ -10,7 +10,6 @@ import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
-import com.ple.util.IMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,7 +26,7 @@ public class DiffService {
                                                          ReactiveWrapper<DatabaseContainer> rightDbc) {
     //This method must compare every part of database starting with database props.
     //Step 1: compare database props
-    ReactorMono.make(Mono.from(leftDbc.unwrapMono().map(dbc -> dbc.database))
+    ReactiveMono.make(Mono.from(leftDbc.unwrapMono().map(dbc -> dbc.database))
         .concatWith(rightDbc.unwrapMono().map(dbc -> dbc.database))
         .collectList()
         .map(databases -> compareDatabaseProps(databases.get(0), databases.get(1))));

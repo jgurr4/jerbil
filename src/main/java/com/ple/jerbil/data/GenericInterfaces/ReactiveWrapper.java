@@ -25,4 +25,8 @@ public abstract class ReactiveWrapper<T> {
 
   public abstract <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper);
 
+  public abstract <R> ReactiveWrapper<R> flatMapMany(Function<? super T, R> mapper);
+
+  public abstract <R> ReactiveWrapper<R> next();
+
 }

@@ -3,7 +3,6 @@ package com.ple.jerbil.data.bridge;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.*;
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
-import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.translator.LanguageGenerator;
@@ -15,11 +14,11 @@ import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.Nullable;
 import org.mariadb.r2dbc.MariadbConnectionConfiguration;
 import org.mariadb.r2dbc.MariadbConnectionFactory;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.List;
 
 @Immutable
 public class MariadbR2dbcBridge implements DataBridge {
@@ -70,27 +69,26 @@ public class MariadbR2dbcBridge implements DataBridge {
     return generator;
   }
 
-  public ReactiveWrapper<MariadbR2dbcBridge> getConnectionPool() {
+  public ReactiveMono<MariadbR2dbcBridge> getConnectionPool() {
     if (pool == null) {
-      return ReactorMono.make(createConnectionPool());
+      return ReactiveMono.make(createConnectionPool());
     }
     if (pool.getMetrics().isPresent()) {
       if (pool.getMetrics().get().acquiredSize() == pool.getMetrics().get().getMaxAllocatedSize()) {
-        return ReactorMono.make(createConnectionPool());
+        return ReactiveMono.make(createConnectionPool());
       }
     }
-    return ReactorMono.make(Mono.just(this));
+    return ReactiveMono.make(Mono.just(this));
   }
 
-  //FIXME: Currently none of the .map and .flatmap methods in reactiveWrapper actually create an failMessage or a exception.
-  // Solution: Require a String failMessage and Throwable in the .map and .flatMap methods.
+  // Interesting solution to this problem is to change T to ? wildcard and remove <T extends Result>. ide it will stop complaining after that.
   @Override
-  public <T extends Result> ReactiveWrapper<T> execute(String sql) {
+  public <T extends Result> ReactiveFlux<T> execute(String sql) {
     return this.getConnectionPool()
         .map(bridge -> bridge.pool)
         .flatMap(pool -> pool.create())
         .map(conn -> conn.createStatement(sql))
-        .flatMap(statement -> (Flux<T>) statement.execute());
+        .flatMapMany(statement -> statement.execute());
   }
 
 /*
@@ -100,15 +98,16 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 */
 
-  public ReactiveWrapper<DatabaseContainer> getDb(String name) {
+  public ReactiveMono<DatabaseContainer> getDb(String name) {
     Database database = Database.make(name);
     return execute("show create database " + name)
-        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create database")))
+        .flatMap(result -> ReactiveFlux.make(
+            Flux.from(result.map((row, rowMetadata) -> (String) row.get("create database"))))
         .map(dbCreateStr -> getGenerator().fromSql(dbCreateStr))
         .flatMap(db -> execute("use " + name + "; show tables")
-            .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+            .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get(0)))
             .flatMap(tblName -> execute("use " + name + "; show create table " + tblName)
-                .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1)))
+                .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get(1)))
                 .map(tblCreateStr -> {
                   final TableContainer table = getGenerator().fromSql(tblCreateStr, db);
                   return getGenerator().fromSql(tblCreateStr, table.table);
@@ -119,10 +118,10 @@ public class MariadbR2dbcBridge implements DataBridge {
                     IArrayMap.make(columns.toArray(Column.emptyArray)))))
             .unwrapFlux()
             .collectList()
-            .map(tableContainers -> (IList<TableContainer>)(IList) IArrayList.make(tableContainers.toArray()))
+            .map(tableContainers -> (IList<TableContainer>) (IList) IArrayList.make(tableContainers.toArray()))
             .map(tables -> convertListToIMap(tables))
-            .map(tables -> DatabaseContainer.make(database, tables))
-        );
+            .map(tables -> DatabaseContainer.make(database, tables)))
+            .next();
   }
 
   private IMap<String, TableContainer> convertListToIMap(IList<TableContainer> tables) {
