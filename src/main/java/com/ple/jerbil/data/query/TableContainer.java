@@ -160,7 +160,7 @@ public class TableContainer extends FromExpression {
   }
 
   public static TableContainer fromSql(LanguageGenerator generator, String showCreateTable, Database db) {
-    return generator.fromSql(showCreateTable, db);
+    return generator.getTableFromSql(showCreateTable, db);
   }
 
   @Override

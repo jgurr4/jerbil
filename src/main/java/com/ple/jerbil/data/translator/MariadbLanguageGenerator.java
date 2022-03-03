@@ -31,21 +31,35 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   @Override
-  public Database fromSql(String dbCreateString) {
-    return null;
+  public DatabaseContainer getDbFromSql(String dbCreateString, Database db, IList<String> tblCreateStringList) {
+    IMap<String, TableContainer> tables = IArrayMap.empty;
+    return DatabaseContainer.make(db, tables);
   }
 
   @Override
-  public TableContainer fromSql(String createTableString, Database db) {
+  public TableContainer getTableFromSql(String createTableString, Database db) {
     final String tableName = getTableNameFromSql(createTableString);
+    final Table table = Table.make(tableName, db);
     final StorageEngine engine = getEngineFromSql(createTableString);
-//FIXME: broken after changes to tables and datbases.
-//    return Table.make(tableName, db, engine);
+    final IMap<String, Column> columns = getColumnsFromSql(createTableString, table);
+    final IMap<String, Index> indexes = getIndexesfromSql(createTableString, table);
+    final NumericColumn autoIncColumn = null;
+    return TableContainer.make(table, columns, engine, indexes, autoIncColumn);
+  }
+
+  private IMap<String, Index> getIndexesfromSql(String createTableString, Table table) {
+    //TODO: Finish implementing.
     return null;
   }
 
+  private IMap<String, Column> getColumnsFromSql(String createTableString, Table table) {
+    //TODO: Finish implementing
+    final IArrayMap<String, Column> columns = IArrayMap.empty;
+    return columns;
+  }
+
   @Override
-  public Column fromSql(String createTableString, Table table) {
+  public Column getColumnFromSql(String createTableString, Table table) {
     final String formattedTable = formatTable(createTableString);
     //TODO: Finish implementing.
 

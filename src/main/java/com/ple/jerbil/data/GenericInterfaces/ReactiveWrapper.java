@@ -6,7 +6,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
 
-public abstract class ReactiveWrapper<T> {
+public abstract class ReactiveWrapper<T> implements Publisher<T>{
   public final String failMessage;
   public final Throwable exception;
 
@@ -25,7 +25,7 @@ public abstract class ReactiveWrapper<T> {
 
   public abstract <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper);
 
-  public abstract <R> ReactiveWrapper<R> flatMapMany(Function<? super T, R> mapper);
+  public abstract <R> ReactiveWrapper<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper);
 
   public abstract <R> ReactiveWrapper<R> next();
 

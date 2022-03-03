@@ -1,6 +1,7 @@
 package com.ple.jerbil.data.translator;
 
 import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.DatabaseContainer;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
@@ -12,11 +13,11 @@ public interface LanguageGenerator {
 
   String toSql(CompleteQuery completeQuery);
 
-  Database fromSql(String dbCreateString);
+  DatabaseContainer getDbFromSql(String dbCreateString, Database db, IList<String> tblCreateStringList);
 
-  TableContainer fromSql(String showCreateTable, Database db);
+  TableContainer getTableFromSql(String showCreateTable, Database db);
 
-  Column fromSql(String showCreateTable, Table table);
+  Column getColumnFromSql(String showCreateTable, Table table);
 
   String toSql(Column column);
 

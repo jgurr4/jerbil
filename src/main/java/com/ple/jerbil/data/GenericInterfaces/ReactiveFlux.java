@@ -1,6 +1,7 @@
 package com.ple.jerbil.data.GenericInterfaces;
 
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -38,7 +39,7 @@ public class ReactiveFlux<T> extends ReactiveWrapper<T> {
   }
 
   @Override
-  public <R> ReactiveFlux<R> flatMapMany(Function<? super T, R> mapper) {
+  public <R> ReactiveFlux<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper) {
     return null;
   }
 
@@ -56,4 +57,8 @@ public class ReactiveFlux<T> extends ReactiveWrapper<T> {
     return flux.next();
   }
 
+  @Override
+  public void subscribe(Subscriber<? super T> s) {
+
+  }
 }

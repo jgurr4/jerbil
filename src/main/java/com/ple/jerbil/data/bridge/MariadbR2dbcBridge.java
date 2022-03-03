@@ -11,6 +11,7 @@ import com.ple.util.*;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Result;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mariadb.r2dbc.MariadbConnectionConfiguration;
 import org.mariadb.r2dbc.MariadbConnectionFactory;
@@ -19,6 +20,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.List;
+import java.util.function.Function;
 
 @Immutable
 public class MariadbR2dbcBridge implements DataBridge {
@@ -81,47 +84,40 @@ public class MariadbR2dbcBridge implements DataBridge {
     return ReactiveMono.make(Mono.just(this));
   }
 
-  // Interesting solution to this problem is to change T to ? wildcard and remove <T extends Result>. ide it will stop complaining after that.
   @Override
   public <T extends Result> ReactiveFlux<T> execute(String sql) {
     return this.getConnectionPool()
         .map(bridge -> bridge.pool)
         .flatMap(pool -> pool.create())
         .map(conn -> conn.createStatement(sql))
-        .flatMapMany(statement -> statement.execute());
+        .flatMapMany(statement -> (Publisher<T>) statement.execute());
   }
-
-/*
-  @Override
-  public <T extends Result> ReactiveWrapper<T> execute(ReactorMono<String> sql) {
-    return sql.map(s -> (T) execute(s));
-  }
-*/
 
   public ReactiveMono<DatabaseContainer> getDb(String name) {
     Database database = Database.make(name);
     return execute("show create database " + name)
-        .flatMap(result -> ReactiveFlux.make(
-            Flux.from(result.map((row, rowMetadata) -> (String) row.get("create database"))))
-        .map(dbCreateStr -> getGenerator().fromSql(dbCreateStr))
-        .flatMap(db -> execute("use " + name + "; show tables")
-            .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get(0)))
-            .flatMap(tblName -> execute("use " + name + "; show create table " + tblName)
-                .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get(1)))
-                .map(tblCreateStr -> {
-                  final TableContainer table = getGenerator().fromSql(tblCreateStr, db);
-                  return getGenerator().fromSql(tblCreateStr, table.table);
-                })
-                .unwrapFlux()
-                .collectList()
-                .map(columns -> TableContainer.make(columns.get(0).table,
-                    IArrayMap.make(columns.toArray(Column.emptyArray)))))
-            .unwrapFlux()
-            .collectList()
-            .map(tableContainers -> (IList<TableContainer>) (IList) IArrayList.make(tableContainers.toArray()))
-            .map(tables -> convertListToIMap(tables))
-            .map(tables -> DatabaseContainer.make(database, tables)))
-            .next();
+        .flatMap(result -> ReactiveMono.make(
+            Flux.from(result.map((row, rowMetadata) -> (String) row.get("create database"))).next())
+        .flatMap(dbCreateStr -> execute("use " + name + "; show tables")
+            .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
+            .unwrapFlux().collectList()
+            .map(tableNameList -> {
+              final IList<String> tableNameIList = IArrayList.make(tableNameList.toArray(new String[0]));
+              return convertToDbContainer(tableNameIList, name, database);
+            })).next()).next();
+  }
+
+  @NotNull
+  private ReactiveMono<DatabaseContainer> convertToDbContainer(IList<String> tblNameList, String dbName, Database database) {
+    return ReactiveMono.make(Flux.fromIterable(tblNameList)
+        .flatMap(tblName -> execute("use " + dbName + "; show create table " + tblName)
+        .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get("create table")))
+        .map(tblCreateStr -> getGenerator().getTableFromSql(tblCreateStr, database))
+        .unwrapFlux()
+        .collectList()
+        .map(tableContainers -> (IList<TableContainer>) (IList) IArrayList.make(tableContainers.toArray()))
+        .map(tables -> convertListToIMap(tables))
+        .map(tablesIList -> DatabaseContainer.make(database, tablesIList))).next());
   }
 
   private IMap<String, TableContainer> convertListToIMap(IList<TableContainer> tables) {
