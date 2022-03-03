@@ -87,12 +87,13 @@ public class DatabaseBuilder {
   private static AutoIncIndex getColumnAttributes(IList<Column> columns, IMap<String, Index> indexes,
                                                   Table customTable) {
     NumericColumn autoIncColumn = null;
-    Index primary = null;  //This only works for multi-column primary keys. All other indexes I have to make a way for
-    // users to specify if it is part of another index, or if it is different index.
+    Index primary = null;
+    IList<String> existingNames = indexes.keys();
     for (Column column : columns) {
-      final String indexName = DatabaseService.generateIndexName(column);
+      final String indexName = DatabaseService.generateIndexName(existingNames, column);
+      existingNames = existingNames.add(indexName);
       if (column.hints.isAutoInc()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.primary, customTable, column));
+        indexes = indexes.put("primary", Index.make(IndexType.primary, "primary", customTable, column));
         autoIncColumn = (NumericColumn) column;
       } else if (column.hints.isPrimary()) {
         if (primary == null) {
@@ -104,13 +105,16 @@ public class DatabaseBuilder {
         }
       }
       if (column.hints.isFulltext()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.fulltext, customTable, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.fulltext, existingNames, customTable, column));
       }
       if (column.hints.isForeign()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.foreign, customTable, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.foreign, existingNames, customTable, column));
       }
       if (column.hints.isIndexed()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.secondary, customTable, column));
+        indexes = indexes.put(indexName, Index.make(IndexType.secondary, existingNames, customTable, column));
+      }
+      if (column.hints.isUnique()) {
+        indexes = indexes.put(indexName, Index.make(IndexType.unique, existingNames, customTable, column));
       }
     }
     return new AutoIncIndex(indexes, autoIncColumn);

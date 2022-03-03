@@ -112,7 +112,7 @@ public class MariadbR2dbcBridge implements DataBridge {
     return ReactiveMono.make(Flux.fromIterable(tblNameList)
         .flatMap(tblName -> execute("use " + dbName + "; show create table " + tblName)
         .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get("create table")))
-        .map(tblCreateStr -> getGenerator().getTableFromSql(tblCreateStr, database))
+        .map(tblCreateStr -> generator.getTableFromSql(tblCreateStr, database))
         .unwrapFlux()
         .collectList()
         .map(tableContainers -> (IList<TableContainer>) (IList) IArrayList.make(tableContainers.toArray()))

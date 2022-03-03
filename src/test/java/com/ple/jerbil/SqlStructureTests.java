@@ -37,7 +37,7 @@ public class SqlStructureTests {
     assertEquals("""
         create table `order` (
           orderId bigint unsigned auto_increment,
-          `add` varchar(255) default ('barter') unique,
+          `add` varchar(255) default ('barter'),
           phrase text,
           userId int unsigned not null,
           itemId int(10) unsigned not null,
@@ -55,6 +55,7 @@ public class SqlStructureTests {
           myInvis int invisible,
           key usrd_itmd_idx (userId,itemId),
           primary key (orderId),
+          unique key ad_idx (`add`),
           fulltext index phrs_idx (phrase)
         ) ENGINE=Aria
         """, q.toSql());
@@ -94,7 +95,7 @@ public class SqlStructureTests {
         ) ENGINE=Aria;
         create table `order` (
           orderId bigint unsigned auto_increment,
-          `add` varchar(255) default ('barter') unique,
+          `add` varchar(255) default ('barter'),
           phrase text,
           userId int unsigned not null,
           itemId int(10) unsigned not null,
@@ -112,9 +113,13 @@ public class SqlStructureTests {
           myInvis int invisible,
           key usrd_itmd_idx (userId,itemId),
           primary key (orderId),
+          unique key ad_idx (`add`),
           fulltext index phrs_idx (phrase)
         ) ENGINE=Aria;
         """, testCreateAll.toSql());
+    //FIXME: Make sure that generated key names have a descriptive prefix that indicates the name, or make sure the
+    // generator checks that the name is not exactly matching any other index name it has generated or user specified.
+    // If it matches a existing name then append _n to the name 'n' being a number 0-infinity.
   }
 
   @Test

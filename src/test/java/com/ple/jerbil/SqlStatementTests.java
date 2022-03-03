@@ -44,6 +44,8 @@ public class SqlStatementTests {
   }
 
   //FIXME: Figure out how to get .set() to work without specifying any columns, just values.
+  //FIXME: IArrayMap does not always have the same order, so replace IArrayMap with ITreeMap instead.
+  // Until this is fixed this test will fail 50% of the time.
   @Test
   void testInsertMulti() {
     final CompleteQuery q1 = item.insert().set(

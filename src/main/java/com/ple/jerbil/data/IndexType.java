@@ -5,5 +5,6 @@ public enum IndexType {
   secondary,
   foreign,
   fulltext,
+  unique,
 //  spatial
 }

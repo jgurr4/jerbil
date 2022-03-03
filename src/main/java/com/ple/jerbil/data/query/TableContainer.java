@@ -41,9 +41,11 @@ public class TableContainer extends FromExpression {
   public TableContainer add(Column... columnArr) {
     IMap<String, Column> newColumns = columns;
     IMap<String, Index> indexList = indexes;
+    IList<String> existingIdxNames = indexes.keys();
     NumericColumn autoIncCol = autoIncrementColumn;
     for (Column column : columnArr) {
-      final String indexName = DatabaseService.generateIndexName(column);
+      final String indexName = DatabaseService.generateIndexName(existingIdxNames, column);
+      existingIdxNames = existingIdxNames.add(indexName);
       IndexType indexType = null;
       newColumns = newColumns.put(column.columnName, column);
       if (column.hints.isAutoInc()) {

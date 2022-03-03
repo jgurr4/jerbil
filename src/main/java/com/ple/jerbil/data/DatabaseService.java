@@ -1,12 +1,19 @@
 package com.ple.jerbil.data;
 
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.util.IList;
 
 public class DatabaseService {
 
-  public static String generateIndexName(Column... columns) {
+  public static String generateIndexName(IList<String> listOfIdxNames, Column... columns) {
     final String formattedColumns = formatForIndexNameGenerator(columns);
-    return formatIndexName(formattedColumns) + "idx";
+    String idxName = formatIndexName(formattedColumns) + "idx";
+    int i = 2;
+    while (listOfIdxNames.contains(idxName)) {
+      idxName += "_" + i;
+      i++;
+    }
+    return idxName;
   }
 
   public static String formatForIndexNameGenerator(Column... columns) {
@@ -26,6 +33,7 @@ public class DatabaseService {
     String result = "";
     for (String s : split) {
       result += s.replaceAll("\\B[aeiou]", "")
+          .replaceAll("`", "")
           .replaceAll("([a-z])\\1*", "$1") + "_";
     }
     return result;

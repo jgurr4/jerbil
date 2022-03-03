@@ -33,6 +33,9 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   @Override
   public DatabaseContainer getDbFromSql(String dbCreateString, Database db, IList<String> tblCreateStringList) {
     IMap<String, TableContainer> tables = IArrayMap.empty;
+    for (String tblCreateStr : tblCreateStringList) {
+      tables = tables.put(getTableNameFromSql(tblCreateStr), getTableFromSql(tblCreateStr, db));
+    }
     return DatabaseContainer.make(db, tables);
   }
 
@@ -42,25 +45,28 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final Table table = Table.make(tableName, db);
     final StorageEngine engine = getEngineFromSql(createTableString);
     final IMap<String, Column> columns = getColumnsFromSql(createTableString, table);
-    final IMap<String, Index> indexes = getIndexesfromSql(createTableString, table);
+    final IMap<String, Index> indexes = getIndexesFromSql(createTableString, table);
     final NumericColumn autoIncColumn = null;
     return TableContainer.make(table, columns, engine, indexes, autoIncColumn);
   }
 
-  private IMap<String, Index> getIndexesfromSql(String createTableString, Table table) {
-    //TODO: Finish implementing.
+  private IMap<String, Index> getIndexesFromSql(String createTableString, Table table) {
+    createTableString = removeBackticks(createTableString);
+    final String[] lines = formatToIndexLines(createTableString);
     return null;
   }
 
   private IMap<String, Column> getColumnsFromSql(String createTableString, Table table) {
     //TODO: Finish implementing
+    createTableString = removeBackticks(createTableString);
+    final String[] columnStrings = formatToColumnLines(createTableString);
     final IArrayMap<String, Column> columns = IArrayMap.empty;
     return columns;
   }
 
   @Override
   public Column getColumnFromSql(String createTableString, Table table) {
-    final String formattedTable = formatTable(createTableString);
+    final String formattedTable = removeBackticks(createTableString);
     //TODO: Finish implementing.
 
     return null;
@@ -190,8 +196,15 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return DataSpec.make(dataType, size);
   }
 
-  private String[] formatToColumnLines(String formattedTable) {
-    return formattedTable
+  private String[] formatToIndexLines(String createTableString) {
+    return createTableString
+        .replaceAll("\n\\) ENGINE=.*", "")
+        .replaceAll("^CREATE TABLE .*\n", "").split("\n");
+  }
+
+
+  private String[] formatToColumnLines(String createTableString) {
+    return createTableString
         .replaceAll("\n\\) ENGINE=.*", "")
         .replaceAll("^CREATE TABLE .*\n", "")
         .replaceAll("\n\s+PRIMARY KEY .*", "")
@@ -199,7 +212,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         .split("\n");
   }
 
-  private String formatTable(String tableInfo) {
+  private String removeBackticks(String tableInfo) {
     return tableInfo.replaceAll("`", "");
   }
 
@@ -656,7 +669,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     String onUpdateVal = "";
     String autoIncrement = "";
     String unsigned = "";
-    String unique = "";
     String invisible = "";
     String generatedFrom = "";
     if (column.hints.isAllowNull() || column.hints.isPrimary() || column.generatedFrom != null || column.defaultValue != null || column.hints.isInvisible()) {
@@ -680,16 +692,13 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         onUpdateVal = onUpdateVal.replace("(", "").replace(")", "");
       }
     }
-    if (column.hints.isUnique()) {
-      unique = " unique";
-    }
     if (column.hints.isInvisible()) {
       invisible = " invisible";
     }
     if (column.generatedFrom != null) {
       generatedFrom = " as (" + toSql(column.generatedFrom) + ")";
     }
-    sql += dataSpec + unsigned + nullVal + defaultVal + onUpdateVal + autoIncrement + unique + invisible + generatedFrom;
+    sql += dataSpec + unsigned + nullVal + defaultVal + onUpdateVal + autoIncrement + invisible + generatedFrom;
     return sql;
   }
 
@@ -860,8 +869,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         sql += separtor + "\n  key";
       } else if (index.type.equals(IndexType.fulltext)) {
         sql += separtor + "\n  fulltext index";
+      }  else if (index.type.equals(IndexType.unique)) {
+        sql += separtor + "\n  unique key";
       } else if (index.type.equals(IndexType.foreign)) {
-        sql += separtor + "\n foreign key";
+        sql += separtor + "\n  foreign key";
 //        references = toSql(index.fkReference); //TODO: Finish implementing foreign key with Index.
       }
       separtor = ",";

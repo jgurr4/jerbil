@@ -3,6 +3,7 @@ package com.ple.jerbil.data;
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
 import org.jetbrains.annotations.Nullable;
@@ -36,11 +37,11 @@ public class Index {
     return new Index(indexType, indexName, table, IArrayList.make(columns), 0, null);
   }
 
-  public static Index make(IndexType indexType, Table table, Column... columns) {
+  public static Index make(IndexType indexType, IList<String> existingIdxNames, Table table, Column... columns) {
     if (indexType.equals(IndexType.primary)) {
       return new Index(indexType, "primary", table, IArrayList.make(columns), 0, null);
     }
-    return new Index(indexType, DatabaseService.generateIndexName(columns),
+    return new Index(indexType, DatabaseService.generateIndexName(existingIdxNames, columns),
         table, IArrayList.make(columns), 0, null);
   }
 
