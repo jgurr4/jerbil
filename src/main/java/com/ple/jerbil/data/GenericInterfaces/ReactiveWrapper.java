@@ -21,8 +21,8 @@ public abstract class ReactiveWrapper<T> {
 
   public abstract Flux<T> unwrapFlux();
 
-  public abstract <R> ReactiveWrapper<R> map(Function<? super T, ? extends R> mapper);
+  public abstract <R> ReactiveWrapper<R> map(Function<? super T, R> mapper);
 
-  public abstract <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<? extends R>> mapper);
+  public abstract <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper);
 
 }

@@ -23,12 +23,12 @@ public class ReactorFlux<T> extends ReactiveWrapper<T> {
   }
 
   @Override
-  public <R> ReactiveWrapper<R> map(Function<? super T, ? extends R> mapper) {
+  public <R> ReactiveWrapper<R> map(Function<? super T, R> mapper) {
     return null;
   }
 
   @Override
-  public <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<? extends R>> mapper) {
+  public <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper) {
     return null;
   }
 

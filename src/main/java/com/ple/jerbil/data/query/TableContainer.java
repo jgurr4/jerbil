@@ -57,7 +57,7 @@ public class TableContainer extends FromExpression {
         indexType = IndexType.fulltext;
       }
       if (indexType != null) {
-        indexList = indexList.put(indexName, Index.make(indexType, indexName, column));
+        indexList = indexList.put(indexName, Index.make(indexType, indexName, table, column));
       }
     }
     return new TableContainer(table, newColumns, storageEngine, indexList, autoIncCol);

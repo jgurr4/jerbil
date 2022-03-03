@@ -2,6 +2,7 @@ package com.ple.jerbil.data.translator;
 
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.sync.Diff;
@@ -15,7 +16,7 @@ public interface LanguageGenerator {
 
   TableContainer fromSql(String showCreateTable, Database db);
 
-  Column fromSql(String showCreateTable, TableContainer table);
+  Column fromSql(String showCreateTable, Table table);
 
   String toSql(Column column);
 

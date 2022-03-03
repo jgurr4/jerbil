@@ -15,28 +15,24 @@ public class ReactorMono<T> extends ReactiveWrapper<T> {
   }
 
   public static <T> ReactorMono<T> make(Mono<T> value) {
-    return new ReactorMono<T>(value, null, null);
+    return new ReactorMono<>(value, null, null);
   }
 
   public Flux<T> unwrapFlux() {
     return Flux.from(mono);
   }
 
+  // Original signature of map and flatmap included ? extends R.
+//  public <R> ReactiveWrapper<R> map(Function<? super T, ? extends R> mapper) {
+
   @Override
-  public <R> ReactiveWrapper<R> map(Function<? super T, ? extends R> mapper) {
-    R result;
-    mono.map()
-    if (mono != null) {
-      result = mapper.apply(mono);
-    } else {
-      return (ReactorMono<R>) this;
-    }
-    return new ReactorMono<>(result, null, null);
+  public <R> ReactiveWrapper<R> map(Function<? super T, R> mapper) {
+    return new ReactorMono(mono.map(mapper).defaultIfEmpty((R) mono.block()), failMessage, exception);
   }
 
   @Override
-  public <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<? extends R>> mapper) {
-    return null;
+  public <R> ReactiveWrapper<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper) {
+    return new ReactorMono(Mono.from(mono.map(mapper).block()).defaultIfEmpty((R) mono.block()), failMessage, exception);
   }
 
   @Override

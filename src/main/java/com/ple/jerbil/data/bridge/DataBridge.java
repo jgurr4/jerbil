@@ -16,10 +16,10 @@ import io.r2dbc.spi.Result;
 public interface DataBridge {
   LanguageGenerator getGenerator();
 
-  <T extends Result> ReactiveWrapper<Failable<T>> execute(String toSql);
+  <T extends Result> ReactiveWrapper<T> execute(String toSql);
 
-  ReactiveWrapper<Result> execute(ReactorMono<String> toSql);
+//  <T extends Result> ReactiveWrapper<T> execute(ReactorMono<String> toSql);
 
-  ReactiveWrapper<Failable<DatabaseContainer>> getDb(String name);
+  ReactiveWrapper<DatabaseContainer> getDb(String name);
 
 }

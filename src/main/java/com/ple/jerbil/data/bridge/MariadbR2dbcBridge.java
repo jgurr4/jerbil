@@ -2,13 +2,13 @@ package com.ple.jerbil.data.bridge;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.*;
+import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.jerbil.data.translator.MariadbLanguageGenerator;
-import com.ple.util.IArrayMap;
-import com.ple.util.IEntry;
-import com.ple.util.IMap;
+import com.ple.util.*;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Result;
@@ -70,92 +70,62 @@ public class MariadbR2dbcBridge implements DataBridge {
     return generator;
   }
 
-  public Mono<MariadbR2dbcBridge> getConnectionPool() {
+  public ReactiveWrapper<MariadbR2dbcBridge> getConnectionPool() {
     if (pool == null) {
-      return createConnectionPool();
+      return ReactorMono.make(createConnectionPool());
     }
     if (pool.getMetrics().isPresent()) {
       if (pool.getMetrics().get().acquiredSize() == pool.getMetrics().get().getMaxAllocatedSize()) {
-        return createConnectionPool();
+        return ReactorMono.make(createConnectionPool());
       }
     }
-    return Mono.just(this);
+    return ReactorMono.make(Mono.just(this));
   }
 
+  //FIXME: Currently none of the .map and .flatmap methods in reactiveWrapper actually create an failMessage or a exception.
+  // Solution: Require a String failMessage and Throwable in the .map and .flatMap methods.
   @Override
-  public <T extends Result> ReactiveWrapper<Failable<T>> execute(String sql) {
-    return ReactorFlux.make(this.getConnectionPool()
+  public <T extends Result> ReactiveWrapper<T> execute(String sql) {
+    return this.getConnectionPool()
         .map(bridge -> bridge.pool)
         .flatMap(pool -> pool.create())
         .map(conn -> conn.createStatement(sql))
-        .flatMapMany(statement -> (Flux<T>) statement.execute())
-        .map(result1 -> Failable.make(result1, null, null))
-        .onErrorContinue(
-            (err, result) -> Failable.make(null, "Something went wrong with bridge.execute", err))
-    );
+        .flatMap(statement -> (Flux<T>) statement.execute());
   }
 
-  //FIXME: This does not return the Failable in case the object is null. which means I cannot get the original exception
-  // and error message from execute().
-  public Flux<Result> executeAndUnwrap(String sql) {
-    return execute(sql).unwrapFlux().map(result -> result.object).filter(obj -> obj != null);
-  }
-
+/*
   @Override
-  public ReactiveWrapper<Result> execute(ReactorMono<String> sql) {
-    return ReactorFlux.make(
-        sql.unwrapMono()
-            .flatMapMany(
-                sqlString -> executeAndUnwrap(sqlString)
-            )
-    );
+  public <T extends Result> ReactiveWrapper<T> execute(ReactorMono<String> sql) {
+    return sql.map(s -> (T) execute(s));
   }
+*/
 
-  public ReactiveWrapper<Failable<DatabaseContainer>> getDb(String name) {
+  public ReactiveWrapper<DatabaseContainer> getDb(String name) {
     Database database = Database.make(name);
-    return ReactorMono.make(execute("show create database " + name)
-                .unwrapFlux()
-        //Here is where you put more methods to retrieve database level properties to put into database, like obtaining charset and
-        //FIXME: this needs to return a Flux<Failable<String>>>
-        .map(dbFailable -> {
-              return dbFailable.map(result -> {
-                return result.map((row, rowMetadata) -> (String) row.get("create database"));
-              });
-            })
-//              if (dbFailable.object != null) {
-//                return Mono.from(dbFailable.object.map((row, rowMetadata) -> (String) row.get("create database")))
-//                    .map(x -> Failable.make(x, null, null));
-//              }
-//              return Mono.just((Failable<String>)((Failable) dbFailable));
-//            }
-//          )
-//                .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create database"))))
-        .next()
-        .map(failableDbCreateString -> {
-          return getGenerator().fromSql(failableDbCreateString);
-        })
-        .flatMapMany(db -> executeAndUnwrap("use " + name + "; show tables")
-                .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
-                .flatMap(tblName -> executeAndUnwrap("use " + name + "; show create table " + tblName)
-                    .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1))))
+    return execute("show create database " + name)
+        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("create database")))
+        .map(dbCreateStr -> getGenerator().fromSql(dbCreateStr))
+        .flatMap(db -> execute("use " + name + "; show tables")
+            .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(0)))
+            .flatMap(tblName -> execute("use " + name + "; show create table " + tblName)
+                .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get(1)))
                 .map(tblCreateStr -> {
                   final TableContainer table = getGenerator().fromSql(tblCreateStr, db);
-                  return getGenerator().fromSql(tblCreateStr, table);
+                  return getGenerator().fromSql(tblCreateStr, table.table);
                 })
+                .unwrapFlux()
                 .collectList()
                 .map(columns -> TableContainer.make(columns.get(0).table,
-                    IArrayMap.make(columns.toArray(Column.emptyArray))))
-        )
+                    IArrayMap.make(columns.toArray(Column.emptyArray)))))
+            .unwrapFlux()
             .collectList()
+            .map(tableContainers -> (IList<TableContainer>)(IList) IArrayList.make(tableContainers.toArray()))
             .map(tables -> convertListToIMap(tables))
             .map(tables -> DatabaseContainer.make(database, tables))
-        //FIXME: After getting executeAndUnwrap fixed, replace this code to match those changes.
-        .map(list -> Failable.make(list, null, null))
-        .defaultIfEmpty(Failable.make(null, "failed", new RuntimeException("failed for some reason.")))
-    );
+        );
   }
 
-  private IMap<String, TableContainer> convertListToIMap(List<TableContainer> tables) {
+  private IMap<String, TableContainer> convertListToIMap(IList<TableContainer> tables) {
     IMap<String, TableContainer> map = IArrayMap.empty;
     for (TableContainer table : tables) {
       map = map.put(table.table.tableName, table);

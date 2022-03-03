@@ -52,7 +52,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return null;
   }
 
-  public Index fromSql(String createTableString, )
+  public Index getIndexfromSql(String createTableString) {
+    //TODO: Finish implementing.
+    return null;
+  }
 
 
   private StorageEngine getEngineFromSql(String createTableSql) {
