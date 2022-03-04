@@ -23,7 +23,7 @@ public class SqlQueryTests {
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
   final InventoryTableContainer inventory = testDb.inventory;
-  final OrderTableContainer sortOrder = testDb.sortOrder;
+  final OrderTableContainer order = testDb.order;
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
@@ -43,7 +43,7 @@ public class SqlQueryTests {
     NumericColumn playerId = testDb.inventory.playerId;
     StorageEngine storageEngine = testDb.item.storageEngine;
     DataSpec dataSpec = testDb.item.itemId.dataSpec;
-    final IList<Index> indexes = testDb.sortOrder.indexes;
+    final IList<Index> indexes = testDb.order.indexes;
     testDb.sync();
     testDb.item.sync();
     testDb.item.itemId.sync();
@@ -197,14 +197,14 @@ public class SqlQueryTests {
         .orderBy(total, SortOrder.descending);         //single-expression orderBy descending. Allows AliasedExpressions.
 //    .orderBy(item.price);                             //Single-expression orderBy ascending by default.
 //    .orderBy(Order.descending, item.price, item.name);  //multi-expression orderBy all descending.
-//    .orderBy(IArrayMap.make(item.price, Order.descending, item.name, Order.ascending)); //multi-expression orderBy each expression with specific sortOrder.
+//    .orderBy(IArrayMap.make(item.price, Order.descending, item.name, Order.ascending)); //multi-expression orderBy each expression with specific order.
 //    .orderBy(item.price, item.name);                    //multi-expression orderBy ascending by default.
     assertEquals("""
         select name, sum(price) as total
         from item
         where price >= 2.32
         group by name
-        sortOrder by total desc
+        order by total desc
         """, q.toSql());
   }
 
@@ -212,15 +212,15 @@ public class SqlQueryTests {
   //FIXME: Need to implement dictionary to put backticks around reserved words.
   @Test
   void testSelectDistinct() {
-    final CompleteQuery q = sortOrder.selectDistinct(sortOrder.total).where(sortOrder.finalized.isTrue())
-        .union(sortOrder.selectDistinct(sortOrder.total).where(sortOrder.finalized.isFalse()));
+    final CompleteQuery q = order.selectDistinct(order.total).where(order.finalized.isTrue())
+        .union(order.selectDistinct(order.total).where(order.finalized.isFalse()));
     assertEquals("""
         select distinct total
-        from sortOrder
+        from order
         where finalized = 1
         union
         select distinct total
-        from sortOrder
+        from order
         where finalized <> 1
         """, q.toSql());
   }
@@ -312,39 +312,39 @@ public class SqlQueryTests {
 
   @Test
   void testMatchFullText() {
-    final CompleteQuery q = sortOrder.select(sortOrder.phrase).where(sortOrder.phrase.match(make("Hello there")));
+    final CompleteQuery q = order.select(order.phrase).where(order.phrase.match(make("Hello there")));
     assertEquals("""
         select phrase
-        from sortOrder
+        from order
         where match(phrase) against('Hello there')
         """, q.toSql());
   }
 
   @Test
   void testExplain() {
-    final CompleteQuery q1 = sortOrder.select().explain();
-    final CompleteQuery q2 = sortOrder.explain().select();
+    final CompleteQuery q1 = order.select().explain();
+    final CompleteQuery q2 = order.explain().select();
     assertEquals("""
         explain select *
-        from sortOrder
+        from order
         """, q1.toSql());
     assertEquals("""
         explain select *
-        from sortOrder
+        from order
         """, q2.toSql());
   }
 
   @Test
   void testAnalyze() { //For mysqlbridge it would have to do explain analyze select, but for mariadbbridge it would just do analyze select.
-    final CompleteQuery q1 = sortOrder.select().analyze();
-    final CompleteQuery q2 = sortOrder.analyze().select();
+    final CompleteQuery q1 = order.select().analyze();
+    final CompleteQuery q2 = order.analyze().select();
     assertEquals("""
         analyze select *
-        from sortOrder
+        from order
         """, q1.toSql());
     assertEquals("""
         analyze select *
-        from sortOrder
+        from order
         """, q2.toSql());
   }
 

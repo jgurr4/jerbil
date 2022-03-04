@@ -90,7 +90,7 @@ public class DatabaseBuilder {
     Index primary = null;
     IList<String> existingNames = indexes.keys();
     for (Column column : columns) {
-      final String indexName = DatabaseService.generateIndexName(existingNames, column);
+      String indexName = DatabaseService.generateIndexName(existingNames, column);
       existingNames = existingNames.add(indexName);
       if (column.hints.isAutoInc()) {
         indexes = indexes.put("primary", Index.make(IndexType.primary, "primary", customTable, column));
@@ -100,21 +100,27 @@ public class DatabaseBuilder {
           primary = Index.make(IndexType.primary, "primary", customTable, column);
           indexes = indexes.put("primary", primary);
         } else {
-          primary = Index.make(IndexType.primary, "primary", customTable, primary.indexedColumns.add(column).toArray());
+          primary = Index.make(IndexType.primary, "primary", customTable,
+              primary.indexedColumns.put(column.columnName, IndexedColumn.make(column, 0, null))
+                  .values().toArray(IndexedColumn.emptyArray));
           indexes = indexes.put("primary", primary);
         }
       }
       if (column.hints.isFulltext()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.fulltext, existingNames, customTable, column));
+        indexes = indexes.put(indexName,
+            Index.make(IndexType.fulltext, indexName, customTable, IndexedColumn.make(column, 0, null)));
       }
       if (column.hints.isForeign()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.foreign, existingNames, customTable, column));
+        indexes = indexes.put(indexName,
+            Index.make(IndexType.foreign, indexName, customTable, IndexedColumn.make(column, 0, null)));
       }
       if (column.hints.isIndexed()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.secondary, existingNames, customTable, column));
+        indexes = indexes.put(indexName,
+            Index.make(IndexType.secondary, indexName, customTable, IndexedColumn.make(column, 0, null)));
       }
       if (column.hints.isUnique()) {
-        indexes = indexes.put(indexName, Index.make(IndexType.unique, existingNames, customTable, column));
+        indexes = indexes.put(indexName,
+            Index.make(IndexType.unique, indexName, customTable, IndexedColumn.make(column, 0, null)));
       }
     }
     return new AutoIncIndex(indexes, autoIncColumn);

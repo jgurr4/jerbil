@@ -30,6 +30,17 @@ public class QueryList<T> implements IList<T> {
   }
 
   @Override
+  public T[] toArray(T[] a) {
+    if (a.length < values.length)
+      // Make a new array of a's runtime type, but my contents:
+      return (T[]) Arrays.copyOf(values, values.length, a.getClass());
+    System.arraycopy(values, 0, a, 0, values.length);
+    if (a.length > values.length)
+      a[values.length] = null;
+    return a;
+  }
+
+  @Override
   public QueryList<T> addAll(IList<T> list) {
     T[] result = Arrays.copyOf(this.values, this.values.length + list.toArray().length);
     for (int i = 0; i < list.toArray().length; i++) {

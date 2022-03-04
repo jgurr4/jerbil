@@ -58,8 +58,10 @@ public class TableContainer extends FromExpression {
       } else if (column.hints.isFulltext()) {
         indexType = IndexType.fulltext;
       }
+      //TODO: Make this check prefixSize and sortOrder from indexes or buildinghints.
       if (indexType != null) {
-        indexList = indexList.put(indexName, Index.make(indexType, indexName, table, column));
+        indexList = indexList.put(indexName,
+            Index.make(indexType, indexName, table, IndexedColumn.make(column, 0, null)));
       }
     }
     return new TableContainer(table, newColumns, storageEngine, indexList, autoIncCol);

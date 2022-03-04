@@ -4,6 +4,7 @@ import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.IndexType;
+import com.ple.jerbil.data.IndexedColumn;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.query.Table;
@@ -40,7 +41,8 @@ public class OrderTableContainer extends TableContainer {
                                 NumericColumn quantity, NumericColumn price, NumericColumn total,
                                 BooleanColumn finalized,
                                 NumericColumn myDouble, NumericColumn myFloat, EnumeralColumn mySet,
-                                DateColumn saleDate, DateColumn saleTime, DateColumn saleDateTime, NumericColumn myInvis,
+                                DateColumn saleDate, DateColumn saleTime, DateColumn saleDateTime,
+                                NumericColumn myInvis,
                                 IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
     super(table, columns, null, indexes, autoIncrementColumn);
     this.orderId = orderId;
@@ -85,11 +87,14 @@ public class OrderTableContainer extends TableContainer {
     final NumericColumn myInvis = Column.make("myInvis", orderTable).asInt().invisible();
 //    final StringColumn myChar = Column.make("myChar", orderTable).asChar();
     final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add,
-        phrase.columnName, phrase, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale, quantity.columnName, quantity,
-        price.columnName, price, total.columnName, total, finalized.columnName, finalized, myDouble.columnName, myDouble,
+        phrase.columnName, phrase, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale,
+        quantity.columnName, quantity,
+        price.columnName, price, total.columnName, total, finalized.columnName, finalized, myDouble.columnName,
+        myDouble,
         myFloat.columnName, myFloat, mySet.columnName, mySet, saleDate.columnName, saleDate, saleTime.columnName,
         saleTime, saleDateTime.columnName, saleDateTime, myInvis.columnName, myInvis);
-    final IMap<String, Index> indexes = IArrayMap.make("usr_itm_idx", Index.make(IndexType.secondary, "usr_itm_idx", orderTable, userId, itemId));
+    final IMap<String, Index> indexes = IArrayMap.make("usr_itm_idx",
+        Index.make(IndexType.secondary, "usr_itm_idx", orderTable, userId, itemId));
     return new OrderTableContainer(orderTable, columns, orderId, add, phrase, userId,
         itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime,
         myInvis, indexes, null);

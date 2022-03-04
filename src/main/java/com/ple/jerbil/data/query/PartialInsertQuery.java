@@ -41,7 +41,7 @@ public class PartialInsertQuery extends PartialQueryWithValues {
         if (!(i >= records.toArray().length)) {
           records.toArray()[i] = records.toArray()[i].put(columns.get(j), Literal.make(values.get(i).get(j)));
         } else {
-          final IMap<Column, Expression> record = IHashMap.make(columns.get(j), Literal.make(values.get(i).get(j)));
+          final IMap<Column, Expression> record = IArrayMap.make(columns.get(j), Literal.make(values.get(i).get(j)));
           records = records.add(record);
         }
       }

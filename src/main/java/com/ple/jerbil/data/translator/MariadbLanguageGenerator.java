@@ -932,6 +932,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       separtor = ",";
       sql += " " + toSqlIndexColumns(columns, generateName);
       generateName = true;
+      columns = IArrayList.empty;
     }
     return sql;
   }

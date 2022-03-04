@@ -10,6 +10,7 @@ import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
+import com.ple.util.IMap;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -248,13 +249,16 @@ public class DiffService {
     ScalarDiff<String> nameDiff = leftIndex.indexName.equals(rightIndex.indexName) ? null : ScalarDiff.make(
         leftIndex.indexName,
         rightIndex.indexName);
-    VectorDiff<Column> columnsDiff = compareListOfColumns(leftIndex.indexedColumns, rightIndex.indexedColumns);
+//    VectorDiff<Column> columnsDiff = compareListOfColumns(leftIndex.getColumns(), rightIndex.getColumns());
+    VectorDiff<IndexedColumn> indexedColumnsDiff = compareIndexedColumns(leftIndex.indexedColumns, rightIndex.indexedColumns);
     IList<ColumnDiff> listOfColumnsDiff = null; //FIXME: Make this return list of columnDiffs.
-    ScalarDiff<Integer> sizeDiff = leftIndex.size == rightIndex.size ? null : ScalarDiff.make(leftIndex.size,
-        rightIndex.size);
-    ScalarDiff<SortOrder> orderDiff = leftIndex.sortOrder.equals(rightIndex.sortOrder) ? null : ScalarDiff.make(
-        leftIndex.sortOrder, rightIndex.sortOrder);
-    return IndexDiff.make(typeDiff, nameDiff, columnsDiff, listOfColumnsDiff, sizeDiff, orderDiff);
+    return IndexDiff.make(typeDiff, nameDiff, indexedColumnsDiff, listOfColumnsDiff);
+  }
+
+  private static VectorDiff<IndexedColumn> compareIndexedColumns(IMap<String, IndexedColumn> indexedColumns,
+                                                                 IMap<String, IndexedColumn> indexedColumns1) {
+    //TODO: Implement this.
+    return null;
   }
 
   public static Diff<Column> compareColumns(Column c1, Column c2) {

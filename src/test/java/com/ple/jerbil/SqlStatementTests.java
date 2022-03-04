@@ -23,7 +23,7 @@ public class SqlStatementTests {
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
   final InventoryTableContainer inventory = testDb.inventory;
-  final OrderTableContainer sortOrder = testDb.sortOrder;
+  final OrderTableContainer order = testDb.order;
 
   public SqlStatementTests() {
     final Properties props = ConfigProps.getProperties();
@@ -44,8 +44,6 @@ public class SqlStatementTests {
   }
 
   //FIXME: Figure out how to get .set() to work without specifying any columns, just values.
-  //FIXME: IArrayMap does not always have the same sortOrder, so replace IArrayMap with ITreeMap instead.
-  // Until this is fixed this test will fail 50% of the time.
   @Test
   void testInsertMulti() {
     final CompleteQuery q1 = item.insert().set(
@@ -91,9 +89,9 @@ public class SqlStatementTests {
 
   @Test
   void testDelete() {
-    final CompleteQuery q = sortOrder.delete().where(sortOrder.finalized.eq(make(false)));
+    final CompleteQuery q = order.delete().where(order.finalized.eq(make(false)));
     assertEquals("""
-        delete from `sortOrder`
+        delete from `order`
         where finalized = false
         """, q.toSql());
   }
@@ -104,10 +102,10 @@ public class SqlStatementTests {
 
   @Test
   void testUpdate() {
-    final CompleteQuery q = sortOrder.update().set(sortOrder.finalized, make(true)).set(sortOrder.phrase, make("Something here"))
-        .where(sortOrder.finalized.eq(make(false)));
+    final CompleteQuery q = order.update().set(order.finalized, make(true)).set(order.phrase, make("Something here"))
+        .where(order.finalized.eq(make(false)));
     assertEquals("""
-        update `sortOrder`
+        update `order`
         set finalized = true,
         phrase = 'Something here'
         where finalized = false

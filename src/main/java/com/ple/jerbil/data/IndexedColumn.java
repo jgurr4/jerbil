@@ -4,6 +4,7 @@ import com.ple.jerbil.data.selectExpression.Column;
 import org.jetbrains.annotations.Nullable;
 
 public class IndexedColumn {
+  public static final IndexedColumn[] emptyArray = new IndexedColumn[0];
   public final Column column;
   @Nullable public final int prefixSize;
   @Nullable public final SortOrder sortOrder;
