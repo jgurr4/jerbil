@@ -1,7 +1,7 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
-import com.ple.jerbil.data.Order;
+import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
@@ -15,7 +15,7 @@ public class SelectQuery extends CompleteQuery {
 
   SelectQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression, @Nullable QueryType queryType,
               @Nullable IList<SelectExpression> select, @Nullable IList<SelectExpression> groupBy,
-              @Nullable IMap<SelectExpression, Order> orderBy, @Nullable BooleanExpression having,
+              @Nullable IMap<SelectExpression, SortOrder> orderBy, @Nullable BooleanExpression having,
               @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
               @Nullable Union union) {
     super(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags, union);
@@ -33,7 +33,7 @@ public class SelectQuery extends CompleteQuery {
 
   public static SelectQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> selectExpressions, IList<SelectExpression> groupBy,
-                                 IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
+                                 IMap<SelectExpression, SortOrder> orderBy, BooleanExpression having, Limit limit,
                                  IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
     return new SelectQuery(where, fromExpression, queryType, selectExpressions, groupBy, orderBy, having, limit, set,
         queryFlags, union);
@@ -66,30 +66,31 @@ public class SelectQuery extends CompleteQuery {
         Union.make(selectQuery, UnionType.all));
   }
 
-  public SelectQuery orderBy(SelectExpression expression, Order order) {
-    return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, IArrayMap.make(expression, order),
+  public SelectQuery orderBy(SelectExpression expression, SortOrder sortOrder) {
+    return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, IArrayMap.make(expression,
+        sortOrder),
         having, limit, set,
         queryFlags, union);
   }
 
-  public SelectQuery orderBy(IMap<SelectExpression, Order> orderBy) {
+  public SelectQuery orderBy(IMap<SelectExpression, SortOrder> orderBy) {
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
         queryFlags, union);
   }
 
-  public SelectQuery orderBy(Order order, SelectExpression... selectExpressions) {
-    IArrayMap<SelectExpression, Order> orderBy = IArrayMap.empty;
+  public SelectQuery orderBy(SortOrder sortOrder, SelectExpression... selectExpressions) {
+    IArrayMap<SelectExpression, SortOrder> orderBy = IArrayMap.empty;
     for (SelectExpression selectExpression : selectExpressions) {
-      orderBy = orderBy.put(selectExpression, order);
+      orderBy = orderBy.put(selectExpression, sortOrder);
     }
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
         queryFlags, union);
   }
 
   public SelectQuery orderBy(SelectExpression... selectExpressions) {
-    IArrayMap<SelectExpression, Order> orderBy = IArrayMap.empty;
+    IArrayMap<SelectExpression, SortOrder> orderBy = IArrayMap.empty;
     for (SelectExpression selectExpression : selectExpressions) {
-      orderBy = orderBy.put(selectExpression, Order.ascending);
+      orderBy = orderBy.put(selectExpression, SortOrder.ascending);
     }
     return new SelectQuery(where, fromExpression, QueryType.select, select, groupBy, orderBy, having, limit, set,
         queryFlags, union);

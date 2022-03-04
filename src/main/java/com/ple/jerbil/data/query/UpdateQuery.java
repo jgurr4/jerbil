@@ -1,7 +1,7 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
-import com.ple.jerbil.data.Order;
+import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.IArrayList;
@@ -15,7 +15,7 @@ public class UpdateQuery extends CompleteQuery {
 
   protected UpdateQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                         @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
-                        @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
+                        @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, SortOrder> orderBy,
                         @Nullable BooleanExpression having, @Nullable Limit limit,
                         @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
                         @Nullable Union union) {
@@ -29,7 +29,7 @@ public class UpdateQuery extends CompleteQuery {
 
   public static UpdateQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> select, IList<SelectExpression> groupBy,
-                                 IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
+                                 IMap<SelectExpression, SortOrder> orderBy, BooleanExpression having, Limit limit,
                                  IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
     return new UpdateQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
         union);

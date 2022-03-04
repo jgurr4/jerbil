@@ -1,7 +1,7 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.GenericInterfaces.DelayedImmutable;
-import com.ple.jerbil.data.Order;
+import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.util.*;
@@ -15,7 +15,7 @@ public class InsertQuery extends CompleteQuery {
 
   protected InsertQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                         @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
-                        @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
+                        @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, SortOrder> orderBy,
                         @Nullable BooleanExpression having, @Nullable Limit limit,
                         @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
                         @Nullable Union union) {
@@ -40,7 +40,7 @@ public class InsertQuery extends CompleteQuery {
 
   public static InsertQuery make(BooleanExpression where, FromExpression fromExpression, QueryType queryType,
                                  IList<SelectExpression> select, IList<SelectExpression> groupBy,
-                                 IMap<SelectExpression, Order> orderBy, BooleanExpression having, Limit limit,
+                                 IMap<SelectExpression, SortOrder> orderBy, BooleanExpression having, Limit limit,
                                  IList<IMap<Column, Expression>> set, QueryFlags queryFlags, Union union) {
     return new InsertQuery(where, fromExpression, queryType, select, groupBy, orderBy, having, limit, set, queryFlags,
         union);

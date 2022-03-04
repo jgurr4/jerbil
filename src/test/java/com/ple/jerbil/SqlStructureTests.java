@@ -23,7 +23,7 @@ public class SqlStructureTests {
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
   final InventoryTableContainer inventory = testDb.inventory;
-  final OrderTableContainer order = testDb.order;
+  final OrderTableContainer sortOrder = testDb.sortOrder;
 
   public SqlStructureTests() {
     final Properties props = ConfigProps.getProperties();
@@ -33,9 +33,9 @@ public class SqlStructureTests {
 
   @Test
   void testCreateOrderTable() {
-    final CreateQuery q = order.create();
+    final CreateQuery q = sortOrder.create();
     assertEquals("""
-        create table `order` (
+        create table `sortOrder` (
           orderId bigint unsigned auto_increment,
           `add` varchar(255) default ('barter'),
           phrase text,
@@ -93,7 +93,7 @@ public class SqlStructureTests {
           itemId int,
           primary key (playerId,itemId)
         ) ENGINE=Aria;
-        create table `order` (
+        create table `sortOrder` (
           orderId bigint unsigned auto_increment,
           `add` varchar(255) default ('barter'),
           phrase text,

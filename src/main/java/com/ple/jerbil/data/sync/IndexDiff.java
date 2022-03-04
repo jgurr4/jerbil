@@ -2,7 +2,7 @@ package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.IndexType;
-import com.ple.jerbil.data.Order;
+import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.util.IList;
 import org.jetbrains.annotations.Nullable;
@@ -15,14 +15,14 @@ public class IndexDiff implements Diff<Index> {
   @Nullable public final VectorDiff<Column> columns;
   @Nullable public final IList<ColumnDiff> columnDiffs;
   @Nullable public final ScalarDiff<Integer> size;
-  @Nullable public final ScalarDiff<Order> order;
+  @Nullable public final ScalarDiff<SortOrder> order;
 
 
   protected IndexDiff(@Nullable ScalarDiff<IndexType> type, @Nullable ScalarDiff<String> indexName,
                       @Nullable VectorDiff<Column> columns,
                       @Nullable IList<ColumnDiff> columnDiffs,
                       @Nullable ScalarDiff<Integer> size,
-                      @Nullable ScalarDiff<Order> order) {
+                      @Nullable ScalarDiff<SortOrder> order) {
     this.type = type;
     this.indexName = indexName;
     this.columns = columns;
@@ -33,7 +33,7 @@ public class IndexDiff implements Diff<Index> {
 
   public static IndexDiff make(@Nullable ScalarDiff<IndexType> type, @Nullable ScalarDiff<String> indexName,
                                @Nullable VectorDiff<Column> columns, @Nullable IList<ColumnDiff> columnDiffs,
-                               @Nullable ScalarDiff<Integer> size, @Nullable ScalarDiff<Order> order) {
+                               @Nullable ScalarDiff<Integer> size, @Nullable ScalarDiff<SortOrder> order) {
     return new IndexDiff(type, indexName, columns, columnDiffs, size, order);
   }
 

@@ -3,9 +3,7 @@ package com.ple.jerbil.data;
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
-import com.ple.util.IArrayList;
-import com.ple.util.IList;
+import com.ple.util.*;
 import org.jetbrains.annotations.Nullable;
 
 @Immutable
@@ -13,36 +11,34 @@ public class Index {
   public final IndexType type;
   public final String indexName;
   public final Table table;
-  public final IList<Column> columns;
-  @Nullable public final int size;
-  @Nullable public final Order order;
+  public final IMap<String, IndexedColumn> indexedColumns;
 //  @Nullable public final FkReference fkReference;
 
-  protected Index(IndexType type, String indexName, Table table, IList<Column> columns,
-                  int size,
-                  @Nullable Order order) {
+  protected Index(IndexType type, String indexName, Table table, IMap<String, IndexedColumn> indexedColumns) {
     this.type = type;
     this.indexName = indexName;
     this.table = table;
-    this.columns = columns;
-    this.size = size;
-    this.order = order;
+    this.indexedColumns = indexedColumns;
   }
 
-  public static Index make(IndexType indexType, String indexName, Table table, int size, Order order, Column... columns) {
-    return new Index(indexType, indexName, table, IArrayList.make(columns), size, order);
-  }
-
-  public static Index make(IndexType indexType, String indexName, Table table, Column... columns) {
-    return new Index(indexType, indexName, table, IArrayList.make(columns), 0, null);
-  }
-
-  public static Index make(IndexType indexType, IList<String> existingIdxNames, Table table, Column... columns) {
-    if (indexType.equals(IndexType.primary)) {
-      return new Index(indexType, "primary", table, IArrayList.make(columns), 0, null);
+  public static Index make(IndexType indexType, String indexName, Table table, IndexedColumn... indexedColumns) {
+    IMap<String, IndexedColumn> indexedColumnsMap = IArrayMap.empty;
+    for (IndexedColumn indexedColumn : indexedColumns) {
+      indexedColumnsMap.put(indexedColumn.column.columnName, indexedColumn);
     }
-    return new Index(indexType, DatabaseService.generateIndexName(existingIdxNames, columns),
-        table, IArrayList.make(columns), 0, null);
+    return new Index(indexType, indexName, table, indexedColumnsMap);
+  }
+
+  public static Index make(IndexType indexType, IList<String> existingIdxNames, Table table, IndexedColumn... indexedColumns) {
+    if (indexType.equals(IndexType.primary)) {
+      return Index.make(indexType, "primary", table, indexedColumns);
+    }
+    IList<Column> columns = IArrayList.empty;
+    for (IndexedColumn indexedColumn : indexedColumns) {
+      columns = columns.add(indexedColumn.column);
+    }
+    return Index.make(indexType, DatabaseService.generateIndexName(existingIdxNames, columns.toArray()),
+        table, indexedColumns);
   }
 
 }

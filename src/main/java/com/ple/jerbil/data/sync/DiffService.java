@@ -248,12 +248,12 @@ public class DiffService {
     ScalarDiff<String> nameDiff = leftIndex.indexName.equals(rightIndex.indexName) ? null : ScalarDiff.make(
         leftIndex.indexName,
         rightIndex.indexName);
-    VectorDiff<Column> columnsDiff = compareListOfColumns(leftIndex.columns, rightIndex.columns);
+    VectorDiff<Column> columnsDiff = compareListOfColumns(leftIndex.indexedColumns, rightIndex.indexedColumns);
     IList<ColumnDiff> listOfColumnsDiff = null; //FIXME: Make this return list of columnDiffs.
     ScalarDiff<Integer> sizeDiff = leftIndex.size == rightIndex.size ? null : ScalarDiff.make(leftIndex.size,
         rightIndex.size);
-    ScalarDiff<Order> orderDiff = leftIndex.order.equals(rightIndex.order) ? null : ScalarDiff.make(
-        leftIndex.order, rightIndex.order);
+    ScalarDiff<SortOrder> orderDiff = leftIndex.sortOrder.equals(rightIndex.sortOrder) ? null : ScalarDiff.make(
+        leftIndex.sortOrder, rightIndex.sortOrder);
     return IndexDiff.make(typeDiff, nameDiff, columnsDiff, listOfColumnsDiff, sizeDiff, orderDiff);
   }
 

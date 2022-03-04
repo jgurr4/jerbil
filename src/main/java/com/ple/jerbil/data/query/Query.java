@@ -2,7 +2,7 @@ package com.ple.jerbil.data.query;
 
 
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
-import com.ple.jerbil.data.Order;
+import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.PotentialQuery;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
@@ -21,7 +21,7 @@ public class Query extends PotentialQuery {
   @Nullable public final QueryType queryType;
   @Nullable public final IList<SelectExpression> select;
   @Nullable public final IList<SelectExpression> groupBy;
-  @Nullable public final IMap<SelectExpression, Order> orderBy;
+  @Nullable public final IMap<SelectExpression, SortOrder> orderBy;
   @Nullable public final BooleanExpression having;
   @Nullable public final Limit limit;
   @Nullable public final IList<IMap<Column, Expression>> set;
@@ -30,7 +30,7 @@ public class Query extends PotentialQuery {
 
   protected Query(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                   @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
-                  @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
+                  @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, SortOrder> orderBy,
                   @Nullable BooleanExpression having, @Nullable Limit limit, @Nullable IList<IMap<Column, Expression>> set,
                   @Nullable QueryFlags queryFlags, @Nullable Union union) {
     this.where = where;

@@ -100,7 +100,7 @@ public class DatabaseBuilder {
           primary = Index.make(IndexType.primary, "primary", customTable, column);
           indexes = indexes.put("primary", primary);
         } else {
-          primary = Index.make(IndexType.primary, "primary", customTable, primary.columns.add(column).toArray());
+          primary = Index.make(IndexType.primary, "primary", customTable, primary.indexedColumns.add(column).toArray());
           indexes = indexes.put("primary", primary);
         }
       }

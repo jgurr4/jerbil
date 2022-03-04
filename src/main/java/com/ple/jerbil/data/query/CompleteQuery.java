@@ -35,7 +35,7 @@ public class CompleteQuery extends Query {
 
   protected CompleteQuery(@Nullable BooleanExpression where, @Nullable FromExpression fromExpression,
                           @Nullable QueryType queryType, @Nullable IList<SelectExpression> select,
-                          @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, Order> orderBy,
+                          @Nullable IList<SelectExpression> groupBy, @Nullable IMap<SelectExpression, SortOrder> orderBy,
                           @Nullable BooleanExpression having, @Nullable Limit limit,
                           @Nullable IList<IMap<Column, Expression>> set, @Nullable QueryFlags queryFlags,
                           @Nullable Union union) {

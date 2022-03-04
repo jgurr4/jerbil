@@ -10,6 +10,8 @@ import com.ple.jerbil.data.sync.Diff;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Locale;
+
 public class MariadbLanguageGenerator implements LanguageGenerator {
 
   public static LanguageGenerator make() {
@@ -45,23 +47,76 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final Table table = Table.make(tableName, db);
     final StorageEngine engine = getEngineFromSql(createTableString);
     final IMap<String, Column> columns = getColumnsFromSql(createTableString, table);
-    final IMap<String, Index> indexes = getIndexesFromSql(createTableString, table);
+    final IMap<String, Index> indexes = getIndexesFromSql(createTableString, table, columns);
     final NumericColumn autoIncColumn = null;
     return TableContainer.make(table, columns, engine, indexes, autoIncColumn);
   }
 
-  private IMap<String, Index> getIndexesFromSql(String createTableString, Table table) {
+  private IMap<String, Index> getIndexesFromSql(String createTableString, Table table, IMap<String, Column> columns) {
+    IMap<String, Index> indexes = IArrayMap.empty;
     createTableString = removeBackticks(createTableString);
     final String[] lines = formatToIndexLines(createTableString);
-    return null;
+    for (String line : lines) {
+      Index index = getIndexFromSql(line, table, columns);
+      indexes = indexes.put(index.indexName, index);
+    }
+    return indexes;
   }
 
   private IMap<String, Column> getColumnsFromSql(String createTableString, Table table) {
-    //TODO: Finish implementing
     createTableString = removeBackticks(createTableString);
     final String[] columnStrings = formatToColumnLines(createTableString);
     final IArrayMap<String, Column> columns = IArrayMap.empty;
+    for (String columnString : columnStrings) {
+      Column columnFromSql = getColumnFromSql(columnString, table);
+      columns.put(columnFromSql.columnName, columnFromSql);
+    }
     return columns;
+  }
+
+  public Index getIndexFromSql(String indexString, Table table, IMap<String, Column> columns) {
+    IndexType indexType = getIndexTypeFromSql(indexString);
+    String indexName = getIndexNameFromSql(indexString, indexType);
+    IList<IndexedColumn> indexedColumns = getIndexedColumnsFromSql(indexString, columns);
+    return Index.make(indexType, indexName, table, indexedColumns.toArray());
+  }
+
+  private String getIndexNameFromSql(String indexString, IndexType indexType) {
+    if (indexType.equals(IndexType.primary)) {
+      return "primary";
+    }
+    return indexString.replaceAll("^.*KEY ", "").replaceAll("\\(.*\\),?","");
+  }
+
+  private IndexType getIndexTypeFromSql(String indexString) {
+    String type = indexString.replaceAll("KEY \\(.*", "KEY");
+    if (type.indexOf("KEY") == 0) {
+      return IndexType.secondary;
+    } else if (type.contains("PRIMARY")) {
+      return IndexType.primary;
+    } else if (type.contains("FULLTEXT")) {
+      return IndexType.fulltext;
+    } else if (type.contains("UNIQUE")) {
+      return IndexType.unique;
+    } else if (type.contains("FOREIGN")) {
+      return IndexType.foreign;
+    }
+    return null;
+  }
+
+  private IList<IndexedColumn> getIndexedColumnsFromSql(String indexString, IMap<String, Column> columns) {
+    IList<IndexedColumn> indexedColumns = IArrayList.empty;
+    int prefixSize = 0;
+    //FIXME: Once you figure out how to obtain sortOrder from Show create table or Show index commands use that method
+    // here to obtain sortOrder for each column. Figure out a method that works for mariadb and mysql both if possible.
+    SortOrder sortOrder = null;
+    final String[] indexColumnsArr = indexString.replaceFirst("^.*KEY.*\\(", "").replaceAll("\\),", "")
+        .replaceAll("\\)", "").split(",");
+    for (String colName : indexColumnsArr) {
+      prefixSize = Integer.parseInt(colName.toLowerCase(Locale.ROOT).replaceAll("[^0-9]", ""));
+      indexedColumns = indexedColumns.add(IndexedColumn.make(columns.get(colName), prefixSize, null));
+    }
+    return indexedColumns;
   }
 
   @Override
@@ -69,11 +124,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final String formattedTable = removeBackticks(createTableString);
     //TODO: Finish implementing.
 
-    return null;
-  }
-
-  public Index getIndexfromSql(String createTableString) {
-    //TODO: Finish implementing.
     return null;
   }
 
@@ -261,7 +311,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         sql += toSqlHaving(transformedHaving) + "\n";
       }
       if (selectQuery.orderBy != null) {
-        IMap<SelectExpression, Order> transformedOrderBy = transformColumns(selectQuery.orderBy, tableList);
+        IMap<SelectExpression, SortOrder> transformedOrderBy = transformColumns(selectQuery.orderBy, tableList);
         sql += "order by " + toSqlOrderBy(transformedOrderBy) + "\n";
       }
       if (selectQuery.limit != null) {
@@ -282,12 +332,12 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   //TODO: make it possible for Order to be null, so that nothing is specified in language generator and default is used from mysql instead.
-  private String toSqlOrderBy(IMap<SelectExpression, Order> orderBy) {
+  private String toSqlOrderBy(IMap<SelectExpression, SortOrder> orderBy) {
     String sql = "";
     String order = "";
     String separator = "";
-    for (IEntry<SelectExpression, Order> entry : orderBy) {
-      if (entry.value.equals(Order.ascending)) {
+    for (IEntry<SelectExpression, SortOrder> entry : orderBy) {
+      if (entry.value.equals(SortOrder.ascending)) {
         order = " asc";
       } else {
         order = " desc";
@@ -298,10 +348,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return sql;
   }
 
-  private IMap<SelectExpression, Order> transformColumns(IMap<SelectExpression, Order> orderBy,
-                                                         IList<TableContainer> tableList) {
-    IMap<SelectExpression, Order> transformedMap = IArrayMap.empty;
-    for (IEntry<SelectExpression, Order> entry : orderBy) {
+  private IMap<SelectExpression, SortOrder> transformColumns(IMap<SelectExpression, SortOrder> orderBy,
+                                                             IList<TableContainer> tableList) {
+    IMap<SelectExpression, SortOrder> transformedMap = IArrayMap.empty;
+    for (IEntry<SelectExpression, SortOrder> entry : orderBy) {
       //TODO: handle aliasedExpressions here.
       if (entry.key instanceof Column) {
         transformedMap = transformedMap.put(transformColumns(entry.key, tableList), entry.value);
@@ -758,7 +808,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       sql += toSqlWhere(transformedWhere) + "\n";
     }
     if (updateQuery.orderBy != null) {
-      IMap<SelectExpression, Order> transformedOrderBy = transformColumns(updateQuery.orderBy, tableList);
+      IMap<SelectExpression, SortOrder> transformedOrderBy = transformColumns(updateQuery.orderBy, tableList);
       sql += "order by " + toSqlOrderBy(transformedOrderBy) + "\n";
     }
     if (updateQuery.limit != null) {
@@ -780,7 +830,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       sql += toSqlWhere(transformedWhere) + "\n";
     }
     if (deleteQuery.orderBy != null) {
-      IMap<SelectExpression, Order> transformedOrderBy = transformColumns(deleteQuery.orderBy, tableList);
+      IMap<SelectExpression, SortOrder> transformedOrderBy = transformColumns(deleteQuery.orderBy, tableList);
       sql += "order by " + toSqlOrderBy(transformedOrderBy) + "\n";
     }
     if (deleteQuery.limit != null) {
@@ -857,11 +907,15 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(IList<Index> indexes) {
+    IList<Column> columns = IArrayList.empty;
     String separtor = "";
     String sql = "";
     String references = "";
     boolean generateName = true;
     for (Index index : indexes) {
+      for (IEntry<String, IndexedColumn> indexedColumn : index.indexedColumns) {
+        columns = columns.add(indexedColumn.value.column);
+      }
       if (index.type.equals(IndexType.primary)) {
         sql += separtor + "\n  primary key";
         generateName = false;
@@ -869,14 +923,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         sql += separtor + "\n  key";
       } else if (index.type.equals(IndexType.fulltext)) {
         sql += separtor + "\n  fulltext index";
-      }  else if (index.type.equals(IndexType.unique)) {
+      } else if (index.type.equals(IndexType.unique)) {
         sql += separtor + "\n  unique key";
       } else if (index.type.equals(IndexType.foreign)) {
         sql += separtor + "\n  foreign key";
 //        references = toSql(index.fkReference); //TODO: Finish implementing foreign key with Index.
       }
       separtor = ",";
-      sql += " " + toSqlIndexColumns(index.columns, generateName);
+      sql += " " + toSqlIndexColumns(columns, generateName);
       generateName = true;
     }
     return sql;
