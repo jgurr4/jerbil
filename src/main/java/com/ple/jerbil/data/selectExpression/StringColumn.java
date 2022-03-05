@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class StringColumn extends Column<StringColumn> implements StringExpression {
 
-  protected StringColumn(String columnName, Table table, DataSpec dataSpec, Expression generatedFrom,
+  protected StringColumn(String columnName, Table table, DataSpec dataSpec, StringExpression generatedFrom,
                          @Nullable StringExpression defaultValue, @Nullable StringExpression onUpdate,
                          BuildingHints hints) {
     super(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, hints);
@@ -19,13 +19,13 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
 
   @Override
   public StringColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
-    return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) generatedFrom, (StringExpression) defaultValue,
         (StringExpression) onUpdate, hints);
   }
 
   @Override
   public StringColumn indexed() {
-    return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) generatedFrom, (StringExpression) defaultValue,
         (StringExpression) onUpdate, hints.index());
   }
 
@@ -36,7 +36,7 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
 
   @Override
   public StringColumn unique() {
-    return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) generatedFrom, (StringExpression) defaultValue,
         (StringExpression) onUpdate, hints.unique());
   }
 
@@ -47,7 +47,7 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
 
   @Override
   public StringColumn allowNull() {
-    return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) generatedFrom, (StringExpression) defaultValue,
         (StringExpression) onUpdate, hints.allowNull());
   }
 
@@ -71,9 +71,15 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     return null;
   }
 
-  public static StringColumn make(String columnName, Table table, int size, Expression generatedFrom,
+  public static StringColumn make(String columnName, Table table, int size, StringExpression generatedFrom,
                                   StringExpression defaultValue, StringExpression onUpdate, BuildingHints hints) {
     return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), generatedFrom, defaultValue,
+        onUpdate, hints);
+  }
+
+  public static StringColumn make(String columnName, Table table, DataSpec dataSpec, StringExpression generatedFrom,
+                                  StringExpression defaultValue, StringExpression onUpdate, BuildingHints hints) {
+    return new StringColumn(columnName, table, dataSpec, generatedFrom, defaultValue,
         onUpdate, hints);
   }
 
@@ -108,11 +114,11 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
   }
 
   public StringColumn defaultValue(StringExpression str) {
-    return new StringColumn(columnName, table, dataSpec, generatedFrom, str, (StringExpression) onUpdate, hints);
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) generatedFrom, str, (StringExpression) onUpdate, hints);
   }
 
   public StringColumn fullText() {
-    return new StringColumn(columnName, table, dataSpec, generatedFrom, (StringExpression) defaultValue,
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) generatedFrom, (StringExpression) defaultValue,
         (StringExpression) onUpdate, hints.fulltext());
   }
 }

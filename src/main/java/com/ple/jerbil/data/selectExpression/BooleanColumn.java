@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression {
 
-  protected BooleanColumn(String columnName, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom,
+  protected BooleanColumn(String columnName, Table table, DataSpec dataSpec, @Nullable BooleanExpression generatedFrom,
                           @Nullable BooleanExpression defaultValue, @Nullable BooleanExpression onUpdate,
                           BuildingHints hints) {
     super(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, hints);
@@ -24,13 +24,19 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
 
   @Override
   public BooleanColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
-    return new BooleanColumn(columnName, table, dataSpec, generatedFrom, null, null,
+    return new BooleanColumn(columnName, table, dataSpec, (BooleanExpression) generatedFrom, null, null,
         BuildingHints.make());
+  }
+
+  public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, BooleanExpression generatedFrom,
+                                   BooleanExpression defaultValue, BooleanExpression onUpdate, BuildingHints hints) {
+    return new BooleanColumn(columnName, table, dataSpec, generatedFrom, defaultValue,
+        onUpdate, hints);
   }
 
   @Override
   public BooleanColumn indexed() {
-    return new BooleanColumn(columnName, table, dataSpec, generatedFrom, (BooleanExpression) defaultValue,
+    return new BooleanColumn(columnName, table, dataSpec, (BooleanExpression) generatedFrom, (BooleanExpression) defaultValue,
         (BooleanExpression) onUpdate, hints.index());
   }
 
@@ -102,7 +108,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   }
 
   public BooleanColumn defaultValue(BooleanExpression bool) {
-    return new BooleanColumn(columnName, table, dataSpec, generatedFrom, bool, (BooleanExpression) onUpdate, hints);
+    return new BooleanColumn(columnName, table, dataSpec, (BooleanExpression) generatedFrom, bool, (BooleanExpression) onUpdate, hints);
   }
 
   public BooleanExpression<UnaliasedExpression> isFalse() {

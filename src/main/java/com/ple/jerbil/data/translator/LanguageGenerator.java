@@ -17,7 +17,7 @@ public interface LanguageGenerator {
 
   TableContainer getTableFromSql(String showCreateTable, Database db);
 
-  Column getColumnFromSql(String showCreateTable, Table table);
+  Column getColumnFromSql(String tableLine, String[] columnsInIndex, Table table);
 
   String toSql(Column column);
 

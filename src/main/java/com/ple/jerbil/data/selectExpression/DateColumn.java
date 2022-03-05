@@ -11,16 +11,21 @@ import java.time.LocalDateTime;
 @Immutable
 public class DateColumn extends Column<DateColumn> implements DateExpression {
 
-  protected DateColumn(String columnName, Table table, DataSpec dataSpec, Expression generatedFrom,
-                       @Nullable DateExpression defaultValue, @Nullable DateExpression onUpdate,
-                       BuildingHints hints) {
+  protected DateColumn(String columnName, Table table, DataSpec dataSpec, DateExpression generatedFrom,
+                       @Nullable DateExpression defaultValue, @Nullable DateExpression onUpdate, BuildingHints hints) {
     super(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, hints);
   }
 
   @Override
   public DateColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
-    return new DateColumn(columnName, table, dataSpec, generatedFrom, (DateExpression) defaultValue,
+    return new DateColumn(columnName, table, dataSpec, (DateExpression) generatedFrom, (DateExpression) defaultValue,
         (DateExpression) onUpdate, BuildingHints.make());
+  }
+
+  public static DateColumn make(String columnName, Table table, DataSpec dataSpec, DateExpression generatedFrom,
+                               DateExpression defaultValue, DateExpression onUpdate, BuildingHints hints) {
+    return new DateColumn(columnName, table, dataSpec, generatedFrom, defaultValue,
+        onUpdate, hints);
   }
 
   @Override
@@ -60,7 +65,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
 
   @Override
   public DateColumn onUpdate(Expression onUpdate) {
-    return new DateColumn(columnName, table, dataSpec, generatedFrom, (DateExpression) defaultValue,
+    return new DateColumn(columnName, table, dataSpec, (DateExpression) generatedFrom, (DateExpression) defaultValue,
         (DateExpression) onUpdate, hints);
   }
 
@@ -83,7 +88,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   }
 
   public DateColumn defaultValue(DateExpression dateExp) {
-    return new DateColumn(columnName, table, dataSpec, generatedFrom, dateExp, (DateExpression) onUpdate, hints);
+    return new DateColumn(columnName, table, dataSpec, (DateExpression) generatedFrom, dateExp, (DateExpression) onUpdate, hints);
   }
 
 /*
@@ -115,7 +120,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   }
 
   public DateColumn defaultValue(LocalDateTime ldateTime) {
-    return new DateColumn(columnName, table, dataSpec, generatedFrom, LiteralDate.make(ldateTime),
+    return new DateColumn(columnName, table, dataSpec, (DateExpression) generatedFrom, LiteralDate.make(ldateTime),
         (DateExpression) onUpdate, hints);
   }
 }

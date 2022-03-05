@@ -63,17 +63,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return indexes;
   }
 
-  private IMap<String, Column> getColumnsFromSql(String createTableString, Table table) {
-    createTableString = removeBackticks(createTableString);
-    final String[] columnStrings = formatToColumnLines(createTableString);
-    final IArrayMap<String, Column> columns = IArrayMap.empty;
-    for (String columnString : columnStrings) {
-      Column columnFromSql = getColumnFromSql(columnString, table);
-      columns.put(columnFromSql.columnName, columnFromSql);
-    }
-    return columns;
-  }
-
   public Index getIndexFromSql(String indexString, Table table, IMap<String, Column> columns) {
     IndexType indexType = getIndexTypeFromSql(indexString);
     String indexName = getIndexNameFromSql(indexString, indexType);
@@ -85,7 +74,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     if (indexType.equals(IndexType.primary)) {
       return "primary";
     }
-    return indexString.replaceAll("^.*KEY ", "").replaceAll("\\(.*\\),?","");
+    return indexString.replaceAll("^.*KEY ", "").replaceAll("\\(.*\\),?", "");
   }
 
   private IndexType getIndexTypeFromSql(String indexString) {
@@ -119,14 +108,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return indexedColumns;
   }
 
-  @Override
-  public Column getColumnFromSql(String createTableString, Table table) {
-    final String formattedTable = removeBackticks(createTableString);
-    //TODO: Finish implementing.
-
-    return null;
-  }
-
 
   private StorageEngine getEngineFromSql(String createTableSql) {
     final String tableSql = createTableSql.toLowerCase();
@@ -148,70 +129,190 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return tableName;
   }
 
-  private IList<Column> createColumnsFromTableString(String formattedTable) {
-    IMap<String, String[]> indexedColumns = IHashMap.empty;
-    IList<Column> columns = IArrayList.make();
-    if (formattedTable.contains("PRIMARY KEY (")) {
-      final int primaryIndex = formattedTable.indexOf("PRIMARY KEY (") + 13;
-      final String[] primaryColumns = formattedTable.substring(primaryIndex, formattedTable.indexOf(")", primaryIndex))
-          .split(",");
-      indexedColumns = indexedColumns.put("PRIMARY KEY", primaryColumns);
-    }
-    if (formattedTable.contains("\n  KEY ")) {
-      final int keyIndex = formattedTable.indexOf("\n  KEY ") + 7;
-      final String refinedKeyValues = formattedTable.substring(keyIndex).replaceAll("^.*\\(", "");
-      final String[] keyColumns = refinedKeyValues.substring(0, refinedKeyValues.indexOf(")\n")).split(",");
-      indexedColumns = indexedColumns.put("KEY", keyColumns);
-    }
-    final String[] tableLines = formatToColumnLines(formattedTable);
-    for (String tableLine : tableLines) {
-      columns = columns.add(getColumnFromSql(tableLine, indexedColumns));
+  private IMap<String, Column> getColumnsFromSql(String createTableString, Table table) {
+    //Step 0: place key lines into a String[] variable.
+    //Step 1: format and place column lines into a String[] variable.
+    //Step 2: format the createTblString to remove all backticks.
+    //Step 3: For each column line
+    //  -> obtain the name, dataSpec/length, generatedFrom, defaultValue, onUpdate, from column lines.
+    //  -> obtain hints from both col lines and key lines.
+    // For hints: 
+    //  -> get auto_inc/unsigned/invisible/allowNull from column lines.
+    //  -> get primary/secondary/fulltext/unique/foriegn from key lines
+    //Step 4: Create/return the map<ColName, Column> from the list of columns
+    String[] columnLines = splitToColumnLines(createTableString);
+    String[] keyLines = splitToKeyLines(createTableString);
+    createTableString = removeBackticks(createTableString);
+    IMap<String, Column> columns = IArrayMap.empty;
+    Column columnFromSql = null;
+    for (String columnLine : columnLines) {
+      columnFromSql = getColumnFromSql(columnLine, keyLines, table);
+      columns = columns.put(columnFromSql.columnName, columnFromSql);
     }
     return columns;
-  }
-
-  private Column getColumnFromSql(String tableLine, IMap<String, String[]> indexedColumns) {
-    tableLine = tableLine.stripLeading();
-    final String colName = tableLine.replaceFirst(" .*", "");
-    final DataSpec dataSpec = getDataSpecFromSql(tableLine);
-    final Expression generatedFrom = getGeneratedFromSql(tableLine);
-    boolean indexed = false;  //FIXME: Find out why item.name column is not becoming indexed in fromSql() even though it says KEY name (name) in existing table.
-    boolean primary = false;
-    if (indexedColumns.keys().contains("PRIMARY KEY")) {
-      for (String column : indexedColumns.get("PRIMARY KEY")) {
-        if (column.equals(colName)) {
-          primary = true;
-        }
-      }
+/*
+    IMap<String, String[]> columnsInIndex = IArrayMap.empty;
+//    IMap<String, String[]> columnsInIndex = getColumnsInIndexFromSql();
+    if (createTableString.contains("PRIMARY KEY (")) {
+      final int primaryIndex = createTableString.indexOf("PRIMARY KEY (") + 13;
+      final String[] primaryColumns = createTableString.substring(primaryIndex, createTableString.indexOf(")", primaryIndex))
+          .split(",");
+      columnsInIndex = columnsInIndex.put("PRIMARY KEY", primaryColumns);
     }
-    if (indexedColumns.keys().contains("KEY")) {
-      for (String column : indexedColumns.get("KEY")) {
-        if (column.equals(colName)) {
-          indexed = true;
-        }
-      }
+    if (createTableString.contains("\n  KEY ")) {
+      final int keyIndex = createTableString.indexOf("\n  KEY ") + 7;
+      final String refinedKeyValues = createTableString.substring(keyIndex).replaceAll("^.*\\(", "");
+      final String[] keyColumns = refinedKeyValues.substring(0, refinedKeyValues.indexOf(")\n")).split(",");
+      columnsInIndex = columnsInIndex.put("KEY", keyColumns);
     }
-/* //FIXME: broken after changes to tables and datbases.
-    if (tableLine.contains("AUTO_INCREMENT")) {
-      return NumericColumn.make(colName, dataSpec, indexed, primary, true, (NumericExpression) generatedFrom);
-    } else if (dataSpec.dataType == DataType.integer || dataSpec.dataType == DataType.decimal || dataSpec.dataType == DataType.bigint || dataSpec.dataType == DataType.tinyint) {
-      return NumericColumn.make(colName, dataSpec, indexed, primary, false, (NumericExpression) generatedFrom);
-    } else if (dataSpec.dataType == DataType.varchar || dataSpec.dataType == DataType.enumeration) {
-      return StringColumn.make(colName, dataSpec, indexed, primary);
-    } else if (dataSpec.dataType == DataType.datetime) {
-      return DateColumn.make(colName, dataSpec, indexed, primary);
-    } else if (dataSpec.dataType == DataType.bool) {
-      return BooleanColumn.make(colName, dataSpec, indexed, primary);
-    } else {
-      System.out.println("Failed to determine data type of this column:" + colName);
+    final String[] columnStrings = splitToColumnLines(createTableString);
+    for (String columnString : columnStrings) {
+      columnFromSql = getColumnFromSql(columnString, columnsInIndex, table);
+      columns = columns.put(columnFromSql.columnName, columnFromSql);
     }
 */
+  }
+
+  private String[] splitToKeyLines(String createTableString) {
+    return createTableString
+        .replaceAll("\n\s+`.*", "")
+        .replaceAll("^CREATE TABLE.*\n", "")
+        .replaceAll("\n\\) ENGINE", "")
+        .split(",\n");
+  }
+
+  @Override
+  public Column getColumnFromSql(String columnLine, String[] keyLines, Table table) {
+    columnLine = columnLine.stripLeading();
+    final String colName = columnLine.replaceFirst(" .*", "");
+    BuildingHints hints = BuildingHints.make();
+    for (String keyLine : keyLines) {
+      if (keyLine.contains(colName)) {
+        hints = getHintFromSql(hints, keyLine);
+      }
+    }
+    columnLine = columnLine.toLowerCase(Locale.ROOT);
+    if (columnLine.contains("unsigned")) {
+      hints = hints.unsigned();
+    }
+    if (columnLine.contains("auto_increment")) {
+      hints = hints.autoInc();
+    }
+    if (!columnLine.contains("not null")) {
+      hints = hints.allowNull();
+    }
+    if (columnLine.contains("invisible")) {
+      hints = hints.invisible();
+    }
+    final DataSpec dataSpec = getDataSpecFromSql(columnLine);
+    final Expression defaultValue = getDefaultValFromSql(columnLine);
+    final Expression generatedFrom = getGeneratedFromSql(columnLine);
+    final Expression onUpdate = getOnUpdateValFromSql(columnLine);
+    if (columnLine.contains("AUTO_INCREMENT")) {
+      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) generatedFrom,
+          (NumericExpression) defaultValue, (NumericExpression) onUpdate, hints);
+    } else if (dataSpec.dataType == DataType.integer || dataSpec.dataType == DataType.decimal ||
+        dataSpec.dataType == DataType.bigint || dataSpec.dataType == DataType.tinyint) {
+      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) generatedFrom,
+          (NumericExpression) defaultValue, (NumericExpression) onUpdate, hints);
+    } else if (dataSpec.dataType == DataType.varchar || dataSpec.dataType == DataType.enumeration) {
+      return StringColumn.make(colName, table, dataSpec, (StringExpression) generatedFrom,
+          (StringExpression) defaultValue, (StringExpression) onUpdate, hints);
+    } else if (dataSpec.dataType == DataType.datetime) {
+      return DateColumn.make(colName, table, dataSpec, (DateExpression) generatedFrom,
+          (DateExpression) defaultValue, (DateExpression) onUpdate, hints);
+    } else if (dataSpec.dataType == DataType.bool) {
+      return BooleanColumn.make(colName, table, dataSpec, (BooleanExpression) generatedFrom,
+          (BooleanExpression) defaultValue, (BooleanExpression) onUpdate, hints);
+    } else {
+      //FIXME: replace this with observability bridge logging.
+      System.out.println("Failed to determine data type of this column:" + colName);
+    }
     return null;
+  }
+
+  private BuildingHints getHintFromSql(BuildingHints hints, String keyLine) {
+    if (keyLine.contains("PRIMARY")) {
+      return hints.primary();
+    } else if (keyLine.contains("UNIQUE")) {
+      return hints.unique();
+    } else if (keyLine.contains("FULLTEXT")) {
+      return hints.fulltext();
+    } else if (keyLine.contains("FOREIGN")) {
+      return hints.foreign();
+    } else if (keyLine.contains("KEY")) {
+      return hints.index();
+    }
+    return hints;
   }
 
   private Expression getGeneratedFromSql(String tableLine) {
-    //TODO: Implement this method.
+    Expression expression = null;
+    tableLine = tableLine
+        .replaceAll("^.*generated always as \\(", "")
+        .replaceAll("\\).*$", "");
+    final String[] parts = tableLine.split(" ");
+    for (String part : parts) {
+      if (part.replaceAll("'", "").length() < part.length()) {
+        // This means it is a StringExpression.
+      } else if (part.replaceAll("[a-z]","").length() < part.length()) {
+        // This means it is a Column.
+      } else if (part.replaceAll("[0-9]", "").length() < part.length()) {
+        // This means it is a NumericExpression.
+        if (part.length() == 1) {
+          if (part.contains("+")) {
+
+          } else if (part.contains("-")) {
+
+          } else if (part.contains("*")) {
+          } else if (part.contains("/")) {
+
+          }
+        }
+      }
+    }
+    return expression;
+  }
+
+
+  private Expression getOnUpdateValFromSql(String tableLine) {
+    //TODO: Implement this.
     return null;
+  }
+
+  private Expression getDefaultValFromSql(String tableLine) {
+    //TODO: Implement this.
+    return null;
+  }
+
+  public BuildingHints getHintsFromSql(String tableLine, IMap<String, String[]> columnsInIndex) {
+    final String colName = tableLine.replaceFirst(" .*", "");
+    BuildingHints hints = BuildingHints.make();
+    String indexType = "";
+    if (columnsInIndex.keys().contains("PRIMARY KEY")) {
+      indexType = "PRIMARY KEY";
+    }
+    for (String column : columnsInIndex.get(indexType)) {
+      if (column.equals(colName)) {
+        hints = hints.primary();
+      }
+    }
+
+    if (columnsInIndex.keys().contains("PRIMARY KEY")) {
+      for (String column : columnsInIndex.get("PRIMARY KEY")) {
+        if (column.equals(colName)) {
+          hints = hints.primary();
+        }
+      }
+    }
+    if (columnsInIndex.keys().contains("KEY")) {
+      for (String column : columnsInIndex.get("KEY")) {
+        if (column.equals(colName)) {
+          hints = hints.index();
+        }
+      }
+    }
+    return hints;
   }
 
   private DataSpec getDataSpecFromSql(String tableLine) {
@@ -253,7 +354,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
 
-  private String[] formatToColumnLines(String createTableString) {
+  private String[] splitToColumnLines(String createTableString) {
     return createTableString
         .replaceAll("\n\\) ENGINE=.*", "")
         .replaceAll("^CREATE TABLE .*\n", "")

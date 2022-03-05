@@ -117,9 +117,6 @@ public class SqlStructureTests {
           fulltext index phrs_idx (phrase)
         ) ENGINE=Aria;
         """, testCreateAll.toSql());
-    //FIXME: Make sure that generated key names have a descriptive prefix that indicates the name, or make sure the
-    // generator checks that the name is not exactly matching any other index name it has generated or user specified.
-    // If it matches a existing name then append _n to the name 'n' being a number 0-infinity.
   }
 
   @Test
