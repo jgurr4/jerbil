@@ -2,7 +2,9 @@ package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.selectExpression.NumericExpression.LiteralNumber;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * Literals can be used to define literal values to be used in expressions. For example if you are trying to select a
@@ -32,9 +34,16 @@ public interface Literal extends Expression {
     return LiteralDate.make(date);
   }
 
+  static LiteralDate make(LocalTime parse) {
+    return null;
+  }
+
+  static LiteralDate make(LocalDate parse) {
+    return null;
+  }
+
   static LiteralBoolean make(Boolean b) {
     return LiteralBoolean.make(b);
   }
-
 
 }

@@ -5,7 +5,7 @@ import com.ple.jerbil.data.GenericInterfaces.Immutable;
 /**
  * BuildingHints allows users to skip manually defining IndexSpec for each index of their tables.
  * The DatabaseBuilder will review the flags of each column and generate the IndexSpecs based on that.
- *
+ * <p>
  * What each flag means:
  * 10000000 = primary key
  * 01000000 = index/secondary key
@@ -16,6 +16,7 @@ import com.ple.jerbil.data.GenericInterfaces.Immutable;
  * 00000010 = unsigned
  * 00000001 = auto_increment
  * 000000001 = allowNull
+ * 0000000001 = autoUpdateTime
  * 0000000000000000   total number of bits = 16
  */
 @Immutable
@@ -30,6 +31,7 @@ public class BuildingHints {
   private static final short unsigned = 1 << 8;
   private static final short autoInc = 1 << 7;
   private static final short allowNull = 1 << 6;
+  private static final short autoUpdateTime = 1 << 5;
 
   protected BuildingHints(int flags) {
     this.flags = (short) flags;
@@ -44,59 +46,83 @@ public class BuildingHints {
   }
 
   public BuildingHints primary() {
-   return new BuildingHints(primary|flags);
+    return new BuildingHints(primary | flags);
   }
+
   public BuildingHints index() {
-    return new BuildingHints(secondary|flags);
+    return new BuildingHints(secondary | flags);
   }
+
   public BuildingHints foreign() {
-    return new BuildingHints(foreign|flags);
+    return new BuildingHints(foreign | flags);
   }
+
   public BuildingHints fulltext() {
-    return new BuildingHints(fulltext|flags);
+    return new BuildingHints(fulltext | flags);
   }
+
   public BuildingHints invisible() {
-    return new BuildingHints(invisible|flags);
+    return new BuildingHints(invisible | flags);
   }
+
   public BuildingHints unique() {
-    return new BuildingHints(unique|flags);
+    return new BuildingHints(unique | flags);
   }
+
   public BuildingHints unsigned() {
-    return new BuildingHints(unsigned|flags);
+    return new BuildingHints(unsigned | flags);
   }
+
   public BuildingHints autoInc() {
-    return new BuildingHints(autoInc|flags);
+    return new BuildingHints(autoInc | flags);
   }
+
   public BuildingHints allowNull() {
-    return new BuildingHints(allowNull|flags);
+    return new BuildingHints(allowNull | flags);
+  }
+
+  public BuildingHints autoUpdateTime() {
+    return new BuildingHints(autoUpdateTime | flags);
   }
 
   public boolean isPrimary() {
     return (flags & primary) > 0;
   }
+
   public boolean isIndexed() {
     return (flags & secondary) > 0;
   }
+
   public boolean isForeign() {
     return (flags & foreign) > 0;
   }
+
   public boolean isFulltext() {
     return (flags & fulltext) > 0;
   }
+
   public boolean isInvisible() {
     return (flags & invisible) > 0;
- }
+  }
+
   public boolean isUnique() {
     return (flags & unique) > 0;
- }
+  }
+
   public boolean isUnsigned() {
     return (flags & unsigned) > 0;
- }
+  }
+
   public boolean isAutoInc() {
     return (flags & autoInc) > 0;
- }
+  }
+
   public boolean isAllowNull() {
     return (flags & allowNull) > 0;
- }
+  }
+
+  public boolean isAutoUpdateTime() {
+    return (flags & autoUpdateTime) > 0;
+  }
 
 }

@@ -9,7 +9,9 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.jerbil.data.sync.Diff;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
-
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Locale;
 
 public class MariadbLanguageGenerator implements LanguageGenerator {
@@ -48,8 +50,17 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final StorageEngine engine = getEngineFromSql(createTableString);
     final IMap<String, Column> columns = getColumnsFromSql(createTableString, table);
     final IMap<String, Index> indexes = getIndexesFromSql(createTableString, table, columns);
-    final NumericColumn autoIncColumn = null;
+    final NumericColumn autoIncColumn = getAutoIncColumn(indexes.get("primary").indexedColumns);
     return TableContainer.make(table, columns, engine, indexes, autoIncColumn);
+  }
+
+  private NumericColumn getAutoIncColumn(IMap<String, IndexedColumn> primary) {
+    for (IEntry<String, IndexedColumn> indexedColumnEntry : primary) {
+      if (indexedColumnEntry.value.column.hints.isAutoInc()) {
+        return (NumericColumn) indexedColumnEntry.value.column;
+      }
+    }
+    return null;
   }
 
   private IMap<String, Index> getIndexesFromSql(String createTableString, Table table, IMap<String, Column> columns) {
@@ -108,7 +119,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return indexedColumns;
   }
 
-
   private StorageEngine getEngineFromSql(String createTableSql) {
     final String tableSql = createTableSql.toLowerCase();
     final int engineIndex = tableSql.indexOf("\n) engine=") + 10;
@@ -130,19 +140,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private IMap<String, Column> getColumnsFromSql(String createTableString, Table table) {
-    //Step 0: place key lines into a String[] variable.
-    //Step 1: format and place column lines into a String[] variable.
-    //Step 2: format the createTblString to remove all backticks.
-    //Step 3: For each column line
-    //  -> obtain the name, dataSpec/length, generatedFrom, defaultValue, onUpdate, from column lines.
-    //  -> obtain hints from both col lines and key lines.
-    // For hints: 
-    //  -> get auto_inc/unsigned/invisible/allowNull from column lines.
-    //  -> get primary/secondary/fulltext/unique/foriegn from key lines
-    //Step 4: Create/return the map<ColName, Column> from the list of columns
     String[] columnLines = splitToColumnLines(createTableString);
     String[] keyLines = splitToKeyLines(createTableString);
-    createTableString = removeBackticks(createTableString);
     IMap<String, Column> columns = IArrayMap.empty;
     Column columnFromSql = null;
     for (String columnLine : columnLines) {
@@ -150,27 +149,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       columns = columns.put(columnFromSql.columnName, columnFromSql);
     }
     return columns;
-/*
-    IMap<String, String[]> columnsInIndex = IArrayMap.empty;
-//    IMap<String, String[]> columnsInIndex = getColumnsInIndexFromSql();
-    if (createTableString.contains("PRIMARY KEY (")) {
-      final int primaryIndex = createTableString.indexOf("PRIMARY KEY (") + 13;
-      final String[] primaryColumns = createTableString.substring(primaryIndex, createTableString.indexOf(")", primaryIndex))
-          .split(",");
-      columnsInIndex = columnsInIndex.put("PRIMARY KEY", primaryColumns);
-    }
-    if (createTableString.contains("\n  KEY ")) {
-      final int keyIndex = createTableString.indexOf("\n  KEY ") + 7;
-      final String refinedKeyValues = createTableString.substring(keyIndex).replaceAll("^.*\\(", "");
-      final String[] keyColumns = refinedKeyValues.substring(0, refinedKeyValues.indexOf(")\n")).split(",");
-      columnsInIndex = columnsInIndex.put("KEY", keyColumns);
-    }
-    final String[] columnStrings = splitToColumnLines(createTableString);
-    for (String columnString : columnStrings) {
-      columnFromSql = getColumnFromSql(columnString, columnsInIndex, table);
-      columns = columns.put(columnFromSql.columnName, columnFromSql);
-    }
-*/
   }
 
   private String[] splitToKeyLines(String createTableString) {
@@ -192,6 +170,29 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       }
     }
     columnLine = columnLine.toLowerCase(Locale.ROOT);
+    hints = getColumnHints(columnLine, hints);
+    final DataSpec dataSpec = getDataSpecFromSql(columnLine);
+    final Literal defaultValue = getDefaultValFromSql(columnLine);
+//    final Expression generatedFrom = getGeneratedFromSql(columnLine);
+    if (columnLine.contains("AUTO_INCREMENT")) {
+      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, hints);
+    } else if (dataSpec.dataType == DataType.integer || dataSpec.dataType == DataType.decimal ||
+        dataSpec.dataType == DataType.bigint || dataSpec.dataType == DataType.tinyint) {
+      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, hints);
+    } else if (dataSpec.dataType == DataType.varchar || dataSpec.dataType == DataType.enumeration) {
+      return StringColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, hints);
+    } else if (dataSpec.dataType == DataType.datetime) {
+      return DateColumn.make(colName, table, dataSpec, (DateExpression) defaultValue, hints);
+    } else if (dataSpec.dataType == DataType.bool) {
+      return BooleanColumn.make(colName, table, dataSpec, (BooleanExpression) defaultValue, hints);
+    } else {
+      //FIXME: replace this with observability bridge logging.
+      System.out.println("Failed to determine data type of this column:" + colName);
+    }
+    return null;
+  }
+
+  private BuildingHints getColumnHints(String columnLine, BuildingHints hints) {
     if (columnLine.contains("unsigned")) {
       hints = hints.unsigned();
     }
@@ -204,31 +205,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     if (columnLine.contains("invisible")) {
       hints = hints.invisible();
     }
-    final DataSpec dataSpec = getDataSpecFromSql(columnLine);
-    final Expression defaultValue = getDefaultValFromSql(columnLine);
-    final Expression generatedFrom = getGeneratedFromSql(columnLine);
-    final Expression onUpdate = getOnUpdateValFromSql(columnLine);
-    if (columnLine.contains("AUTO_INCREMENT")) {
-      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) generatedFrom,
-          (NumericExpression) defaultValue, (NumericExpression) onUpdate, hints);
-    } else if (dataSpec.dataType == DataType.integer || dataSpec.dataType == DataType.decimal ||
-        dataSpec.dataType == DataType.bigint || dataSpec.dataType == DataType.tinyint) {
-      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) generatedFrom,
-          (NumericExpression) defaultValue, (NumericExpression) onUpdate, hints);
-    } else if (dataSpec.dataType == DataType.varchar || dataSpec.dataType == DataType.enumeration) {
-      return StringColumn.make(colName, table, dataSpec, (StringExpression) generatedFrom,
-          (StringExpression) defaultValue, (StringExpression) onUpdate, hints);
-    } else if (dataSpec.dataType == DataType.datetime) {
-      return DateColumn.make(colName, table, dataSpec, (DateExpression) generatedFrom,
-          (DateExpression) defaultValue, (DateExpression) onUpdate, hints);
-    } else if (dataSpec.dataType == DataType.bool) {
-      return BooleanColumn.make(colName, table, dataSpec, (BooleanExpression) generatedFrom,
-          (BooleanExpression) defaultValue, (BooleanExpression) onUpdate, hints);
-    } else {
-      //FIXME: replace this with observability bridge logging.
-      System.out.println("Failed to determine data type of this column:" + colName);
+    if (columnLine.contains("on update current_timestamp")) {
+      hints = hints.autoUpdateTime();
     }
-    return null;
+    return hints;
   }
 
   private BuildingHints getHintFromSql(BuildingHints hints, String keyLine) {
@@ -246,46 +226,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return hints;
   }
 
-  private Expression getGeneratedFromSql(String tableLine) {
-    Expression expression = null;
-    tableLine = tableLine
-        .replaceAll("^.*generated always as \\(", "")
-        .replaceAll("\\).*$", "");
-    final String[] parts = tableLine.split(" ");
-    for (String part : parts) {
-      if (part.replaceAll("'", "").length() < part.length()) {
-        // This means it is a StringExpression.
-      } else if (part.replaceAll("[a-z]","").length() < part.length()) {
-        // This means it is a Column.
-      } else if (part.replaceAll("[0-9]", "").length() < part.length()) {
-        // This means it is a NumericExpression.
-        if (part.length() == 1) {
-          if (part.contains("+")) {
-
-          } else if (part.contains("-")) {
-
-          } else if (part.contains("*")) {
-          } else if (part.contains("/")) {
-
-          }
-        }
-      }
-    }
-    return expression;
-  }
-
-
-  private Expression getOnUpdateValFromSql(String tableLine) {
-    //TODO: Implement this.
-    return null;
-  }
-
-  private Expression getDefaultValFromSql(String tableLine) {
-    //TODO: Implement this.
-    return null;
-  }
-
   public BuildingHints getHintsFromSql(String tableLine, IMap<String, String[]> columnsInIndex) {
+    //TODO: Finish implementing.
     final String colName = tableLine.replaceFirst(" .*", "");
     BuildingHints hints = BuildingHints.make();
     String indexType = "";
@@ -297,7 +239,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         hints = hints.primary();
       }
     }
-
     if (columnsInIndex.keys().contains("PRIMARY KEY")) {
       for (String column : columnsInIndex.get("PRIMARY KEY")) {
         if (column.equals(colName)) {
@@ -313,6 +254,24 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       }
     }
     return hints;
+  }
+
+  private Literal getDefaultValFromSql(String tableLine) {
+    String defaultVal = tableLine.replaceAll("^.*default", "").replaceFirst(",$", "");
+    if (defaultVal.replaceAll("[0-9]", "").length() == 0) {
+      return Literal.make(Integer.parseInt(defaultVal));
+    } else if (defaultVal.replaceAll("[0-9]", "").replace(".", "").length() == 0) {
+      return Literal.make(Double.parseDouble(defaultVal));
+    } else if (defaultVal.replaceAll("[0-9]{4}-[0-9]{2}-[0-9]{2}","").length() == 0) {
+      return Literal.make(LocalDate.parse(defaultVal));
+    } else if (defaultVal.replaceAll("[0-9]{2}:[0-9]{2}:[0-9]{2}","").length() == 0) {
+      return Literal.make(LocalTime.parse(defaultVal));
+    } else if (defaultVal.replaceAll("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}","").length() == 0) {
+      return Literal.make(LocalDateTime.parse(defaultVal));
+    } else if (defaultVal.replace("false","").replace("true","").length() == 0) {
+      return Literal.make(Boolean.parseBoolean(defaultVal));
+    }
+      return Literal.make(defaultVal);
   }
 
   private DataSpec getDataSpecFromSql(String tableLine) {
@@ -353,7 +312,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         .replaceAll("^CREATE TABLE .*\n", "").split("\n");
   }
 
-
   private String[] splitToColumnLines(String createTableString) {
     return createTableString
         .replaceAll("\n\\) ENGINE=.*", "")
@@ -366,6 +324,33 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   private String removeBackticks(String tableInfo) {
     return tableInfo.replaceAll("`", "");
   }
+
+  /* Uncomment when generatedFrom is supported.
+    private Expression getGeneratedFromSql(String tableLine) {
+      Expression expression = null;
+      tableLine = tableLine
+          .replaceAll("^.*generated always as \\(", "")
+          .replaceAll("\\).*$", "");
+      final String[] parts = tableLine.split(" ");
+      for (String part : parts) {
+        if (part.replaceAll("'", "").length() < part.length()) {
+          // This means it is a StringExpression.
+        } else if (part.replaceAll("[a-z]","").length() < part.length()) {
+          // This means it is a Column.
+        } else if (part.replaceAll("[0-9]", "").length() < part.length()) {
+          // This means it is a NumericExpression.
+          if (part.length() == 1) {
+            if (part.contains("+")) {
+            } else if (part.contains("-")) {
+            } else if (part.contains("*")) {
+            } else if (part.contains("/")) {
+            }
+          }
+        }
+      }
+      return expression;
+    }
+  */
 
   private String toSql(SelectQuery selectQuery) {
     String sql = "";
@@ -812,7 +797,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 
   //TODO: Add support for specifying Null on a column. Leave not null off because that is default.
   public String toSql(Column column) {
-    //Order: name + dataspec + nullVal + defaultVal + onUpdateVal + autoInc + unique + invisible + generatedVal
     String sql = checkToAddBackticks(column.getColumnName());
     String dataSpec = dataTypeToSql(column);
     String nullVal = " not null";
@@ -821,8 +805,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     String autoIncrement = "";
     String unsigned = "";
     String invisible = "";
-    String generatedFrom = "";
-    if (column.hints.isAllowNull() || column.hints.isPrimary() || column.generatedFrom != null || column.defaultValue != null || column.hints.isInvisible()) {
+//    String generatedFrom = "";
+    if (column.hints.isAllowNull() || column.hints.isPrimary() || column.defaultValue != null || column.hints.isInvisible()) {
       nullVal = "";
     }
     if (column instanceof NumericColumn && column.hints.isAutoInc()) {
@@ -837,19 +821,16 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         defaultVal = defaultVal.replace("(", "").replace(")", "");
       }
     }
-    if (column.onUpdate != null) {
-      onUpdateVal = " on update (" + toSql(column.onUpdate) + ")";
-      if (onUpdateVal.contains("current_timestamp")) {
-        onUpdateVal = onUpdateVal.replace("(", "").replace(")", "");
-      }
+    if (column.hints.isAutoUpdateTime()) {
+      onUpdateVal = " on update current_timestamp";
     }
     if (column.hints.isInvisible()) {
       invisible = " invisible";
     }
-    if (column.generatedFrom != null) {
-      generatedFrom = " as (" + toSql(column.generatedFrom) + ")";
-    }
-    sql += dataSpec + unsigned + nullVal + defaultVal + onUpdateVal + autoIncrement + invisible + generatedFrom;
+//    if (column.generatedFrom != null) {
+//      generatedFrom = " as (" + toSql(column.generatedFrom) + ")";
+//    }
+    sql += dataSpec + unsigned + nullVal + defaultVal + onUpdateVal + autoIncrement + invisible;// + generatedFrom;
     return sql;
   }
 
@@ -1054,11 +1035,5 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     sql += indexName + "(" + indexedColumns + ")";
     return sql;
   }
-
-/*
-    return indexedColumns.toLowerCase().replaceAll(",", "_")
-        .replaceAll("\\B[aeiou]", "")
-        .replaceAll("([a-z])\\1*", "$1");
-*/
 
 }

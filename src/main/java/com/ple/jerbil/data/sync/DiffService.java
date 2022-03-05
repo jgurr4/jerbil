@@ -267,15 +267,13 @@ public class DiffService {
         c2.columnName);
     final ScalarDiff<DataSpec> dataSpecDiff = c1.dataSpec.equals(c2.dataSpec) ? null : ScalarDiff.make(
         c1.dataSpec, c2.dataSpec);
-    final ScalarDiff<Expression> generatedDiff = c1.generatedFrom.equals(
-        c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
+//    final ScalarDiff<Expression> generatedDiff = c1.generatedFrom.equals(
+//        c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
     final ScalarDiff<Expression> defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(
         c1.defaultValue, c2.defaultValue);
-    final ScalarDiff<Expression> onUpdateDiff = c1.onUpdate.equals(c2.onUpdate) ? null : ScalarDiff.make(
-        c1.onUpdate, c2.onUpdate);
     final ScalarDiff<BuildingHints> hintsDiff = c1.hints.equals(c2.hints) ? null : ScalarDiff.make(
         c1.hints, c2.hints);
-    return ColumnDiff.make(nameDiff, tableDiff, dataSpecDiff, generatedDiff, defaultDiff, onUpdateDiff, hintsDiff);
+    return ColumnDiff.make(nameDiff, tableDiff, dataSpecDiff, defaultDiff, hintsDiff);
   }
 
   public static boolean checkTableNameInList(IList<TableContainer> tables, TableContainer t1) {

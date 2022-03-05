@@ -8,7 +8,6 @@ import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +43,7 @@ public class SqlStructureTests {
           scale mediumint unsigned not null,
           quantity smallint unsigned not null,
           price decimal(14, 2) not null,
-          total decimal(14, 2) as (quantity * price),
+          total decimal(14, 2) not null,
           finalized boolean not null,
           myDouble double not null,
           myFloat float not null,
@@ -102,7 +101,7 @@ public class SqlStructureTests {
           scale mediumint unsigned not null,
           quantity smallint unsigned not null,
           price decimal(14, 2) not null,
-          total decimal(14, 2) as (quantity * price),
+          total decimal(14, 2) not null,
           finalized boolean not null,
           myDouble double not null,
           myFloat float not null,
@@ -164,8 +163,9 @@ public class SqlStructureTests {
         // the column is being recreated. This means the translator must change the column rather than dropping it.
       }
   // Make a test to test ability to make multi-index keys not primary.
-
     */
+
+/* //Uncomment after adding generatedColumn back.
   @Test
   void testGeneratedColumn() {
     NumericColumn quantity = Column.make("quantity", item.table).asInt();
@@ -185,6 +185,7 @@ public class SqlStructureTests {
         ) ENGINE=Aria
         """, q.toSql());
   }
+*/
 
   /*
   //ALTER TABLE tests:

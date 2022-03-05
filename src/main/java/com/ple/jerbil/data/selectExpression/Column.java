@@ -13,19 +13,16 @@ import java.util.Objects;
 public abstract class Column <T extends Column> extends PartialColumn{
 
     public final DataSpec dataSpec;
-    @Nullable public final Expression generatedFrom;
+//    @Nullable public final Expression generatedFrom;
     @Nullable public final Expression defaultValue;
     public static Column[] emptyArray = new Column[0];
-    public final Expression onUpdate;
     public final BuildingHints hints;
 
-    protected Column(String columnName, Table table, DataSpec dataSpec, @Nullable Expression generatedFrom,
-                     @Nullable Expression defaultValue, @Nullable Expression onUpdate, BuildingHints hints) {
+    protected Column(String columnName, Table table, DataSpec dataSpec, @Nullable Expression defaultValue, BuildingHints hints) {
         super(columnName, table);
         this.dataSpec = dataSpec;
-        this.generatedFrom = generatedFrom;
+//        this.generatedFrom = generatedFrom;
         this.defaultValue = defaultValue;
-        this.onUpdate = onUpdate;
         this.hints = hints;
     }
 
@@ -33,7 +30,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
         return PartialColumn.make(columnName, table);
     }
 
-    public abstract T make(String columnName, DataSpec dataSpec, Expression generatedFrom);
+    public abstract T make(String columnName, DataSpec dataSpec);
 
     public abstract T indexed();
 
@@ -48,6 +45,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
     public abstract T defaultValue(Expression e);
 
     public abstract T defaultValue(Enum<?> value);
+/*
 
     public abstract T onUpdate(Expression e);
 
@@ -56,6 +54,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
     public T generatedFrom(Expression generatedFrom) {
         return make(columnName, dataSpec, generatedFrom);
     }
+*/
 
     public String toSql() {
         if (DataGlobal.bridge == null) {
@@ -75,13 +74,12 @@ public abstract class Column <T extends Column> extends PartialColumn{
         Column<?> column = (Column<?>) o;
         return dataSpec.equals(column.dataSpec) &&
           columnName.equals(column.columnName) &&
-          Objects.equals(generatedFrom, column.generatedFrom) &&
           Objects.equals(defaultValue, column.defaultValue);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dataSpec, generatedFrom, defaultValue);
+        return Objects.hash(dataSpec, defaultValue);
     }
 
     @Override
@@ -89,7 +87,7 @@ public abstract class Column <T extends Column> extends PartialColumn{
         return "Column{" +
           "columnName='" + columnName + '\'' +
           ", dataSpec=" + dataSpec +
-          ", generatedFrom=" + generatedFrom +
+//          ", generatedFrom=" + generatedFrom +
           ", defaultValue=" + defaultValue +
           "}";
     }

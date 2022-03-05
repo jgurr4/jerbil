@@ -16,28 +16,24 @@ import org.jetbrains.annotations.Nullable;
  */
 public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression {
 
-  protected BooleanColumn(String columnName, Table table, DataSpec dataSpec, @Nullable BooleanExpression generatedFrom,
-                          @Nullable BooleanExpression defaultValue, @Nullable BooleanExpression onUpdate,
+  protected BooleanColumn(String columnName, Table table, DataSpec dataSpec, @Nullable BooleanExpression defaultValue,
                           BuildingHints hints) {
-    super(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, hints);
+    super(columnName, table, dataSpec, defaultValue, hints);
   }
 
   @Override
-  public BooleanColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
-    return new BooleanColumn(columnName, table, dataSpec, (BooleanExpression) generatedFrom, null, null,
-        BuildingHints.make());
+  public BooleanColumn make(String columnName, DataSpec dataSpec) {
+    return new BooleanColumn(columnName, table, dataSpec, null, BuildingHints.make());
   }
 
-  public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, BooleanExpression generatedFrom,
-                                   BooleanExpression defaultValue, BooleanExpression onUpdate, BuildingHints hints) {
-    return new BooleanColumn(columnName, table, dataSpec, generatedFrom, defaultValue,
-        onUpdate, hints);
+  public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, BooleanExpression defaultValue,
+                                   BuildingHints hints) {
+    return new BooleanColumn(columnName, table, dataSpec, defaultValue, hints);
   }
 
   @Override
   public BooleanColumn indexed() {
-    return new BooleanColumn(columnName, table, dataSpec, (BooleanExpression) generatedFrom, (BooleanExpression) defaultValue,
-        (BooleanExpression) onUpdate, hints.index());
+    return new BooleanColumn(columnName, table, dataSpec, (BooleanExpression) defaultValue, hints.index());
   }
 
   @Override
@@ -70,45 +66,24 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
     return null;
   }
 
-  @Override
-  public BooleanColumn onUpdate(Expression e) {
-    return null;
-  }
-
-  @Override
-  public BooleanColumn onUpdate(Enum<?> value) {
-    return null;
-  }
-
   public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
-    return new BooleanColumn(columnName, table, dataSpec, null, null, null, hints);
+    return new BooleanColumn(columnName, table, dataSpec, null, hints);
   }
 
   public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new BooleanColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make());
+    return new BooleanColumn(columnName, table, dataSpec, null, BuildingHints.make());
   }
 
   public static BooleanColumn make(String columnName, Table table) {
-    return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool), null, null,
-        null, BuildingHints.make());
+    return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool),null, BuildingHints.make());
   }
-
-/*
-  public BooleanExpression isGreaterThan(Expression i) {
-    return null;
-  }
-
-  public BooleanExpression isLessThan(Expression i) {
-    return null;
-  }
-*/
 
   public BooleanExpression eq(LiteralBoolean bool) {
     return Equals.make(this, bool);
   }
 
   public BooleanColumn defaultValue(BooleanExpression bool) {
-    return new BooleanColumn(columnName, table, dataSpec, (BooleanExpression) generatedFrom, bool, (BooleanExpression) onUpdate, hints);
+    return new BooleanColumn(columnName, table, dataSpec, bool, hints);
   }
 
   public BooleanExpression<UnaliasedExpression> isFalse() {

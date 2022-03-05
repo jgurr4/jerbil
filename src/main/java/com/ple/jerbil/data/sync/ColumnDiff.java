@@ -16,31 +16,27 @@ public class ColumnDiff implements Diff<Column> {
   @Nullable public final ScalarDiff<String> name;
   @Nullable public final ScalarDiff<Table> table;
   @Nullable public final ScalarDiff<DataSpec> dataSpec;
-  @Nullable public final ScalarDiff<Expression> generatedFrom;
+//  @Nullable public final ScalarDiff<Expression> generatedFrom;
   @Nullable public final ScalarDiff<Expression> defaultValue;
-  @Nullable public final ScalarDiff<Expression> onUpdate;
   @Nullable public final ScalarDiff<BuildingHints> buildingHints;
 //  private final ScalarDiff<String> comment;
 
   protected ColumnDiff(@Nullable ScalarDiff<String> name, @Nullable ScalarDiff<Table> table,
-                       @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable ScalarDiff<Expression> generatedFrom,
-                       @Nullable ScalarDiff<Expression> defaultValue, @Nullable ScalarDiff<Expression> onUpdate,
+                       @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable ScalarDiff<Expression> defaultValue,
                        @Nullable ScalarDiff<BuildingHints> buildingHints) {
     this.name = name;
     this.table = table;
     this.dataSpec = dataSpec;
-    this.generatedFrom = generatedFrom;
+//    this.generatedFrom = generatedFrom;
     this.defaultValue = defaultValue;
 //    this.comment = comment;
-    this.onUpdate = onUpdate;
     this.buildingHints = buildingHints;
   }
 
   public static ColumnDiff make(ScalarDiff<String> name, ScalarDiff<Table> table,
-                                ScalarDiff<DataSpec> dataSpec, ScalarDiff<Expression> generatedFrom,
-                                ScalarDiff<Expression> defaultValue, ScalarDiff<Expression> onUpdate,
+                                ScalarDiff<DataSpec> dataSpec, ScalarDiff<Expression> defaultValue,
                                 ScalarDiff<BuildingHints> buildingHints) {
-    return new ColumnDiff(name, table, dataSpec, generatedFrom, defaultValue, onUpdate, buildingHints);
+    return new ColumnDiff(name, table, dataSpec, defaultValue, buildingHints);
   }
 
   @Override

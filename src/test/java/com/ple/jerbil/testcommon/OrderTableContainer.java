@@ -75,7 +75,7 @@ public class OrderTableContainer extends TableContainer {
     final NumericColumn scale = Column.make("scale", orderTable).asMediumIntUnsigned();
     final NumericColumn quantity = Column.make("quantity", orderTable).asSmallInt().unsigned();
     final NumericColumn price = Column.make("price", orderTable).asDecimal(14, 2);
-    final NumericColumn total = Column.make("total", orderTable).asDecimal(14, 2).generatedFrom(quantity.times(price));
+    final NumericColumn total = Column.make("total", orderTable).asDecimal(14, 2); //.generatedFrom(quantity.times(price))
     final BooleanColumn finalized = Column.make("finalized", orderTable).asBoolean();
     final NumericColumn myDouble = Column.make("myDouble", orderTable).asDouble();
     final NumericColumn myFloat = Column.make("myFloat", orderTable).asFloat();
@@ -83,7 +83,7 @@ public class OrderTableContainer extends TableContainer {
     final DateColumn saleDate = Column.make("saleDate", orderTable).asDate();
     final DateColumn saleTime = Column.make("saleTime", orderTable).asTime();
     final DateColumn saleDateTime = Column.make("saleDateTime", orderTable).asDateTime()
-        .defaultValue(LiteralDate.currentTimestamp).onUpdate(LiteralDate.currentTimestamp);
+        .defaultValue(LiteralDate.currentTimestamp).onUpdateCurrentTimeStamp();
     final NumericColumn myInvis = Column.make("myInvis", orderTable).asInt().invisible();
 //    final StringColumn myChar = Column.make("myChar", orderTable).asChar();
     final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add,

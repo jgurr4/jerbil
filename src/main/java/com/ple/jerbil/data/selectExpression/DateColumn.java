@@ -11,21 +11,17 @@ import java.time.LocalDateTime;
 @Immutable
 public class DateColumn extends Column<DateColumn> implements DateExpression {
 
-  protected DateColumn(String columnName, Table table, DataSpec dataSpec, DateExpression generatedFrom,
-                       @Nullable DateExpression defaultValue, @Nullable DateExpression onUpdate, BuildingHints hints) {
-    super(columnName, table, dataSpec, generatedFrom, defaultValue, onUpdate, hints);
+  protected DateColumn(String columnName, Table table, DataSpec dataSpec, @Nullable DateExpression defaultValue, BuildingHints hints) {
+    super(columnName, table, dataSpec, defaultValue, hints);
   }
 
   @Override
-  public DateColumn make(String columnName, DataSpec dataSpec, Expression generatedFrom) {
-    return new DateColumn(columnName, table, dataSpec, (DateExpression) generatedFrom, (DateExpression) defaultValue,
-        (DateExpression) onUpdate, BuildingHints.make());
+  public DateColumn make(String columnName, DataSpec dataSpec) {
+    return new DateColumn(columnName, table, dataSpec, (DateExpression) defaultValue, BuildingHints.make());
   }
 
-  public static DateColumn make(String columnName, Table table, DataSpec dataSpec, DateExpression generatedFrom,
-                               DateExpression defaultValue, DateExpression onUpdate, BuildingHints hints) {
-    return new DateColumn(columnName, table, dataSpec, generatedFrom, defaultValue,
-        onUpdate, hints);
+  public static DateColumn make(String columnName, Table table, DataSpec dataSpec, DateExpression defaultValue, BuildingHints hints) {
+    return new DateColumn(columnName, table, dataSpec, defaultValue, hints);
   }
 
   @Override
@@ -63,32 +59,32 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
     return null;
   }
 
-  @Override
   public DateColumn onUpdate(Expression onUpdate) {
-    return new DateColumn(columnName, table, dataSpec, (DateExpression) generatedFrom, (DateExpression) defaultValue,
-        (DateExpression) onUpdate, hints);
+    return new DateColumn(columnName, table, dataSpec, (DateExpression) defaultValue, hints);
   }
 
-  @Override
   public DateColumn onUpdate(Enum<?> value) {
     return null;
   }
 
+  public DateColumn onUpdateCurrentTimeStamp() {
+    return new DateColumn(columnName, table, dataSpec, (DateExpression) defaultValue, hints.autoUpdateTime());
+  }
+
   public static DateColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
-    return new DateColumn(columnName, table, dataSpec, null, null, null, hints);
+    return new DateColumn(columnName, table, dataSpec, null, hints);
   }
 
   public static DateColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new DateColumn(columnName, table, dataSpec, null, null, null, BuildingHints.make());
+    return new DateColumn(columnName, table, dataSpec, null, BuildingHints.make());
   }
 
   public static DateColumn make(String columnName, Table table) {
-    return new DateColumn(columnName, table, DataSpec.make(DataType.datetime), null, null,
-        null, BuildingHints.make());
+    return new DateColumn(columnName, table, DataSpec.make(DataType.datetime),null, BuildingHints.make());
   }
 
   public DateColumn defaultValue(DateExpression dateExp) {
-    return new DateColumn(columnName, table, dataSpec, (DateExpression) generatedFrom, dateExp, (DateExpression) onUpdate, hints);
+    return new DateColumn(columnName, table, dataSpec, dateExp, hints);
   }
 
 /*
@@ -120,7 +116,6 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   }
 
   public DateColumn defaultValue(LocalDateTime ldateTime) {
-    return new DateColumn(columnName, table, dataSpec, (DateExpression) generatedFrom, LiteralDate.make(ldateTime),
-        (DateExpression) onUpdate, hints);
+    return new DateColumn(columnName, table, dataSpec, LiteralDate.make(ldateTime), hints);
   }
 }

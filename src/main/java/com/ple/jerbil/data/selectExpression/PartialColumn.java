@@ -30,23 +30,6 @@ public class PartialColumn implements Expression, OrderedExpression {
     return new PartialColumn(name, table);
   }
 
-  /*
-    public BooleanExpression isGreaterThan(Expression i) {
-      return null;
-    }
-
-    public BooleanExpression isLessThan(Expression i) {
-      return null;
-    }
-
-    public BooleanExpression eq(Expression item) {
-      return null;
-    }
-
-    public BooleanExpression eq(Enum<?> value) {
-      return null;
-    }
-  */
   public NumericColumn asInt() {
     return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer));
   }
@@ -113,8 +96,8 @@ public class PartialColumn implements Expression, OrderedExpression {
   }
 
   public NumericColumn bigId() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), null, null,
-        null, BuildingHints.make().primary().autoInc());
+    return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), null,
+        BuildingHints.make().primary().autoInc());
   }
 
   public NumericColumn mediumId() {
