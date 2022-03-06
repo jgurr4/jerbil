@@ -87,7 +87,8 @@ public class TableContainer extends FromExpression {
     return CreateQuery.make(this);
   }
 
-  public Table remove(Column column) {
+  public TableContainer remove(Column... column) {
+    //TODO: Implement this.
     return null;
   }
 

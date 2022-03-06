@@ -866,6 +866,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 
   @Override
   public String toSql(Diff diff) {
+    //TODO: Implement this. Make sure it returns null if diffs are empty.
     return null;
   }
 

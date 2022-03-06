@@ -2,19 +2,18 @@ package com.ple.jerbil.data.sync;
 
 import com.ple.util.IList;
 
-public class VectorDiff<T> {
-
+public class VectorDiff<T, D extends Diff<T>> {
   public final IList<T> create;
   public final IList<T> delete;
-  public final IList<Diff<T>> update;
+  public final IList<D> update;
 
-  protected VectorDiff(IList<T> create, IList<T> delete, IList<Diff<T>> update){
+  protected VectorDiff(IList<T> create, IList<T> delete, IList<D> update){
     this.create = create;
     this.delete = delete;
     this.update = update;
   }
 
-  public static <T2> VectorDiff<T2> make(IList<T2> create, IList<T2> delete, IList<Diff<T2>> update) {
+  public static <T, D extends Diff<T>> VectorDiff<T, D> make(IList<T> create, IList<T> delete, IList<D> update) {
     return new VectorDiff<>(create, delete, update);
   }
 

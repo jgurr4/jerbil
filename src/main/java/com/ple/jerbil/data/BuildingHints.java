@@ -125,4 +125,10 @@ public class BuildingHints {
     return (flags & autoUpdateTime) > 0;
   }
 
+  @Override
+  public String toString() {
+    return "BuildingHints{" +
+        "flags=" + flags +
+        '}';
+  }
 }

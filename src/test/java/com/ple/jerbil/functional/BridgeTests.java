@@ -38,24 +38,46 @@ public class BridgeTests {
   }
 
   @Test
-  void testCompareDatabases() {
+  void testCompareSameDatabase() {
     final DbDiff diffs = DiffService.compareDatabases(testDb.wrap(), testDb.wrap()).unwrap();
     assertNull(diffs.databaseName);
     assertNull(diffs.tables);
     assertEquals(0, diffs.getTotalDiffs());
     assertNull(diffs.toSql());
+  }
+
+  @Test
+  void testCompareDifferentDatabase() {
+    final Column extra = Column.make("extra", order.table).asChar(13);
+    final Column modified = Column.make("phrase", order.table).asVarchar();
+    DatabaseContainer testDb2 = testDb;
+    TableContainer newOrder = testDb2.tables.get("order").add(extra, modified).remove(order.phrase, order.add);
+    newOrder = newOrder.add(extra);
+    testDb2 = testDb2.add(newOrder);
+    //Wrong way to alter immutables:
+//    testDb2.tables = testDb2.tables.remove("order");
+//    testDb2.tables.get("order").columns = testDb2.tables.get("order").columns.put(extra.columnName, extra);
+    final DbDiff diffs = DiffService.compareDatabases(testDb.wrap(), testDb2.wrap()).unwrap();
     //How to access each diff type inside DbDiff: (Note that you would want to iterate over each list.)
-    final IList<TableContainer> createTables = diffs.tables.create;
-    final IList<TableContainer> deleteTables = diffs.tables.delete;
-    final IList<Diff<TableContainer>> updateTables = diffs.tables.update;
-    final IList<TableDiff> tableDiffs = diffs.tableDiffs;
-    final IList<Column> createColumns = tableDiffs.get(0).columns.create;
-    final IList<Column> deleteColumns = tableDiffs.get(0).columns.delete;
-    final IList<Diff<Column>> updateColumns = tableDiffs.get(0).columns.update;
-    final ColumnDiff columnDiff = tableDiffs.get(0).columnDiffs.get(0);
-    if (columnDiff.buildingHints != null) {
-      System.out.println(columnDiff.buildingHints.before);
-      System.out.println(columnDiff.buildingHints.after);
+    // table diff should not be null, and the first entry should be order table with a
+    // create value = add column
+    // delete value = extra column
+    // update value = List<ColumnDiff>
+    // First entry of columnDiffs should be phrase:
+    // dataspec.before: text    dataspec.after: varchar
+    // buildinghints.before: "fulltext, allowNull"   buildinghints.after: ""
+    if (diffs.tables != null) {
+      assertNull(diffs.tables.create);
+      assertNull(diffs.tables.delete);
+      assertNotNull(diffs.tables.update);
+      assertEquals(order.add, diffs.tables.update.get(0).columns.create.get(0));
+      assertEquals(extra, diffs.tables.update.get(0).columns.delete.get(0));
+      if (diffs.tables.update.get(0).columns.update != null) {
+        assertEquals(BuildingHints.make().allowNull().fulltext(), diffs.tables.update.get(0).columns.update.get(0).buildingHints.before);
+        assertEquals(BuildingHints.make(), diffs.tables.update.get(0).columns.update.get(0).buildingHints.after);
+        assertEquals(DataType.varchar, diffs.tables.update.get(0).columns.update.get(0).dataSpec.before.dataType);
+        assertEquals(DataType.varchar, diffs.tables.update.get(0).columns.update.get(0).dataSpec.after.dataType);
+      }
     }
   }
 
@@ -70,10 +92,10 @@ public class BridgeTests {
     final Index rightIdx = item.indexes.get("primary");
     final IndexDiff indexDiff = DiffService.compareIndexes(leftIdx, rightIdx);
     assertNull(indexDiff.indexName);
-    assertEquals(IArrayList.make(inventory.playerId), indexDiff.columns.create);
-    assertNull(indexDiff.columns.delete);
-    assertEquals(inventory.table.tableName, indexDiff.columnDiffs.get(0).table.before);
-    assertEquals(item.table.tableName, indexDiff.columnDiffs.get(0).table.after);
+    assertEquals(IArrayList.make(inventory.playerId), indexDiff.indexedColumns.create);
+    assertNull(indexDiff.indexedColumns.delete);
+    assertEquals(inventory.table.tableName, indexDiff.indexedColumns.update.get(0).column.before.table);
+    assertEquals(item.table.tableName, indexDiff.indexedColumns.update.get(0).column.after.table);
   }
 
   @Test

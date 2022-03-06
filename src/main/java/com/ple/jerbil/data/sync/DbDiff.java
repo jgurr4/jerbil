@@ -8,8 +8,7 @@ import com.ple.util.IList;
 public class DbDiff implements Diff<Database> {
 
   public final ScalarDiff<String> databaseName;
-  public final IList<TableDiff> tableDiffs;
-  public final VectorDiff<TableContainer> tables;
+  public final VectorDiff<TableContainer, TableDiff> tables;
 //  public final VectorDiff<ViewTable> views;
 //  public final ScalarDiff<CharSet> charSet;
 //  public final VectorDiff<StoredProcedure> procedures;
@@ -17,9 +16,8 @@ public class DbDiff implements Diff<Database> {
 //  public final VectorDiff<StoredEvent> events;
 //  public final VectorDiff<StoredTrigger> triggers;
 
-  protected DbDiff(ScalarDiff<String> databaseName, IList<TableDiff> tableDiffs, VectorDiff<TableContainer> tables) {
+  protected DbDiff(ScalarDiff<String> databaseName, VectorDiff<TableContainer, TableDiff> tables) {
     this.databaseName = databaseName;
-    this.tableDiffs = tableDiffs;
     this.tables = tables;
 //    this.views = views;
 //    this.charSet = charSet;
@@ -29,8 +27,8 @@ public class DbDiff implements Diff<Database> {
 //    this.triggers = triggers;
   }
 
-  public static DbDiff make(ScalarDiff<String> name, IList<TableDiff> tableDiffs, VectorDiff<TableContainer> tables) {
-    return new DbDiff(name, tableDiffs, tables);
+  public static DbDiff make(ScalarDiff<String> name, VectorDiff<TableContainer, TableDiff> tables) {
+    return new DbDiff(name, tables);
   }
 
   /**
@@ -39,7 +37,10 @@ public class DbDiff implements Diff<Database> {
    * @return String
    */
   public String toSql() {
-    return DataGlobal.bridge.getGenerator().toSql(this);
+    if (this.tables != null || this.databaseName != null) {
+      return DataGlobal.bridge.getGenerator().toSql(this);
+    }
+    return null;
   }
 
   public DbDiff filter(DdlOption ddlOption) {
@@ -48,7 +49,8 @@ public class DbDiff implements Diff<Database> {
 
   @Override
   public int getTotalDiffs() {
-    return 1;
+    //TODO: Implement this.
+    return 0;
   }
 
 }
