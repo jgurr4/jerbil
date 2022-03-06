@@ -51,21 +51,10 @@ public class BridgeTests {
     final Column extra = Column.make("extra", order.table).asChar(13);
     final Column modified = Column.make("phrase", order.table).asVarchar();
     DatabaseContainer testDb2 = testDb;
-    TableContainer newOrder = testDb2.tables.get("order").add(extra, modified).remove(order.phrase, order.add);
+    TableContainer newOrder = testDb2.tables.get("order").add(extra, modified).remove(order.add);
     newOrder = newOrder.add(extra);
     testDb2 = testDb2.add(newOrder);
-    //Wrong way to alter immutables:
-//    testDb2.tables = testDb2.tables.remove("order");
-//    testDb2.tables.get("order").columns = testDb2.tables.get("order").columns.put(extra.columnName, extra);
     final DbDiff diffs = DiffService.compareDatabases(testDb.wrap(), testDb2.wrap()).unwrap();
-    //How to access each diff type inside DbDiff: (Note that you would want to iterate over each list.)
-    // table diff should not be null, and the first entry should be order table with a
-    // create value = add column
-    // delete value = extra column
-    // update value = List<ColumnDiff>
-    // First entry of columnDiffs should be phrase:
-    // dataspec.before: text    dataspec.after: varchar
-    // buildinghints.before: "fulltext, allowNull"   buildinghints.after: ""
     if (diffs.tables != null) {
       assertNull(diffs.tables.create);
       assertNull(diffs.tables.delete);
@@ -75,7 +64,7 @@ public class BridgeTests {
       if (diffs.tables.update.get(0).columns.update != null) {
         assertEquals(BuildingHints.make().allowNull().fulltext(), diffs.tables.update.get(0).columns.update.get(0).buildingHints.before);
         assertEquals(BuildingHints.make(), diffs.tables.update.get(0).columns.update.get(0).buildingHints.after);
-        assertEquals(DataType.varchar, diffs.tables.update.get(0).columns.update.get(0).dataSpec.before.dataType);
+        assertEquals(DataType.text, diffs.tables.update.get(0).columns.update.get(0).dataSpec.before.dataType);
         assertEquals(DataType.varchar, diffs.tables.update.get(0).columns.update.get(0).dataSpec.after.dataType);
       }
     }

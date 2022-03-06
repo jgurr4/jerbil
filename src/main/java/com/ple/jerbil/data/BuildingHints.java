@@ -2,6 +2,8 @@ package com.ple.jerbil.data;
 
 import com.ple.jerbil.data.GenericInterfaces.Immutable;
 
+import java.util.Objects;
+
 /**
  * BuildingHints allows users to skip manually defining IndexSpec for each index of their tables.
  * The DatabaseBuilder will review the flags of each column and generate the IndexSpecs based on that.
@@ -123,6 +125,19 @@ public class BuildingHints {
 
   public boolean isAutoUpdateTime() {
     return (flags & autoUpdateTime) > 0;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof BuildingHints)) return false;
+    BuildingHints that = (BuildingHints) o;
+    return flags == that.flags;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(flags);
   }
 
   @Override

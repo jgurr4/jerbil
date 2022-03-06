@@ -16,12 +16,15 @@ import java.util.Objects;
 public class TableContainer extends FromExpression {
   public final Table table;
   public final IMap<String, Column> columns;
-  @Nullable public final StorageEngine storageEngine;
+  public final StorageEngine storageEngine;
   @Nullable public final IMap<String, Index> indexes;
   @Nullable public final NumericColumn autoIncrementColumn;
 
-  protected TableContainer(Table table, IMap<String, Column> columns, @Nullable StorageEngine storageEngine,
+  protected TableContainer(Table table, IMap<String, Column> columns, StorageEngine storageEngine,
                            @Nullable IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
+    if (storageEngine == null) {
+      storageEngine = StorageEngine.simple;
+    }
     this.table = table;
     this.columns = columns;
     this.storageEngine = storageEngine;
@@ -35,7 +38,7 @@ public class TableContainer extends FromExpression {
   }
 
   public static TableContainer make(Table table, IMap<String, Column> columns) {
-    return new TableContainer(table, columns, null, null, null);
+    return new TableContainer(table, columns, StorageEngine.simple, null, null);
   }
 
   public TableContainer add(Column... columnArr) {
@@ -87,9 +90,12 @@ public class TableContainer extends FromExpression {
     return CreateQuery.make(this);
   }
 
-  public TableContainer remove(Column... column) {
-    //TODO: Implement this.
-    return null;
+  public TableContainer remove(Column... newColumns) {
+    IMap<String, Column> nc = columns;
+    for (Column column : newColumns) {
+      nc = nc.remove(column.columnName);
+    }
+    return TableContainer.make(table, nc, storageEngine, indexes, autoIncrementColumn);
   }
 
   public PartialInsertQuery insert() {

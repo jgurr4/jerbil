@@ -12,10 +12,8 @@ import com.ple.util.IArrayList;
 import com.ple.util.IEntry;
 import com.ple.util.IList;
 import com.ple.util.IMap;
-import reactor.core.publisher.Flux;
+import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
-
-import java.util.Objects;
 
 /**
  * Contains static methods for obtaining all differences between existing database structure and Database Object.
@@ -37,7 +35,8 @@ public class DiffService {
     if (!leftDb.database.databaseName.equals(rightDb.database.databaseName)) {
       nameDiff = ScalarDiff.make(leftDb.database.databaseName, rightDb.database.databaseName);
     }
-    VectorDiff<TableContainer, TableDiff> tablesDiff = compareListOfTables(leftDb.tables.values(), rightDb.tables.values());
+    VectorDiff<TableContainer, TableDiff> tablesDiff = compareListOfTables(leftDb.tables.values(),
+        rightDb.tables.values());
     return DbDiff.make(nameDiff, tablesDiff);
   }
 
@@ -62,7 +61,8 @@ public class DiffService {
     return null;
   }
 
-  public static IList<TableContainer> getMissingTables(IList<TableContainer> leftTables, IList<TableContainer> rightTables) {
+  public static IList<TableContainer> getMissingTables(IList<TableContainer> leftTables,
+                                                       IList<TableContainer> rightTables) {
     IList<TableContainer> result = IArrayList.make();
     for (TableContainer lTable : leftTables) {
       if (!rightTables.contains(lTable) && !checkTableNameInList(rightTables, lTable)) {
@@ -118,15 +118,85 @@ public class DiffService {
   public static TableDiff compareTables(TableContainer t1, TableContainer t2) {
     // Should compare columns and indexes separately.
 //    final VectorDiff<Index> indexDiff = compareIndexes(c1, c2);
-/*
-//FIXME: broken after updates to database and tables.
-    ScalarDiff<String> nameDiff = t1.tableName.equals(t2.tableName) ? null : ScalarDiff.make(t1.tableName, t2.tableName);
-    VectorDiff<Column> columnsDiff = compareListOfColumns(t1.columns, t2.columns);
-    ScalarDiff<StorageEngine> storageEngineDiff = t1.storageEngine.name().equals(t2.storageEngine.name()) ? null : ScalarDiff.make(
-        t1.storageEngine, t2.storageEngine);
-    return TableDiff.make(nameDiff, columnsDiff, storageEngineDiff);
-*/
+    ScalarDiff<String> nameDiff = t1.table.tableName.equals(t2.table.tableName) ? null : ScalarDiff.make(
+        t1.table.tableName, t2.table.tableName);
+    VectorDiff<Column, ColumnDiff> columnDiffs = compareListOfColumns(t1.columns.values(), t2.columns.values());
+    VectorDiff<Index, IndexDiff> indexDiffs = compareListOfIndexes(t1.indexes, t2.indexes);
+    ScalarDiff<StorageEngine> storageEngineDiff = t1.storageEngine.name()
+        .equals(t2.storageEngine.name()) ? null : ScalarDiff.make(t1.storageEngine, t2.storageEngine);
+    if (nameDiff != null || columnDiffs != null || indexDiffs != null || storageEngineDiff != null) {
+      return TableDiff.make(nameDiff, columnDiffs, indexDiffs, storageEngineDiff);
+    }
     return null;
+  }
+
+  private static VectorDiff<Index, IndexDiff> compareListOfIndexes(IMap<String, Index> leftIndexes, IMap<String, Index> rightIndexes) {
+    IList<Index> create = IArrayList.empty;
+    IList<Index> delete = IArrayList.empty;
+    IList<IndexDiff> update = IArrayList.empty;
+    for (Index leftIndex : leftIndexes.values()) {
+      for (Index rightIndex : rightIndexes.values()) {
+        if (leftIndexes.get(rightIndex.indexName) == null) {
+          delete = delete.add(rightIndex);
+        }
+        if (rightIndexes.get(leftIndex.indexName) == null) {
+          create = create.add(leftIndex);
+        }
+        if (leftIndexes.get(rightIndex.indexName) != null && !leftIndexes.get(rightIndex.indexName).equals(rightIndex)) {
+          ScalarDiff<IndexType> typeDiff = null;
+          ScalarDiff<String> nameDiff = null;
+          ScalarDiff<Table> tableDiff = null;
+          VectorDiff<IndexedColumn, IndexedColumnDiff> indexedColumnsDiffs = compareListOfIndexedColumns(leftIndex.indexedColumns,
+              rightIndex.indexedColumns);
+          if (!leftIndex.indexName.equals(rightIndex.indexName)) {
+            nameDiff = ScalarDiff.make(leftIndex.indexName, rightIndex.indexName);
+          }
+          if (!leftIndex.type.equals(rightIndex.type)) {
+            typeDiff = ScalarDiff.make(leftIndex.type, rightIndex.type);
+          }
+          if (!leftIndex.table.equals(rightIndex.table)) {
+            tableDiff = ScalarDiff.make(leftIndex.table, rightIndex.table);
+          }
+          update = update.add(IndexDiff.make(typeDiff, nameDiff, tableDiff, indexedColumnsDiffs));
+        }
+      }
+    }
+    return VectorDiff.make(create, delete, update);
+  }
+
+  private static VectorDiff<IndexedColumn, IndexedColumnDiff> compareListOfIndexedColumns(IMap<String, IndexedColumn> leftIndexedColumns,
+      IMap<String, IndexedColumn> rightIndexedColumns) {
+    IList<IndexedColumn> create = IArrayList.empty;
+    IList<IndexedColumn> delete = IArrayList.empty;
+    IList<IndexedColumnDiff> update = IArrayList.empty;
+    for (IndexedColumn rightColumn : rightIndexedColumns.values()) {
+      for (IndexedColumn leftColumn : leftIndexedColumns.values()) {
+        if (leftIndexedColumns.get(rightColumn.column.columnName) == null) {
+          delete = delete.add(rightColumn);
+        }
+        if (rightIndexedColumns.get(leftColumn.column.columnName) == null) {
+          create = create.add(leftColumn);
+        }
+        if (leftIndexedColumns.get(rightColumn.column.columnName) != null && !leftIndexedColumns.get(
+            rightColumn.column.columnName).equals(rightColumn)) {
+          final IndexedColumn leftIndexedColumn = leftIndexedColumns.get(rightColumn.column.columnName);
+          ScalarDiff<Column> columnDiff = null;
+          ScalarDiff<Integer> prefixDiff = null;
+          ScalarDiff<SortOrder> sortOrderDiff = null;
+          if (!leftIndexedColumn.column.equals(rightColumn.column)) {
+            columnDiff = ScalarDiff.make(leftIndexedColumn.column, rightColumn.column);
+          }
+          if (leftIndexedColumn.prefixSize != rightColumn.prefixSize) {
+            prefixDiff = ScalarDiff.make(leftIndexedColumn.prefixSize, rightColumn.prefixSize);
+          }
+          if (leftIndexedColumn.sortOrder.equals(rightColumn.sortOrder)) {
+            sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, rightColumn.sortOrder);
+          }
+          update = update.add(IndexedColumnDiff.make(columnDiff, prefixDiff, sortOrderDiff));
+        }
+      }
+    }
+    return VectorDiff.make(create, delete, update);
   }
 
   public static TableContainer getTableMatchingName(IList<TableContainer> tables, String name) {
@@ -139,8 +209,7 @@ public class DiffService {
     return result;
   }
 
-  public static VectorDiff<Column, ColumnDiff> compareListOfColumns(IList<Column> leftColumns,
-                                                                    IList<Column> rightColumns) {
+  public static VectorDiff<Column, ColumnDiff> compareListOfColumns(IList<Column> leftColumns, IList<Column> rightColumns) {
     IList<Column> create = getMissingColumns(leftColumns, rightColumns);
     final IList<Column> noExactMatchesList = filterOutMatchingColumns(leftColumns, rightColumns);
     IList<Column> matches = IArrayList.make();
@@ -212,6 +281,7 @@ public class DiffService {
     return result;
   }
 
+/*
   public static IList<Diff<Index>> getListOfIndexDiffs(IList<Index> leftIndexes, IList<Index> rightIndexes) {
     return Flux.fromIterable(rightIndexes)
         .filter(Objects::nonNull)
@@ -230,9 +300,9 @@ public class DiffService {
     }
     return null;
   }
+*/
 
-  public static IList<ColumnDiff> getListOfColumnDiffs(IList<Column> leftColumns,
-                                                       IList<Column> rightColumns) {
+  public static IList<ColumnDiff> getListOfColumnDiffs(IList<Column> leftColumns, IList<Column> rightColumns) {
     IList<ColumnDiff> columnDiffs = IArrayList.empty;
     for (Column rightColumn : rightColumns) {
       if (rightColumn != null) {
@@ -240,21 +310,48 @@ public class DiffService {
             compareColumns(getColumnMatchingName(leftColumns, rightColumn.columnName), rightColumn));
       }
     }
-    return columnDiffs;
+    if (columnDiffs.size() > 0) {
+      return columnDiffs;
+    }
+    return null;
+  }
+
+  public static ColumnDiff compareColumns(Column c1, Column c2) {
+    final ScalarDiff<Table> tableDiff = c1.table.equals(c2.table) ? null : ScalarDiff.make(c1.table, c2.table);
+    final ScalarDiff<String> nameDiff = c1.columnName.equals(c2.columnName) ? null : ScalarDiff.make(c1.columnName,
+        c2.columnName);
+    final ScalarDiff<DataSpec> dataSpecDiff = c1.dataSpec.equals(c2.dataSpec) ? null : ScalarDiff.make(
+        c1.dataSpec, c2.dataSpec);
+//    final ScalarDiff<Expression> generatedDiff = c1.generatedFrom.equals(
+//        c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
+    ScalarDiff<Expression> defaultDiff = null;
+    if (c1.defaultValue != null && c2.defaultValue != null) {
+      defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(
+          c1.defaultValue, c2.defaultValue);
+    } else if (c1.defaultValue == null && c2.defaultValue != null) {
+      defaultDiff = ScalarDiff.make(null, c2.defaultValue);
+    } else if (c1.defaultValue != null & c2.defaultValue == null) {
+      defaultDiff = ScalarDiff.make(c1.defaultValue, null);
+    }
+    final ScalarDiff<BuildingHints> hintsDiff = c1.hints.equals(c2.hints) ? null : ScalarDiff.make(
+        c1.hints, c2.hints);
+    return ColumnDiff.make(nameDiff, tableDiff, dataSpecDiff, defaultDiff, hintsDiff);
   }
 
   public static IndexDiff compareIndexes(Index leftIndex, Index rightIndex) {
+    ScalarDiff<Table> tableDiff = null;
     ScalarDiff<IndexType> typeDiff = leftIndex.type.equals(rightIndex.type) ? null : ScalarDiff.make(leftIndex.type,
         rightIndex.type);
     ScalarDiff<String> nameDiff = leftIndex.indexName.equals(rightIndex.indexName) ? null : ScalarDiff.make(
         leftIndex.indexName,
         rightIndex.indexName);
 //    VectorDiff<Column> columnsDiff = compareListOfColumns(leftIndex.getColumns(), rightIndex.getColumns());
-    VectorDiff<IndexedColumn, IndexedColumnDiff> indexedColumns = getIndexedColumnDiff(leftIndex.indexedColumns,
+    VectorDiff<IndexedColumn, IndexedColumnDiff> indexedColumns = compareListOfIndexedColumns(leftIndex.indexedColumns,
         rightIndex.indexedColumns);
-    IList<IndexedColumnDiff> indexedColumnsDiff = getListOfIndexedColumnDiffs(leftIndex.indexedColumns,
-        rightIndex.indexedColumns);
-    return IndexDiff.make(typeDiff, nameDiff, indexedColumns);
+    if (!leftIndex.table.equals(rightIndex.table)) {
+      tableDiff = ScalarDiff.make(leftIndex.table, rightIndex.table);
+    }
+    return IndexDiff.make(typeDiff, nameDiff, tableDiff, indexedColumns);
   }
 
   private static IList<IndexedColumnDiff> getListOfIndexedColumnDiffs(IMap<String, IndexedColumn> leftIndexedColumns,
@@ -297,57 +394,6 @@ public class DiffService {
     //FIXME: Use observability bridge here for logging.
     System.out.println("IndexedColumn not found in list.");
     return null;
-  }
-
-  private static VectorDiff<IndexedColumn, IndexedColumnDiff> getIndexedColumnDiff(IMap<String, IndexedColumn> leftIndexedColumns,
-                                                                                   IMap<String, IndexedColumn> rightIndexedColumns) {
-    IList<IndexedColumn> create = IArrayList.empty;
-    IList<IndexedColumn> delete = IArrayList.empty;
-    IList<IndexedColumnDiff> update = IArrayList.empty;
-    boolean exists = false;
-    for (IndexedColumn rightColumn : rightIndexedColumns.values()) {
-      for (IndexedColumn leftColumn : leftIndexedColumns.values()) {
-        if (leftIndexedColumns.get(rightColumn.column.columnName) == null) {
-          delete = delete.add(rightColumn);
-        }
-        if (rightIndexedColumns.get(leftColumn.column.columnName) == null) {
-          create = create.add(leftColumn);
-        }
-        if (leftIndexedColumns.get(rightColumn.column.columnName) != null && !leftIndexedColumns.get(
-            rightColumn.column.columnName).equals(rightColumn)) {
-          final IndexedColumn leftIndexedColumn = leftIndexedColumns.get(rightColumn.column.columnName);
-          ScalarDiff<Column> columnDiff = null;
-          ScalarDiff<Integer> prefixDiff = null;
-          ScalarDiff<SortOrder> sortOrderDiff = null;
-          if (!leftIndexedColumn.column.equals(rightColumn.column)) {
-            columnDiff = ScalarDiff.make(leftIndexedColumn.column, rightColumn.column);
-          }
-          if (leftIndexedColumn.prefixSize != rightColumn.prefixSize) {
-            prefixDiff = ScalarDiff.make(leftIndexedColumn.prefixSize, rightColumn.prefixSize);
-          }
-          if (leftIndexedColumn.sortOrder.equals(rightColumn.sortOrder)) {
-            sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, rightColumn.sortOrder);
-          }
-          update = update.add(IndexedColumnDiff.make(columnDiff, prefixDiff, sortOrderDiff));
-        }
-      }
-    }
-    return VectorDiff.make(create, delete, update);
-  }
-
-  public static ColumnDiff compareColumns(Column c1, Column c2) {
-    final ScalarDiff<Table> tableDiff = c1.table.equals(c2.table) ? null : ScalarDiff.make(c1.table, c2.table);
-    final ScalarDiff<String> nameDiff = c1.columnName.equals(c2.columnName) ? null : ScalarDiff.make(c1.columnName,
-        c2.columnName);
-    final ScalarDiff<DataSpec> dataSpecDiff = c1.dataSpec.equals(c2.dataSpec) ? null : ScalarDiff.make(
-        c1.dataSpec, c2.dataSpec);
-//    final ScalarDiff<Expression> generatedDiff = c1.generatedFrom.equals(
-//        c2.generatedFrom) ? null : ScalarDiff.make(c1.generatedFrom, c2.generatedFrom);
-    final ScalarDiff<Expression> defaultDiff = c1.defaultValue.equals(c2.defaultValue) ? null : ScalarDiff.make(
-        c1.defaultValue, c2.defaultValue);
-    final ScalarDiff<BuildingHints> hintsDiff = c1.hints.equals(c2.hints) ? null : ScalarDiff.make(
-        c1.hints, c2.hints);
-    return ColumnDiff.make(nameDiff, tableDiff, dataSpecDiff, defaultDiff, hintsDiff);
   }
 
   public static boolean checkTableNameInList(IList<TableContainer> tables, TableContainer t1) {
