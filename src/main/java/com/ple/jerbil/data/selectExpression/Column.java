@@ -1,7 +1,7 @@
 package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.jerbil.data.translator.LanguageGenerator;

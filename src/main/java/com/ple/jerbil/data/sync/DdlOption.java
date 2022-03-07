@@ -43,4 +43,16 @@ public class DdlOption {
     return new DdlOption(0b111);
   }
 
+  public boolean isUpdate() {
+    return (option & update) > 0;
+  }
+
+  public boolean isDelete() {
+    return (option & delete) > 0;
+  }
+
+  public boolean isCreate() {
+    return (option & create) > 0;
+  }
+
 }

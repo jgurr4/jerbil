@@ -14,4 +14,12 @@ public class ScalarDiff<T> {
     return new ScalarDiff<>(before, after);
   }
 
+  public ScalarDiff<T> filter(DdlOption ddlOption) {
+    if (!ddlOption.isUpdate()) {
+      if (!before.equals(after)) {
+        return null;
+      }
+    }
+    return this;
+  }
 }

@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.sync;
 
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import com.ple.jerbil.data.IndexedColumn;
 import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -28,5 +28,13 @@ public class IndexedColumnDiff implements Diff<IndexedColumn> {
   @Override
   public int getTotalDiffs() {
     return 0;
+  }
+
+  @Override
+  public IndexedColumnDiff filter(DdlOption ddlOption) {
+    ScalarDiff<Column> newColumn = column.filter(ddlOption);
+    ScalarDiff<Integer> newPrefixSize = prefixSize.filter(ddlOption);
+    ScalarDiff<SortOrder> newSortOrder = sortOrder.filter(ddlOption);
+    return new IndexedColumnDiff(newColumn, newPrefixSize, newSortOrder);
   }
 }

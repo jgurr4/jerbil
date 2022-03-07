@@ -4,7 +4,7 @@ import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.DatabaseBuilder;
 import com.ple.jerbil.data.DatabaseContainer;
-import com.ple.jerbil.data.GenericInterfaces.Failable;
+import com.ple.util.Failable;
 import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.sync.DbDiff;
@@ -18,7 +18,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SyncTests {
+public class BridgeTests {
   final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
@@ -26,7 +26,7 @@ public class SyncTests {
   final InventoryTableContainer inventory = testDb.inventory;
   final OrderTableContainer order = testDb.order;
 
-  public SyncTests() {
+  public BridgeTests() {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(
         props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),

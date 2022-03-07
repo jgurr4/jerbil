@@ -1,9 +1,11 @@
 package com.ple.jerbil.data.sync;
 
-import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.TableContainer;
+import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.util.IList;
+
+import java.util.List;
 
 public class DbDiff implements Diff<Database> {
 
@@ -44,7 +46,9 @@ public class DbDiff implements Diff<Database> {
   }
 
   public DbDiff filter(DdlOption ddlOption) {
-    return null;
+    final VectorDiff<TableContainer, TableDiff> newTables = tables.filter(ddlOption);
+    ScalarDiff<String> nameDiff = databaseName.filter(ddlOption);
+    return DbDiff.make(nameDiff, newTables);
   }
 
   @Override

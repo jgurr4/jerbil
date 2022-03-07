@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.query;
 
-import com.ple.jerbil.data.GenericInterfaces.DelayedImmutable;
+import com.ple.util.DelayedImmutable;
 import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;

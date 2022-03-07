@@ -1,7 +1,7 @@
 package com.ple.jerbil.data.query;
 
 
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.PotentialQuery;
 import com.ple.jerbil.data.selectExpression.Column;

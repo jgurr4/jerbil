@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;

@@ -1,17 +1,14 @@
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.IndexType;
-import com.ple.jerbil.data.IndexedColumn;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
-import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
-import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
 

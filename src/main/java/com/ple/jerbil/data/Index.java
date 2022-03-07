@@ -1,10 +1,9 @@
 package com.ple.jerbil.data;
 
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.util.*;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 

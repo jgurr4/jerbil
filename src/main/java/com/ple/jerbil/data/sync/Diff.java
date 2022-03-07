@@ -10,4 +10,5 @@ import com.ple.util.IMap;
  */
 public interface Diff<T> {
   int getTotalDiffs();
+  <D extends Diff<T>> D filter(DdlOption ddlOption);
 }

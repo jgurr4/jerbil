@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.sync;
 
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.StorageEngine;
 import com.ple.jerbil.data.query.TableContainer;
@@ -35,6 +35,27 @@ public class TableDiff implements Diff<TableContainer> {
   @Override
   public int getTotalDiffs() {
     return 0;
+  }
+
+  @Override
+  public TableDiff filter(DdlOption ddlOption) {
+    VectorDiff<Column, ColumnDiff> newColumns = null;
+    ScalarDiff<StorageEngine> newEngine = null;
+    VectorDiff<Index, IndexDiff> newIndexes = null;
+    ScalarDiff<String> newTableName = null;
+    if (columns != null) {
+      newColumns = columns.filter(ddlOption);
+    }
+    if (storageEngine != null) {
+       newEngine = storageEngine.filter(ddlOption);
+    }
+    if (indexes != null) {
+       newIndexes = indexes.filter(ddlOption);
+    }
+    if (tableName != null) {
+       newTableName = tableName.filter(ddlOption);
+    }
+    return new TableDiff(newTableName, newColumns, newIndexes, newEngine);
   }
 
 }

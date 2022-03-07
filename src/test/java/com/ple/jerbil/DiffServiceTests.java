@@ -1,8 +1,6 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.GenericInterfaces.Failable;
-import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
@@ -12,7 +10,6 @@ import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
-import com.ple.util.IList;
 import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +17,8 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BridgeTests {
+// This class can contain non-functional tests for the DbContainer sync method with filters and the diffServices methods.
+public class DiffServiceTests {
 
   final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
@@ -29,7 +27,7 @@ public class BridgeTests {
   final InventoryTableContainer inventory = testDb.inventory;
   final OrderTableContainer order = testDb.order;
 
-  public BridgeTests() {
+  public DiffServiceTests() {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(
         props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
@@ -62,7 +60,8 @@ public class BridgeTests {
       assertEquals(order.add, diffs.tables.update.get(0).columns.create.get(0));
       assertEquals(extra, diffs.tables.update.get(0).columns.delete.get(0));
       if (diffs.tables.update.get(0).columns.update != null) {
-        assertEquals(BuildingHints.make().allowNull().fulltext(), diffs.tables.update.get(0).columns.update.get(0).buildingHints.before);
+        assertEquals(BuildingHints.make().allowNull().fulltext(),
+            diffs.tables.update.get(0).columns.update.get(0).buildingHints.before);
         assertEquals(BuildingHints.make(), diffs.tables.update.get(0).columns.update.get(0).buildingHints.after);
         assertEquals(DataType.text, diffs.tables.update.get(0).columns.update.get(0).dataSpec.before.dataType);
         assertEquals(DataType.varchar, diffs.tables.update.get(0).columns.update.get(0).dataSpec.after.dataType);
@@ -74,31 +73,29 @@ public class BridgeTests {
   void testDbDiffFilter() {
     final Table alteredItem = Table.make("item", testDb.database);
     final NumericColumn price = Column.make("price", alteredItem).asInt();
-    final IMap<String, Column> alteredItemColumns = IArrayMap.make(item.itemId, item.name, item.type, price);
-    //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
+    final IMap<String, Column> alteredItemColumns = IArrayMap.make(item.itemId.columnName, item.itemId,
+        item.name.columnName, item.name, item.type.columnName, item.type, price.columnName, price);
     final Table extraTable = Table.make("extra", testDb.database);
-    final IMap<String, Column> extraTableColumns = IArrayMap.make(Column.make("id", extraTable).bigId());
-    //FIXME: Find out how this altered table can be added to the database. Perhaps use DatabaseContainer.
-    final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns, StorageEngine.transactional, null, null);
+    final NumericColumn id = Column.make("id", extraTable).bigId();
+    final IMap<String, Column> extraTableColumns = IArrayMap.make(id.columnName, id);
+    final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns,
+        StorageEngine.transactional, null, null);
     final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
-    final DbDiff diff = DiffService.compareDatabases(testDb.wrap(), DatabaseContainer.make(Database.make("myDb"),
-        IArrayMap.make(user, player, alteredItemTableContainer, extraTableContainer)
-    ).wrap()).unwrap();
-//    diff.filter(DdlOption.make(0b010));
-    //inventory needs create, alteredItem needs update, extraTable needs delete.
-//    assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.length());
-//    assertEquals(0, diff.filter(DdlOption.make().create()).tables.delete.length());
-//    assertEquals(0, diff.filter(DdlOption.make().create()).tables.update.length());
-//    assertEquals(0, diff.filter(DdlOption.make().delete()).tables.create.length());
-//    assertEquals(1, diff.filter(DdlOption.make().delete()).tables.delete.length());
-//    assertEquals(0, diff.filter(DdlOption.make().delete()).tables.update.length());
-//    assertEquals(0, diff.filter(DdlOption.make().update()).tables.create.length());
-//    assertEquals(0, diff.filter(DdlOption.make().update()).tables.delete.length());
-//    assertEquals(1, diff.filter(DdlOption.make().update()).tables.update.length());
-    // How to access table properties, column properties and columnDiffs:
-    // diff.filter().tables.create.get(0).engine;
-    // diff.filter().tables.update.get(0).create.get(0).dataSpec;
-    // diff.filter().tables.update.get(0).update.get(0). ;
+    final DatabaseContainer myDb = DatabaseContainer.make(Database.make("myDb"),
+        IArrayMap.make(user.tableName, user, player.tableName, player, inventory.tableName, inventory, alteredItemTableContainer.table.tableName, alteredItemTableContainer,
+            extraTableContainer.table.tableName, extraTableContainer));
+    final DbDiff diff = DiffService.compareDatabases(testDb.wrap(), myDb.wrap()).unwrap();
+    assertEquals("test", diff.databaseName.before);
+    assertEquals("myDb", diff.databaseName.after);
+    assertEquals(1, diff.filter(DdlOption.make().create()).tables.create.size());
+    assertNull(diff.filter(DdlOption.make().create()).tables.delete);
+    assertNull(diff.filter(DdlOption.make().create()).tables.update);
+    assertNull(diff.filter(DdlOption.make().delete()).tables.create);
+    assertEquals(1, diff.filter(DdlOption.make().delete()).tables.delete.size());
+    assertNull(diff.filter(DdlOption.make().delete()).tables.update);
+    assertNull(diff.filter(DdlOption.make().update()).tables.create);
+    assertNull(diff.filter(DdlOption.make().update()).tables.delete);
+    assertEquals(1, diff.filter(DdlOption.make().update()).tables.update.size());
   }
 
   @Test
@@ -182,12 +179,15 @@ public class BridgeTests {
   @Test
   void testGetExtraIndexes() {
   }
+
   @Test
   void testGetMissingIndexes() {
   }
+
   @Test
   void testGetMatchingIndexes() {
   }
+
   @Test
   void testGetListOfIndexDiffs() {
   }

@@ -1,6 +1,6 @@
 package com.ple.jerbil.data;
 
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;

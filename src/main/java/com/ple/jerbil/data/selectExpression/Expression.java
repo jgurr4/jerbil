@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 
 /**
  * Expression is more specific than SelectExpression because it doesn't include AliasedExpressions.

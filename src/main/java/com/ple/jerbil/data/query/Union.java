@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.query;
 
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 
 @Immutable
 public class Union {

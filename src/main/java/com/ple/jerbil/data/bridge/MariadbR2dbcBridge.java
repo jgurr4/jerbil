@@ -2,7 +2,7 @@ package com.ple.jerbil.data.bridge;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.*;
-import com.ple.jerbil.data.GenericInterfaces.Immutable;
+import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.jerbil.data.translator.MariadbLanguageGenerator;
