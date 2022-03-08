@@ -109,10 +109,9 @@ public class DiffServiceTests {
     final Index rightIdx = item.indexes.get("primary");
     final IndexDiff indexDiff = DiffService.compareIndexes(leftIdx, rightIdx);
     assertNull(indexDiff.indexName);
-    assertEquals(IArrayList.make(inventory.playerId), indexDiff.indexedColumns.create);
+    assertEquals(inventory.playerId, indexDiff.indexedColumns.create.get(0).column);
     assertNull(indexDiff.indexedColumns.delete);
-    assertEquals(inventory.table.tableName, indexDiff.indexedColumns.update.get(0).column.before.table);
-    assertEquals(item.table.tableName, indexDiff.indexedColumns.update.get(0).column.after.table);
+    assertEquals(inventory.indexes.get("primary").indexedColumns.get("playerId").column, indexDiff.indexedColumns.create.get(0).column);
   }
 
   @Test

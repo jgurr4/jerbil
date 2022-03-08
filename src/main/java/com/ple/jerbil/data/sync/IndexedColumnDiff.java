@@ -32,9 +32,18 @@ public class IndexedColumnDiff implements Diff<IndexedColumn> {
 
   @Override
   public IndexedColumnDiff filter(DdlOption ddlOption) {
-    ScalarDiff<Column> newColumn = column.filter(ddlOption);
-    ScalarDiff<Integer> newPrefixSize = prefixSize.filter(ddlOption);
-    ScalarDiff<SortOrder> newSortOrder = sortOrder.filter(ddlOption);
+    ScalarDiff<Column> newColumn = null;
+    ScalarDiff<Integer> newPrefixSize = null;
+    ScalarDiff<SortOrder> newSortOrder = null;
+    if (column != null) {
+      newColumn = column.filter(ddlOption);
+    }
+    if (prefixSize != null) {
+      newPrefixSize = prefixSize.filter(ddlOption);
+    }
+    if (sortOrder != null) {
+      newSortOrder = sortOrder.filter(ddlOption);
+    }
     return new IndexedColumnDiff(newColumn, newPrefixSize, newSortOrder);
   }
 }

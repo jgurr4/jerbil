@@ -46,9 +46,15 @@ public class DbDiff implements Diff<Database> {
   }
 
   public DbDiff filter(DdlOption ddlOption) {
-    final VectorDiff<TableContainer, TableDiff> newTables = tables.filter(ddlOption);
-    ScalarDiff<String> nameDiff = databaseName.filter(ddlOption);
-    return DbDiff.make(nameDiff, newTables);
+    VectorDiff<TableContainer, TableDiff> newTables = null;
+    ScalarDiff<String> newDatabaseName = null;
+    if (tables != null) {
+       newTables = tables.filter(ddlOption);
+    }
+    if (databaseName != null) {
+      newDatabaseName = databaseName.filter(ddlOption);
+    }
+    return DbDiff.make(newDatabaseName, newTables);
   }
 
   @Override

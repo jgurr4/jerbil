@@ -192,8 +192,7 @@ public class DiffService {
     return null;
   }
 
-  private static VectorDiff<IndexedColumn, IndexedColumnDiff> compareListOfIndexedColumns(
-      IMap<String, IndexedColumn> leftIndexedColumns,
+  private static VectorDiff<IndexedColumn, IndexedColumnDiff> compareListOfIndexedColumns(IMap<String, IndexedColumn> leftIndexedColumns,
       IMap<String, IndexedColumn> rightIndexedColumns) {
     IList<IndexedColumn> create = IArrayList.empty;
     IList<IndexedColumn> delete = IArrayList.empty;
@@ -218,10 +217,18 @@ public class DiffService {
           if (leftIndexedColumn.prefixSize != rightColumn.prefixSize) {
             prefixDiff = ScalarDiff.make(leftIndexedColumn.prefixSize, rightColumn.prefixSize);
           }
-          if (leftIndexedColumn.sortOrder.equals(rightColumn.sortOrder)) {
+          if (leftIndexedColumn.sortOrder != null && rightColumn.sortOrder == null) {
+            sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, null);
+          } else if (leftIndexedColumn.sortOrder == null && rightColumn.sortOrder != null) {
+            sortOrderDiff = ScalarDiff.make(null, rightColumn.sortOrder);
+          } else if (leftIndexedColumn.sortOrder == null && rightColumn.sortOrder == null) {
+            sortOrderDiff = null;
+          } else if (leftIndexedColumn.sortOrder.equals(rightColumn.sortOrder)) {
             sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, rightColumn.sortOrder);
           }
-          update = update.add(IndexedColumnDiff.make(columnDiff, prefixDiff, sortOrderDiff));
+          if (columnDiff != null || prefixDiff != null || sortOrderDiff != null) {
+            update = update.add(IndexedColumnDiff.make(columnDiff, prefixDiff, sortOrderDiff));
+          }
         }
       }
     }

@@ -34,10 +34,20 @@ public class IndexDiff implements Diff<Index> {
 
   @Override
   public IndexDiff filter(DdlOption ddlOption) {
-    ScalarDiff<IndexType> newType = type.filter(ddlOption);
-    ScalarDiff<String> newIndexName = indexName.filter(ddlOption);
-    ScalarDiff<Table> newTable = table.filter(ddlOption);
-    VectorDiff<IndexedColumn, IndexedColumnDiff> newIndexedColumns = indexedColumns.filter(ddlOption);
+    ScalarDiff<IndexType> newType = null;
+    VectorDiff<IndexedColumn, IndexedColumnDiff> newIndexedColumns = null;
+    ScalarDiff<String> newIndexName = null;
+    ScalarDiff<Table> newTable = null;
+    if (type != null) {
+      newType = type.filter(ddlOption);
+    }
+    if (indexName != null) {
+      newIndexName = indexName.filter(ddlOption);
+    }
+    if (table != null) {
+      newTable = table.filter(ddlOption);
+    }
+     newIndexedColumns = indexedColumns.filter(ddlOption);
     return new IndexDiff(newType, newIndexName, newTable, newIndexedColumns);
   }
 

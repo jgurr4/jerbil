@@ -46,11 +46,26 @@ public class ColumnDiff implements Diff<Column> {
 
   @Override
   public ColumnDiff filter(DdlOption ddlOption) {
-    ScalarDiff<String> newColName = columnName.filter(ddlOption);
-    ScalarDiff<Table> newTable = table.filter(ddlOption);
-    ScalarDiff<DataSpec> newDataSpec = dataSpec.filter(ddlOption);
-    ScalarDiff<Expression> newDefaultVal = defaultValue.filter(ddlOption);
-    ScalarDiff<BuildingHints> newBuildingHints = buildingHints.filter(ddlOption);
+    ScalarDiff<String> newColName = null;
+    ScalarDiff<Table> newTable = null;
+    ScalarDiff<DataSpec> newDataSpec = null;
+    ScalarDiff<Expression> newDefaultVal = null;
+    ScalarDiff<BuildingHints> newBuildingHints = null;
+    if (columnName != null) {
+      newColName = columnName.filter(ddlOption);
+    }
+    if (table != null) {
+      newTable = table.filter(ddlOption);
+    }
+    if (dataSpec != null) {
+      newDataSpec = dataSpec.filter(ddlOption);
+    }
+    if (defaultValue != null) {
+      newDefaultVal = defaultValue.filter(ddlOption);
+    }
+    if (buildingHints != null) {
+      newBuildingHints = buildingHints.filter(ddlOption);
+    }
     return new ColumnDiff(newColName, newTable, newDataSpec, newDefaultVal, newBuildingHints);
   }
 
