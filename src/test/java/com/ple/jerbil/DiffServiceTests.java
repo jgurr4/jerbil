@@ -82,7 +82,8 @@ public class DiffServiceTests {
         StorageEngine.transactional, null, null);
     final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
     final DatabaseContainer myDb = DatabaseContainer.make(Database.make("myDb"),
-        IArrayMap.make(user.tableName, user, player.tableName, player, inventory.tableName, inventory, alteredItemTableContainer.table.tableName, alteredItemTableContainer,
+        IArrayMap.make(user.tableName, user, player.tableName, player, inventory.tableName, inventory,
+            alteredItemTableContainer.table.tableName, alteredItemTableContainer,
             extraTableContainer.table.tableName, extraTableContainer));
     final DbDiff diff = DiffService.compareDatabases(testDb.wrap(), myDb.wrap()).unwrap();
     assertEquals("test", diff.databaseName.before);
@@ -111,7 +112,8 @@ public class DiffServiceTests {
     assertNull(indexDiff.indexName);
     assertEquals(inventory.playerId, indexDiff.indexedColumns.create.get(0).column);
     assertNull(indexDiff.indexedColumns.delete);
-    assertEquals(inventory.indexes.get("primary").indexedColumns.get("playerId").column, indexDiff.indexedColumns.create.get(0).column);
+    assertEquals(inventory.indexes.get("primary").indexedColumns.get("playerId").column,
+        indexDiff.indexedColumns.create.get(0).column);
   }
 
   @Test
@@ -194,9 +196,10 @@ public class DiffServiceTests {
   @Test
   void testCompareMissingTable() {
     final DbDiff diffs = DiffService.compareDatabases(
-            testDb.wrap(), DatabaseContainer.make(Database.make("myDb"), IArrayMap.make(user, player, item)).wrap())
+            testDb.wrap(), DatabaseContainer.make(Database.make("myDb"),
+                IArrayMap.make(user.tableName, user, player.tableName, player, item.tableName, item)).wrap())
         .unwrap();
-    assertEquals(IArrayList.make("inventory"), diffs.tables.create);
+    assertEquals("inventory", diffs.tables.create.get(0).table.tableName);
     assertNull(diffs.tables.delete);
     assertNull(diffs.tables.update);
     System.out.println(diffs.tables.create);
