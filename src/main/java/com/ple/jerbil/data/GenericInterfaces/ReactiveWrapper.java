@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.GenericInterfaces;
 
+import org.jetbrains.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -7,13 +8,6 @@ import reactor.core.publisher.Mono;
 import java.util.function.Function;
 
 public abstract class ReactiveWrapper<T> implements Publisher<T>{
-  public final String failMessage;
-  public final Throwable exception;
-
-  protected ReactiveWrapper(String failMessage, Throwable exception) {
-    this.failMessage = failMessage;
-    this.exception = exception;
-  }
 
   public abstract T unwrap();
 
@@ -27,6 +21,6 @@ public abstract class ReactiveWrapper<T> implements Publisher<T>{
 
   public abstract <R> ReactiveWrapper<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper);
 
-  public abstract <R> ReactiveWrapper<R> next();
+  public abstract <T> ReactiveWrapper<T> next();
 
 }

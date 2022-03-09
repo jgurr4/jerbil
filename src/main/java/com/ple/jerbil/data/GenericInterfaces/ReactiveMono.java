@@ -10,17 +10,12 @@ import java.util.function.Function;
 public class ReactiveMono<T> extends ReactiveWrapper<T> {
   private final Mono<T> mono;
 
-  protected ReactiveMono(Mono<T> mono, String failMessage, Throwable exception) {
-    super(failMessage, exception);
+  protected ReactiveMono(Mono<T> mono) {
     this.mono = mono;
   }
 
   public static <T> ReactiveMono<T> make(Mono<T> value) {
-    return new ReactiveMono<>(value, null, null);
-  }
-
-  public static <T> ReactiveMono<T> make(Mono<T> value, String failMessage, Throwable exception) {
-    return new ReactiveMono<>(value, failMessage, exception);
+    return new ReactiveMono<>(value);
   }
 
   public Flux<T> unwrapFlux() {
@@ -32,22 +27,22 @@ public class ReactiveMono<T> extends ReactiveWrapper<T> {
 
   @Override
   public <R> ReactiveMono<R> map(Function<? super T, R> mapper) {
-    return new ReactiveMono(mono.map(mapper).defaultIfEmpty((R) mono.block()), failMessage, exception);
+    return new ReactiveMono(mono.map(mapper));
   }
 
   @Override
   public <R> ReactiveMono<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper) {
-    return new ReactiveMono(Mono.from(mono.map(mapper).block()).defaultIfEmpty((R) mono.block()), failMessage, exception);
+    return new ReactiveMono(Mono.from(mono.map(mapper)));
   }
 
   @Override
   public <R> ReactiveFlux<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper) {
-    return null;
+    return new ReactiveFlux<>(Mono.from(mono.map(mapper)).flatMapMany(e -> e));
   }
 
   @Override
-  public <R> ReactiveMono<R> next() {
-    return null;
+  public <T> ReactiveMono<T> next() {
+    return (ReactiveMono<T>) this;
   }
 
   @Override
@@ -61,6 +56,5 @@ public class ReactiveMono<T> extends ReactiveWrapper<T> {
 
   @Override
   public void subscribe(Subscriber<? super T> s) {
-
   }
 }

@@ -36,31 +36,12 @@ public class BridgeTests {
 
   @Test
   void testGetDb() {
-    // New functor method:
-    //Generate failable functor naturally:
     final ReactiveWrapper<DatabaseContainer> test = DatabaseContainer.getDbContainer("test");
     assertEquals("test", test.unwrap().database.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
     System.out.println(test.toString().replaceAll("Table\\{", "\nTable{"));
     assertTrue(test.unwrap().database.databaseName.equals("test"));
     assertTrue(test.unwrap().tables.get("item").equals(item.table));
-    // If any failures occurred, failResult will be returned, otherwise successful object is returned.
-    final Object diff = test.map(db1 -> db1.sync())
-        .map(syncResult -> syncResult.diff.unwrap()).unwrap();
-    //Wrap object in failable functor:
-    final Failable<ReactiveWrapper> failableR = Failable.make(testDb, null, null)
-        .map(db1 -> db1.sync())
-        .map(syncResult -> syncResult.diff);
-    if (failableR.object != null) {
-      System.out.println(failableR.object);
-    } else {
-      System.out.println(failableR.failMessage);;
-      System.out.println(failableR.exception);
-    }
-    //how to unwrap the failable functor:
-    final DatabaseContainer resultDb = test.unwrap();
-    final String failMessage = test.failMessage;
-    final Throwable exception = test.exception;
   }
 
   @Test

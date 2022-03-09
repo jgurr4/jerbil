@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.GenericInterfaces;
 
+import org.jetbrains.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
@@ -8,10 +9,13 @@ import reactor.core.publisher.Mono;
 import java.util.function.Function;
 
 public class SynchronousObject<T> extends ReactiveWrapper<T> {
-  private final T object;
+  @Nullable private final T object;
+  @Nullable public final String failMessage;
+  @Nullable public final Throwable exception;
 
   protected SynchronousObject(T object, String failMessage, Throwable exception) {
-    super(failMessage, exception);
+    this.failMessage = failMessage;
+    this.exception = exception;
     this.object = object;
   }
 
@@ -61,12 +65,12 @@ public class SynchronousObject<T> extends ReactiveWrapper<T> {
 
   @Override
   public <R> ReactiveFlux<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper) {
-    return null;
+    return (ReactiveFlux<R>) ReactiveFlux.make(Flux.just(object).map(mapper));
   }
 
   @Override
-  public <R> ReactiveMono<R> next() {
-    return null;
+  public <T> ReactiveMono<T> next() {
+    return (ReactiveMono<T>) ReactiveMono.make(Mono.just(object));
   }
 
   @Override

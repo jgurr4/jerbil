@@ -10,19 +10,13 @@ import java.util.function.Function;
 public class ReactiveFlux<T> extends ReactiveWrapper<T> {
   private final Flux<T> flux;
 
-  protected ReactiveFlux(Flux<T> flux, String failMessage, Throwable exception) {
-    super(failMessage, exception);
+  protected ReactiveFlux(Flux<T> flux) {
     this.flux = flux;
   }
 
   public static <T> ReactiveFlux<T> make(Flux<T> value) {
-    return new ReactiveFlux<T>(value, null, null);
+    return new ReactiveFlux<>(value);
   }
-
-  public static <T> ReactiveFlux<T> make(Flux<T> value, String failMessage, Throwable exception) {
-    return new ReactiveFlux<T>(value, failMessage, exception);
-  }
-
 
   public Flux<T> unwrapFlux() {
     return flux;
@@ -30,22 +24,22 @@ public class ReactiveFlux<T> extends ReactiveWrapper<T> {
 
   @Override
   public <R> ReactiveFlux<R> map(Function<? super T, R> mapper) {
-    return null;
+    return new ReactiveFlux<>(flux.map(mapper));
   }
 
   @Override
   public <R> ReactiveFlux<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper) {
-    return null;
+    return new ReactiveFlux<>(flux.flatMap(mapper));
   }
 
   @Override
   public <R> ReactiveFlux<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper) {
-    return null;
+    return new ReactiveFlux<>(flux.flatMap(mapper));
   }
 
   @Override
-  public <R> ReactiveMono<R> next() {
-    return null;
+  public <T> ReactiveMono<T> next() {
+    return new ReactiveMono<>((Mono<T>) flux.next());
   }
 
   @Override
@@ -59,6 +53,5 @@ public class ReactiveFlux<T> extends ReactiveWrapper<T> {
 
   @Override
   public void subscribe(Subscriber<? super T> s) {
-
   }
 }
