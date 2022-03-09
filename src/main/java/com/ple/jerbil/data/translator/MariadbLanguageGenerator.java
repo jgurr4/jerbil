@@ -16,8 +16,10 @@ import java.util.Locale;
 
 public class MariadbLanguageGenerator implements LanguageGenerator {
 
+  public static MysqlLanguageGenerator only = new MysqlLanguageGenerator();
+
   public static LanguageGenerator make() {
-    return new MariadbLanguageGenerator();
+    return only;
   }
 
   @Override

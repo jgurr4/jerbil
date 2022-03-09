@@ -19,4 +19,6 @@ public interface DataBridge {
 
   ReactiveWrapper<DatabaseContainer> getDb(String name);
 
+  <T extends DbRecord, I extends DbRecordId> I save(T record);
+
 }
