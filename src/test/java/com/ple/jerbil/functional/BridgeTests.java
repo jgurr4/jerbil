@@ -12,6 +12,7 @@ import com.ple.jerbil.data.sync.Diff;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Hooks;
 
 import java.util.Properties;
 
@@ -35,7 +36,7 @@ public class BridgeTests {
 
   @Test
   void testGetDb() {
-//    Hooks.onOperatorDebug();
+    Hooks.onOperatorDebug();
     final ReactiveWrapper<DatabaseContainer> test = DatabaseContainer.getDbContainer("test");
     assertEquals("test", test.unwrap().database.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));

@@ -39,7 +39,8 @@ public class ReactiveMono<T> extends ReactiveWrapper<T> {
 
   @Override
   public <R> ReactiveFlux<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper) {
-    return new ReactiveFlux<>(Mono.from(mono.map(mapper)).flatMapMany(e -> e));
+    final Flux<R> flux = Mono.from(mono.map(mapper)).flatMapMany(e -> e);
+    return new ReactiveFlux<>(flux);
   }
 
   @Override

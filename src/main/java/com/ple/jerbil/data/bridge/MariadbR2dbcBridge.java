@@ -87,15 +87,9 @@ public class MariadbR2dbcBridge implements DataBridge {
     return this.getConnectionPool()
         .map(bridge -> bridge.pool)
 //        .log()
-        .flatMap(pool -> {
-          System.out.println(pool.getClass().getName());
-          return pool.create();
-        })
+        .flatMap(pool -> pool.create())
         .log()
-        .map(conn -> {
-          final Statement statement = conn.createStatement(sql);
-          return statement;
-        })
+        .map(conn -> conn.createStatement(sql))
         .flatMapMany(statement -> (Publisher<T>) statement.execute());
   }
 
