@@ -5,13 +5,14 @@ import com.ple.jerbil.data.reactiveUtils.SynchronousObject;
 import com.ple.jerbil.data.query.*;
 import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.data.sync.SyncResult;
+import com.ple.util.IArrayMap;
 import com.ple.util.IEntry;
 import com.ple.util.IMap;
 import reactor.util.annotation.Nullable;
 
 public class DatabaseContainer {
 
-  public static final DatabaseContainer empty = new DatabaseContainer();
+  public static final DatabaseContainer empty = new DatabaseContainer(Database.make("none"), IArrayMap.empty, null);
   public final Database database;
   public final IMap<String, TableContainer> tables;
   @Nullable public final CharSet charSet;

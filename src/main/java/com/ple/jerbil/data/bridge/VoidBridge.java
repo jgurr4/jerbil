@@ -7,7 +7,6 @@ import com.ple.jerbil.data.translator.VoidLanguageGenerator;
 
 public class VoidBridge implements DataBridge {
 
-
   @Override
   public LanguageGenerator getGenerator() {
     return VoidLanguageGenerator.only;
@@ -30,6 +29,7 @@ public class VoidBridge implements DataBridge {
 
   @Override
   public <T extends DbRecord, I extends DbRecordId> I save(T record) {
+    return (I) DbRecordId.empty;
   }
 
 }
