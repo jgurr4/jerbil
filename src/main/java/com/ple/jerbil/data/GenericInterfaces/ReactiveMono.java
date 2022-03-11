@@ -3,6 +3,7 @@ package com.ple.jerbil.data.GenericInterfaces;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
@@ -27,12 +28,16 @@ public class ReactiveMono<T> extends ReactiveWrapper<T> {
 
   @Override
   public <R> ReactiveMono<R> map(Function<? super T, R> mapper) {
-    return new ReactiveMono(mono.map(mapper));
+    final Mono<R> map = mono.map(mapper);
+    return new ReactiveMono(map);
   }
 
   @Override
   public <R> ReactiveMono<R> flatMap(Function<? super T, ? extends Publisher<R>> mapper) {
-    return new ReactiveMono(Mono.from(mono.map(mapper)));
+    final Mono<? extends Publisher<R>> map = mono.map(mapper);
+    final Mono<? extends Publisher<R>> from = Mono.from(map);
+    final ReactiveMono result = new ReactiveMono(map);
+    return result;
   }
 
   @Override
@@ -43,6 +48,11 @@ public class ReactiveMono<T> extends ReactiveWrapper<T> {
   @Override
   public <T> ReactiveMono<T> next() {
     return (ReactiveMono<T>) this;
+  }
+
+  @Override
+  public ReactiveMono<T> log() {
+    return new ReactiveMono<>(mono.log());
   }
 
   @Override

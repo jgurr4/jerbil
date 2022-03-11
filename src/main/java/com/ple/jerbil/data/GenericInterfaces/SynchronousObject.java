@@ -74,7 +74,11 @@ public class SynchronousObject<T> extends ReactiveWrapper<T> {
   }
 
   @Override
-  public void subscribe(Subscriber<? super T> s) {
+  public SynchronousObject<T> log() {
+    return this;
+  }
 
+  @Override
+  public void subscribe(Subscriber<? super T> s) {
   }
 }

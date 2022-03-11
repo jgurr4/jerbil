@@ -12,7 +12,13 @@ import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.data.sync.Diff;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.jerbil.testcommon.*;
+import io.r2dbc.pool.ConnectionPool;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Hooks;
+import reactor.core.scheduler.ReactorBlockHoundIntegration;
+import reactor.util.Logger;
+import reactor.util.Loggers;
+
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,6 +42,12 @@ public class BridgeTests {
 
   @Test
   void testGetDb() {
+    Hooks.onOperatorDebug();
+//    Hooks.onOperatorError((t, d) -> {
+//      System.out.println(t.getMessage());
+//      return t;
+//    });
+//    final ReactorBlockHoundIntegration block = new ReactorBlockHoundIntegration();
     final ReactiveWrapper<DatabaseContainer> test = DatabaseContainer.getDbContainer("test");
     assertEquals("test", test.unwrap().database.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));

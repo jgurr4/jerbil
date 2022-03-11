@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.GenericInterfaces;
 
+import io.r2dbc.spi.Result;
 import org.jetbrains.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -23,4 +24,5 @@ public abstract class ReactiveWrapper<T> implements Publisher<T>{
 
   public abstract <T> ReactiveWrapper<T> next();
 
+  public abstract ReactiveWrapper<T> log();
 }

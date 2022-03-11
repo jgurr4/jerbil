@@ -43,6 +43,11 @@ public class ReactiveFlux<T> extends ReactiveWrapper<T> {
   }
 
   @Override
+  public ReactiveFlux<T> log() {
+    return new ReactiveFlux<>(flux.log());
+  }
+
+  @Override
   public T unwrap() {
     return flux.blockLast();
   }

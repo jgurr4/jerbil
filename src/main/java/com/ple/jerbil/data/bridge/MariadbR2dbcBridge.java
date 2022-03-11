@@ -10,13 +10,19 @@ import com.ple.util.*;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
 import io.r2dbc.spi.Result;
+import io.r2dbc.spi.Statement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mariadb.r2dbc.MariadbConnectionConfiguration;
 import org.mariadb.r2dbc.MariadbConnectionFactory;
 import org.reactivestreams.Publisher;
+import reactor.core.Scannable;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
+import reactor.util.Logger;
+import reactor.util.Loggers;
+
 import java.time.Duration;
 
 @Immutable
@@ -84,8 +90,16 @@ public class MariadbR2dbcBridge implements DataBridge {
   public <T extends Result> ReactiveFlux<T> execute(String sql) {
     return this.getConnectionPool()
         .map(bridge -> bridge.pool)
-        .flatMap(pool -> pool.create())
-        .map(conn -> conn.createStatement(sql))
+//        .log()
+        .flatMap(pool -> {
+          System.out.println(pool.getClass().getName());
+          return pool.create();
+        })
+        .log()
+        .map(conn -> {
+          final Statement statement = conn.createStatement(sql);
+          return statement;
+        })
         .flatMapMany(statement -> (Publisher<T>) statement.execute());
   }
 
