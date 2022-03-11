@@ -1,7 +1,5 @@
-package com.ple.jerbil.data.GenericInterfaces;
+package com.ple.jerbil.data.reactiveUtils;
 
-import io.r2dbc.spi.Result;
-import org.jetbrains.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

@@ -2,7 +2,7 @@ package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.*;
 import com.ple.util.Immutable;
-import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
+import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.DataBridge;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;

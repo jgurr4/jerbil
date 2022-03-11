@@ -1,7 +1,7 @@
 package com.ple.jerbil.data.sync;
 
 import com.ple.util.Immutable;
-import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
+import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import io.r2dbc.spi.Result;
 
 @Immutable

@@ -1,7 +1,7 @@
 package com.ple.jerbil.data.bridge;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.GenericInterfaces.*;
+import com.ple.jerbil.data.reactiveUtils.*;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.translator.LanguageGenerator;
@@ -16,12 +16,8 @@ import org.jetbrains.annotations.Nullable;
 import org.mariadb.r2dbc.MariadbConnectionConfiguration;
 import org.mariadb.r2dbc.MariadbConnectionFactory;
 import org.reactivestreams.Publisher;
-import reactor.core.Scannable;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Hooks;
 import reactor.core.publisher.Mono;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.time.Duration;
 

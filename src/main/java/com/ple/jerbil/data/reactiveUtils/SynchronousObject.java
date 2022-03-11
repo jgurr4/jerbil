@@ -1,4 +1,4 @@
-package com.ple.jerbil.data.GenericInterfaces;
+package com.ple.jerbil.data.reactiveUtils;
 
 import org.jetbrains.annotations.Nullable;
 import org.reactivestreams.Publisher;

@@ -1,8 +1,8 @@
 package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
-import com.ple.jerbil.data.GenericInterfaces.ReactiveMono;
+import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
+import com.ple.jerbil.data.reactiveUtils.ReactiveMono;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.BuildingHints;
@@ -12,7 +12,6 @@ import com.ple.util.IArrayList;
 import com.ple.util.IEntry;
 import com.ple.util.IList;
 import com.ple.util.IMap;
-import org.jetbrains.annotations.Nullable;
 import reactor.core.publisher.Mono;
 
 /**

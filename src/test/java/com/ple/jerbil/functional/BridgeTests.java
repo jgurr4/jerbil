@@ -4,25 +4,18 @@ import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.DatabaseBuilder;
 import com.ple.jerbil.data.DatabaseContainer;
-import com.ple.util.Failable;
-import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
+import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.sync.DbDiff;
 import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.data.sync.Diff;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.jerbil.testcommon.*;
-import io.r2dbc.pool.ConnectionPool;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Hooks;
-import reactor.core.scheduler.ReactorBlockHoundIntegration;
-import reactor.util.Logger;
-import reactor.util.Loggers;
 
 import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BridgeTests {
   final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
@@ -42,12 +35,7 @@ public class BridgeTests {
 
   @Test
   void testGetDb() {
-    Hooks.onOperatorDebug();
-//    Hooks.onOperatorError((t, d) -> {
-//      System.out.println(t.getMessage());
-//      return t;
-//    });
-//    final ReactorBlockHoundIntegration block = new ReactorBlockHoundIntegration();
+//    Hooks.onOperatorDebug();
     final ReactiveWrapper<DatabaseContainer> test = DatabaseContainer.getDbContainer("test");
     assertEquals("test", test.unwrap().database.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
