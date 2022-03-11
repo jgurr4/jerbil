@@ -1,8 +1,9 @@
 package com.ple.jerbil.data.bridge;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
-import com.ple.jerbil.data.GenericInterfaces.SynchronousObject;
+import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
+import com.ple.jerbil.data.reactiveUtils.SynchronousObject;
+import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.jerbil.data.translator.VoidLanguageGenerator;
 
 public class VoidBridge implements DataBridge {

@@ -83,14 +83,19 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @Override
-  public <T extends DbResult> ReactiveFlux<T> execute(String sql) {
+  public ReactiveFlux<DbResult> execute(String sql) {
     return this.getConnectionPool()
         .map(bridge -> bridge.pool)
 //        .log()
         .flatMap(pool -> pool.create())
         .log()
         .map(conn -> conn.createStatement(sql))
-        .flatMapMany(statement -> (Publisher<T>) statement.execute());
+        .flatMapMany(statement -> statement.execute());
+  }
+
+  @Override
+  public ReactiveWrapper<DbResult> execute(ReactiveWrapper<String> toSql) {
+    return null;
   }
 
   public ReactiveMono<DatabaseContainer> getDb(String name) {
@@ -105,6 +110,11 @@ public class MariadbR2dbcBridge implements DataBridge {
               final IList<String> tableNameIList = IArrayList.make(tableNameList.toArray(new String[0]));
               return convertToDbContainer(tableNameIList, name, database);
             })).next()).next();
+  }
+
+  @Override
+  public <T extends DbRecord, I extends DbRecordId> I save(T record) {
+    return null;
   }
 
   @NotNull

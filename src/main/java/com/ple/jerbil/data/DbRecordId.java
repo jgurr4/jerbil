@@ -2,6 +2,6 @@ package com.ple.jerbil.data;
 
 public class DbRecordId {
 
-  public static final DbRecordId empty;
+  public static final DbRecordId empty = new DbRecordId();
 
 }

@@ -1,6 +1,11 @@
 package com.ple.jerbil.data.bridge;
 
-import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
+import com.ple.jerbil.data.DatabaseContainer;
+import com.ple.jerbil.data.DbRecord;
+import com.ple.jerbil.data.DbRecordId;
+import com.ple.jerbil.data.DbResult;
+import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
+import com.ple.jerbil.data.translator.LanguageGenerator;
 
 /**
  * Bridge is responsible for connecting and sending data to and from a database.

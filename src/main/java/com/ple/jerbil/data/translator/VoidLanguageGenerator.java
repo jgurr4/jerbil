@@ -1,11 +1,13 @@
 package com.ple.jerbil.data.translator;
 
 import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.LanguageGenerator;
+import com.ple.jerbil.data.DatabaseContainer;
 import com.ple.jerbil.data.query.CompleteQuery;
+import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.sync.Diff;
+import com.ple.util.IList;
 
 public class VoidLanguageGenerator implements LanguageGenerator {
 
@@ -14,6 +16,21 @@ public class VoidLanguageGenerator implements LanguageGenerator {
   @Override
   public String toSql(CompleteQuery completeQuery) {
     return "";
+  }
+
+  @Override
+  public DatabaseContainer getDbFromSql(String dbCreateString, Database db, IList<String> tblCreateStringList) {
+    return null;
+  }
+
+  @Override
+  public TableContainer getTableFromSql(String showCreateTable, Database db) {
+    return null;
+  }
+
+  @Override
+  public Column getColumnFromSql(String tableLine, String[] columnsInIndex, Table table) {
+    return null;
   }
 
   @Override
