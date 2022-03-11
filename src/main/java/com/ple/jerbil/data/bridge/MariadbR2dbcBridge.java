@@ -83,7 +83,7 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @Override
-  public <T extends Result> ReactiveFlux<T> execute(String sql) {
+  public <T extends DbResult> ReactiveFlux<T> execute(String sql) {
     return this.getConnectionPool()
         .map(bridge -> bridge.pool)
 //        .log()

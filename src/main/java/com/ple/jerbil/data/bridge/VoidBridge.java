@@ -3,28 +3,29 @@ package com.ple.jerbil.data.bridge;
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.GenericInterfaces.ReactiveWrapper;
 import com.ple.jerbil.data.GenericInterfaces.SynchronousObject;
-import com.ple.jerbil.data.translator.MysqlLanguageGenerator;
-import io.r2dbc.spi.Result;
+import com.ple.jerbil.data.translator.VoidLanguageGenerator;
 
 public class VoidBridge implements DataBridge {
 
 
   @Override
   public LanguageGenerator getGenerator() {
-    return MysqlLanguageGenerator.only;
+    return VoidLanguageGenerator.only;
   }
 
   @Override
-  public ReactiveWrapper<Result> execute(String toSql) {
-    return SynchronousObject.make()
+  public ReactiveWrapper<DbResult> execute(String toSql) {
+    return SynchronousObject.make(DbResult.empty);
   }
 
   @Override
-  public ReactiveWrapper<Result> execute(ReactiveWrapper<String> toSql) {
+  public ReactiveWrapper<DbResult> execute(ReactiveWrapper<String> toSql) {
+    return SynchronousObject.make(DbResult.empty);
   }
 
   @Override
   public ReactiveWrapper<DatabaseContainer> getDb(String name) {
+    return SynchronousObject.make(DatabaseContainer.empty);
   }
 
   @Override
