@@ -38,7 +38,7 @@ public class BridgeTests {
   void testGetDb() {
     Hooks.onOperatorDebug();
     final ReactiveWrapper<DatabaseContainer> test = DatabaseContainer.getDbContainer("test");
-    assertEquals("test", test.unwrap().database.databaseName);
+    assertEquals("test", test.log().unwrap().database.databaseName);
     System.out.println(testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
     System.out.println(test.toString().replaceAll("Table\\{", "\nTable{"));
     assertTrue(test.unwrap().database.databaseName.equals("test"));

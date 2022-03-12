@@ -90,7 +90,7 @@ public class MariadbR2dbcBridge implements DataBridge {
         .flatMap(pool -> pool.create())
         .log()
         .map(conn -> conn.createStatement(sql))
-        .flatMapMany(statement -> statement.execute());
+        .flatMapMany(statement -> DbResult.make(statement.execute()));
   }
 
   @Override
@@ -99,17 +99,23 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   public ReactiveMono<DatabaseContainer> getDb(String name) {
+    // example of printing out each result table from resultList.
+//    execute("select * from user").unwrapFlux()
+//        .flatMap(dbResult -> Flux.fromIterable(dbResult.resultList))
+//        .doOnNext(resultTable -> System.out.println(resultTable));
+
     Database database = Database.make(name);
-    return execute("show create database " + name)
-        .flatMap(result -> ReactiveMono.make(
-            Flux.from(result.map((row, rowMetadata) -> (String) row.get("create database"))).next())
-        .flatMap(dbCreateStr -> execute("use " + name + "; show tables")
-            .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get("tables_in_" + name)))
-            .unwrapFlux().collectList()
-            .map(tableNameList -> {
-              final IList<String> tableNameIList = IArrayList.make(tableNameList.toArray(new String[0]));
-              return convertToDbContainer(tableNameIList, name, database);
-            })).next()).next();
+    return ReactiveMono.make(execute("show create database " + name).unwrapFlux()
+        .flatMap(result ->
+            Flux.just((String[]) result.getColumn("create database"))
+                .next()
+                .flatMap(dbCreateStr -> execute("use " + name + "; show tables")
+                    .flatMap(result1 -> Flux.just((String[]) result.getColumn("tables_in_" + name)))
+                    .unwrapFlux().collectList()
+                    .map(tableNameList -> {
+                      final IList<String> tableNameIList = IArrayList.make(tableNameList.toArray(new String[0]));
+                      return convertToDbContainer(tableNameIList, name, database);
+                    }))).next()).next();
   }
 
   @Override
@@ -118,16 +124,17 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @NotNull
-  private ReactiveMono<DatabaseContainer> convertToDbContainer(IList<String> tblNameList, String dbName, Database database) {
+  private ReactiveMono<DatabaseContainer> convertToDbContainer(IList<String> tblNameList, String dbName,
+                                                               Database database) {
     return ReactiveMono.make(Flux.fromIterable(tblNameList)
         .flatMap(tblName -> execute("use " + dbName + "; show create table " + tblName)
-        .flatMap(result1 -> result1.map((row, rowMetadata) -> (String) row.get("create table")))
-        .map(tblCreateStr -> generator.getTableFromSql(tblCreateStr, database))
-        .unwrapFlux()
-        .collectList()
-        .map(tableContainers -> (IList<TableContainer>) (IList) IArrayList.make(tableContainers.toArray()))
-        .map(tables -> convertListToIMap(tables))
-        .map(tablesIList -> DatabaseContainer.make(database, tablesIList))).next());
+            .flatMap(dbResult -> Flux.just((String[]) dbResult.getColumn("create table")))
+            .map(tblCreateStr -> generator.getTableFromSql(tblCreateStr, database))
+            .unwrapFlux()
+            .collectList()
+            .map(tableContainers -> (IList<TableContainer>) (IList) IArrayList.make(tableContainers.toArray()))
+            .map(tables -> convertListToIMap(tables))
+            .map(tablesIList -> DatabaseContainer.make(database, tablesIList))).next());
   }
 
   private IMap<String, TableContainer> convertListToIMap(IList<TableContainer> tables) {

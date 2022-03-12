@@ -33,17 +33,14 @@ public class VoidLanguageGenerator implements LanguageGenerator {
     return null;
   }
 
-  @Override
   public Database fromSql(String dbCreateString) {
     return null;
   }
 
-  @Override
   public TableContainer fromSql(String showCreateTable, Database db) {
     return null;
   }
 
-  @Override
   public Column fromSql(String showCreateTable, TableContainer table) {
     return null;
   }
