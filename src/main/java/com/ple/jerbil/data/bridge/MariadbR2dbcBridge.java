@@ -1,31 +1,31 @@
 package com.ple.jerbil.data.bridge;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.reactiveUtils.*;
-import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.TableContainer;
+import com.ple.jerbil.data.reactiveUtils.ReactiveFlux;
+import com.ple.jerbil.data.reactiveUtils.ReactiveMono;
 import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.jerbil.data.translator.MariadbLanguageGenerator;
 import com.ple.util.*;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
+import io.r2dbc.spi.ReadableMetadata;
 import io.r2dbc.spi.Result;
-import io.r2dbc.spi.Statement;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.mariadb.r2dbc.MariadbConnectionConfiguration;
 import org.mariadb.r2dbc.MariadbConnectionFactory;
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 @Immutable
 public class MariadbR2dbcBridge implements DataBridge {
 
   public final LanguageGenerator generator = MariadbLanguageGenerator.make();
-  public final String driver;
   public final String host;
   public final int port;
   public final String username;
@@ -33,9 +33,8 @@ public class MariadbR2dbcBridge implements DataBridge {
   @Nullable public final String database;
   public final ConnectionPool pool;
 
-  protected MariadbR2dbcBridge(String driver, String host, int port, String username, String password,
-                               @Nullable String database, ConnectionPool pool) {
-    this.driver = driver;
+  protected MariadbR2dbcBridge(String host, int port, String username, String password, @Nullable String database,
+                               ConnectionPool pool) {
     this.host = host;
     this.port = port;
     this.username = username;
@@ -44,25 +43,36 @@ public class MariadbR2dbcBridge implements DataBridge {
     this.pool = pool;
   }
 
-  public static MariadbR2dbcBridge make(String driver, String host, int port, String username, String password,
-                                        String database, ConnectionPool pool) {
-    return new MariadbR2dbcBridge(driver, host, port, username, password, database, pool);
+  public static MariadbR2dbcBridge make(String host, int port, String username, String password,
+                                        String database) {
+    final MariadbConnectionConfiguration factoryConfig = MariadbConnectionConfiguration.builder()
+        .host(host)
+        .port(port)
+        .username(username)
+        .allowMultiQueries(true)
+        .password(password)
+        .database(database)
+        .build();
+    //TODO: Add SSl configuration options above.
+    final MariadbConnectionFactory connFactory = new MariadbConnectionFactory(factoryConfig);
+    final ConnectionPoolConfiguration poolConfig = ConnectionPoolConfiguration
+        .builder(connFactory)
+        .maxIdleTime(Duration.ofMillis(1000))
+        .maxSize(10)
+        .build();
+    return new MariadbR2dbcBridge(host, port, username, password, database, new ConnectionPool(poolConfig));
   }
 
-  public static DataBridge make(String driver, String host, int port, String username, String password,
-                                String database) {
-    return new MariadbR2dbcBridge(
-        driver, host, port, username, password, database, startConnection(host, port, username, password, database));
-  }
-
-  public static DataBridge make(String driver, String host, int port, String username, String password) {
-    return new MariadbR2dbcBridge(
-        driver, host, port, username, password, null, startConnection(host, port, username, password, null));
+  private Mono<MariadbR2dbcBridge> makeReactive(String host, int port, String username, String password,
+                                                String database) {
+    return Mono.just(make(host, port, username, password, database))
+        .doOnError(e -> {
+          throw new IllegalArgumentException("Issue creating connection pool");
+        });
   }
 
   public static DataBridge make(String host, int port, String username, String password) {
-    return new MariadbR2dbcBridge(
-        "r2dbc:mariadb", host, port, username, password, null, startConnection(host, port, username, password, null));
+    return make(host, port, username, password, null);
   }
 
   @Override
@@ -70,40 +80,54 @@ public class MariadbR2dbcBridge implements DataBridge {
     return generator;
   }
 
-  public ReactiveMono<MariadbR2dbcBridge> getConnectionPool() {
-    if (pool == null) {
-      return ReactiveMono.make(createConnectionPool());
-    }
-    if (pool.getMetrics().isPresent()) {
-      if (pool.getMetrics().get().acquiredSize() == pool.getMetrics().get().getMaxAllocatedSize()) {
-        return ReactiveMono.make(createConnectionPool());
-      }
-    }
-    return ReactiveMono.make(Mono.just(this));
-  }
-
+  //FIXME: This method
   @Override
   public ReactiveFlux<DbResult> execute(String sql) {
-    return this.getConnectionPool()
-        .map(bridge -> bridge.pool)
-//        .log()
-        .flatMap(pool -> pool.create())
-        .log()
-        .map(conn -> conn.createStatement(sql))
-        .flatMapMany(statement -> DbResult.make(statement.execute()));
+    return ReactiveFlux.make(Mono.just(this.pool)
+        .flatMap(pool -> {
+          return pool.create();
+        })
+        .map(conn -> {
+          return conn.createStatement(sql);
+        })
+        .flatMapMany(statement -> {
+          return statement.execute();
+        })
+        .flatMap(result -> {
+          final ReactiveMono<DbResult> dbResult = getDbResult(result);
+          return dbResult.unwrapMono();
+        }));
   }
 
-  @Override
-  public ReactiveWrapper<DbResult> execute(ReactiveWrapper<String> toSql) {
-    return null;
+  public static ReactiveMono<DbResult> getDbResult(Result result) {
+    IList<String> warningList = IArrayList.empty;
+    IList<String> errorList = IArrayList.empty;
+    List<String> colNames = new ArrayList<>();
+    List<Object> values = new ArrayList<>();
+    return ReactiveMono.make(
+        Flux.from(
+                result.map(
+                    (row, rowMetadata) -> {
+                      final List<String> names = rowMetadata.getColumnMetadatas().stream()
+                          .map(ReadableMetadata::getName).toList();
+                      if (colNames.size() == 0) {
+                        colNames.addAll(names);
+                      }
+                      for (int i = 0; i < colNames.size(); i++) {
+                        values.add(row.get(i));
+                      }
+                      return row;
+                    }))
+            .next()
+            .flatMap(row -> Mono.from(result.getRowsUpdated()))
+            .map(ru -> {
+              final ITable iTableResult = ITable.make(IArrayList.make(colNames), values.toArray());
+              return DbResult.make(iTableResult, errorList, warningList, ru);
+            })
+            .defaultIfEmpty(DbResult.empty));
   }
 
   public ReactiveMono<DatabaseContainer> getDb(String name) {
-    // example of printing out each result table from resultList.
-//    execute("select * from user").unwrapFlux()
-//        .flatMap(dbResult -> Flux.fromIterable(dbResult.resultList))
-//        .doOnNext(resultTable -> System.out.println(resultTable));
-
     Database database = Database.make(name);
     return ReactiveMono.make(execute("show create database " + name).unwrapFlux()
         .flatMap(result ->
@@ -144,36 +168,4 @@ public class MariadbR2dbcBridge implements DataBridge {
     }
     return map;
   }
-
-  private Mono<MariadbR2dbcBridge> createConnectionPool() {
-    return Mono.just(startConnection(host, port, username, password, database))
-        .map(pool -> MariadbR2dbcBridge.make(driver, host, port, username, password, database, pool))
-        .doOnError(e -> {
-          throw new IllegalArgumentException("Issue creating connection pool");
-        })
-        .doOnSuccess(bridge -> {
-          if (bridge.pool != null) bridge.pool.close();
-        });
-  }
-
-  private static ConnectionPool startConnection(String host, int port, String username, String password,
-                                                String database) {
-    final MariadbConnectionConfiguration factoryConfig = MariadbConnectionConfiguration.builder()
-        .host(host)
-        .port(port)
-        .username(username)
-        .allowMultiQueries(true)
-        .password(password)
-        .database(database)
-        .build();
-    //TODO: Add SSl configuration options above.
-    final MariadbConnectionFactory connFactory = new MariadbConnectionFactory(factoryConfig);
-    final ConnectionPoolConfiguration poolConfig = ConnectionPoolConfiguration
-        .builder(connFactory)
-        .maxIdleTime(Duration.ofMillis(1000))
-        .maxSize(20)
-        .build();
-    return new ConnectionPool(poolConfig);
-  }
-
 }

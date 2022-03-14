@@ -6,6 +6,7 @@ import com.ple.jerbil.data.DbRecordId;
 import com.ple.jerbil.data.DbResult;
 import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import com.ple.jerbil.data.translator.LanguageGenerator;
+import io.r2dbc.pool.ConnectionPool;
 
 /**
  * Bridge is responsible for connecting and sending data to and from a database.
@@ -18,10 +19,7 @@ public interface DataBridge {
 
   ReactiveWrapper<DbResult> execute(String toSql);
 
-  ReactiveWrapper<DbResult> execute(ReactiveWrapper<String> toSql);
-
   ReactiveWrapper<DatabaseContainer> getDb(String name);
 
   <T extends DbRecord, I extends DbRecordId> I save(T record);
-
 }

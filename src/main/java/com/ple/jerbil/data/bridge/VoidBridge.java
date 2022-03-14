@@ -19,11 +19,6 @@ public class VoidBridge implements DataBridge {
   }
 
   @Override
-  public ReactiveWrapper<DbResult> execute(ReactiveWrapper<String> toSql) {
-    return SynchronousObject.make(DbResult.empty);
-  }
-
-  @Override
   public ReactiveWrapper<DatabaseContainer> getDb(String name) {
     return SynchronousObject.make(DatabaseContainer.empty);
   }

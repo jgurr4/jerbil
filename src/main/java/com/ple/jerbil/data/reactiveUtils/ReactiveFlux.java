@@ -1,5 +1,7 @@
 package com.ple.jerbil.data.reactiveUtils;
 
+import com.ple.util.IArrayList;
+import com.ple.util.IList;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
@@ -50,6 +52,10 @@ public class ReactiveFlux<T> extends ReactiveWrapper<T> {
   @Override
   public T unwrap() {
     return flux.blockLast();
+  }
+
+  public IList<T> unwrapList() {
+    return IArrayList.make((T) flux.collectList().block().toArray());
   }
 
   public Mono<T> unwrapMono() {

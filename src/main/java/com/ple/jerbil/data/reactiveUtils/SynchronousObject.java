@@ -1,5 +1,7 @@
 package com.ple.jerbil.data.reactiveUtils;
 
+import com.ple.util.IArrayList;
+import com.ple.util.IList;
 import org.jetbrains.annotations.Nullable;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
@@ -76,6 +78,11 @@ public class SynchronousObject<T> extends ReactiveWrapper<T> {
   @Override
   public SynchronousObject<T> log() {
     return this;
+  }
+
+  @Override
+  public IList<T> unwrapList() {
+    return IArrayList.make(object);
   }
 
   @Override

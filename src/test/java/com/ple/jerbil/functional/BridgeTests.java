@@ -1,9 +1,6 @@
 package com.ple.jerbil.functional;
 
-import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.DatabaseBuilder;
-import com.ple.jerbil.data.DatabaseContainer;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.sync.DbDiff;
@@ -11,8 +8,13 @@ import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.data.sync.Diff;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.jerbil.testcommon.*;
+import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.Test;
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import reactor.core.publisher.Hooks;
+import reactor.core.publisher.Mono;
 
 import java.util.Properties;
 
@@ -28,10 +30,34 @@ public class BridgeTests {
 
   public BridgeTests() {
     final Properties props = ConfigProps.getProperties();
-    DataGlobal.bridge = MariadbR2dbcBridge.make(
-        props.getProperty("driver"), props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
+    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
         props.getProperty("user"), props.getProperty("password")
     );
+  }
+
+  @Test
+  void testExecute() {
+    Hooks.onOperatorDebug();
+    final DbResult dbResult = DataGlobal.bridge.execute("select 1")
+        .unwrapList().get(0);
+    System.out.println(dbResult.result);
+    System.out.println(dbResult.rowsUpdated);
+    System.out.println(dbResult.error);
+    System.out.println(dbResult.warning);
+/* uncomment to see example of how result and row.get works
+    (Mono.just((MariadbR2dbcBridge) DataGlobal.bridge))
+        .flatMapMany(bridge -> bridge.pool.create())
+        .map(conn -> conn.createStatement("use test; select 1, 2 union all select 3, 4; select 5, 6 union all select 7, 8"))
+//        .log()
+        .flatMap(stmt -> stmt.execute())
+        .log()
+        .flatMap(result -> result.map((row, rowMetadata) -> (Integer) row.get(0)))
+        .doOnNext(firstColumnOfResult -> System.out.println(firstColumnOfResult))
+        .blockLast();
+*/
+//    final ReactiveWrapper<DbResult> execute = DataGlobal.bridge.execute("select 1; select 2");
+//    final IList<ITable> resultList = execute.unwrap().resultList;
+//    System.out.println(resultList);
   }
 
   @Test
