@@ -7,6 +7,7 @@ import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.function.Function;
 
 public class ReactiveFlux<T> extends ReactiveWrapper<T> {
@@ -55,7 +56,7 @@ public class ReactiveFlux<T> extends ReactiveWrapper<T> {
   }
 
   public IList<T> unwrapList() {
-    return IArrayList.make((T) flux.collectList().block().toArray());
+    return flux.collectList().map(list -> IArrayList.make(list)).block();
   }
 
   public Mono<T> unwrapMono() {

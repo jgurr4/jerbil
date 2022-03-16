@@ -8,6 +8,8 @@ import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.data.sync.Diff;
 import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.jerbil.testcommon.*;
+import com.ple.util.IArrayList;
+import com.ple.util.IList;
 import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -38,12 +40,15 @@ public class BridgeTests {
   @Test
   void testExecute() {
     Hooks.onOperatorDebug();
-    final DbResult dbResult = DataGlobal.bridge.execute("select 1")
-        .unwrapList().get(0);
+    final IList<DbResult> dbResults = DataGlobal.bridge.execute("select 1, 2 union all select 3, 4")
+        .unwrapList();
+    final DbResult dbResult = dbResults.get(0);
     System.out.println(dbResult.result);
-    System.out.println(dbResult.rowsUpdated);
-    System.out.println(dbResult.error);
-    System.out.println(dbResult.warning);
+    assertEquals(IArrayList.make("1", "2"), dbResult.result.columnNames);
+    assertArrayEquals(new Object[]{1,2,3,4}, dbResult.result.values);
+    assertEquals(0, dbResult.rowsUpdated);
+    assertEquals(IArrayList.empty, dbResult.error);
+    assertEquals(IArrayList.empty, dbResult.warning);
 /* uncomment to see example of how result and row.get works
     (Mono.just((MariadbR2dbcBridge) DataGlobal.bridge))
         .flatMapMany(bridge -> bridge.pool.create())
