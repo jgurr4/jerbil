@@ -12,7 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 public class MariadbLanguageGenerator implements LanguageGenerator {
 
@@ -80,7 +82,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     IndexType indexType = getIndexTypeFromSql(indexString);
     String indexName = getIndexNameFromSql(indexString, indexType);
     IList<IndexedColumn> indexedColumns = getIndexedColumnsFromSql(indexString, columns);
-    return Index.make(indexType, indexName, table, indexedColumns.toArray());
+    return Index.make(indexType, indexName, table, indexedColumns.toArray(IndexedColumn.emptyArray));
   }
 
   private String getIndexNameFromSql(String indexString, IndexType indexType) {
@@ -92,7 +94,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 
   private IndexType getIndexTypeFromSql(String indexString) {
     String type = indexString.replaceAll("KEY \\(.*", "KEY");
-    if (type.indexOf("KEY") == 0) {
+    if (type.replaceAll("\\sKEY ","").length() < type.length()) {
       return IndexType.secondary;
     } else if (type.contains("PRIMARY")) {
       return IndexType.primary;
@@ -107,18 +109,35 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private IList<IndexedColumn> getIndexedColumnsFromSql(String indexString, IMap<String, Column> columns) {
-    IList<IndexedColumn> indexedColumns = IArrayList.empty;
-    int prefixSize = 0;
+    IList<IndexedColumn> indexedColumns = IArrayList.make();
     //FIXME: Once you figure out how to obtain sortOrder from Show create table or Show index commands use that method
     // here to obtain sortOrder for each column. Figure out a method that works for mariadb and mysql both if possible.
     SortOrder sortOrder = null;
-    final String[] indexColumnsArr = indexString.replaceFirst("^.*KEY.*\\(", "").replaceAll("\\),", "")
-        .replaceAll("\\)", "").split(",");
-    for (String colName : indexColumnsArr) {
-      prefixSize = Integer.parseInt(colName.toLowerCase(Locale.ROOT).replaceAll("[^0-9]", ""));
-      indexedColumns = indexedColumns.add(IndexedColumn.make(columns.get(colName), prefixSize, null));
+    final IMap<String, Integer> indexedColumnsAndPrefixSizes = getIndexedColumnsAndPrefixSize(indexString);
+    for (IEntry<String, Integer> indexColumnEntry : indexedColumnsAndPrefixSizes) {
+        indexedColumns = indexedColumns.add(
+            IndexedColumn.make(columns.get(indexColumnEntry.key), indexColumnEntry.value, null));
     }
     return indexedColumns;
+  }
+
+  private IMap<String, Integer> getIndexedColumnsAndPrefixSize(String indexString) {
+    String colName = "";
+    Integer prefix = 0;
+    IMap<String, Integer> colNamesAndPrefixes = IArrayMap.empty;
+    final String[] columnAndPrefix = indexString.replaceAll(".* \\(", "")
+        .replaceAll(",?$","")
+        .replaceAll("\\)$","")
+//        .replaceAll("\\),?", "")
+        .split(",");
+    for (String colAndPref : columnAndPrefix) {
+      colName = colAndPref.replaceAll("\\([0-9]{0,3}\\)", "");
+      if (colAndPref.replaceAll("\\([0-9]{0,3}\\)", "").length() != colAndPref.length()) {
+        prefix = Integer.parseInt(colAndPref.replaceAll("[^0-9]",""));
+      }
+      colNamesAndPrefixes = colNamesAndPrefixes.put(colName, prefix);
+    }
+    return colNamesAndPrefixes;
   }
 
   private StorageEngine getEngineFromSql(String createTableSql) {
@@ -178,14 +197,19 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 //    final Expression generatedFrom = getGeneratedFromSql(columnLine);
     if (columnLine.contains("AUTO_INCREMENT")) {
       return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, hints);
-    } else if (dataSpec.dataType == DataType.integer || dataSpec.dataType == DataType.decimal ||
-        dataSpec.dataType == DataType.bigint || dataSpec.dataType == DataType.tinyint) {
+    } else if (dataSpec.dataType.equals(DataType.integer) || dataSpec.dataType.equals(DataType.decimal) ||
+        dataSpec.dataType.equals(DataType.bigint) || dataSpec.dataType.equals(DataType.tinyint) ||
+        dataSpec.dataType.equals(DataType.mediumint) || dataSpec.dataType.equals(DataType.smallint) ||
+        dataSpec.dataType.equals(DataType.aDouble) || dataSpec.dataType.equals(DataType.aFloat)) {
       return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, hints);
-    } else if (dataSpec.dataType == DataType.varchar || dataSpec.dataType == DataType.enumeration) {
+    } else if (dataSpec.dataType.equals(DataType.varchar) || dataSpec.dataType.equals(DataType.enumeration) ||
+        dataSpec.dataType.equals(DataType.text) || dataSpec.dataType.equals(DataType.character) ||
+        dataSpec.dataType.equals(DataType.set)) {
       return StringColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, hints);
-    } else if (dataSpec.dataType == DataType.datetime) {
+    } else if (dataSpec.dataType.equals(DataType.datetime) || dataSpec.dataType.equals(DataType.date) ||
+        dataSpec.dataType.equals(DataType.time) || dataSpec.dataType.equals(DataType.timestamp)) {
       return DateColumn.make(colName, table, dataSpec, (DateExpression) defaultValue, hints);
-    } else if (dataSpec.dataType == DataType.bool) {
+    } else if (dataSpec.dataType.equals(DataType.bool)) {
       return BooleanColumn.make(colName, table, dataSpec, (BooleanExpression) defaultValue, hints);
     } else {
       //FIXME: replace this with observability bridge logging.
@@ -259,6 +283,9 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private Literal getDefaultValFromSql(String tableLine) {
+    if (!tableLine.contains("^.*default ")) {
+      return null;
+    }
     String defaultVal = tableLine.replaceAll("^.*default", "").replaceFirst(",$", "");
     if (defaultVal.replaceAll("[0-9]", "").length() == 0) {
       return Literal.make(Integer.parseInt(defaultVal));
@@ -277,49 +304,103 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private DataSpec getDataSpecFromSql(String tableLine) {
+    tableLine = tableLine.stripLeading();
     DataType dataType = null;
     int size = 0;
+    int precision = 0;
     String regex = "";
     int endIndex = 0;
-    if (tableLine.contains(" enum(")) {
-      tableLine = tableLine.replaceFirst("^.* enum\\(", "").replaceAll("'", "");
+    if (tableLine.contains("enum(")) {
+      tableLine = tableLine.replaceFirst("^.*enum\\(", "").replaceAll("'", "");
       endIndex = tableLine.indexOf(") ");
       return DataSpec.make(DataType.enumeration, tableLine.substring(0, endIndex));
-    } else if (tableLine.contains(" set(")) {
-      tableLine = tableLine.replaceFirst("^.* set\\(", "").replaceAll("'", "");
+    } else if (tableLine.contains("set(")) {
+      tableLine = tableLine.replaceFirst("^.*set\\(", "").replaceAll("'", "");
       endIndex = tableLine.indexOf(") ");
       return DataSpec.make(DataType.enumeration, tableLine.substring(0, endIndex));
-    } else if (tableLine.contains(" varchar(")) {
-      regex = "^.* varchar\\(";
+    } else if (tableLine.contains("varchar(")) {
+      regex = "^.*varchar\\(";
       dataType = DataType.varchar;
-    } else if (tableLine.contains(" int(")) {
-      regex = "^.* int\\(";
+    } else if (tableLine.contains("char")) {
+      regex = "^.*char\\(";
+      dataType = DataType.character;
+    } else if (tableLine.contains("text")) {
+      regex = "^.*text";
+      dataType = DataType.text;
+    } else if (tableLine.contains("int(")) {
+      regex = "^.*int\\(";
       dataType = DataType.integer;
-    } else if (tableLine.contains(" bigint(")) {
-      regex = "^.* bigint\\(";
+    } else if (tableLine.contains("bigint(")) {
+      regex = "^.*bigint\\(";
       dataType = DataType.bigint;
-    } else if (tableLine.contains(" tinyint(")) {
-      regex = "^.* tinyint\\(";
+    } else if (tableLine.contains("mediumint(")) {
+      regex = "^.*mediumint\\(";
+      dataType = DataType.mediumint;
+    } else if (tableLine.contains("smallint(")) {
+      regex = "^.*smallint\\(";
+      dataType = DataType.smallint;
+    } else if (tableLine.contains("tinyint(")) {
+      regex = "^.*tinyint\\(";
       dataType = DataType.tinyint;
+    } else if (tableLine.contains("double")) {
+      regex = "^.*double\\(";
+      dataType = DataType.aDouble;
+    } else if (tableLine.contains("float")) {
+      regex = "^.*float\\(";
+      dataType = DataType.aFloat;
+    } else if (tableLine.contains("decimal(")) {
+      regex = "^.*decimal\\(";
+      dataType = DataType.decimal;
+    } else if (tableLine.contains("boolean")) {
+      regex = "^.*boolean";
+      dataType = DataType.bool;
+    } else if (tableLine.contains("date")) {
+      regex = "^.*date";
+      dataType = DataType.date;
+    } else if (tableLine.contains("time")) {
+      regex = "^.*time";
+      dataType = DataType.time;
+    } else if (tableLine.contains("datetime")) {
+      regex = "^.*datetime";
+      dataType = DataType.datetime;
+    } else if (tableLine.contains("timestamp")) {
+      regex = "^.*timestamp";
+      dataType = DataType.timestamp;
     }
     tableLine = tableLine.replaceFirst(regex, "");
     endIndex = tableLine.indexOf(")");
-    size = Integer.parseInt(tableLine.substring(0, endIndex));
+    if (endIndex != -1) {
+      String[] sizeAndPrecision = tableLine.replaceAll("\\).*", "").split(",");
+      size = Integer.parseInt(sizeAndPrecision[0]);
+      if (sizeAndPrecision.length > 1) {
+        precision = Integer.parseInt(sizeAndPrecision[1]);
+        return DataSpec.make(dataType, precision, size);
+      }
+    }
+    if (dataType.equals(DataType.tinyint) && size == 1) {
+      dataType = DataType.bool;
+    }
     return DataSpec.make(dataType, size);
   }
 
   private String[] formatToIndexLines(String createTableString) {
-    return createTableString
+    final String[] lines = createTableString
         .replaceAll("\n\\) ENGINE=.*", "")
         .replaceAll("^CREATE TABLE .*\n", "").split("\n");
+    return Arrays.stream(lines).filter(line -> line.contains("PRIMARY") || line.contains("KEY")
+            || line.contains("FULLTEXT") || line.contains("FOREIGN"))
+        .collect(Collectors.toList()).toArray(new String[0]);
   }
 
   private String[] splitToColumnLines(String createTableString) {
     return createTableString
-        .replaceAll("\n\\) ENGINE=.*", "")
         .replaceAll("^CREATE TABLE .*\n", "")
         .replaceAll("\n\s+PRIMARY KEY .*", "")
         .replaceAll("\n\s+KEY .* \\(.*", "")
+        .replaceAll("\n.*KEY .*\n", "\n")
+        .replaceAll("\n.*FULLTEXT .*\n", "\n")
+        .replaceAll("\n\\) ENGINE=.*", "")
+        .replaceAll("`","")
         .split("\n");
   }
 
@@ -984,7 +1065,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return sql;
   }
 
-  private String checkToAddBackticks(String name) {
+  public String checkToAddBackticks(String name) {
     if (MariadbReservedWords.wordsHashSet.contains(name)) {
       return "`" + name + "`";
     }

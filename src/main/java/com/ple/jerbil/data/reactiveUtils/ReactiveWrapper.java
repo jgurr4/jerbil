@@ -2,10 +2,12 @@ package com.ple.jerbil.data.reactiveUtils;
 
 import com.ple.util.IList;
 import org.reactivestreams.Publisher;
+import reactor.core.Fuseable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public abstract class ReactiveWrapper<T> implements Publisher<T>{
 
@@ -21,9 +23,12 @@ public abstract class ReactiveWrapper<T> implements Publisher<T>{
 
   public abstract <R> ReactiveWrapper<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper);
 
+//  public abstract <T> ReactiveWrapper<T> filter(Predicate<? super T> p);
+
   public abstract <T> ReactiveWrapper<T> next();
 
   public abstract ReactiveWrapper<T> log();
 
   public abstract IList<T> unwrapList();
+
 }

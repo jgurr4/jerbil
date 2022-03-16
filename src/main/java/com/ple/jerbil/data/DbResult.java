@@ -44,4 +44,13 @@ public class DbResult {
     return result.get(rowIndex, columnIndex);
   }
 
+  @Override
+  public String toString() {
+    return "DbResult{" +
+        "result=" + result +
+        ", error=" + error +
+        ", warning=" + warning +
+        ", rowsUpdated=" + rowsUpdated +
+        '}';
+  }
 }

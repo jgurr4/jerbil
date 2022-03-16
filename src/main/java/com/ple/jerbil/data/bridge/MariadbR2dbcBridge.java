@@ -96,7 +96,7 @@ public class MariadbR2dbcBridge implements DataBridge {
           final ReactiveMono<DbResult> dbResult = getDbResult(result);
           return dbResult.unwrapMono();  //FIXME: Add flatMap support for ReactiveMono without needing to use unwrapMono().
 //          return Mono.just(DbResult.empty);
-        }));
+        }).filter(dbResult -> dbResult.result.columnNames.size() > 0)); //TODO: Remove this filtering when we get segments supported.
   }
 
   @Immutable
@@ -151,8 +151,11 @@ public class MariadbR2dbcBridge implements DataBridge {
     return ReactiveMono.make(Flux.from(
             result.map(
                 (row, rowMetadata) -> {
-                  final List<String> names = rowMetadata.getColumnMetadatas().stream()
-                      .map(ReadableMetadata::getName).toList();
+                  final List<String> names = rowMetadata
+                      .getColumnMetadatas()
+                      .stream()
+                      .map(ReadableMetadata::getName)
+                      .toList();
                   IList<Object> rowValues = IArrayList.empty;
                   IList<String> colNames = IArrayList.empty;
                   for (int i = 0; i < names.size(); i++) {
@@ -162,6 +165,7 @@ public class MariadbR2dbcBridge implements DataBridge {
                   return new rowColData(rowValues, colNames);
                 }))
         .collectList()
+        .filter(rowList -> rowList.size() > 0)
         .map(rowList -> {
           final IList<String> columnNames = rowList.get(0).colNames;
           final IList<String> warningList = IArrayList.empty;
@@ -178,18 +182,22 @@ public class MariadbR2dbcBridge implements DataBridge {
 
   public ReactiveMono<DatabaseContainer> getDb(String name) {
     Database database = Database.make(name);
-    return ReactiveMono.make(execute("show create database " + name).unwrapMono()
+    return ReactiveMono.make(execute("show create database " + name)
+        .unwrapMono()
         .flatMap(result ->
             Flux.just(result.getColumn("create database"))
                 .next()
                 .flatMap(dbCreateStr -> execute("use " + name + "; show tables")
-                    .flatMap(result1 -> Flux.just(result.getColumn("tables_in_" + name)))
                     .unwrapFlux()
+                    .flatMap(result1 -> {
+                      return Flux.just(result1.getColumn("tables_in_" + name));
+                    })
                     .collectList()
-                    .map(tableNameList -> {
+                    .flatMap(tableNameList -> {
                       final IList<String> tableNameIList = IArrayList.make(tableNameList.toArray(new String[0]));
-                      return convertToDbContainer(tableNameIList, name, database);
-                    })))).next();
+                      return convertToDbContainer(tableNameIList, name, database).unwrapMono();
+                    })
+                    .cast(DatabaseContainer.class))));
   }
 
   @Override
@@ -202,14 +210,14 @@ public class MariadbR2dbcBridge implements DataBridge {
   private ReactiveMono<DatabaseContainer> convertToDbContainer(IList<String> tblNameList, String dbName,
                                                                Database database) {
     return ReactiveMono.make(Flux.fromIterable(tblNameList)
-        .flatMap(tblName -> execute("use " + dbName + "; show create table " + tblName)
-            .flatMap(dbResult -> Flux.just((String[]) dbResult.getColumn("create table")))
-            .map(tblCreateStr -> generator.getTableFromSql(tblCreateStr, database))
-            .unwrapFlux()
+        .flatMap(tblName -> execute("use " + dbName + "; show create table " + generator.checkToAddBackticks(tblName)).unwrapFlux()) //FIXME: Figure out a way to support .flatMap with ReactiveFlux without needing to unrwapFlux.
+//        .log()
+        .flatMap(dbResult -> Flux.just(dbResult.getColumn("create table")))
+            .map(tblCreateStr -> generator.getTableFromSql((String) tblCreateStr, database))
             .collectList()
             .map(tableContainers -> (IList<TableContainer>) (IList) IArrayList.make(tableContainers.toArray()))
             .map(tables -> convertListToIMap(tables))
-            .map(tablesIList -> DatabaseContainer.make(database, tablesIList))).next());
+            .map(tablesIList -> DatabaseContainer.make(database, tablesIList)));
   }
 
   private IMap<String, TableContainer> convertListToIMap(IList<TableContainer> tables) {

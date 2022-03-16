@@ -55,4 +55,9 @@ public class VoidLanguageGenerator implements LanguageGenerator {
     return "";
   }
 
+  @Override
+  public String checkToAddBackticks(String name) {
+    return "";
+  }
+
 }

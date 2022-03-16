@@ -9,6 +9,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class ReactiveFlux<T> extends ReactiveWrapper<T> {
   private final Flux<T> flux;
@@ -39,6 +40,11 @@ public class ReactiveFlux<T> extends ReactiveWrapper<T> {
   public <R> ReactiveFlux<R> flatMapMany(Function<? super T, ? extends Publisher<R>> mapper) {
     return new ReactiveFlux<>(flux.flatMap(mapper));
   }
+
+//  @Override
+//  public <T> ReactiveWrapper<T> filter(Predicate<? super T> p) {
+//    return flux.filter(p);
+//  }
 
   @Override
   public <T> ReactiveMono<T> next() {

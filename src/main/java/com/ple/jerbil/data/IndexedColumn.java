@@ -19,4 +19,12 @@ public class IndexedColumn {
     return new IndexedColumn(column, prefixSize, sortOrder);
   }
 
+  @Override
+  public String toString() {
+    return "IndexedColumn{" +
+        "column=" + column +
+        ", prefixSize=" + prefixSize +
+        ", sortOrder=" + sortOrder +
+        '}';
+  }
 }

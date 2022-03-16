@@ -80,4 +80,12 @@ public class DatabaseContainer {
     return null;
   }
 
+  @Override
+  public String toString() {
+    return "DatabaseContainer{" +
+        "database=" + database +
+        ", tables=" + tables +
+        ", charSet=" + charSet +
+        '}';
+  }
 }

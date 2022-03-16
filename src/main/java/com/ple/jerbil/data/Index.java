@@ -65,4 +65,13 @@ public class Index {
     return columns;
   }
 
+  @Override
+  public String toString() {
+    return "Index{" +
+        "type=" + type +
+        ", indexName='" + indexName + '\'' +
+        ", table=" + table +
+        ", indexedColumns=" + indexedColumns +
+        '}';
+  }
 }

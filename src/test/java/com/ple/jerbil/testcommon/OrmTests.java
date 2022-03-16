@@ -27,6 +27,7 @@ public class OrmTests {
   }
 
   //TODO: Decide whether .load() should be inside TableContainer or inside User Pojo.
+  //TODO: Finish implementing load and save inside the relevant classes using external Bridge methods.
   @Test
   public void testLoad() {
     final int id = 1;

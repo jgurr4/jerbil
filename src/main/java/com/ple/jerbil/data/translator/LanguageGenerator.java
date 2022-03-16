@@ -23,4 +23,6 @@ public interface LanguageGenerator {
 
   String toSql(Diff diff);
 
+  String checkToAddBackticks(String name);
+
 }
