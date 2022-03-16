@@ -100,20 +100,6 @@ public class MariadbR2dbcBridge implements DataBridge {
   }
 
   @Immutable
-  private static class TableData {
-    @Nullable public final IList<String> colNames;
-    @Nullable public final List<IList<Object>> rows;
-    @Nullable public final Integer rowsUpdated;
-
-    private TableData(@Nullable IList<String> colNames,
-                      List<IList<Object>> rows, @Nullable Integer rowsUpdated) {
-      this.colNames = colNames;
-      this.rows = rows;
-      this.rowsUpdated = rowsUpdated;
-    }
-  }
-
-  @Immutable
   private static class rowColData {
     @Nullable public final IList<Object> rowValues;
     @Nullable public final IList<String> colNames;
@@ -192,21 +178,23 @@ public class MariadbR2dbcBridge implements DataBridge {
 
   public ReactiveMono<DatabaseContainer> getDb(String name) {
     Database database = Database.make(name);
-    return ReactiveMono.make(execute("show create database " + name).unwrapFlux()
+    return ReactiveMono.make(execute("show create database " + name).unwrapMono()
         .flatMap(result ->
-            Flux.just((String[]) result.getColumn("create database"))
+            Flux.just(result.getColumn("create database"))
                 .next()
                 .flatMap(dbCreateStr -> execute("use " + name + "; show tables")
-                    .flatMap(result1 -> Flux.just((String[]) result.getColumn("tables_in_" + name)))
-                    .unwrapFlux().collectList()
+                    .flatMap(result1 -> Flux.just(result.getColumn("tables_in_" + name)))
+                    .unwrapFlux()
+                    .collectList()
                     .map(tableNameList -> {
                       final IList<String> tableNameIList = IArrayList.make(tableNameList.toArray(new String[0]));
                       return convertToDbContainer(tableNameIList, name, database);
-                    }))).next()).next();
+                    })))).next();
   }
 
   @Override
   public <T extends DbRecord, I extends DbRecordId> I save(T record) {
+
     return null;
   }
 

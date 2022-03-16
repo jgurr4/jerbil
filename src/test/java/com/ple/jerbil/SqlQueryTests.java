@@ -14,7 +14,7 @@ import java.util.Properties;
 import static com.ple.jerbil.data.selectExpression.Literal.make;
 import static com.ple.jerbil.data.selectExpression.booleanExpression.And.and;
 import static com.ple.jerbil.data.selectExpression.booleanExpression.Or.or;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SqlQueryTests {
 

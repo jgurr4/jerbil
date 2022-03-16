@@ -199,4 +199,8 @@ public class TableContainer extends FromExpression {
         ", autoIncrementColumn=" + autoIncrementColumn +
         '}';
   }
+
+  public <T extends DbRecord> T load(int id) {
+    return null;
+  }
 }
