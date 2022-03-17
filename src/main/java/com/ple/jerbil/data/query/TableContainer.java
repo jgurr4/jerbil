@@ -203,4 +203,8 @@ public class TableContainer extends FromExpression {
   public <T extends DbRecord> T load(int id) {
     return null;
   }
+
+  public DbRecordId save(DbRecord record) {
+    return null;
+  }
 }

@@ -14,4 +14,8 @@ public class UserId extends DbRecordId {
   public static UserId make(long id) {
     return new UserId(id);
   }
+
+  public User load() {
+    return null;
+  }
 }

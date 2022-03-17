@@ -53,11 +53,11 @@ public class CompleteQuery extends Query {
     return generator.toSql(this);
   }
 
-  public ReactiveWrapper<Result> execute() {
+  public ReactiveWrapper<DbResult> execute() {
     return execute(DataGlobal.bridge);
   }
 
-  private ReactiveWrapper<Result> execute(DataBridge bridge) {
+  private ReactiveWrapper<DbResult> execute(DataBridge bridge) {
 //    return bridge.execute(toSql());
     return null;
   }

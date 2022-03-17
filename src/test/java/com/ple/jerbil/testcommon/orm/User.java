@@ -1,6 +1,7 @@
 package com.ple.jerbil.testcommon.orm;
 
 import com.ple.jerbil.data.DbRecord;
+import com.ple.jerbil.data.DbResult;
 import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.util.Immutable;
 
@@ -18,6 +19,14 @@ public class User extends DbRecord<User, UserId> {
 
   public static User make(UserId userId, String name, int age) {
     return new User(userId, name, age);
+  }
+
+  public static User make(DbResult result) {
+    return null;
+  }
+
+  public static User make(String name, int age) {
+    return null;
   }
 
   public User setName(String name) {
