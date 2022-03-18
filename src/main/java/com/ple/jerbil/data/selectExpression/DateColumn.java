@@ -115,6 +115,17 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
     return null;
   }
 
+  @Override
+  public String toString() {
+    return "DateColumn{" +
+        "dataSpec=" + dataSpec +
+        ", defaultValue=" + defaultValue +
+        ", hints=" + hints +
+        ", columnName='" + columnName + '\'' +
+        ", table=" + table +
+        '}';
+  }
+
   public DateColumn defaultValue(LocalDateTime ldateTime) {
     return new DateColumn(columnName, table, dataSpec, LiteralDate.make(ldateTime), hints);
   }

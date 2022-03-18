@@ -1,6 +1,7 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.DatabaseBuilder;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
@@ -35,13 +36,13 @@ public class SqlStructureTests {
     final CreateQuery q = order.create();
     assertEquals("""
         create table `order` (
-          orderId bigint unsigned auto_increment,
+          orderId bigint(20) unsigned auto_increment,
           `add` varchar(255) default ('barter'),
           phrase text,
-          userId int unsigned not null,
+          userId int(11) unsigned not null,
           itemId int(10) unsigned not null,
-          scale mediumint unsigned not null,
-          quantity smallint unsigned not null,
+          scale mediumint(8) unsigned not null,
+          quantity smallint(5) unsigned not null,
           price decimal(14, 2) not null,
           total decimal(14, 2) not null,
           finalized boolean not null,
@@ -51,7 +52,7 @@ public class SqlStructureTests {
           saleDate date not null,
           saleTime time not null,
           saleDateTime datetime default current_timestamp on update current_timestamp,
-          myInvis int invisible,
+          myInvis int(11) invisible,
           key usrd_itmd_idx (userId,itemId),
           primary key (orderId),
           unique key ad_idx (`add`),
@@ -67,39 +68,39 @@ public class SqlStructureTests {
         create database test;
         use test;
         create table user (
-          userId bigint auto_increment,
+          userId bigint(20) auto_increment,
           name varchar(255) not null,
-          age int not null,
+          age int(11) not null,
           primary key (userId),
           key nm_idx (name)
         ) ENGINE=Aria;
         create table player (
-          playerId int auto_increment,
-          userId int not null,
+          playerId int(11) auto_increment,
+          userId int(11) not null,
           name varchar(20) not null,
           primary key (playerId)
         ) ENGINE=Innodb;
         create table item (
-          itemId int auto_increment,
+          itemId int(11) auto_increment,
           name varchar(20) not null,
           type enum('weapon','armor','shield','accessory') not null,
-          price int not null,
+          price int(11) not null,
           primary key (itemId),
           key nm_idx (name)
         ) ENGINE=Aria;
         create table inventory (
-          playerId int,
-          itemId int,
+          playerId int(11),
+          itemId int(11),
           primary key (playerId,itemId)
         ) ENGINE=Aria;
         create table `order` (
-          orderId bigint unsigned auto_increment,
+          orderId bigint(20) unsigned auto_increment,
           `add` varchar(255) default ('barter'),
           phrase text,
-          userId int unsigned not null,
+          userId int(11) unsigned not null,
           itemId int(10) unsigned not null,
-          scale mediumint unsigned not null,
-          quantity smallint unsigned not null,
+          scale mediumint(8) unsigned not null,
+          quantity smallint(5) unsigned not null,
           price decimal(14, 2) not null,
           total decimal(14, 2) not null,
           finalized boolean not null,
@@ -109,7 +110,7 @@ public class SqlStructureTests {
           saleDate date not null,
           saleTime time not null,
           saleDateTime datetime default current_timestamp on update current_timestamp,
-          myInvis int invisible,
+          myInvis int(11) invisible,
           key usrd_itmd_idx (userId,itemId),
           primary key (orderId),
           unique key ad_idx (`add`),
@@ -125,11 +126,11 @@ public class SqlStructureTests {
     final CompleteQuery q = newTable.create();
     assertEquals("""
         create table item (
-          itemId int auto_increment,
+          itemId int(11) auto_increment,
           name varchar(20) not null,
           type enum('weapon','armor','shield','accessory') not null,
-          price int not null,
-          quantity int not null,
+          price int(11) not null,
+          quantity int(11) not null,
           primary key (itemId),
           key nm_idx (name),
           key qnty_idx (quantity)

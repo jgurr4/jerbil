@@ -6,6 +6,8 @@ import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.selectExpression.booleanExpression.GreaterThan;
 
+import java.util.Objects;
+
 @Immutable
 public class ArithmeticExpression implements NumericExpression {
 
@@ -35,4 +37,16 @@ public class ArithmeticExpression implements NumericExpression {
     return null;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof ArithmeticExpression)) return false;
+    ArithmeticExpression that = (ArithmeticExpression) o;
+    return e1.equals(that.e1) && e2.equals(that.e2) && type == that.type;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(e1, e2, type);
+  }
 }

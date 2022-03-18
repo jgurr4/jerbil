@@ -1,8 +1,8 @@
 package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
+import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import com.ple.jerbil.data.sync.DbDiff;
 import com.ple.jerbil.data.sync.DdlOption;
 import com.ple.jerbil.data.sync.Diff;
@@ -10,13 +10,8 @@ import com.ple.jerbil.data.sync.SyncResult;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
 import com.ple.util.IList;
-import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.Test;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import reactor.core.publisher.Hooks;
-import reactor.core.publisher.Mono;
 
 import java.util.Properties;
 
@@ -69,15 +64,12 @@ public class BridgeTests {
   void testGetDb() {
     Hooks.onOperatorDebug();
     final ReactiveWrapper<DatabaseContainer> test = DatabaseContainer.getDbContainer("test");
-//    System.out.println(test.unwrap().getClass().getName());
     final DatabaseContainer testDb = test.unwrap();
     assertEquals("test", testDb.database.databaseName);
-//    System.out.println(this.testDb.tables.toString().replaceAll("Table\\{", "\nTable{"));
-//    System.out.println(testDb.toString().replaceAll("TableContainer\\{", "\nTableContainer{"));
     System.out.println(this.testDb.item + "\n");
     System.out.println(testDb.tables.get("item"));
-    assertTrue(testDb.database.databaseName.equals("test"));
-    assertTrue(testDb.tables.get("item").equals(item.table));
+    assertEquals("test", testDb.database.databaseName);
+    assertEquals(item, testDb.tables.get("item"));
   }
 
   @Test

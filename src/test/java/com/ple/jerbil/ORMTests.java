@@ -1,10 +1,12 @@
-package com.ple.jerbil.testcommon.orm;
+package com.ple.jerbil;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.data.selectExpression.booleanExpression.And;
 import com.ple.jerbil.testcommon.*;
+import com.ple.jerbil.testcommon.orm.User;
+import com.ple.jerbil.testcommon.orm.UserId;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

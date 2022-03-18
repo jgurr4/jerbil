@@ -82,6 +82,17 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
     return Equals.make(this, bool);
   }
 
+  @Override
+  public String toString() {
+    return "BooleanColumn{" +
+        "dataSpec=" + dataSpec +
+        ", defaultValue=" + defaultValue +
+        ", hints=" + hints +
+        ", columnName='" + columnName + '\'' +
+        ", table=" + table +
+        '}';
+  }
+
   public BooleanColumn defaultValue(BooleanExpression bool) {
     return new BooleanColumn(columnName, table, dataSpec, bool, hints);
   }

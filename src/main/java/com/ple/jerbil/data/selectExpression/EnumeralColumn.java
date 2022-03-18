@@ -17,6 +17,10 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
     return new EnumeralColumn(columnName, table, dataSpec, null, BuildingHints.make());
   }
 
+  public static EnumeralColumn make(String columnName, Table table, DataSpec dataSpec, StringExpression defaultValue, BuildingHints hints) {
+    return new EnumeralColumn(columnName, table, dataSpec, defaultValue, hints);
+  }
+
   @Override
   public EnumeralColumn make(String columnName, DataSpec dataSpec) {
     return null;
@@ -65,5 +69,16 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
   @Override
   public SelectQuery select() {
     return null;
+  }
+
+  @Override
+  public String toString() {
+    return "EnumeralColumn{" +
+        "dataSpec=" + dataSpec +
+        ", defaultValue=" + defaultValue +
+        ", hints=" + hints +
+        ", columnName='" + columnName + '\'' +
+        ", table=" + table +
+        '}';
   }
 }

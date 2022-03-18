@@ -89,7 +89,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     if (indexType.equals(IndexType.primary)) {
       return "primary";
     }
-    return indexString.replaceAll("^.*KEY ", "").replaceAll("\\(.*\\),?", "");
+    indexString = indexString.replaceAll("^.*KEY ", "").replaceAll("\\(.*\\),?", "").stripTrailing();
+    return DatabaseService.createIndexName(indexString);
   }
 
   private IndexType getIndexTypeFromSql(String indexString) {
@@ -202,10 +203,11 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         dataSpec.dataType.equals(DataType.mediumint) || dataSpec.dataType.equals(DataType.smallint) ||
         dataSpec.dataType.equals(DataType.aDouble) || dataSpec.dataType.equals(DataType.aFloat)) {
       return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, hints);
-    } else if (dataSpec.dataType.equals(DataType.varchar) || dataSpec.dataType.equals(DataType.enumeration) ||
-        dataSpec.dataType.equals(DataType.text) || dataSpec.dataType.equals(DataType.character) ||
-        dataSpec.dataType.equals(DataType.set)) {
+    } else if (dataSpec.dataType.equals(DataType.varchar) || dataSpec.dataType.equals(DataType.text) ||
+        dataSpec.dataType.equals(DataType.character)) {
       return StringColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, hints);
+    } else if (dataSpec.dataType.equals(DataType.set) || dataSpec.dataType.equals(DataType.enumeration)) {
+      return EnumeralColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, hints);
     } else if (dataSpec.dataType.equals(DataType.datetime) || dataSpec.dataType.equals(DataType.date) ||
         dataSpec.dataType.equals(DataType.time) || dataSpec.dataType.equals(DataType.timestamp)) {
       return DateColumn.make(colName, table, dataSpec, (DateExpression) defaultValue, hints);
@@ -918,16 +920,16 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private String dataTypeToSql(Column column) {
-    String sql = " " + column.dataSpec.getSqlName();
+    String sql = " " + column.dataSpec.dataType.sqlName;
     if (column instanceof NumericColumn) {
       if (column.dataSpec.preciseScale != null) {
         sql += "(" + column.dataSpec.preciseScale[0] + ", " + column.dataSpec.preciseScale[1] + ")";
-      } else if (column.dataSpec.size != 0) {
-        sql += "(" + column.dataSpec.size + ")";
+      } else if (column.dataSpec.size.isPresent()) {
+        sql += "(" + column.dataSpec.size.get() + ")";
       }
     } else if (column instanceof StringColumn) {
       if (!column.dataSpec.dataType.equals(DataType.text)) {
-        sql += "(" + column.dataSpec.size + ")";
+        sql += "(" + column.dataSpec.size.get() + ")";
       }
     } else if (column instanceof EnumeralColumn) {
       final EnumSpec enumSpec = (EnumSpec) column.dataSpec;
@@ -1114,7 +1116,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       separator = ",";
     }
     if (generateName) {
-      indexName = DatabaseService.formatIndexName(indexedColumns) + "idx ";
+      indexName = DatabaseService.createIndexName(indexedColumns);
     }
     sql += indexName + "(" + indexedColumns + ")";
     return sql;

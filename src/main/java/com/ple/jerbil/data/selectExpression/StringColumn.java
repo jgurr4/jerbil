@@ -101,4 +101,15 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
   public StringColumn fullText() {
     return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, hints.fulltext());
   }
+
+  @Override
+  public String toString() {
+    return "StringColumn{" +
+        "dataSpec=" + dataSpec +
+        ", defaultValue=" + defaultValue +
+        ", hints=" + hints +
+        ", columnName='" + columnName + '\'' +
+        ", table=" + table +
+        '}';
+  }
 }

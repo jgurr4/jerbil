@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * DataSpec represents any datatype and it's parameter definitions for defining specific columns in tables. For example:
@@ -22,32 +23,24 @@ import java.util.Objects;
  */
 @Immutable
 public class DataSpec {
-
-  public final static DataSpec integer = new DataSpec(DataType.integer, 0, null);
-  public final static DataSpec varchar = new DataSpec(DataType.varchar, 0, null);
+  public final static DataSpec integer = new DataSpec(DataType.integer, DataType.integer.defaultSize, null);
+  public final static DataSpec varchar = new DataSpec(DataType.varchar, DataType.varchar.defaultSize, null);
   public final DataType dataType;
-  public final int size;
+  public final Optional<Integer> size;
   @Nullable public final int[] preciseScale;
-  public final static int defaultMaxSize = 255;
 
-  protected DataSpec(DataType dataType, int size, int[] preciseScale) {
+  protected DataSpec(DataType dataType, Optional<Integer> size, int[] preciseScale) {
     this.dataType = dataType;
     this.size = size;
     this.preciseScale = preciseScale;
   }
 
-  public DataSpec(DataType dataType, int size) {
-    this.dataType = dataType;
-    this.size = size;
-    this.preciseScale = null;
-  }
-
   public static DataSpec make(DataType type, int size) {
-    return new DataSpec(type, size, null);
+    return new DataSpec(type, Optional.of(size), null);
   }
 
   public static DataSpec make(DataType type, int precision, int scale) {
-    return new DataSpec(type, defaultMaxSize, new int[]{precision, scale});
+    return new DataSpec(type, type.defaultSize, new int[]{precision, scale});
   }
 
   public static DataSpec make(DataType type, Class enumObj) {
@@ -69,64 +62,7 @@ public class DataSpec {
   //TODO: Pull this code out of here and place inside MysqlLanguageGenerator, because this is specific to mysql only. Won't necessarily work for other dbms.
   // Just make the size 0 if not specified by the user explicitely.
   public static DataSpec make(DataType type) {
-    int maxSize = 0;
-    if (type == DataType.varchar || type == DataType.enumeration || type == DataType.character) {
-      maxSize = DefaultSize.varchar.getSize();
-/*  //Uncomment this if we want int(11) and other default sizes specified explicitely in table create statements.
-    } else if (type == DataType.bigint) {
-      maxSize = DefaultSize.bigint.getSize();
-    } else if (type == DataType.mediumint) {
-      maxSize = DefaultSize.mediumint.getSize();
-    } else if (type == DataType.integer) {
-      maxSize = DefaultSize.integer.getSize();
-    } else if (type == DataType.tinyint) {
-      maxSize = DefaultSize.tinyint.getSize();
-    } else if (type == DataType.bool) {
-      maxSize = DefaultSize.bool.getSize();
-*/
-    }
-    return new DataSpec(type, maxSize, null);
-  }
-
-  public String getSqlName() {
-    if (this.dataType.equals(DataType.integer)) {
-      return "int";
-    } else if (this.dataType.equals(DataType.tinyint)) {
-      return "tinyint";
-    } else if (this.dataType.equals(DataType.smallint)) {
-      return "smallint";
-    } else if (this.dataType.equals(DataType.mediumint)) {
-      return "mediumint";
-    } else if (this.dataType.equals(DataType.bigint)) {
-      return "bigint";
-    } else if (this.dataType.equals(DataType.aDouble)) {
-      return "double";
-    } else if (this.dataType.equals(DataType.aFloat)) {
-      return "float";
-    } else if (this.dataType.equals(DataType.decimal)) {
-      return "decimal";
-    } else if (this.dataType.equals(DataType.bool)) {
-      return "boolean";
-    } else if (this.dataType.equals(DataType.enumeration)) {
-      return "enum";
-    } else if (this.dataType.equals(DataType.set)) {
-      return "set";
-    } else if (this.dataType.equals(DataType.varchar)) {
-      return "varchar";
-    } else if (this.dataType.equals(DataType.character)) {
-      return "char";
-    } else if (this.dataType.equals(DataType.text)) {
-      return "text";
-    } else if (this.dataType.equals(DataType.date)) {
-      return "date";
-    } else if (this.dataType.equals(DataType.datetime)) {
-      return "datetime";
-    } else if (this.dataType.equals(DataType.time)) {
-      return "time";
-    } else if (this.dataType.equals(DataType.timestamp)) {
-      return "timestamp";
-    }
-    return this.dataType.name();
+    return new DataSpec(type, type.defaultSize, null);
   }
 
   @Override
@@ -134,7 +70,8 @@ public class DataSpec {
     if (this == o) return true;
     if (!(o instanceof DataSpec)) return false;
     DataSpec dataSpec = (DataSpec) o;
-    return size == dataSpec.size && dataType == dataSpec.dataType && Arrays.equals(preciseScale, dataSpec.preciseScale);
+    return size == dataSpec.size && dataType == dataSpec.dataType && Arrays.equals(preciseScale,
+        dataSpec.preciseScale);
   }
 
   @Override

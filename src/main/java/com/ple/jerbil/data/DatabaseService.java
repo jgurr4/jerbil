@@ -7,7 +7,7 @@ public class DatabaseService {
 
   public static String generateIndexName(IList<String> listOfIdxNames, Column... columns) {
     final String formattedColumns = formatForIndexNameGenerator(columns);
-    String idxName = formatIndexName(formattedColumns) + "idx";
+    String idxName = createIndexName(formattedColumns);
     int i = 2;
     while (listOfIdxNames.contains(idxName)) {
       idxName += "_" + i;
@@ -28,13 +28,13 @@ public class DatabaseService {
 
   //FIXME: Make it remove Id or _id and also handle camelcase and _ separated words differently. For example: itemId and item_id should become itm_idx.
   // Or also user_info or userInfo = usrinf instead of usrnf
-  public static String formatIndexName(String indexedColumns) {
+  public static String createIndexName(String indexedColumns) {
     final String[] split = indexedColumns.toLowerCase().split(",");
     String result = "";
     for (String s : split) {
       result += s.replaceAll("\\B[aeiou]", "")
           .replaceAll("`", "")
-          .replaceAll("([a-z])\\1*", "$1") + "_";
+          .replaceAll("([a-z])\\1*", "$1") + "_idx";
     }
     return result;
   }

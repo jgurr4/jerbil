@@ -71,15 +71,15 @@ public abstract class Column <T extends Column> extends PartialColumn{
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Column)) return false;
+        if (!super.equals(o)) return false;
         Column<?> column = (Column<?>) o;
-        return dataSpec.equals(column.dataSpec) &&
-          columnName.equals(column.columnName) &&
-          Objects.equals(defaultValue, column.defaultValue);
+        return dataSpec.equals(column.dataSpec) && Objects.equals(defaultValue,
+            column.defaultValue) && hints.equals(column.hints);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(dataSpec, defaultValue);
+        return Objects.hash(super.hashCode(), dataSpec, defaultValue, hints);
     }
 
     @Override

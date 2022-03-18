@@ -102,22 +102,22 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
     return Equals.make(this, value);
   }
 
-  @Override
-  public String toString() {
-    return "NumericColumn{" +
-        "columnName='" + columnName +
-        ", dataSpec=" + dataSpec +
-//        ", generatedFrom=" + generatedFrom +
-        ", defaultValue=" + defaultValue +
-        ", table=" + table + '\'' +
-        '}';
-  }
-
   public NumericColumn ai() {
     return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.autoInc().primary());
   }
 
   public NumericColumn unsigned() {
     return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.unsigned());
+  }
+
+  @Override
+  public String toString() {
+    return "NumericColumn{" +
+        "dataSpec=" + dataSpec +
+        ", defaultValue=" + defaultValue +
+        ", hints=" + hints +
+        ", columnName='" + columnName + '\'' +
+        ", table=" + table +
+        '}';
   }
 }
