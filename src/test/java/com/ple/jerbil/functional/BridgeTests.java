@@ -66,8 +66,8 @@ public class BridgeTests {
     final ReactiveWrapper<DatabaseContainer> test = DatabaseContainer.getDbContainer("test");
     final DatabaseContainer testDb = test.unwrap();
     assertEquals("test", testDb.database.databaseName);
-    System.out.println(this.testDb.item + "\n");
-    System.out.println(testDb.tables.get("item"));
+//    System.out.println(this.testDb.item + "\n");
+//    System.out.println(testDb.tables.get("item"));
     assertEquals("test", testDb.database.databaseName);
     assertEquals(item, testDb.tables.get("item"));
   }

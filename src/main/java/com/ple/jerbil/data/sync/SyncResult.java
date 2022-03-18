@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.sync;
 
+import com.ple.jerbil.data.DbResult;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import io.r2dbc.spi.Result;
@@ -7,15 +8,15 @@ import io.r2dbc.spi.Result;
 @Immutable
 public class SyncResult<D extends Diff> {
 
-  public final ReactiveWrapper<Result> result;
+  public final ReactiveWrapper<DbResult> result;
   public final ReactiveWrapper<D> diff;
 
-  protected SyncResult(ReactiveWrapper<Result> result, ReactiveWrapper<D> diff) {
+  protected SyncResult(ReactiveWrapper<DbResult> result, ReactiveWrapper<D> diff) {
     this.result = result;
     this.diff = diff;
   }
 
-  public static <D extends Diff> SyncResult make(ReactiveWrapper<Result> result, ReactiveWrapper<D> diffs) {
+  public static <D extends Diff> SyncResult make(ReactiveWrapper<DbResult> result, ReactiveWrapper<D> diffs) {
     return new SyncResult(result, diffs);
   }
 

@@ -90,7 +90,7 @@ public class DatabaseBuilder {
     Index primary = null;
     IList<String> existingNames = indexes.keys();
     for (Column column : columns) {
-      String indexName = DatabaseService.generateIndexName(existingNames, column);
+      String indexName = DatabaseService.generateIndexName(existingNames, column).stripTrailing();
       existingNames = existingNames.add(indexName);
       if (column.hints.isAutoInc()) {
         indexes = indexes.put("primary", Index.make(IndexType.primary, "primary", customTable, column));

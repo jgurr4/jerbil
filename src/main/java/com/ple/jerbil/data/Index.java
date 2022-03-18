@@ -6,6 +6,7 @@ import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.util.*;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 @Immutable
 public class Index {
@@ -63,6 +64,21 @@ public class Index {
       columns = columns.add(indexedColumn.column);
     }
     return columns;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Index)) return false;
+    Index index = (Index) o;
+    return type == index.type && indexName.equals(index.indexName) && table.equals(
+        index.table) && indexedColumns.equals(
+        index.indexedColumns);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(type, indexName, table, indexedColumns);
   }
 
   @Override

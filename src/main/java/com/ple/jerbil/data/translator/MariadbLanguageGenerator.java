@@ -6,7 +6,8 @@ import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.function.Sum;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
-import com.ple.jerbil.data.sync.Diff;
+import com.ple.jerbil.data.sync.DbDiff;
+import com.ple.jerbil.data.sync.TableDiff;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 import java.time.LocalDate;
@@ -949,8 +950,37 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   @Override
-  public String toSql(Diff diff) {
-    //TODO: Implement this. Make sure it returns null if diffs are empty.
+  public String toSql(DbDiff dbDiff) {
+    String sql = "";
+    if (dbDiff.getTotalDiffs() == 0) {
+      return sql;
+    }
+    if (dbDiff.databaseName != null) {
+      //TODO: Figure out how you would update databaseName without dropping old database. Perhaps allow DatabaseContainer
+      // to be passed into this method, and use its toSql() to recreate the database, while retaining the old db.
+      // Or perhaps migrate data from the old db, to a new db with the correct name. Then return sql string.
+    }
+    if (dbDiff.tables != null) {
+      if (dbDiff.tables.create != null) {
+        for (TableContainer table : dbDiff.tables.create) {
+          sql += table.create() + ";\n";
+        }
+      }
+      if (dbDiff.tables.delete != null) {
+        for (TableContainer table : dbDiff.tables.delete) {
+          sql += table.drop() + ";\n";
+        }
+      }
+      if (dbDiff.tables.update != null) {
+        for (TableDiff tableDiff : dbDiff.tables.update) {
+          sql += toSql(tableDiff);
+        }
+      }
+    }
+    return sql;
+  }
+
+  private String toSql(TableDiff tableDiff) {
     return null;
   }
 
@@ -1071,6 +1101,11 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       return "`" + name + "`";
     }
     return name;
+  }
+
+  @Override
+  public String drop(TableContainer table) {
+    return "drop table " + table.table.tableName;
   }
 
   private String toSql(IList<Index> indexes) {

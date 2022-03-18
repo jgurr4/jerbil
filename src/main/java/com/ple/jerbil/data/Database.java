@@ -2,6 +2,8 @@ package com.ple.jerbil.data;
 
 import com.ple.util.Immutable;
 
+import java.util.Objects;
+
 /**
  * Database is a object representing the database and it's tables.
  */
@@ -24,5 +26,16 @@ public class Database {
         '}';
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof Database)) return false;
+    Database database = (Database) o;
+    return databaseName.equals(database.databaseName);
+  }
 
+  @Override
+  public int hashCode() {
+    return Objects.hash(databaseName);
+  }
 }

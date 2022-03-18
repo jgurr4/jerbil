@@ -21,12 +21,17 @@ import reactor.core.publisher.Mono;
  */
 public class DiffService {
 
+  public static DbDiff compareDatabases(DatabaseContainer leftDbc, DatabaseContainer rightDbc) {
+    return compareDatabaseProps(leftDbc, rightDbc);
+  }
+
   public static ReactiveWrapper<DbDiff> compareDatabases(ReactiveWrapper<DatabaseContainer> leftDbc,
                                                          ReactiveWrapper<DatabaseContainer> rightDbc) {
-    return ReactiveMono.make(Mono.from(leftDbc.unwrapMono())
+    return ReactiveMono.make(leftDbc.unwrapMono()
         .concatWith(rightDbc.unwrapMono())
         .collectList()
-        .map(databases -> compareDatabaseProps(databases.get(0), databases.get(1))));
+        .map(databases -> compareDatabaseProps(databases.get(0), databases.get(1)))
+    );
   }
 
   public static DbDiff compareDatabaseProps(DatabaseContainer leftDb, DatabaseContainer rightDb) {

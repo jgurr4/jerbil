@@ -207,4 +207,8 @@ public class TableContainer extends FromExpression {
   public DbRecordId save(DbRecord record) {
     return null;
   }
+
+  public String drop() {
+    return DataGlobal.bridge.getGenerator().drop(this);
+  }
 }
