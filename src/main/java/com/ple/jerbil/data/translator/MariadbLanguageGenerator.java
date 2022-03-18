@@ -89,8 +89,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     if (indexType.equals(IndexType.primary)) {
       return "primary";
     }
-    indexString = indexString.replaceAll("^.*KEY ", "").replaceAll("\\(.*\\),?", "").stripTrailing();
-    return DatabaseService.createIndexName(indexString);
+    return indexString.replaceAll("^.*KEY ", "").replaceAll("\\(.*\\),?", "").stripTrailing();
   }
 
   private IndexType getIndexTypeFromSql(String indexString) {
@@ -1075,7 +1074,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(IList<Index> indexes) {
-    IList<Column> columns = IArrayList.empty;
+    IList<Column> columns = IArrayList.make();
     String separtor = "";
     String sql = "";
     String references = "";
@@ -1100,7 +1099,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       separtor = ",";
       sql += " " + toSqlIndexColumns(columns, generateName);
       generateName = true;
-      columns = IArrayList.empty;
+      columns = IArrayList.make();
     }
     return sql;
   }
@@ -1116,7 +1115,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       separator = ",";
     }
     if (generateName) {
-      indexName = DatabaseService.createIndexName(indexedColumns);
+      indexName = DatabaseService.generateIndexName(columns.toArray());
     }
     sql += indexName + "(" + indexedColumns + ")";
     return sql;

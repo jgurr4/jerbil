@@ -1,9 +1,15 @@
 package com.ple.jerbil.data;
 
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.util.IArrayList;
 import com.ple.util.IList;
 
 public class DatabaseService {
+
+
+  public static String generateIndexName(Column... columns) {
+    return generateIndexName(IArrayList.make(), columns);
+  }
 
   public static String generateIndexName(IList<String> listOfIdxNames, Column... columns) {
     final String formattedColumns = formatForIndexNameGenerator(columns);
@@ -13,7 +19,7 @@ public class DatabaseService {
       idxName += "_" + i;
       i++;
     }
-    return idxName;
+    return idxName + "_idx ";
   }
 
   public static String formatForIndexNameGenerator(Column... columns) {
@@ -31,10 +37,12 @@ public class DatabaseService {
   public static String createIndexName(String indexedColumns) {
     final String[] split = indexedColumns.toLowerCase().split(",");
     String result = "";
+    String separator = "";
     for (String s : split) {
-      result += s.replaceAll("\\B[aeiou]", "")
+      result += separator + s.replaceAll("\\B[aeiou]", "")
           .replaceAll("`", "")
-          .replaceAll("([a-z])\\1*", "$1") + "_idx";
+          .replaceAll("([a-z])\\1*", "$1");
+      separator = "_";
     }
     return result;
   }
