@@ -5,18 +5,20 @@ import com.ple.util.Immutable;
 import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import io.r2dbc.spi.Result;
 
+import java.util.Objects;
+
 @Immutable
 public class SyncResult<D extends Diff> {
 
   public final ReactiveWrapper<DbResult> result;
-  public final ReactiveWrapper<D> diff;
+  public final D diff;
 
-  protected SyncResult(ReactiveWrapper<DbResult> result, ReactiveWrapper<D> diff) {
+  protected SyncResult(ReactiveWrapper<DbResult> result, D diff) {
     this.result = result;
     this.diff = diff;
   }
 
-  public static <D extends Diff> SyncResult make(ReactiveWrapper<DbResult> result, ReactiveWrapper<D> diffs) {
+  public static <D extends Diff> SyncResult make(ReactiveWrapper<DbResult> result, D diffs) {
     return new SyncResult(result, diffs);
   }
 
@@ -199,4 +201,16 @@ public class SyncResult<D extends Diff> {
   }
 */
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof SyncResult)) return false;
+    SyncResult<?> that = (SyncResult<?>) o;
+    return result.equals(that.result) && diff.equals(that.diff);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(result, diff);
+  }
 }

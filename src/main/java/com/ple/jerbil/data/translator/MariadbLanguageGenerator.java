@@ -6,8 +6,7 @@ import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.function.Sum;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
-import com.ple.jerbil.data.sync.DbDiff;
-import com.ple.jerbil.data.sync.TableDiff;
+import com.ple.jerbil.data.sync.*;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 import java.time.LocalDate;
@@ -956,6 +955,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       return sql;
     }
     if (dbDiff.databaseName != null) {
+      // We need leftside DatabaseContainer here.
       //TODO: Figure out how you would update databaseName without dropping old database. Perhaps allow DatabaseContainer
       // to be passed into this method, and use its toSql() to recreate the database, while retaining the old db.
       // Or perhaps migrate data from the old db, to a new db with the correct name. Then return sql string.
@@ -981,6 +981,128 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSql(TableDiff tableDiff) {
+    String sql = "";
+    if (tableDiff.tableName != null) {
+      sql += "alter table " + tableDiff.tableName.after + " rename " + tableDiff.tableName.before + ";\n";
+    }
+    if (tableDiff.storageEngine != null) {
+      sql += "alter table "; //we need rightside tableName here.
+    }
+    if (tableDiff.indexes != null) {
+      if (tableDiff.indexes.create != null) {
+        for (Index index : tableDiff.indexes.create) {
+          sql += index.create() + ";\n";
+        }
+      }
+      if (tableDiff.indexes.delete != null) {
+        for (Index index : tableDiff.indexes.delete) {
+          sql += index.drop() + ";\n";
+        }
+      }
+      if (tableDiff.indexes.update != null) {
+        for (IndexDiff indexDiff : tableDiff.indexes.update) {
+          sql += toSql(indexDiff);
+        }
+      }
+    }
+    if (tableDiff.columns != null) {
+      if (tableDiff.columns.create != null) {
+        for (Column column : tableDiff.columns.create) {
+          sql += column.create() + ";\n";
+        }
+      }
+      if (tableDiff.columns.delete != null) {
+        for (Column column : tableDiff.columns.delete) {
+          sql += column.drop() + ";\n";
+        }
+      }
+      if (tableDiff.columns.update != null) {
+        for (ColumnDiff columnDiff : tableDiff.columns.update) {
+          sql += toSql(columnDiff);
+        }
+      }
+    }
+    return sql;
+  }
+
+  private String toSql(ColumnDiff columnDiff) {
+    String sql = "";
+    if (columnDiff.columnName != null) {
+      //We need either Table name here. Because by this point it has been renamed if wrong. Because this is affected by update as well.
+      sql += "alter table " +  tableName + "rename column " + columnDiff.columnName.after + " to " + columnDiff.columnName.before + ";\n";
+    }
+    if (columnDiff.table != null) {
+      // Place sql here to migrate from rightside table to the leftside one only if we haven't renamed the table already.
+    }
+    if (columnDiff.dataSpec != null) {
+      //We need either table name here. We need either colName here.
+      sql += "alter table " + tableName + " modify " + colName + columnDiff.dataSpec.before + ";\n";
+    }
+    if (columnDiff.defaultValue != null) {
+      //We need either table name, colName and defaultValue here.
+      sql += "alter table " + tableName + " modify " + colName + columnDiff.dataSpec.before + defaultVal + ";\n";
+    }
+    if (columnDiff.buildingHints != null) {
+      sql += compareBuildingHintsToSql(columnDiff.buildingHints.before, columnDiff.buildingHints.after) + ";\n";
+    }
+    return sql;
+  }
+
+  private String toSql(IndexDiff indexDiff) {
+    String sql = "";
+    String indexTypeStr = "";
+    if (indexDiff.indexName != null) {
+      //We need either tablename here. We need indexedColumnNames here. (name,item). We need Index here. For IndexType and stuff.
+      if (indexType.equals(IndexType.primary)) {
+        indexTypeStr = "primary key";
+      } else if (index.equals(IndexType.secondary)) {
+        indexTypeStr = "index";
+      }
+      //TODO: Add more type checking here.
+      sql += "drop " + indexTypeStr + " " + indexDiff.indexName.after + " on " + tableName + ";\n" +
+          index.create() + ";\n";
+//      "create index " + indexDiff.indexName.before + " on " + tableName + indexedColumns + ";\n";
+    }
+    if (indexDiff.table != null) {
+      // Find a way to migrate index from rightside to leftside table only if the table name was not already modified.
+    }
+    if (indexDiff.type != null) {
+      //We need either indexname here. We need either tableName here.
+      sql += "drop index " + indexName + " on " + tableName + ";\n" +
+          index.create();
+    }
+    if (indexDiff.indexedColumns != null) {
+      if (indexDiff.indexedColumns.create != null) {
+        for (IndexedColumn indexedCol : indexDiff.indexedColumns.create) {
+          sql += indexedCol.create() + ";\n";
+        }
+      }
+      if (indexDiff.indexedColumns.delete != null) {
+        for (IndexedColumn indexedCol : indexDiff.indexedColumns.delete) {
+          sql += indexedCol.drop() + ";\n";
+        }
+      }
+      if (indexDiff.indexedColumns.update != null) {
+        for (IndexedColumnDiff indexedColDiff : indexDiff.indexedColumns.update) {
+          sql += toSql(indexedColDiff);
+        }
+      }
+    }
+    return sql;
+  }
+
+  private String toSql(IndexedColumnDiff indexedColDiff) {
+    //TODO: Decide if this is necessary. It may be easier to just drop a index and recreate it.
+    if (indexedColDiff.column != null) {
+    }
+    if (indexedColDiff.sortOrder != null) {
+    }
+    if (indexedColDiff.prefixSize != null) {
+    }
+    return null;
+  }
+
+  private String compareBuildingHintsToSql(BuildingHints before, BuildingHints after) {
     return null;
   }
 

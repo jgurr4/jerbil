@@ -2,14 +2,19 @@ package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
+import com.ple.jerbil.data.query.Table;
+import com.ple.jerbil.data.query.TableContainer;
+import com.ple.jerbil.data.reactiveUtils.ReactiveMono;
 import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
-import com.ple.jerbil.data.sync.DbDiff;
-import com.ple.jerbil.data.sync.DdlOption;
-import com.ple.jerbil.data.sync.Diff;
-import com.ple.jerbil.data.sync.SyncResult;
+import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
+import com.ple.jerbil.data.selectExpression.StringColumn;
+import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayList;
+import com.ple.util.IArrayMap;
 import com.ple.util.IList;
+import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Hooks;
 
@@ -63,21 +68,51 @@ public class BridgeTests {
   @Test
   void testGetDb() {
     Hooks.onOperatorDebug();
-    final ReactiveWrapper<DatabaseContainer> test = DatabaseContainer.getDbContainer("test");
-    final DatabaseContainer testDb = test.unwrap();
-    assertEquals("test", testDb.database.databaseName);
-//    System.out.println(this.testDb.item + "\n");
-//    System.out.println(testDb.tables.get("item"));
-    assertEquals("test", testDb.database.databaseName);
-    assertEquals(item, testDb.tables.get("item"));
+    final DatabaseContainer test = DatabaseContainer.getDbContainer("test").unwrap();
+    assertEquals("test", test.database.databaseName);
+    assertEquals("test", test.database.databaseName);
+    assertEquals(item, test.tables.get("item"));
+  }
+
+  @Test
+  void testDiffToSql() {
+    final Table userTable = Table.make("useer", testDb.database);
+    final NumericColumn userId = Column.make("userId", userTable).asInt();
+    final StringColumn name = Column.make("name", userTable).asVarchar(15);
+    final NumericColumn age = Column.make("agee", userTable).asInt();
+    final IMap<String, Index> indexSpecs = IArrayMap.make("nm_idx", Index.make(IndexType.secondary, "nm_idx",
+        userTable, IndexedColumn.make(name, 10, null)));
+    final IMap<String, Column> columns = IArrayMap.make(userId.columnName, userId, name.columnName, name,
+        age.columnName, age);
+    final TableContainer updatedUser = TableContainer.make(userTable, columns, StorageEngine.simple, indexSpecs, userId);
+    final DatabaseContainer test = DatabaseContainer.make(testDb.database, IArrayMap.make(testDb.inventory.tableName,
+        testDb.inventory, testDb.item.tableName, testDb.item, testDb.order.tableName, testDb.order, updatedUser));
+    final DbDiff dbDiff = DiffService.compareDatabases(testDb, test);
+    // Create Index cannot be used to add primary key in mysql. However alter table does work to add primary key in mariadb.
+    assertEquals("""
+        use test;
+        create table player (
+          playerId int(11) auto_increment,
+          userId int(11) not null,
+          name varchar(20) not null,
+          primary key (playerId)
+        ) ENGINE=Innodb;
+        alter table useer rename user;
+        alter table user add primary key (userId);
+        alter table user modify userId bigint(20) not null auto_increment;
+        alter table user modify name varchar(255) not null;
+        alter table user change agee age int(11) not null;
+        drop index nm_idx on user;
+        create index nm_idx on user (name);
+        """, dbDiff.toSql());
   }
 
   @Test
   void syncCreateWithDbMissing() { //Should create database using Database Object. Every diff should exist because it is forced to create db for first time.
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create();
-    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
-    assertNotNull(((DbDiff) syncResult.diff.unwrap()).databaseName);
+    final ReactiveMono<SyncResult> syncResult = testDb.sync(ddlOption);
+    assertNotNull(((DbDiff) syncResult.unwrap().diff).databaseName);
   }
 
   @Test
