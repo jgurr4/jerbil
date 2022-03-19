@@ -9,6 +9,7 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.jerbil.data.sync.*;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -54,7 +55,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final StorageEngine engine = getEngineFromSql(createTableString);
     final IMap<String, Column> columns = getColumnsFromSql(createTableString, table);
     final IMap<String, Index> indexes = getIndexesFromSql(createTableString, table, columns);
-    final NumericColumn autoIncColumn = getAutoIncColumn(indexes.get("primary").indexedColumns);
+    NumericColumn autoIncColumn = null;
+    if (indexes.size() != 0) {
+      autoIncColumn = getAutoIncColumn(indexes.get("primary").indexedColumns);
+    }
     return TableContainer.make(table, columns, engine, indexes, autoIncColumn);
   }
 
@@ -94,7 +98,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 
   private IndexType getIndexTypeFromSql(String indexString) {
     String type = indexString.replaceAll("KEY \\(.*", "KEY");
-    if (type.replaceAll("\\sKEY ","").length() < type.length()) {
+    if (type.replaceAll("\\sKEY ", "").length() < type.length()) {
       return IndexType.secondary;
     } else if (type.contains("PRIMARY")) {
       return IndexType.primary;
@@ -115,8 +119,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     SortOrder sortOrder = null;
     final IMap<String, Integer> indexedColumnsAndPrefixSizes = getIndexedColumnsAndPrefixSize(indexString);
     for (IEntry<String, Integer> indexColumnEntry : indexedColumnsAndPrefixSizes) {
-        indexedColumns = indexedColumns.add(
-            IndexedColumn.make(columns.get(indexColumnEntry.key), indexColumnEntry.value, null));
+      indexedColumns = indexedColumns.add(
+          IndexedColumn.make(columns.get(indexColumnEntry.key), indexColumnEntry.value, null));
     }
     return indexedColumns;
   }
@@ -126,14 +130,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     Integer prefix = 0;
     IMap<String, Integer> colNamesAndPrefixes = IArrayMap.empty;
     final String[] columnAndPrefix = indexString.replaceAll(".* \\(", "")
-        .replaceAll(",?$","")
-        .replaceAll("\\)$","")
+        .replaceAll(",?$", "")
+        .replaceAll("\\)$", "")
 //        .replaceAll("\\),?", "")
         .split(",");
     for (String colAndPref : columnAndPrefix) {
       colName = colAndPref.replaceAll("\\([0-9]{0,3}\\)", "");
       if (colAndPref.replaceAll("\\([0-9]{0,3}\\)", "").length() != colAndPref.length()) {
-        prefix = Integer.parseInt(colAndPref.replaceAll("[^0-9]",""));
+        prefix = Integer.parseInt(colAndPref.replaceAll("[^0-9]", ""));
       }
       colNamesAndPrefixes = colNamesAndPrefixes.put(colName, prefix);
     }
@@ -292,16 +296,16 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       return Literal.make(Integer.parseInt(defaultVal));
     } else if (defaultVal.replaceAll("[0-9]", "").replace(".", "").length() == 0) {
       return Literal.make(Double.parseDouble(defaultVal));
-    } else if (defaultVal.replaceAll("[0-9]{4}-[0-9]{2}-[0-9]{2}","").length() == 0) {
+    } else if (defaultVal.replaceAll("[0-9]{4}-[0-9]{2}-[0-9]{2}", "").length() == 0) {
       return Literal.make(LocalDate.parse(defaultVal));
-    } else if (defaultVal.replaceAll("[0-9]{2}:[0-9]{2}:[0-9]{2}","").length() == 0) {
+    } else if (defaultVal.replaceAll("[0-9]{2}:[0-9]{2}:[0-9]{2}", "").length() == 0) {
       return Literal.make(LocalTime.parse(defaultVal));
-    } else if (defaultVal.replaceAll("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}","").length() == 0) {
+    } else if (defaultVal.replaceAll("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}", "").length() == 0) {
       return Literal.make(LocalDateTime.parse(defaultVal));
-    } else if (defaultVal.replace("false","").replace("true","").length() == 0) {
+    } else if (defaultVal.replace("false", "").replace("true", "").length() == 0) {
       return Literal.make(Boolean.parseBoolean(defaultVal));
     }
-      return Literal.make(defaultVal);
+    return Literal.make(defaultVal);
   }
 
   private DataSpec getDataSpecFromSql(String tableLine) {
@@ -401,7 +405,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         .replaceAll("\n.*KEY .*\n", "\n")
         .replaceAll("\n.*FULLTEXT .*\n", "\n")
         .replaceAll("\n\\) ENGINE=.*", "")
-        .replaceAll("`","")
+        .replaceAll("`", "")
         .split("\n");
   }
 
@@ -950,25 +954,23 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 
   @Override
   public String toSql(DbDiff dbDiff) {
-    String sql = "";
-    if (dbDiff.getTotalDiffs() == 0) {
-      return sql;
-    }
+    String sql = "use " + dbDiff.databaseA.database.databaseName + ";\n";
+    // TODO: Uncomment after I finish implementing the getTotalDiffs methods.
+//    if (dbDiff.getTotalDiffs() == 0) {
+//      return sql;
+//    }
     if (dbDiff.databaseName != null) {
-      // We need leftside DatabaseContainer here.
-      //TODO: Figure out how you would update databaseName without dropping old database. Perhaps allow DatabaseContainer
-      // to be passed into this method, and use its toSql() to recreate the database, while retaining the old db.
-      // Or perhaps migrate data from the old db, to a new db with the correct name. Then return sql string.
+      sql += dbDiff.databaseA.createAll().toSql() + "\n" + migrateToSql(dbDiff.databaseB, dbDiff.databaseA) + ";\n";
     }
     if (dbDiff.tables != null) {
       if (dbDiff.tables.create != null) {
         for (TableContainer table : dbDiff.tables.create) {
-          sql += table.create() + ";\n";
+          sql += toSqlCreate(table) + ";\n";
         }
       }
       if (dbDiff.tables.delete != null) {
         for (TableContainer table : dbDiff.tables.delete) {
-          sql += table.drop() + ";\n";
+          sql += toSqlDrop(table) + ";\n";
         }
       }
       if (dbDiff.tables.update != null) {
@@ -980,40 +982,47 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return sql;
   }
 
+  private String migrateToSql(DatabaseContainer leftDb, DatabaseContainer rightDb) {
+    //TODO: Implement this.
+    // This method will iterate through each table of leftDb, and select * from that into each corresponding table in the rightDb.
+    return null;
+  }
+
   private String toSql(TableDiff tableDiff) {
     String sql = "";
     if (tableDiff.tableName != null) {
       sql += "alter table " + tableDiff.tableName.after + " rename " + tableDiff.tableName.before + ";\n";
     }
     if (tableDiff.storageEngine != null) {
-      sql += "alter table "; //we need rightside tableName here.
+      sql += "alter table " + tableDiff.tableA.table.tableName + " engine " + toSql(tableDiff.tableA.storageEngine);
     }
     if (tableDiff.indexes != null) {
       if (tableDiff.indexes.create != null) {
         for (Index index : tableDiff.indexes.create) {
-          sql += index.create() + ";\n";
+          sql += toSqlCreate(index) + ";\n";
         }
       }
       if (tableDiff.indexes.delete != null) {
         for (Index index : tableDiff.indexes.delete) {
-          sql += index.drop() + ";\n";
+          sql += toSqlDrop(index) + ";\n";
         }
       }
       if (tableDiff.indexes.update != null) {
         for (IndexDiff indexDiff : tableDiff.indexes.update) {
-          sql += toSql(indexDiff);
+          sql += toSqlDrop(indexDiff.indexB);
+          sql += toSqlCreate(indexDiff.indexA);
         }
       }
     }
     if (tableDiff.columns != null) {
       if (tableDiff.columns.create != null) {
         for (Column column : tableDiff.columns.create) {
-          sql += column.create() + ";\n";
+          sql += toSqlCreate(column) + ";\n";
         }
       }
       if (tableDiff.columns.delete != null) {
         for (Column column : tableDiff.columns.delete) {
-          sql += column.drop() + ";\n";
+          sql += toSqlDrop(column) + ";\n";
         }
       }
       if (tableDiff.columns.update != null) {
@@ -1025,27 +1034,79 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return sql;
   }
 
+  private String toSqlDrop(Column column) {
+    return "alter table " + column.table.tableName + " drop column " + column.columnName;
+  }
+
+  private String toSqlCreate(Column column) {
+    return "alter table " + column.table.tableName + " add column " + toSql(column);
+  }
+
+  private String toSqlCreate(TableContainer table) {
+    return table.create().toSql();
+  }
+
+  public String toSqlDrop(TableContainer table) {
+    return "drop table " + table.table.tableName;
+  }
+
+  private String toSqlCreate(Index index) {
+    String type = "";
+    if (index.type.equals(IndexType.primary)) {
+      return "alter table " + index.table.tableName + " add primary key " + toSql(index.indexedColumns);
+    } else if (index.type.equals(IndexType.foreign)) {
+      //TODO: Implement this once we add foreign key support.
+    } else if (index.type.equals(IndexType.unique)) {
+      type = " unique ";
+    } else if (index.type.equals(IndexType.fulltext)) {
+      type = " fulltext ";
+    }
+    return "create" + type + "index " + index.indexName + " on " + index.table.tableName + " " + toSql(
+        index.indexedColumns);
+  }
+
+  private String toSql(IMap<String, IndexedColumn> indexedColumns) {
+    String sql = "(";
+    String prefix = "";
+    String sortOrder = "";
+    String separator = "";
+    for (IndexedColumn indexedColumn : indexedColumns.values()) {
+      if (indexedColumn.prefixSize != 0) {
+        prefix = "(" + indexedColumn.prefixSize + ")";
+      }
+      if (indexedColumn.sortOrder != null) {
+        if (!indexedColumn.sortOrder.equals(SortOrder.ascending)) {
+          sortOrder = "desc";
+        }
+      }
+      sql += separator + indexedColumn.column.columnName + prefix + " " + sortOrder;
+      separator = ",";
+    }
+    return sql + ")";
+  }
+
+  private String toSqlDrop(Index index) {
+    if (index.type.equals(IndexType.primary)) {
+      return "alter table " + index.table.tableName + " drop primary key";
+    }
+    return null;
+  }
+
   private String toSql(ColumnDiff columnDiff) {
     String sql = "";
-    if (columnDiff.columnName != null) {
-      //We need either Table name here. Because by this point it has been renamed if wrong. Because this is affected by update as well.
-      sql += "alter table " +  tableName + "rename column " + columnDiff.columnName.after + " to " + columnDiff.columnName.before + ";\n";
-    }
-    if (columnDiff.table != null) {
-      // Place sql here to migrate from rightside table to the leftside one only if we haven't renamed the table already.
-    }
-    if (columnDiff.dataSpec != null) {
-      //We need either table name here. We need either colName here.
-      sql += "alter table " + tableName + " modify " + colName + columnDiff.dataSpec.before + ";\n";
-    }
-    if (columnDiff.defaultValue != null) {
-      //We need either table name, colName and defaultValue here.
-      sql += "alter table " + tableName + " modify " + colName + columnDiff.dataSpec.before + defaultVal + ";\n";
-    }
-    if (columnDiff.buildingHints != null) {
-      sql += compareBuildingHintsToSql(columnDiff.buildingHints.before, columnDiff.buildingHints.after) + ";\n";
+    if (columnDiff.columnName != null || columnDiff.dataSpec != null || columnDiff.defaultValue != null || columnDiff.buildingHints != null) {
+      sql += "alter table " + columnDiff.columnA.table.tableName + " change " + columnDiff.columnB.columnName + " " +
+          toSql(columnDiff.columnA);
     }
     return sql;
+  }
+
+/*
+  private String compareBuildingHintsToSql(BuildingHints before, BuildingHints after) {
+    final BuildingHints hints = BuildingHints.make(before.flags ^ after.flags);
+    if (hints.isAutoInc()) {
+    }
+      return null;
   }
 
   private String toSql(IndexDiff indexDiff) {
@@ -1101,10 +1162,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     }
     return null;
   }
-
-  private String compareBuildingHintsToSql(BuildingHints before, BuildingHints after) {
-    return null;
-  }
+*/
 
   public String toSql(UpdateQuery updateQuery) {
     String sql = "update " + checkToAddBackticks(toSql(updateQuery.fromExpression)) + "\nset ";
@@ -1199,11 +1257,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     String engine = "";
     if (createQuery.fromExpression instanceof TableContainer) {
       final TableContainer t = (TableContainer) createQuery.fromExpression;
-      if (t.storageEngine == StorageEngine.simple || t.storageEngine == null) {
-        engine = "Aria";
-      } else if (t.storageEngine == StorageEngine.transactional) {
-        engine = "Innodb";
-      }
+      engine = toSql(t.storageEngine);
       sql = "create table " + checkToAddBackticks(t.table.tableName) + " (\n";
       final IMap<String, Column> columns = t.columns;
       String separator = "  ";
@@ -1218,16 +1272,24 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return sql;
   }
 
+  private String toSql(StorageEngine se) {
+    String engine = "";
+    if (se == null) {
+      engine = "Aria";
+    }
+    if (se.equals(StorageEngine.simple)) {
+      engine = "Aria";
+    } else if (se.equals(StorageEngine.transactional)) {
+      engine = "Innodb";
+    }
+    return engine;
+  }
+
   public String checkToAddBackticks(String name) {
     if (MariadbReservedWords.wordsHashSet.contains(name)) {
       return "`" + name + "`";
     }
     return name;
-  }
-
-  @Override
-  public String drop(TableContainer table) {
-    return "drop table " + table.table.tableName;
   }
 
   private String toSql(IList<Index> indexes) {

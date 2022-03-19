@@ -76,7 +76,8 @@ public class BridgeTests {
 
   @Test
   void testDiffToSql() {
-    final Table userTable = Table.make("useer", testDb.database);
+    // TODO: Change "user" to "useer" once we implement ID comment checking, to test renaming table.
+    final Table userTable = Table.make("user", testDb.database);
     final NumericColumn userId = Column.make("userId", userTable).asInt();
     final StringColumn name = Column.make("name", userTable).asVarchar(15);
     final NumericColumn age = Column.make("agee", userTable).asInt();
@@ -86,7 +87,7 @@ public class BridgeTests {
         age.columnName, age);
     final TableContainer updatedUser = TableContainer.make(userTable, columns, StorageEngine.simple, indexSpecs, userId);
     final DatabaseContainer test = DatabaseContainer.make(testDb.database, IArrayMap.make(testDb.inventory.tableName,
-        testDb.inventory, testDb.item.tableName, testDb.item, testDb.order.tableName, testDb.order, updatedUser));
+        testDb.inventory, testDb.item.tableName, testDb.item, testDb.order.tableName, testDb.order, updatedUser.table.tableName, updatedUser));
     final DbDiff dbDiff = DiffService.compareDatabases(testDb, test);
     // Create Index cannot be used to add primary key in mysql. However alter table does work to add primary key in mariadb.
     assertEquals("""
@@ -120,8 +121,8 @@ public class BridgeTests {
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     DataGlobal.bridge.execute(testDb.createAll().toSql()).unwrapFlux().blockLast();
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
-    assertEquals(0, syncResult.diff.unwrap().getTotalDiffs()); //FIXME: Find a way to run methods through Diff interface
+    final ReactiveWrapper<SyncResult> syncResult = testDb.sync(ddlOption);
+    assertEquals(0, syncResult.unwrap().diff.getTotalDiffs()); //FIXME: Find a way to run methods through Diff interface
   }
 
   @Test
@@ -129,7 +130,7 @@ public class BridgeTests {
     DataGlobal.bridge.execute("alter table player modify column name varchar(50) not null").unwrapFlux()
         .blockLast();  //TODO: Replace sql with jerbil methods like player.modify(playerColumns.name).asVarchar(50);  or player.alter also add support for player.rename player.change
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final SyncResult<Diff<Database>> syncResult = testDb.sync(ddlOption);
+    final ReactiveWrapper<SyncResult> syncResult = testDb.sync(ddlOption);
 //    assertEquals(1, ((DbDiff) syncResult.diff.unwrap()).tables.update.length());
 //    assertEquals(1, syncResult.diff.unwrap().getDiffs().size);
   }

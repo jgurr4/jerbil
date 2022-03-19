@@ -96,4 +96,13 @@ public abstract class Column <T extends Column> extends PartialColumn{
         return null;
     }
 
+/*
+    public String create() {
+        return null;
+    }
+
+    public String drop() {
+        return null;
+    }
+*/
 }

@@ -6,6 +6,8 @@ import com.ple.jerbil.data.SortOrder;
 import com.ple.jerbil.data.selectExpression.Column;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 @Immutable
 public class IndexedColumnDiff implements Diff<IndexedColumn> {
 
@@ -28,6 +30,29 @@ public class IndexedColumnDiff implements Diff<IndexedColumn> {
   @Override
   public int getTotalDiffs() {
     return 0;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof IndexedColumnDiff)) return false;
+    IndexedColumnDiff that = (IndexedColumnDiff) o;
+    return Objects.equals(column, that.column) && Objects.equals(prefixSize,
+        that.prefixSize) && Objects.equals(sortOrder, that.sortOrder);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(column, prefixSize, sortOrder);
+  }
+
+  @Override
+  public String toString() {
+    return "IndexedColumnDiff{" +
+        "column=" + column +
+        ", prefixSize=" + prefixSize +
+        ", sortOrder=" + sortOrder +
+        '}';
   }
 
   @Override

@@ -41,7 +41,7 @@ public class DiffService {
     }
     VectorDiff<TableContainer, TableDiff> tablesDiff = compareListOfTables(leftDb.tables.values(),
         rightDb.tables.values());
-    return DbDiff.make(nameDiff, tablesDiff);
+    return DbDiff.make(nameDiff, tablesDiff, leftDb, rightDb);
   }
 
   public static VectorDiff<TableContainer, TableDiff> compareListOfTables(IList<TableContainer> leftTables,
@@ -116,17 +116,17 @@ public class DiffService {
     return nonMatchingTables;
   }
 
-  public static TableDiff compareTables(TableContainer t1, TableContainer t2) {
+  public static TableDiff compareTables(TableContainer leftTable, TableContainer rightTable) {
     // Should compare columns and indexes separately.
 //    final VectorDiff<Index> indexDiff = compareIndexes(c1, c2);
-    ScalarDiff<String> nameDiff = t1.table.tableName.equals(t2.table.tableName) ? null : ScalarDiff.make(
-        t1.table.tableName, t2.table.tableName);
-    VectorDiff<Column, ColumnDiff> columnDiffs = compareListOfColumns(t1.columns.values(), t2.columns.values());
-    VectorDiff<Index, IndexDiff> indexDiffs = compareListOfIndexes(t1.indexes, t2.indexes);
-    ScalarDiff<StorageEngine> storageEngineDiff = t1.storageEngine.name()
-        .equals(t2.storageEngine.name()) ? null : ScalarDiff.make(t1.storageEngine, t2.storageEngine);
+    ScalarDiff<String> nameDiff = leftTable.table.tableName.equals(rightTable.table.tableName) ? null : ScalarDiff.make(
+        leftTable.table.tableName, rightTable.table.tableName);
+    VectorDiff<Column, ColumnDiff> columnDiffs = compareListOfColumns(leftTable.columns.values(), rightTable.columns.values());
+    VectorDiff<Index, IndexDiff> indexDiffs = compareListOfIndexes(leftTable.indexes, rightTable.indexes);
+    ScalarDiff<StorageEngine> storageEngineDiff = leftTable.storageEngine.name()
+        .equals(rightTable.storageEngine.name()) ? null : ScalarDiff.make(leftTable.storageEngine, rightTable.storageEngine);
     if (nameDiff != null || columnDiffs != null || indexDiffs != null || storageEngineDiff != null) {
-      return TableDiff.make(nameDiff, columnDiffs, indexDiffs, storageEngineDiff);
+      return TableDiff.make(nameDiff, columnDiffs, indexDiffs, storageEngineDiff, leftTable, rightTable);
     }
     return null;
   }
@@ -162,7 +162,7 @@ public class DiffService {
             if (!leftIndex.table.equals(rightIndex.table)) {
               tableDiff = ScalarDiff.make(leftIndex.table, rightIndex.table);
             }
-            update = update.add(IndexDiff.make(typeDiff, nameDiff, tableDiff, indexedColumnsDiffs));
+            update = update.add(IndexDiff.make(typeDiff, nameDiff, tableDiff, indexedColumnsDiffs, leftIndex, rightIndex));
           }
         }
       }
@@ -376,7 +376,7 @@ public class DiffService {
     }
     final ScalarDiff<BuildingHints> hintsDiff = c1.hints.equals(c2.hints) ? null : ScalarDiff.make(
         c1.hints, c2.hints);
-    return ColumnDiff.make(nameDiff, tableDiff, dataSpecDiff, defaultDiff, hintsDiff);
+    return ColumnDiff.make(nameDiff, tableDiff, dataSpecDiff, defaultDiff, hintsDiff, c1, c2);
   }
 
   public static IndexDiff compareIndexes(Index leftIndex, Index rightIndex) {
@@ -392,7 +392,7 @@ public class DiffService {
     if (!leftIndex.table.equals(rightIndex.table)) {
       tableDiff = ScalarDiff.make(leftIndex.table, rightIndex.table);
     }
-    return IndexDiff.make(typeDiff, nameDiff, tableDiff, indexedColumns);
+    return IndexDiff.make(typeDiff, nameDiff, tableDiff, indexedColumns, leftIndex, rightIndex);
   }
 
   private static IList<IndexedColumnDiff> getListOfIndexedColumnDiffs(IMap<String, IndexedColumn> leftIndexedColumns,

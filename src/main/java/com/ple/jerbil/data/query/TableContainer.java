@@ -86,10 +86,6 @@ public class TableContainer extends FromExpression {
     return QueryWithFrom.make(result);
   }
 
-  public CreateQuery create() {
-    return CreateQuery.make(this);
-  }
-
   public TableContainer remove(Column... newColumns) {
     IMap<String, Column> nc = columns;
     for (Column column : newColumns) {
@@ -208,7 +204,13 @@ public class TableContainer extends FromExpression {
     return null;
   }
 
-  public String drop() {
+  public CreateQuery create() {
+    return CreateQuery.make(this);
+  }
+
+/*
+  public AlterQuery drop() {
     return DataGlobal.bridge.getGenerator().drop(this);
   }
+*/
 }

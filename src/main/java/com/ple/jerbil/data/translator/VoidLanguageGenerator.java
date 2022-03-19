@@ -60,9 +60,4 @@ public class VoidLanguageGenerator implements LanguageGenerator {
     return "";
   }
 
-  @Override
-  public String drop(TableContainer table) {
-    return null;
-  }
-
 }

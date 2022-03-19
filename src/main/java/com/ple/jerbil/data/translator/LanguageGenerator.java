@@ -2,6 +2,7 @@ package com.ple.jerbil.data.translator;
 
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.DatabaseContainer;
+import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
@@ -26,5 +27,4 @@ public interface LanguageGenerator {
 
   String checkToAddBackticks(String name);
 
-  String drop(TableContainer tableContainer);
 }

@@ -90,4 +90,14 @@ public class Index {
         ", indexedColumns=" + indexedColumns +
         '}';
   }
+
+/*
+  public AlterQuery create() {
+    return DataGlobal.bridge.getGenerator().create(this);
+  }
+
+  public AlterQuery drop() {
+    return DataGlobal.bridge.getGenerator().drop(this);
+  }
+*/
 }

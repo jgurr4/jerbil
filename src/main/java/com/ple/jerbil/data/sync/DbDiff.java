@@ -2,15 +2,17 @@ package com.ple.jerbil.data.sync;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.TableContainer;
-import com.ple.jerbil.data.selectExpression.Column;
-import com.ple.util.IList;
+import com.ple.util.Nullable;
 
-import java.util.List;
+import java.util.Objects;
 
 public class DbDiff implements Diff<Database> {
 
-  public final ScalarDiff<String> databaseName;
-  public final VectorDiff<TableContainer, TableDiff> tables;
+  @Nullable public final ScalarDiff<String> databaseName;
+  @Nullable public final VectorDiff<TableContainer, TableDiff> tables;
+  public final DatabaseContainer databaseA;
+  public final DatabaseContainer databaseB;
+
 //  public final VectorDiff<ViewTable> views;
 //  public final ScalarDiff<CharSet> charSet;
 //  public final VectorDiff<StoredProcedure> procedures;
@@ -18,19 +20,23 @@ public class DbDiff implements Diff<Database> {
 //  public final VectorDiff<StoredEvent> events;
 //  public final VectorDiff<StoredTrigger> triggers;
 
-  protected DbDiff(ScalarDiff<String> databaseName, VectorDiff<TableContainer, TableDiff> tables) {
+  protected DbDiff(ScalarDiff<String> databaseName, VectorDiff<TableContainer, TableDiff> tables,
+                   DatabaseContainer databaseA, DatabaseContainer databaseB) {
     this.databaseName = databaseName;
     this.tables = tables;
+    this.databaseA = databaseA;
 //    this.views = views;
 //    this.charSet = charSet;
 //    this.procedures = procedures;
 //    this.functions = functions;
 //    this.events = events;
 //    this.triggers = triggers;
+    this.databaseB = databaseB;
   }
 
-  public static DbDiff make(ScalarDiff<String> name, VectorDiff<TableContainer, TableDiff> tables) {
-    return new DbDiff(name, tables);
+  public static DbDiff make(ScalarDiff<String> name, VectorDiff<TableContainer, TableDiff> tables, DatabaseContainer databaseA,
+                            DatabaseContainer databaseB) {
+    return new DbDiff(name, tables, databaseA, databaseB);
   }
 
   /**
@@ -54,7 +60,7 @@ public class DbDiff implements Diff<Database> {
     if (databaseName != null) {
       newDatabaseName = databaseName.filter(ddlOption);
     }
-    return DbDiff.make(newDatabaseName, newTables);
+    return new DbDiff(newDatabaseName, newTables, databaseA, databaseB);
   }
 
   @Override
@@ -63,4 +69,27 @@ public class DbDiff implements Diff<Database> {
     return 0;
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof DbDiff)) return false;
+    DbDiff dbDiff = (DbDiff) o;
+    return Objects.equals(databaseName, dbDiff.databaseName) && Objects.equals(tables,
+        dbDiff.tables) && databaseA.equals(dbDiff.databaseA) && databaseB.equals(dbDiff.databaseB);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(databaseName, tables, databaseA, databaseB);
+  }
+
+  @Override
+  public String toString() {
+    return "DbDiff{" +
+        "databaseName=" + databaseName +
+        ", tables=" + tables +
+        ", databaseA=" + databaseA +
+        ", databaseB=" + databaseB +
+        '}';
+  }
 }

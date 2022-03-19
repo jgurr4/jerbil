@@ -9,6 +9,8 @@ import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 @Immutable
 public class ColumnDiff implements Diff<Column> {
 
@@ -20,10 +22,12 @@ public class ColumnDiff implements Diff<Column> {
   @Nullable public final ScalarDiff<Expression> defaultValue;
   @Nullable public final ScalarDiff<BuildingHints> buildingHints;
 //  private final ScalarDiff<String> comment;
+  public final Column columnA;
+  public final Column columnB;
 
   protected ColumnDiff(@Nullable ScalarDiff<String> columnName, @Nullable ScalarDiff<Table> table,
                        @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable ScalarDiff<Expression> defaultValue,
-                       @Nullable ScalarDiff<BuildingHints> buildingHints) {
+                       @Nullable ScalarDiff<BuildingHints> buildingHints, Column columnA, Column columnB) {
     this.columnName = columnName;
     this.table = table;
     this.dataSpec = dataSpec;
@@ -31,12 +35,14 @@ public class ColumnDiff implements Diff<Column> {
     this.defaultValue = defaultValue;
 //    this.comment = comment;
     this.buildingHints = buildingHints;
+    this.columnA = columnA;
+    this.columnB = columnB;
   }
 
   public static ColumnDiff make(ScalarDiff<String> columnName, ScalarDiff<Table> table,
                                 ScalarDiff<DataSpec> dataSpec, ScalarDiff<Expression> defaultValue,
-                                ScalarDiff<BuildingHints> buildingHints) {
-    return new ColumnDiff(columnName, table, dataSpec, defaultValue, buildingHints);
+                                ScalarDiff<BuildingHints> buildingHints, Column columnA, Column columnB) {
+    return new ColumnDiff(columnName, table, dataSpec, defaultValue, buildingHints, columnA, columnB);
   }
 
   @Override
@@ -66,7 +72,35 @@ public class ColumnDiff implements Diff<Column> {
     if (buildingHints != null) {
       newBuildingHints = buildingHints.filter(ddlOption);
     }
-    return new ColumnDiff(newColName, newTable, newDataSpec, newDefaultVal, newBuildingHints);
+    return new ColumnDiff(newColName, newTable, newDataSpec, newDefaultVal, newBuildingHints, columnA, columnB);
   }
 
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (!(o instanceof ColumnDiff)) return false;
+    ColumnDiff that = (ColumnDiff) o;
+    return Objects.equals(columnName, that.columnName) && Objects.equals(table,
+        that.table) && Objects.equals(dataSpec, that.dataSpec) && Objects.equals(defaultValue,
+        that.defaultValue) && Objects.equals(buildingHints, that.buildingHints) && columnA.equals(
+        that.columnA) && columnB.equals(that.columnB);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(columnName, table, dataSpec, defaultValue, buildingHints, columnA, columnB);
+  }
+
+  @Override
+  public String toString() {
+    return "ColumnDiff{" +
+        "columnName=" + columnName +
+        ", table=" + table +
+        ", dataSpec=" + dataSpec +
+        ", defaultValue=" + defaultValue +
+        ", buildingHints=" + buildingHints +
+        ", columnA=" + columnA +
+        ", columnB=" + columnB +
+        '}';
+  }
 }
