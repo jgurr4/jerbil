@@ -77,6 +77,8 @@ public class BridgeTests {
   @Test
   void testDiffToSql() {
     // TODO: Change "user" to "useer" once we implement ID comment checking, to test renaming table.
+    // TODO: Once we implement the comment system with id, we'll be able to allow renaming columns and tables which will automatically
+    //  migrate the data successfully. Until then we have to simply add and drop columns/tables.
     final Table userTable = Table.make("user", testDb.database);
     final NumericColumn userId = Column.make("userId", userTable).asInt();
     final StringColumn name = Column.make("name", userTable).asVarchar(15);
@@ -89,7 +91,6 @@ public class BridgeTests {
     final DatabaseContainer test = DatabaseContainer.make(testDb.database, IArrayMap.make(testDb.inventory.tableName,
         testDb.inventory, testDb.item.tableName, testDb.item, testDb.order.tableName, testDb.order, updatedUser.table.tableName, updatedUser));
     final DbDiff dbDiff = DiffService.compareDatabases(testDb, test);
-    // Create Index cannot be used to add primary key in mysql. However alter table does work to add primary key in mariadb.
     assertEquals("""
         use test;
         create table player (
@@ -98,13 +99,13 @@ public class BridgeTests {
           name varchar(20) not null,
           primary key (playerId)
         ) ENGINE=Innodb;
-        alter table useer rename user;
-        alter table user add primary key (userId);
-        alter table user modify userId bigint(20) not null auto_increment;
-        alter table user modify name varchar(255) not null;
-        alter table user change agee age int(11) not null;
-        drop index nm_idx on user;
-        create index nm_idx on user (name);
+        alter table user add column age int(11) not null;
+        alter table user drop column agee;
+        alter table user change userId userId bigint(20) auto_increment primary key;
+        alter table user change name name varchar(255) not null;
+        alter table user add primary key if not exists (userId);
+        alter table user drop index nm_idx;
+        alter table user add index nm_idx (name);
         """, dbDiff.toSql());
   }
 

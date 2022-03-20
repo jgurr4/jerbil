@@ -121,10 +121,12 @@ public class DiffService {
 //    final VectorDiff<Index> indexDiff = compareIndexes(c1, c2);
     ScalarDiff<String> nameDiff = leftTable.table.tableName.equals(rightTable.table.tableName) ? null : ScalarDiff.make(
         leftTable.table.tableName, rightTable.table.tableName);
-    VectorDiff<Column, ColumnDiff> columnDiffs = compareListOfColumns(leftTable.columns.values(), rightTable.columns.values());
+    VectorDiff<Column, ColumnDiff> columnDiffs = compareListOfColumns(leftTable.columns.values(),
+        rightTable.columns.values());
     VectorDiff<Index, IndexDiff> indexDiffs = compareListOfIndexes(leftTable.indexes, rightTable.indexes);
     ScalarDiff<StorageEngine> storageEngineDiff = leftTable.storageEngine.name()
-        .equals(rightTable.storageEngine.name()) ? null : ScalarDiff.make(leftTable.storageEngine, rightTable.storageEngine);
+        .equals(rightTable.storageEngine.name()) ? null : ScalarDiff.make(leftTable.storageEngine,
+        rightTable.storageEngine);
     if (nameDiff != null || columnDiffs != null || indexDiffs != null || storageEngineDiff != null) {
       return TableDiff.make(nameDiff, columnDiffs, indexDiffs, storageEngineDiff, leftTable, rightTable);
     }
@@ -136,37 +138,41 @@ public class DiffService {
     IList<Index> create = IArrayList.empty;
     IList<Index> delete = IArrayList.empty;
     IList<IndexDiff> update = IArrayList.empty;
+    Index leftIndex = null;
     if (rightIndexes != null && leftIndexes != null) {
-      for (Index leftIndex : leftIndexes.values()) {
-        for (Index rightIndex : rightIndexes.values()) {
-          if (leftIndexes.get(rightIndex.indexName) == null) {
-            delete = delete.add(rightIndex);
+      for (Index rightIndex : rightIndexes.values()) {
+        leftIndex = leftIndexes.get(rightIndex.indexName);
+        if (leftIndexes.get(rightIndex.indexName) == null) {
+          delete = delete.add(rightIndex);
+        }
+        for (Index lIndex : leftIndexes.values()) {
+        if (rightIndexes.get(lIndex.indexName) == null) {
+          create = create.add(lIndex);
+        }
+        }
+        if (leftIndexes.get(rightIndex.indexName) != null && !leftIndexes.get(rightIndex.indexName)
+            .equals(rightIndex)) {
+          ScalarDiff<IndexType> typeDiff = null;
+          ScalarDiff<String> nameDiff = null;
+          ScalarDiff<Table> tableDiff = null;
+          VectorDiff<IndexedColumn, IndexedColumnDiff> indexedColumnsDiffs = compareListOfIndexedColumns(
+              leftIndex.indexedColumns,
+              rightIndex.indexedColumns);
+          if (!leftIndex.indexName.equals(rightIndex.indexName)) {
+            nameDiff = ScalarDiff.make(leftIndex.indexName, rightIndex.indexName);
           }
-          if (rightIndexes.get(leftIndex.indexName) == null) {
-            create = create.add(leftIndex);
+          if (!leftIndex.type.equals(rightIndex.type)) {
+            typeDiff = ScalarDiff.make(leftIndex.type, rightIndex.type);
           }
-          if (leftIndexes.get(rightIndex.indexName) != null && !leftIndexes.get(rightIndex.indexName)
-              .equals(rightIndex)) {
-            ScalarDiff<IndexType> typeDiff = null;
-            ScalarDiff<String> nameDiff = null;
-            ScalarDiff<Table> tableDiff = null;
-            VectorDiff<IndexedColumn, IndexedColumnDiff> indexedColumnsDiffs = compareListOfIndexedColumns(
-                leftIndex.indexedColumns,
-                rightIndex.indexedColumns);
-            if (!leftIndex.indexName.equals(rightIndex.indexName)) {
-              nameDiff = ScalarDiff.make(leftIndex.indexName, rightIndex.indexName);
-            }
-            if (!leftIndex.type.equals(rightIndex.type)) {
-              typeDiff = ScalarDiff.make(leftIndex.type, rightIndex.type);
-            }
-            if (!leftIndex.table.equals(rightIndex.table)) {
-              tableDiff = ScalarDiff.make(leftIndex.table, rightIndex.table);
-            }
-            update = update.add(IndexDiff.make(typeDiff, nameDiff, tableDiff, indexedColumnsDiffs, leftIndex, rightIndex));
+          if (!leftIndex.table.equals(rightIndex.table)) {
+            tableDiff = ScalarDiff.make(leftIndex.table, rightIndex.table);
           }
+          update = update.add(
+              IndexDiff.make(typeDiff, nameDiff, tableDiff, indexedColumnsDiffs, leftIndexes.get(rightIndex.indexName),
+                  rightIndex));
         }
       }
-    } else if (rightIndexes == null && leftIndexes != null){
+    } else if (rightIndexes == null && leftIndexes != null) {
       create = leftIndexes.values();
     } else if (leftIndexes == null && rightIndexes != null) {
       delete = rightIndexes.values();
@@ -174,7 +180,8 @@ public class DiffService {
     return checkNullsInResult(create, delete, update);
   }
 
-  private static <T, D extends Diff<T>> VectorDiff<T, D> checkNullsInResult(IList<T> create, IList<T> delete, IList<D> update) {
+  private static <T, D extends Diff<T>> VectorDiff<T, D> checkNullsInResult(IList<T> create, IList<T> delete,
+                                                                            IList<D> update) {
     if (create != null) {
       if (create.size() == 0) {
         create = null;
@@ -196,7 +203,8 @@ public class DiffService {
     return null;
   }
 
-  private static VectorDiff<IndexedColumn, IndexedColumnDiff> compareListOfIndexedColumns(IMap<String, IndexedColumn> leftIndexedColumns,
+  private static VectorDiff<IndexedColumn, IndexedColumnDiff> compareListOfIndexedColumns(
+      IMap<String, IndexedColumn> leftIndexedColumns,
       IMap<String, IndexedColumn> rightIndexedColumns) {
     IList<IndexedColumn> create = IArrayList.empty;
     IList<IndexedColumn> delete = IArrayList.empty;
@@ -321,27 +329,6 @@ public class DiffService {
     }
     return result;
   }
-
-/*
-  public static IList<Diff<Index>> getListOfIndexDiffs(IList<Index> leftIndexes, IList<Index> rightIndexes) {
-    return Flux.fromIterable(rightIndexes)
-        .filter(Objects::nonNull)
-        .map(rIndex -> compareIndexes(getIndexMatchingName(leftIndexes, rIndex), rIndex))
-        .collectList()
-        .map(indexDiffs -> IArrayList.make(indexDiffs.toArray(IndexDiff.empty)))
-        .defaultIfEmpty(null)
-        .block();
-  }
-
-  public static Index getIndexMatchingName(IList<Index> leftIndexes, Index rIndex) {
-    for (Index leftIndex : leftIndexes) {
-      if (leftIndex.indexName.equals(rIndex.indexName)) {
-        return leftIndex;
-      }
-    }
-    return null;
-  }
-*/
 
   public static IList<ColumnDiff> getListOfColumnDiffs(IList<Column> leftColumns, IList<Column> rightColumns) {
     IList<ColumnDiff> columnDiffs = IArrayList.empty;

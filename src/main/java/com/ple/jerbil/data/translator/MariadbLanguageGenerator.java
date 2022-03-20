@@ -994,25 +994,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       sql += "alter table " + tableDiff.tableName.after + " rename " + tableDiff.tableName.before + ";\n";
     }
     if (tableDiff.storageEngine != null) {
-      sql += "alter table " + tableDiff.tableA.table.tableName + " engine " + toSql(tableDiff.tableA.storageEngine);
-    }
-    if (tableDiff.indexes != null) {
-      if (tableDiff.indexes.create != null) {
-        for (Index index : tableDiff.indexes.create) {
-          sql += toSqlCreate(index) + ";\n";
-        }
-      }
-      if (tableDiff.indexes.delete != null) {
-        for (Index index : tableDiff.indexes.delete) {
-          sql += toSqlDrop(index) + ";\n";
-        }
-      }
-      if (tableDiff.indexes.update != null) {
-        for (IndexDiff indexDiff : tableDiff.indexes.update) {
-          sql += toSqlDrop(indexDiff.indexB);
-          sql += toSqlCreate(indexDiff.indexA);
-        }
-      }
+      sql += "alter table " + tableDiff.tableA.table.tableName + " engine " + toSql(tableDiff.tableA.storageEngine) + ";\n";
     }
     if (tableDiff.columns != null) {
       if (tableDiff.columns.create != null) {
@@ -1031,6 +1013,37 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         }
       }
     }
+    if (tableDiff.indexes != null) {
+      if (tableDiff.indexes.create != null) {
+        for (Index index : tableDiff.indexes.create) {
+          sql += toSqlCreate(index) + ";\n";
+        }
+      }
+      if (tableDiff.indexes.delete != null) {
+        for (Index index : tableDiff.indexes.delete) {
+          sql += toSqlDrop(index) + ";\n";
+        }
+      }
+      if (tableDiff.indexes.update != null) {
+        for (IndexDiff indexDiff : tableDiff.indexes.update) {
+          sql += toSqlDrop(indexDiff.indexB) + ";\n";
+          sql += toSqlCreate(indexDiff.indexA) + ";\n";
+        }
+      }
+    }
+    return sql;
+  }
+
+  private String toSql(ColumnDiff columnDiff) {
+    String sql = "";
+    String primary = "";
+    if (toSql(columnDiff.columnA).contains(" auto_increment")) {
+      primary = " primary key";
+    }
+    if (columnDiff.columnName != null || columnDiff.dataSpec != null || columnDiff.defaultValue != null || columnDiff.buildingHints != null) {
+      sql += "alter table " + columnDiff.columnA.table.tableName + " change " + columnDiff.columnB.columnName + " " +
+          toSql(columnDiff.columnA) + primary + ";\n";
+    }
     return sql;
   }
 
@@ -1043,7 +1056,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSqlCreate(TableContainer table) {
-    return table.create().toSql();
+    return table.create().toSql().replaceAll("\n$", "");
   }
 
   public String toSqlDrop(TableContainer table) {
@@ -1051,9 +1064,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private String toSqlCreate(Index index) {
-    String type = "";
-    if (index.type.equals(IndexType.primary)) {
-      return "alter table " + index.table.tableName + " add primary key " + toSql(index.indexedColumns);
+    String type = " ";
+    if (index.type.equals(IndexType.primary)) {  //NOTE: The reason we add if not exists here, if in case the column is
+      // autoInc and must specify primary key in it's modification/creation.
+      return "alter table " + index.table.tableName + " add primary key if not exists " + toSql(index.indexedColumns);
     } else if (index.type.equals(IndexType.foreign)) {
       //TODO: Implement this once we add foreign key support.
     } else if (index.type.equals(IndexType.unique)) {
@@ -1061,8 +1075,15 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     } else if (index.type.equals(IndexType.fulltext)) {
       type = " fulltext ";
     }
-    return "create" + type + "index " + index.indexName + " on " + index.table.tableName + " " + toSql(
-        index.indexedColumns);
+//    return "create" + type + "index " + index.indexName + " on " + index.table.tableName + " " + toSql(index.indexedColumns);
+    return "alter table " + index.table.tableName + " add" + type + "index " + index.indexName + " " + toSql(index.indexedColumns);
+  }
+
+  private String toSqlDrop(Index index) {
+    if (index.type.equals(IndexType.primary)) {
+      return "alter table " + index.table.tableName + " drop primary key";
+    }
+    return "alter table " + index.table.tableName + " drop index " + index.indexName;
   }
 
   private String toSql(IMap<String, IndexedColumn> indexedColumns) {
@@ -1076,29 +1097,13 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       }
       if (indexedColumn.sortOrder != null) {
         if (!indexedColumn.sortOrder.equals(SortOrder.ascending)) {
-          sortOrder = "desc";
+          sortOrder = " desc";
         }
       }
-      sql += separator + indexedColumn.column.columnName + prefix + " " + sortOrder;
+      sql += separator + indexedColumn.column.columnName + prefix + sortOrder;
       separator = ",";
     }
     return sql + ")";
-  }
-
-  private String toSqlDrop(Index index) {
-    if (index.type.equals(IndexType.primary)) {
-      return "alter table " + index.table.tableName + " drop primary key";
-    }
-    return null;
-  }
-
-  private String toSql(ColumnDiff columnDiff) {
-    String sql = "";
-    if (columnDiff.columnName != null || columnDiff.dataSpec != null || columnDiff.defaultValue != null || columnDiff.buildingHints != null) {
-      sql += "alter table " + columnDiff.columnA.table.tableName + " change " + columnDiff.columnB.columnName + " " +
-          toSql(columnDiff.columnA);
-    }
-    return sql;
   }
 
 /*
