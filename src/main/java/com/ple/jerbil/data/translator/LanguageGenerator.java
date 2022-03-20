@@ -27,4 +27,5 @@ public interface LanguageGenerator {
 
   String checkToAddBackticks(String name);
 
+  String drop(DatabaseContainer databaseContainer);
 }

@@ -15,7 +15,9 @@ import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
 import com.ple.util.IList;
 import com.ple.util.IMap;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import reactor.core.publisher.Hooks;
 
 import java.util.Properties;
@@ -49,27 +51,16 @@ public class BridgeTests {
     assertEquals(0, dbResult.rowsUpdated);
     assertEquals(IArrayList.empty, dbResult.error);
     assertEquals(IArrayList.empty, dbResult.warning);
-/* uncomment to see example of how result and row.get works
-    (Mono.just((MariadbR2dbcBridge) DataGlobal.bridge))
-        .flatMapMany(bridge -> bridge.pool.create())
-        .map(conn -> conn.createStatement("use test; select 1, 2 union all select 3, 4; select 5, 6 union all select 7, 8"))
-//        .log()
-        .flatMap(stmt -> stmt.execute())
-        .log()
-        .flatMap(result -> result.map((row, rowMetadata) -> (Integer) row.get(0)))
-        .doOnNext(firstColumnOfResult -> System.out.println(firstColumnOfResult))
-        .blockLast();
-*/
-//    final ReactiveWrapper<DbResult> execute = DataGlobal.bridge.execute("select 1; select 2");
-//    final IList<ITable> resultList = execute.unwrap().resultList;
-//    System.out.println(resultList);
   }
 
   @Test
   void testGetDb() {
     Hooks.onOperatorDebug();
-    final DatabaseContainer test = DatabaseContainer.getDbContainer("test").unwrap();
-    assertEquals("test", test.database.databaseName);
+    DatabaseContainer test = DatabaseContainer.getDbContainer("test").unwrap();
+    if (test.equals(DatabaseContainer.empty)) {
+      DataGlobal.bridge.execute(testDb.createAll().toSql()).unwrap();
+      test = DatabaseContainer.getDbContainer("test").unwrapMono().checkpoint().block();
+    }
     assertEquals("test", test.database.databaseName);
     assertEquals(item, test.tables.get("item"));
   }
@@ -110,13 +101,17 @@ public class BridgeTests {
   }
 
   @Test
-  void syncCreateWithDbMissing() { //Should create database using Database Object. Every diff should exist because it is forced to create db for first time.
+  void syncCreateWithDbMissing() {
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
-    final DdlOption ddlOption = DdlOption.make().create();
-    final ReactiveMono<SyncResult> syncResult = testDb.sync(ddlOption);
-    assertNotNull(((DbDiff) syncResult.unwrap().diff).databaseName);
+    final SyncResult syncResult = testDb.sync(DdlOption.make().create()).unwrap();
+    System.out.println(syncResult.diff);
+    System.out.println(((DbDiff) syncResult.diff).toSql());
+    syncResult.result.unwrapFlux().blockLast();
+    assertNotNull(((DbDiff) syncResult.diff).databaseName);
+    assertEquals(5, ((DbDiff) syncResult.diff).tables.create.size());
   }
 
+  /*
   @Test
   void syncWithoutConflicts() { //It should reuse existing with no diffs.
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
@@ -243,5 +238,5 @@ public class BridgeTests {
   @Test
   void syncDeleteWithExtraProcedure() { //Extra Procedure must be dropped.
   }
-
+   */
 }

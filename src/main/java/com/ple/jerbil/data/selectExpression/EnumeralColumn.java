@@ -74,10 +74,10 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
   @Override
   public String toString() {
     return "EnumeralColumn{" +
-        "dataSpec=" + dataSpec +
+        "columnName='" + columnName + '\'' +
+        ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
         ", hints=" + hints +
-        ", columnName='" + columnName + '\'' +
         ", table=" + table +
         '}';
   }

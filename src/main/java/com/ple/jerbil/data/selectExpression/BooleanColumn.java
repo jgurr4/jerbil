@@ -85,10 +85,10 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   @Override
   public String toString() {
     return "BooleanColumn{" +
-        "dataSpec=" + dataSpec +
+        "columnName='" + columnName + '\'' +
+        ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
         ", hints=" + hints +
-        ", columnName='" + columnName + '\'' +
         ", table=" + table +
         '}';
   }

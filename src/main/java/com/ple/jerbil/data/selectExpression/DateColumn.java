@@ -118,10 +118,10 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
   @Override
   public String toString() {
     return "DateColumn{" +
-        "dataSpec=" + dataSpec +
+        "columnName='" + columnName + '\'' +
+        ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
         ", hints=" + hints +
-        ", columnName='" + columnName + '\'' +
         ", table=" + table +
         '}';
   }

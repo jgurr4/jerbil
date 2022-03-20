@@ -105,10 +105,10 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
   @Override
   public String toString() {
     return "StringColumn{" +
-        "dataSpec=" + dataSpec +
+        "columnName='" + columnName + '\'' +
+        ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
         ", hints=" + hints +
-        ", columnName='" + columnName + '\'' +
         ", table=" + table +
         '}';
   }

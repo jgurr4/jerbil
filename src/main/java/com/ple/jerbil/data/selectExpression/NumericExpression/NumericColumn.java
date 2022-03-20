@@ -113,10 +113,10 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   @Override
   public String toString() {
     return "NumericColumn{" +
-        "dataSpec=" + dataSpec +
+        "columnName='" + columnName + '\'' +
+        ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
         ", hints=" + hints +
-        ", columnName='" + columnName + '\'' +
         ", table=" + table +
         '}';
   }

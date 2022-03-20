@@ -45,7 +45,10 @@ public class DbDiff implements Diff<Database> {
    * @return String
    */
   public String toSql() {
-    if (this.tables != null || this.databaseName != null) {
+    if (databaseB.equals(DatabaseContainer.empty)) {
+      return databaseA.createAll().toSql();
+    }
+    if (tables != null || databaseName != null) {
       return DataGlobal.bridge.getGenerator().toSql(this);
     }
     return null;

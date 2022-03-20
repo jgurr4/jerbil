@@ -42,10 +42,13 @@ public class DatabaseContainer {
   // This method is for convenience, it automatically retrieves a database object from rdbms which has the same name.
   public ReactiveMono<SyncResult> sync(DdlOption ddlOption) {
     return ReactiveMono.make(getDbContainer(database.databaseName).unwrapMono()
+//            .filter(dbc -> dbc.equals(DatabaseContainer.empty))
         .map(existingDb -> DiffService.compareDatabases(this, existingDb))
         .map(dbDiff -> SyncRaft.make(dbDiff.filter(ddlOption), dbDiff))
         .map(syncRaft -> SyncRaft.make(syncRaft.filteredDiff.toSql(), syncRaft.dbDiff))
-        .map(syncRaft -> SyncResult.make(DataGlobal.bridge.execute(syncRaft.sql), syncRaft.dbDiff)));
+        .map(syncRaft -> SyncResult.make(DataGlobal.bridge.execute(syncRaft.sql), syncRaft.dbDiff))
+//        .defaultIfEmpty()
+    );
   }
 
   // This method is when you already have two databaseContainer objects ready to compare.
@@ -78,7 +81,7 @@ public class DatabaseContainer {
   }
 
   public String drop() {
-    return null;
+    return DataGlobal.bridge.getGenerator().drop(this);
   }
 
   @Override

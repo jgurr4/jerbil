@@ -326,11 +326,11 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     } else if (tableLine.contains("varchar(")) {
       regex = "^.*varchar\\(";
       dataType = DataType.varchar;
-    } else if (tableLine.contains("char")) {
+    } else if (tableLine.contains("char(")) {
       regex = "^.*char\\(";
       dataType = DataType.character;
-    } else if (tableLine.contains("text")) {
-      regex = "^.*text";
+    } else if (tableLine.contains(" text ")) {
+      regex = "^.* text";
       dataType = DataType.text;
     } else if (tableLine.contains("int(")) {
       regex = "^.*int\\(";
@@ -347,34 +347,34 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     } else if (tableLine.contains("tinyint(")) {
       regex = "^.*tinyint\\(";
       dataType = DataType.tinyint;
-    } else if (tableLine.contains("double")) {
-      regex = "^.*double\\(";
+    } else if (tableLine.contains(" double ")) {
+      regex = "^.* double";
       dataType = DataType.aDouble;
-    } else if (tableLine.contains("float")) {
-      regex = "^.*float\\(";
+    } else if (tableLine.contains(" float ")) {
+      regex = "^.* float";
       dataType = DataType.aFloat;
     } else if (tableLine.contains("decimal(")) {
       regex = "^.*decimal\\(";
       dataType = DataType.decimal;
-    } else if (tableLine.contains("boolean")) {
-      regex = "^.*boolean";
+    } else if (tableLine.contains(" boolean ")) {
+      regex = "^.* boolean";
       dataType = DataType.bool;
-    } else if (tableLine.contains("date")) {
-      regex = "^.*date";
+    } else if (tableLine.contains(" date ")) {
+      regex = "^.* date";
       dataType = DataType.date;
-    } else if (tableLine.contains("time")) {
-      regex = "^.*time";
+    } else if (tableLine.contains(" time ")) {
+      regex = "^.* time";
       dataType = DataType.time;
-    } else if (tableLine.contains("datetime")) {
-      regex = "^.*datetime";
+    } else if (tableLine.contains(" datetime ")) {
+      regex = "^.* datetime";
       dataType = DataType.datetime;
-    } else if (tableLine.contains("timestamp")) {
-      regex = "^.*timestamp";
+    } else if (tableLine.contains(" timestamp ")) {
+      regex = "^.* timestamp";
       dataType = DataType.timestamp;
     }
     tableLine = tableLine.replaceFirst(regex, "");
     endIndex = tableLine.indexOf(")");
-    if (endIndex != -1) {
+    if (endIndex != -1 && !dataType.defaultSize.isEmpty()) {
       String[] sizeAndPrecision = tableLine.replaceAll("\\).*", "").split(",");
       size = Integer.parseInt(sizeAndPrecision[0]);
       if (sizeAndPrecision.length > 1) {
@@ -1295,6 +1295,11 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       return "`" + name + "`";
     }
     return name;
+  }
+
+  @Override
+  public String drop(DatabaseContainer database) {
+    return "drop database if exists " + database.database.databaseName;
   }
 
   private String toSql(IList<Index> indexes) {

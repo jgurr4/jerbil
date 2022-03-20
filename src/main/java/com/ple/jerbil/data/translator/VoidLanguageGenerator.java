@@ -60,4 +60,9 @@ public class VoidLanguageGenerator implements LanguageGenerator {
     return "";
   }
 
+  @Override
+  public String drop(DatabaseContainer databaseContainer) {
+    return null;
+  }
+
 }
