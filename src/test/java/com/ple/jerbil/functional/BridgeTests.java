@@ -101,6 +101,55 @@ public class BridgeTests {
   }
 
   @Test
+  void testDiffToSqlWithFilter() {
+    final Table userTable = Table.make("user", testDb.database);
+    final NumericColumn userId = Column.make("userId", userTable).asInt();
+    final StringColumn name = Column.make("name", userTable).asVarchar(15);
+    final NumericColumn age = Column.make("agee", userTable).asInt();
+    final IMap<String, Index> indexSpecs = IArrayMap.make("nm_idx", Index.make(IndexType.secondary, "nm_idx",
+        userTable, IndexedColumn.make(name, 10, null)));
+    final IMap<String, Column> columns = IArrayMap.make(userId.columnName, userId, name.columnName, name,
+        age.columnName, age);
+    final TableContainer updatedUser = TableContainer.make(userTable, columns, StorageEngine.simple, indexSpecs, userId);
+    final DatabaseContainer test = DatabaseContainer.make(testDb.database, IArrayMap.make(testDb.inventory.tableName,
+        testDb.inventory, testDb.item.tableName, testDb.item, testDb.order.tableName, testDb.order, updatedUser.table.tableName, updatedUser));
+    final DbDiff dbDiff = DiffService.compareDatabases(testDb, test);
+    final DbDiff createUpdate = dbDiff.filter(DdlOption.make().create().update());
+    final DbDiff deleteUpdate = dbDiff.filter(DdlOption.make().delete().update());
+    final DbDiff update = dbDiff.filter(DdlOption.make().update());
+    assertEquals("""
+        use test;
+        create table player (
+          playerId int(11) auto_increment,
+          userId int(11) not null,
+          name varchar(20) not null,
+          primary key (playerId)
+        ) ENGINE=Innodb;
+        alter table user add column age int(11) not null;
+        alter table user change userId userId bigint(20) auto_increment primary key;
+        alter table user change name name varchar(255) not null;
+        alter table user add primary key if not exists (userId);
+        alter table user drop index nm_idx;
+        alter table user add index nm_idx (name);
+        """, createUpdate.toSql());
+    assertEquals("""
+        use test;
+        alter table user drop column agee;
+        alter table user change userId userId bigint(20) auto_increment primary key;
+        alter table user change name name varchar(255) not null;
+        alter table user drop index nm_idx;
+        alter table user add index nm_idx (name);
+        """, deleteUpdate.toSql());
+    assertEquals("""
+        use test;
+        alter table user change userId userId bigint(20) auto_increment primary key;
+        alter table user change name name varchar(255) not null;
+        alter table user drop index nm_idx;
+        alter table user add index nm_idx (name);
+        """, update.toSql());
+  }
+
+  @Test
   void syncCreateWithDbMissing() {
     DataGlobal.bridge.execute(testDb.drop()).unwrapFlux().blockLast();
     final SyncResult syncResult = testDb.sync(DdlOption.make().create()).unwrap();
