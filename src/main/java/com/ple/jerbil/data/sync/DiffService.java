@@ -209,37 +209,37 @@ public class DiffService {
     IList<IndexedColumn> create = IArrayList.empty;
     IList<IndexedColumn> delete = IArrayList.empty;
     IList<IndexedColumnDiff> update = IArrayList.empty;
-    for (IndexedColumn rightColumn : rightIndexedColumns.values()) {
+    for (IndexedColumn rightIdxCol : rightIndexedColumns.values()) {
       for (IndexedColumn leftColumn : leftIndexedColumns.values()) {
-        if (leftIndexedColumns.get(rightColumn.column.columnName) == null) {
-          delete = delete.add(rightColumn);
+        if (leftIndexedColumns.get(rightIdxCol.column.columnName) == null) {
+          delete = delete.add(rightIdxCol);
         }
         if (rightIndexedColumns.get(leftColumn.column.columnName) == null) {
           create = create.add(leftColumn);
         }
-        if (leftIndexedColumns.get(rightColumn.column.columnName) != null && !leftIndexedColumns.get(
-            rightColumn.column.columnName).equals(rightColumn)) {
-          final IndexedColumn leftIndexedColumn = leftIndexedColumns.get(rightColumn.column.columnName);
+        if (leftIndexedColumns.get(rightIdxCol.column.columnName) != null && !leftIndexedColumns.get(
+            rightIdxCol.column.columnName).equals(rightIdxCol)) {
+          final IndexedColumn leftIndexedColumn = leftIndexedColumns.get(rightIdxCol.column.columnName);
           ScalarDiff<Column> columnDiff = null;
           ScalarDiff<Integer> prefixDiff = null;
           ScalarDiff<SortOrder> sortOrderDiff = null;
-          if (!leftIndexedColumn.column.equals(rightColumn.column)) {
-            columnDiff = ScalarDiff.make(leftIndexedColumn.column, rightColumn.column);
+          if (!leftIndexedColumn.column.equals(rightIdxCol.column)) {
+            columnDiff = ScalarDiff.make(leftIndexedColumn.column, rightIdxCol.column);
           }
-          if (leftIndexedColumn.prefixSize != rightColumn.prefixSize) {
-            prefixDiff = ScalarDiff.make(leftIndexedColumn.prefixSize, rightColumn.prefixSize);
+          if (leftIndexedColumn.prefixSize != rightIdxCol.prefixSize) {
+            prefixDiff = ScalarDiff.make(leftIndexedColumn.prefixSize, rightIdxCol.prefixSize);
           }
-          if (leftIndexedColumn.sortOrder != null && rightColumn.sortOrder == null) {
+          if (leftIndexedColumn.sortOrder != null && rightIdxCol.sortOrder == null) {
             sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, null);
-          } else if (leftIndexedColumn.sortOrder == null && rightColumn.sortOrder != null) {
-            sortOrderDiff = ScalarDiff.make(null, rightColumn.sortOrder);
-          } else if (leftIndexedColumn.sortOrder == null && rightColumn.sortOrder == null) {
+          } else if (leftIndexedColumn.sortOrder == null && rightIdxCol.sortOrder != null) {
+            sortOrderDiff = ScalarDiff.make(null, rightIdxCol.sortOrder);
+          } else if (leftIndexedColumn.sortOrder == null && rightIdxCol.sortOrder == null) {
             sortOrderDiff = null;
-          } else if (leftIndexedColumn.sortOrder.equals(rightColumn.sortOrder)) {
-            sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, rightColumn.sortOrder);
+          } else if (leftIndexedColumn.sortOrder.equals(rightIdxCol.sortOrder)) {
+            sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, rightIdxCol.sortOrder);
           }
           if (columnDiff != null || prefixDiff != null || sortOrderDiff != null) {
-            update = update.add(IndexedColumnDiff.make(columnDiff, prefixDiff, sortOrderDiff));
+            update = update.add(IndexedColumnDiff.make(columnDiff, prefixDiff, sortOrderDiff, leftIndexedColumn, rightIdxCol));
           }
         }
       }
@@ -409,7 +409,7 @@ public class DiffService {
     if (!leftIndexedColumn.sortOrder.equals(rightIndexedColumn.sortOrder)) {
       sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, rightIndexedColumn.sortOrder);
     }
-    return IndexedColumnDiff.make(columnDiff, prefixSizeDiff, sortOrderDiff);
+    return IndexedColumnDiff.make(columnDiff, prefixSizeDiff, sortOrderDiff, leftIndexedColumn, rightIndexedColumn);
   }
 
   private static IndexedColumn getIndexedColumnMatchingName(IMap<String, IndexedColumn> leftIndexedColumns,

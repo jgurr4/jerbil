@@ -115,7 +115,7 @@ public class IndexDiff implements Diff<Index> {
         idxColDiffs += separator + idxColDiff;
       }
     }
-    return "IndexDiff{" +
+    return "IndexDiff{ leftName: " + indexA.indexName + "  rightName: " + indexB.indexName +
         types +
         idxNames +
         tbl +

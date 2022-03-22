@@ -118,7 +118,7 @@ public class DbDiff implements Diff<Database> {
         tblDiffs += separator + tableDiff;
       }
     }
-    return "DbDiff{" +
+    return "DbDiff{ leftName: " + databaseA.database.databaseName + "  rightName: " + databaseB.database.databaseName +
         dbName +
         tbl + "\n" +
 //        ", databaseA=" + databaseA +

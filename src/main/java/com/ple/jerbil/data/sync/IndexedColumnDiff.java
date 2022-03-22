@@ -14,17 +14,23 @@ public class IndexedColumnDiff implements Diff<IndexedColumn> {
   @Nullable public final ScalarDiff<Column> column;
   @Nullable public final ScalarDiff<Integer> prefixSize;
   @Nullable public final ScalarDiff<SortOrder> sortOrder;
+  public final IndexedColumn indexedColumnA;
+  public final IndexedColumn indexedColumnB;
 
   protected IndexedColumnDiff(@Nullable ScalarDiff<Column> column, @Nullable ScalarDiff<Integer> prefixSize,
-      @Nullable ScalarDiff<SortOrder> sortOrder) {
+                              @Nullable ScalarDiff<SortOrder> sortOrder,
+                              IndexedColumn indexedColumnA, IndexedColumn indexedColumnB) {
     this.column = column;
     this.prefixSize = prefixSize;
     this.sortOrder = sortOrder;
+    this.indexedColumnA = indexedColumnA;
+    this.indexedColumnB = indexedColumnB;
   }
 
   public static IndexedColumnDiff make(@Nullable ScalarDiff<Column> column, @Nullable ScalarDiff<Integer> prefixSize,
-                                       @Nullable ScalarDiff<SortOrder> sortOrder) {
-    return new IndexedColumnDiff(column, prefixSize, sortOrder);
+                                       @Nullable ScalarDiff<SortOrder> sortOrder, IndexedColumn indexedColumnA,
+                                       IndexedColumn indexedColumnB) {
+    return new IndexedColumnDiff(column, prefixSize, sortOrder, indexedColumnA, indexedColumnB);
   }
 
   @Override
@@ -60,7 +66,7 @@ public class IndexedColumnDiff implements Diff<IndexedColumn> {
     if (sortOrder != null) {
       sOrder = "\n  sortOrder=\n    left: " + sortOrder.before + "\n    right: " + sortOrder.after;
     }
-    return "IndexedColumnDiff{" +
+    return "IndexedColumnDiff{ leftName: " + indexedColumnA.column.columnName + "  rightName: " + indexedColumnB.column.columnName +
         cols +
         preSize +
         sOrder +
@@ -81,6 +87,6 @@ public class IndexedColumnDiff implements Diff<IndexedColumn> {
     if (sortOrder != null) {
       newSortOrder = sortOrder.filter(ddlOption);
     }
-    return new IndexedColumnDiff(newColumn, newPrefixSize, newSortOrder);
+    return new IndexedColumnDiff(newColumn, newPrefixSize, newSortOrder, indexedColumnA, indexedColumnB);
   }
 }

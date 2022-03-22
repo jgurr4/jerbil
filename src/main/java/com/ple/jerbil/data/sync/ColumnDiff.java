@@ -113,7 +113,7 @@ public class ColumnDiff implements Diff<Column> {
     if (buildingHints != null) {
       bHints = "\n  buildingHints= \n    left: " + buildingHints.before + "\n    right: " + buildingHints.after;
     }
-    return "ColumnDiff{" +
+    return "ColumnDiff{ leftName: " + columnA.columnName + "  rightName: " + columnB.columnName +
         colNames +
         tables +
         dSpec +

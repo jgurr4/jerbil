@@ -143,7 +143,7 @@ public class TableDiff implements Diff<TableContainer> {
         indexDiffs += separator + idxDiff;
       }
     }
-    return "TableDiff{" +
+    return "TableDiff{ leftName: " + tableA.table.tableName + "  rightName: " + tableB.table.tableName +
         tblName +
         cols +
         idxes +
