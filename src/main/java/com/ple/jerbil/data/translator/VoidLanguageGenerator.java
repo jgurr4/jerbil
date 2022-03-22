@@ -7,6 +7,7 @@ import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.sync.DbDiff;
+import com.ple.jerbil.data.sync.TableDiff;
 import com.ple.util.IList;
 
 public class VoidLanguageGenerator implements LanguageGenerator {
@@ -53,6 +54,11 @@ public class VoidLanguageGenerator implements LanguageGenerator {
   @Override
   public String toSql(DbDiff diff) {
     return "";
+  }
+
+  @Override
+  public String toSql(TableDiff tableDiff) {
+    return null;
   }
 
   @Override

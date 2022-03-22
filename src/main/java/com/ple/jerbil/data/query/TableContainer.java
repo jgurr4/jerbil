@@ -1,12 +1,15 @@
 package com.ple.jerbil.data.query;
 
 import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.reactiveUtils.ReactiveMono;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.booleanExpression.BooleanExpression;
 import com.ple.jerbil.data.sync.SyncResult;
+import com.ple.jerbil.data.sync.TableDiff;
 import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.util.IArrayList;
+import com.ple.util.IArrayMap;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 import reactor.util.annotation.Nullable;
@@ -14,6 +17,7 @@ import reactor.util.annotation.Nullable;
 import java.util.Objects;
 
 public class TableContainer extends FromExpression {
+  public static TableContainer empty = new TableContainer(Table.make("none", Database.make("none")), IArrayMap.empty, StorageEngine.simple, null, null);
   public final Table table;
   public final IMap<String, Column> columns;
   public final StorageEngine storageEngine;
@@ -70,7 +74,11 @@ public class TableContainer extends FromExpression {
     return new TableContainer(table, newColumns, storageEngine, indexList, autoIncCol);
   }
 
-  public SyncResult sync() {
+  public ReactiveMono<SyncResult<TableDiff>> sync() {
+    return null;
+  }
+
+  public ReactiveMono<SyncResult<TableDiff>> sync(TableContainer leftTable, TableContainer rightTable) {
     return null;
   }
 

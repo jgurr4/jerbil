@@ -9,6 +9,7 @@ import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.sync.DbDiff;
 import com.ple.jerbil.data.sync.Diff;
+import com.ple.jerbil.data.sync.TableDiff;
 import com.ple.util.IList;
 
 public interface LanguageGenerator {
@@ -25,7 +26,10 @@ public interface LanguageGenerator {
 
   String toSql(DbDiff diff);
 
+  String toSql(TableDiff tableDiff);
+
   String checkToAddBackticks(String name);
 
   String drop(DatabaseContainer databaseContainer);
+
 }

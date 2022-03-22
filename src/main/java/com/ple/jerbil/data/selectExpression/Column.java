@@ -1,6 +1,8 @@
 package com.ple.jerbil.data.selectExpression;
 
 import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.reactiveUtils.ReactiveMono;
+import com.ple.jerbil.data.sync.ColumnDiff;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.sync.SyncResult;
@@ -67,6 +69,14 @@ public abstract class Column <T extends Column> extends PartialColumn{
         return generator.toSql(this);
     }
 
+    public ReactiveMono<SyncResult<ColumnDiff>> sync() {
+        return null;
+    }
+
+    public ReactiveMono<SyncResult<ColumnDiff>> sync(Column leftColumn, Column rightColumn) {
+        return null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -91,18 +101,4 @@ public abstract class Column <T extends Column> extends PartialColumn{
           ", defaultValue=" + defaultValue +
           "}";
     }
-
-    public SyncResult sync() {
-        return null;
-    }
-
-/*
-    public String create() {
-        return null;
-    }
-
-    public String drop() {
-        return null;
-    }
-*/
 }

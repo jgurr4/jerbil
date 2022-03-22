@@ -988,7 +988,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return null;
   }
 
-  private String toSql(TableDiff tableDiff) {
+  public String toSql(TableDiff tableDiff) {
     String sql = "";
     if (tableDiff.tableName != null) {
       sql += "alter table " + tableDiff.tableName.after + " rename " + tableDiff.tableName.before + ";\n";

@@ -2,6 +2,7 @@ package com.ple.jerbil.data.sync;
 
 
 import com.ple.jerbil.data.*;
+import com.ple.jerbil.data.query.TableContainer;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.BuildingHints;

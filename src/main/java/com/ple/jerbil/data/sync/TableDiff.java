@@ -1,5 +1,7 @@
 package com.ple.jerbil.data.sync;
 
+import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.DatabaseContainer;
 import com.ple.jerbil.data.query.Table;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.Index;
@@ -65,6 +67,16 @@ public class TableDiff implements Diff<TableContainer> {
        newTableName = tableName.filter(ddlOption);
     }
     return new TableDiff(newTableName, newColumns, newIndexes, newEngine, tableA, tableB);
+  }
+
+  public String toSql() {
+    if (tableB.equals(TableContainer.empty)) {
+      return tableA.create().toSql();
+    }
+    if (columns != null || tableName != null) {
+      return "use " + tableA.table.database.databaseName + ";\n" + DataGlobal.bridge.getGenerator().toSql(this);
+    }
+    return "";
   }
 
   @Override

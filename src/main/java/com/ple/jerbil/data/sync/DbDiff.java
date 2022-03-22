@@ -51,7 +51,7 @@ public class DbDiff implements Diff<Database> {
     if (tables != null || databaseName != null) {
       return DataGlobal.bridge.getGenerator().toSql(this);
     }
-    return null;
+    return "";
   }
 
   public DbDiff filter(DdlOption ddlOption) {

@@ -35,12 +35,12 @@ public class DatabaseContainer {
    * This will sync a Database using a default filtering setting of Create and Update. It won't delete any extra tables or columns.
    * @return SyncResult
    */
-  public ReactiveMono<SyncResult>  sync() {
+  public ReactiveMono<SyncResult<DbDiff>>  sync() {
     return sync(DdlOption.make().create().update());
   }
 
   // This method is for convenience, it automatically retrieves a database object from rdbms which has the same name.
-  public ReactiveMono<SyncResult> sync(DdlOption ddlOption) {
+  public ReactiveMono<SyncResult<DbDiff>> sync(DdlOption ddlOption) {
     return ReactiveMono.make(getDbContainer(database.databaseName).unwrapMono()
 //            .filter(dbc -> dbc.equals(DatabaseContainer.empty))
         .map(existingDb -> DiffService.compareDatabases(this, existingDb))
