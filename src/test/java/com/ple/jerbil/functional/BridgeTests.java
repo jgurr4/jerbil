@@ -115,7 +115,7 @@ public class BridgeTests {
         testDb.inventory, testDb.item.tableName, testDb.item, testDb.order.tableName, testDb.order, updatedUser.table.tableName, updatedUser));
     final DbDiff dbDiff = DiffService.compareDatabases(testDb, test);
     final DbDiff createUpdate = dbDiff.filter(DdlOption.make().create().update());
-    final DbDiff deleteUpdate = dbDiff.filter(DdlOption.make().delete().update());
+    final DbDiff deleteUpdate = dbDiff.filter(DdlOption.make().delete().update());  //TODO: Make update() implied by default for delete and create, so it goes deeper into each table and column for delete
     final DbDiff update = dbDiff.filter(DdlOption.make().update());
     assertEquals("""
         use test;
@@ -160,6 +160,24 @@ public class BridgeTests {
     assertEquals(5, ((DbDiff) syncResult.diff).tables.create.size());
   }
 
+  @Test
+  void syncWithModifiedColumn() {
+    DataGlobal.bridge.execute("use test; alter table player modify column name varchar(50) not null").unwrapFlux().blockLast();
+    //TODO: Replace sql with jerbil methods like player.modify(playerColumns.name).asVarchar(50);  or player.alter also add support for player.rename player.change
+//    final ReactiveWrapper<SyncResult> syncResult = testDb.sync(DdlOption.make().create().update().delete());
+//    final DbDiff diff = (DbDiff) syncResult.unwrap().diff;
+//    for (Object o : syncResult.unwrap().result.unwrapList()) {
+//      o = (DbResult) o;
+//    }
+    final DbDiff diff = DiffService.compareDatabases(testDb, DataGlobal.bridge.getDb("test").unwrap());
+    System.out.println(diff);
+    System.out.println(diff.toSql());
+    assertEquals(1 , diff.tables.update.size());
+//    assertEquals(1, ((DbDiff) syncResult.diff.unwrap()).tables.update.length());
+//    assertEquals(1, syncResult.diff.unwrap().getDiffs().size);
+  }
+
+
   /*
   @Test
   void syncWithoutConflicts() { //It should reuse existing with no diffs.
@@ -168,16 +186,6 @@ public class BridgeTests {
     final DdlOption ddlOption = DdlOption.make().create().update().delete();
     final ReactiveWrapper<SyncResult> syncResult = testDb.sync(ddlOption);
     assertEquals(0, syncResult.unwrap().diff.getTotalDiffs()); //FIXME: Find a way to run methods through Diff interface
-  }
-
-  @Test
-  void syncWithConflictingTable() { //update-level diffs in tables exist, so should contain error inside SyncResult.
-    DataGlobal.bridge.execute("alter table player modify column name varchar(50) not null").unwrapFlux()
-        .blockLast();  //TODO: Replace sql with jerbil methods like player.modify(playerColumns.name).asVarchar(50);  or player.alter also add support for player.rename player.change
-    final DdlOption ddlOption = DdlOption.make().create().update().delete();
-    final ReactiveWrapper<SyncResult> syncResult = testDb.sync(ddlOption);
-//    assertEquals(1, ((DbDiff) syncResult.diff.unwrap()).tables.update.length());
-//    assertEquals(1, syncResult.diff.unwrap().getDiffs().size);
   }
 
   @Test

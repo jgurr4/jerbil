@@ -326,14 +326,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     } else if (tableLine.contains("varchar(")) {
       regex = "^.*varchar\\(";
       dataType = DataType.varchar;
-    } else if (tableLine.contains("char(")) {
-      regex = "^.*char\\(";
+    } else if (tableLine.contains(" char(")) {
+      regex = "^.* char\\(";
       dataType = DataType.character;
     } else if (tableLine.contains(" text ")) {
       regex = "^.* text";
       dataType = DataType.text;
-    } else if (tableLine.contains("int(")) {
-      regex = "^.*int\\(";
+    } else if (tableLine.contains(" int(")) {
+      regex = "^.* int\\(";
       dataType = DataType.integer;
     } else if (tableLine.contains("bigint(")) {
       regex = "^.*bigint\\(";

@@ -88,11 +88,42 @@ public class DbDiff implements Diff<Database> {
 
   @Override
   public String toString() {
+    String dbName = "";
+    String tbl = "";
+    String tablesBefore = "";
+    String tablesAfter = "";
+    String separator = "";
+    String tblDiffs = "";
+    boolean diffTables = false;
+    for (String table : databaseA.tables.keys()) {
+      tablesBefore += separator + table;
+      separator = " ";
+      if (databaseB.tables.get(table) == null) diffTables = true;
+    }
+    separator = "";
+    for (String table : databaseB.tables.keys()) {
+      tablesAfter += separator + table;
+      separator = " ";
+      if (databaseA.tables.get(table) == null) diffTables = true;
+    }
+    if (databaseName != null) {
+      dbName = "\n  databaseName= \n  left: " + databaseName.before + "\n  right: " + databaseName.after;
+    }
+    if (tables != null && diffTables) {
+      tbl = "\n  tables= \n left: " + tablesBefore  + "\n right: " + tablesAfter;
+    }
+    separator = "\n";
+    if (tables != null) {
+      for (TableDiff tableDiff : tables.update) {
+        tblDiffs += separator + tableDiff;
+      }
+    }
     return "DbDiff{" +
-        "databaseName=" + databaseName +
-        ", tables=" + tables +
-        ", databaseA=" + databaseA +
-        ", databaseB=" + databaseB +
-        '}';
+        dbName +
+        tbl + "\n" +
+//        ", databaseA=" + databaseA +
+//        ", databaseB=" + databaseB +
+        tblDiffs +
+        "\n}";
   }
 }

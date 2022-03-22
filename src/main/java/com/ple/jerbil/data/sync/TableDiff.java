@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.sync;
 
+import com.ple.jerbil.data.query.Table;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.StorageEngine;
@@ -83,13 +84,72 @@ public class TableDiff implements Diff<TableContainer> {
 
   @Override
   public String toString() {
+    String tblName = "";
+    String sEngine = "";
+    String cols = "";
+    String idxes = "";
+    String colsBefore = "  ";
+    String colsAfter = "  ";
+    String idxesBefore = "  ";
+    String idxesAfter = "  ";
+    String separator = "";
+    String columnDiffs = "";
+    String indexDiffs = "";
+    boolean diffColumns = false;
+    boolean diffIndexes = false;
+    for (String column : tableA.columns.keys()) {
+      colsBefore += separator + column;
+      separator = " ";
+      if (tableB.columns.get(column) == null) diffColumns = true;
+    }
+    separator = "";
+    for (String column : tableB.columns.keys()) {
+      colsAfter += separator + column;
+      separator = " ";
+      if (tableA.columns.get(column) == null) diffColumns = true;
+    }
+    if (columns != null && diffColumns) {
+      cols = "\n  columns= \n left: " + colsBefore  + "\n right: " + colsAfter;
+    }
+    separator = "";
+    for (String index : tableA.indexes.keys()) {
+      idxesBefore += separator + index;
+      separator = " ";
+      if (tableB.indexes.get(index) == null) diffIndexes = true;
+    }
+    separator = "";
+    for (String index : tableB.indexes.keys()) {
+      idxesAfter += separator + index;
+      separator = " ";
+      if (tableA.indexes.get(index) == null) diffIndexes = true;
+    }
+    if (columns != null && diffIndexes) {
+      idxes = "\n  indexes= \n    left: " + idxesBefore  + "\n    right: " + idxesAfter;
+    }
+    if (tableName != null) {
+      tblName = "\n  tableName= \n    left: " + tableName.before + "\n    right: " + tableName.after;
+    }
+    if (storageEngine != null) {
+      sEngine = "\n  storageEngine= \n    left: " + storageEngine.before + "\n    right: " + storageEngine.after;
+    }
+    separator = "\n";
+    if (columns != null) {
+      for (ColumnDiff colDiff : columns.update) {
+        columnDiffs += separator + colDiff;
+      }
+    }
+    if (indexes != null) {
+      for (IndexDiff idxDiff : indexes.update) {
+        indexDiffs += separator + idxDiff;
+      }
+    }
     return "TableDiff{" +
-        "tableName=" + tableName +
-        ", columns=" + columns +
-        ", indexes=" + indexes +
-        ", storageEngine=" + storageEngine +
-        ", tableA=" + tableA +
-        ", tableB=" + tableB +
+        tblName +
+        cols +
+        idxes +
+        sEngine +
+        columnDiffs +
+        indexDiffs +
         '}';
   }
 }

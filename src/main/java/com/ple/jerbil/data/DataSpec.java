@@ -70,7 +70,10 @@ public class DataSpec {
     if (this == o) return true;
     if (!(o instanceof DataSpec)) return false;
     DataSpec dataSpec = (DataSpec) o;
-    return size.get() == dataSpec.size.get() && dataType == dataSpec.dataType && Arrays.equals(preciseScale,
+    if (size.isPresent() && dataSpec.size.isPresent()) {
+      if (size.get() != dataSpec.size.get()) return false;
+    } else if (size.isPresent() ^ dataSpec.size.isPresent()) return false;
+    return dataType == dataSpec.dataType && Arrays.equals(preciseScale,
         dataSpec.preciseScale);
   }
 

@@ -93,14 +93,32 @@ public class ColumnDiff implements Diff<Column> {
 
   @Override
   public String toString() {
+    String colNames = "";
+    String tables = "";
+    String dSpec = "";
+    String defVal = "";
+    String bHints = "";
+    if (columnName != null) {
+      colNames = "\n  columnName= \n    left: " + columnName.before + "\n    right: " + columnName.after;
+    }
+    if (table != null) {
+      tables = "\n  table= \n    left: " + table.before + "\n    right: " + table.after;
+    }
+    if (dataSpec != null) {
+      dSpec = "\n  dataSpec= \n    left: " + dataSpec.before + "\n    right: " + dataSpec.after;
+    }
+    if (defaultValue != null) {
+      defVal = "\n  defaultValue= \n    left: " + defaultValue.before + "\n    right: " + defaultValue.after;
+    }
+    if (buildingHints != null) {
+      bHints = "\n  buildingHints= \n    left: " + buildingHints.before + "\n    right: " + buildingHints.after;
+    }
     return "ColumnDiff{" +
-        "columnName=" + columnName +
-        ", table=" + table +
-        ", dataSpec=" + dataSpec +
-        ", defaultValue=" + defaultValue +
-        ", buildingHints=" + buildingHints +
-        ", columnA=" + columnA +
-        ", columnB=" + columnB +
+        colNames +
+        tables +
+        dSpec +
+        defVal +
+        bHints +
         '}';
   }
 }

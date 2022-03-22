@@ -48,10 +48,22 @@ public class IndexedColumnDiff implements Diff<IndexedColumn> {
 
   @Override
   public String toString() {
+    String cols = "";
+    String preSize = "";
+    String sOrder = "";
+    if (column != null) {
+      cols = "\n  column=\n    left: " + column.before + "\n    right: " + column.after;
+    }
+    if (prefixSize != null) {
+      preSize = "\n  prefixSize=\n    left: " + prefixSize.before + "\n    right: " + prefixSize.after;
+    }
+    if (sortOrder != null) {
+      sOrder = "\n  sortOrder=\n    left: " + sortOrder.before + "\n    right: " + sortOrder.after;
+    }
     return "IndexedColumnDiff{" +
-        "column=" + column +
-        ", prefixSize=" + prefixSize +
-        ", sortOrder=" + sortOrder +
+        cols +
+        preSize +
+        sOrder +
         '}';
   }
 

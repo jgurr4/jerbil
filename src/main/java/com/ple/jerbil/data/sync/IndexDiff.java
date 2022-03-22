@@ -77,13 +77,50 @@ public class IndexDiff implements Diff<Index> {
 
   @Override
   public String toString() {
+    String separator = "";
+    String types = "";
+    String idxNames = "";
+    String tbl = "";
+    String idxCols = "";
+    String idxColsBefore = "  ";
+    String idxColsAfter = "  ";
+    String idxColDiffs = "";
+    boolean diffIdxCols = false;
+    if (type != null) {
+      types = "\n  type=\n    left: " + type.before + "\n    right: " + type.after;
+    }
+    if (indexName != null) {
+      idxNames = "\n  indexName=\n    left: " + indexName.before + "\n    right: " + indexName.after;
+    }
+    if (table != null) {
+      tbl = "\n  table=\n    left: " + table.before + "\n    right: " + table.after;
+    }
+    for (String idxCol : indexA.indexedColumns.keys()) {
+      idxColsBefore += separator + idxCol;
+      separator = " ";
+      if (indexB.indexedColumns.get(idxCol) == null) diffIdxCols = true;
+    }
+    separator = "";
+    for (String idxCol : indexB.indexedColumns.keys()) {
+      idxColsAfter += separator + idxCol;
+      separator = " ";
+      if (indexA.indexedColumns.get(idxCol) == null) diffIdxCols = true;
+    }
+    if (indexedColumns != null && diffIdxCols) {
+      idxCols = "\n  indexedColumns= \n left: " + idxColsBefore  + "\n right: " + idxColsAfter;
+    }
+    separator = "\n";
+    if (indexedColumns != null) {
+      for (IndexedColumnDiff idxColDiff : indexedColumns.update) {
+        idxColDiffs += separator + idxColDiff;
+      }
+    }
     return "IndexDiff{" +
-        "type=" + type +
-        ", indexName=" + indexName +
-        ", table=" + table +
-        ", indexedColumns=" + indexedColumns +
-        ", indexA=" + indexA +
-        ", indexB=" + indexB +
+        types +
+        idxNames +
+        tbl +
+        idxCols +
+        idxColDiffs +
         '}';
   }
 }
