@@ -142,8 +142,40 @@ public class BuildingHints {
 
   @Override
   public String toString() {
+    String props = "";
+    if (this.isUnique()) {
+      props += "unique, ";
+    }
+    if (this.isAutoInc()) {
+      props += "auto_increment, ";
+    }
+    if (this.isAutoUpdateTime()) {
+      props += "current_timestamp, ";
+    }
+    if (this.isPrimary()) {
+      props += "primary key, ";
+    }
+    if (this.isIndexed()) {
+      props += "indexed, ";
+    }
+    if (this.isFulltext()) {
+      props += "fulltext, ";
+    }
+    if (this.isForeign()) {
+      props += "foreign key, ";
+    }
+    if (this.isInvisible()) {
+      props += "invisible, ";
+    }
+    if (this.isUnsigned()) {
+      props += "unsigned, ";
+    }
+    if (this.isAllowNull()) {
+      props += "allow null, ";
+    }
     return "BuildingHints{" +
-        "flags=" + flags +
+        "flags=" + flags + ", " +
+        "props=" + props.replaceFirst(", $","") +
         '}';
   }
 }

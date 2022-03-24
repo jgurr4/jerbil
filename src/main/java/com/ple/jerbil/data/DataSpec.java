@@ -39,6 +39,10 @@ public class DataSpec {
     return new DataSpec(type, Optional.of(size), null);
   }
 
+  public static DataSpec make(DataType type, Optional<Integer> size) {
+    return new DataSpec(type, size, null);
+  }
+
   public static DataSpec make(DataType type, int precision, int scale) {
     return new DataSpec(type, type.defaultSize, new int[]{precision, scale});
   }
@@ -70,10 +74,7 @@ public class DataSpec {
     if (this == o) return true;
     if (!(o instanceof DataSpec)) return false;
     DataSpec dataSpec = (DataSpec) o;
-    if (size.isPresent() && dataSpec.size.isPresent()) {
-      if (size.get() != dataSpec.size.get()) return false;
-    } else if (size.isPresent() ^ dataSpec.size.isPresent()) return false;
-    return dataType == dataSpec.dataType && Arrays.equals(preciseScale,
+    return dataType == dataSpec.dataType && size.equals(dataSpec.size) && Arrays.equals(preciseScale,
         dataSpec.preciseScale);
   }
 

@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class MariadbLanguageGenerator implements LanguageGenerator {
@@ -197,7 +198,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     columnLine = columnLine.toLowerCase(Locale.ROOT);
     hints = getColumnHints(columnLine, hints);
     final DataSpec dataSpec = getDataSpecFromSql(columnLine);
-    final Literal defaultValue = getDefaultValFromSql(columnLine);
+    final SelectExpression defaultValue = getDefaultValFromSql(columnLine);
 //    final Expression generatedFrom = getGeneratedFromSql(columnLine);
     if (columnLine.contains("AUTO_INCREMENT")) {
       return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, hints);
@@ -287,12 +288,17 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return hints;
   }
 
-  private Literal getDefaultValFromSql(String tableLine) {
-    if (!tableLine.contains("^.*default ")) {
+  private SelectExpression getDefaultValFromSql(String tableLine) {
+    if (tableLine.replaceFirst("^.*default ", "").length() == tableLine.length()) {
       return null;
     }
+    if (tableLine.replaceFirst("default null", "").length() != tableLine.length()) {
+      return LiteralNull.make();
+    }
     String defaultVal = tableLine.replaceAll("^.*default", "").replaceFirst(",$", "");
-    if (defaultVal.replaceAll("[0-9]", "").length() == 0) {
+    if (defaultVal.replaceFirst("current_timestamp", "").length() != defaultVal.length()) {
+      return CurrentTimestamp.make();
+    } else if (defaultVal.replaceAll("[0-9]", "").length() == 0) {
       return Literal.make(Integer.parseInt(defaultVal));
     } else if (defaultVal.replaceAll("[0-9]", "").replace(".", "").length() == 0) {
       return Literal.make(Double.parseDouble(defaultVal));
@@ -305,13 +311,13 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     } else if (defaultVal.replace("false", "").replace("true", "").length() == 0) {
       return Literal.make(Boolean.parseBoolean(defaultVal));
     }
-    return Literal.make(defaultVal);
+    return Literal.make(defaultVal.replaceAll("'","").strip());
   }
 
   private DataSpec getDataSpecFromSql(String tableLine) {
     tableLine = tableLine.stripLeading();
     DataType dataType = null;
-    int size = 0;
+    Optional<Integer> size = Optional.empty();
     int precision = 0;
     String regex = "";
     int endIndex = 0;
@@ -376,13 +382,13 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     endIndex = tableLine.indexOf(")");
     if (endIndex != -1 && !dataType.defaultSize.isEmpty()) {
       String[] sizeAndPrecision = tableLine.replaceAll("\\).*", "").split(",");
-      size = Integer.parseInt(sizeAndPrecision[0]);
+      size = Optional.of(Integer.parseInt(sizeAndPrecision[0]));
       if (sizeAndPrecision.length > 1) {
         precision = Integer.parseInt(sizeAndPrecision[1]);
-        return DataSpec.make(dataType, precision, size);
+        return DataSpec.make(dataType, precision, size.get());
       }
     }
-    if (dataType.equals(DataType.tinyint) && size == 1) {
+    if (dataType.equals(DataType.tinyint) && size.get() == 1) {
       dataType = DataType.bool;
     }
     return DataSpec.make(dataType, size);
@@ -994,7 +1000,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       sql += "alter table " + tableDiff.tableName.after + " rename " + tableDiff.tableName.before + ";\n";
     }
     if (tableDiff.storageEngine != null) {
-      sql += "alter table " + tableDiff.tableA.table.tableName + " engine " + toSql(tableDiff.tableA.storageEngine) + ";\n";
+      sql += "alter table " + tableDiff.tableA.table.tableName + " engine " + toSql(
+          tableDiff.tableA.storageEngine) + ";\n";
     }
     if (tableDiff.columns != null) {
       if (tableDiff.columns.create != null) {
@@ -1076,7 +1083,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       type = " fulltext ";
     }
 //    return "create" + type + "index " + index.indexName + " on " + index.table.tableName + " " + toSql(index.indexedColumns);
-    return "alter table " + index.table.tableName + " add" + type + "index " + index.indexName + " " + toSql(index.indexedColumns);
+    return "alter table " + index.table.tableName + " add" + type + "index " + index.indexName + " " + toSql(
+        index.indexedColumns);
   }
 
   private String toSqlDrop(Index index) {

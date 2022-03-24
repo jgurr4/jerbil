@@ -8,11 +8,15 @@ import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
+import com.ple.observabilityBridge.RecordingService;
+import com.ple.observabilityBridge.SystemOutLogHandler;
 import com.ple.util.IArrayList;
 import com.ple.util.IEntry;
 import com.ple.util.IList;
 import com.ple.util.IMap;
 import reactor.core.publisher.Mono;
+
+import java.util.Deque;
 
 /**
  * Contains static methods for obtaining all differences between existing database structure and Database Object.
@@ -419,8 +423,12 @@ public class DiffService {
         return leftIndexedColumn.value;
       }
     }
-    //FIXME: Use observability bridge here for logging.
-    System.out.println("IndexedColumn not found in list.");
+    //TODO: implement observability bridge.
+//    final SystemOutLogHandler mainLog = SystemOutLogHandler.only;
+//    final RecordingService rs = RecordingService.make(mainLog);
+//    rs.open("IndexedColumn not found in list.", "sync", System.Logger.Level.INFO);
+//    final Deque<Long> startTimeList = rs.startTimeList;
+//    rs.close("");
     return null;
   }
 
