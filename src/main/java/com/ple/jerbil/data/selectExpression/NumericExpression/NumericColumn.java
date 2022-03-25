@@ -3,6 +3,7 @@ package com.ple.jerbil.data.selectExpression.NumericExpression;
 import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
+import com.ple.jerbil.data.selectExpression.LiteralNull;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -30,7 +31,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   }
 
   public static NumericColumn make(String columnName, Table table, BuildingHints hints) {
-    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer),null, hints);
+    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, hints);
   }
 
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression defaultValue,
@@ -46,7 +47,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   @Override
   public NumericColumn primary() {
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.primary());
+    return new NumericColumn(columnName, table, dataSpec, null, hints.primary());
   }
 
   @Override
@@ -56,7 +57,11 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   @Override
   public NumericColumn invisible() {
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.invisible());
+    Expression newDefault = defaultValue;
+    if (defaultValue == null) {
+      newDefault = LiteralNull.instance;
+    }
+    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) newDefault, hints.invisible());
   }
 
   @Override
@@ -103,7 +108,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   }
 
   public NumericColumn ai() {
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.autoInc().primary());
+    return new NumericColumn(columnName, table, dataSpec, null, hints.autoInc().primary());
   }
 
   public NumericColumn unsigned() {

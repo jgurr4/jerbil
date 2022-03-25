@@ -21,41 +21,6 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, hints);
   }
 
-  @Override
-  public StringColumn indexed() {
-    return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, hints.index());
-  }
-
-  @Override
-  public StringColumn primary() {
-    return null;
-  }
-
-  @Override
-  public StringColumn unique() {
-    return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, hints.unique());
-  }
-
-  @Override
-  public StringColumn invisible() {
-    return null;
-  }
-
-  @Override
-  public StringColumn allowNull() {
-    return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, hints.allowNull());
-  }
-
-  @Override
-  public StringColumn defaultValue(Expression e) {
-    return null;
-  }
-
-  @Override
-  public StringColumn defaultValue(Enum<?> value) {
-    return null;
-  }
-
   public static StringColumn make(String columnName, Table table, int size, StringExpression defaultValue,
                                   BuildingHints hints) {
     return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), defaultValue, hints);
@@ -78,6 +43,45 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     return new StringColumn(columnName, table, dataSpec, null, BuildingHints.make());
   }
 
+  @Override
+  public StringColumn indexed() {
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, hints.index());
+  }
+
+  @Override
+  public StringColumn primary() {
+    return null;
+  }
+
+  @Override
+  public StringColumn unique() {
+    return new StringColumn(columnName, table, dataSpec, null, hints.unique());
+  }
+
+  @Override
+  public StringColumn invisible() {
+    return null;
+  }
+
+  @Override
+  public StringColumn allowNull() {
+    Expression newDefault = defaultValue;
+    if (defaultValue == null) {
+      newDefault = LiteralNull.instance;
+    }
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) newDefault, hints.allowNull());
+  }
+
+  @Override
+  public StringColumn defaultValue(Expression e) {
+    return null;
+  }
+
+  @Override
+  public StringColumn defaultValue(Enum<?> value) {
+    return null;
+  }
+
   public Equals eq(StringExpression value) {
     return Equals.make(this, value);
   }
@@ -95,7 +99,11 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
   }
 
   public StringColumn defaultValue(StringExpression str) {
-    return new StringColumn(columnName, table, dataSpec, str, hints);
+    BuildingHints newHints = hints;
+    if (str instanceof LiteralNull) {
+      newHints = hints.allowNull();
+    }
+    return new StringColumn(columnName, table, dataSpec, str, newHints);
   }
 
   public StringColumn fullText() {

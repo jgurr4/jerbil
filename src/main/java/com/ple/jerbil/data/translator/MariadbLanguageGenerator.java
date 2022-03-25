@@ -57,7 +57,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final IMap<String, Column> columns = getColumnsFromSql(createTableString, table);
     final IMap<String, Index> indexes = getIndexesFromSql(createTableString, table, columns);
     NumericColumn autoIncColumn = null;
-    if (indexes.size() != 0) {
+    if (indexes.size() != 0 && indexes.get("primary") != null) {
       autoIncColumn = getAutoIncColumn(indexes.get("primary").indexedColumns);
     }
     return TableContainer.make(table, columns, engine, indexes, autoIncColumn);
@@ -192,11 +192,11 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     BuildingHints hints = BuildingHints.make();
     for (String keyLine : keyLines) {
       if (keyLine.contains(colName)) {
-        hints = getHintFromSql(hints, keyLine);
+        hints = getKeyHintsFromSql(hints, keyLine);
       }
     }
     columnLine = columnLine.toLowerCase(Locale.ROOT);
-    hints = getColumnHints(columnLine, hints);
+    hints = getColumnHintsFromSql(columnLine, hints);
     final DataSpec dataSpec = getDataSpecFromSql(columnLine);
     final SelectExpression defaultValue = getDefaultValFromSql(columnLine);
 //    final Expression generatedFrom = getGeneratedFromSql(columnLine);
@@ -224,14 +224,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return null;
   }
 
-  private BuildingHints getColumnHints(String columnLine, BuildingHints hints) {
+  private BuildingHints getColumnHintsFromSql(String columnLine, BuildingHints hints) {
     if (columnLine.contains("unsigned")) {
       hints = hints.unsigned();
     }
     if (columnLine.contains("auto_increment")) {
       hints = hints.autoInc();
     }
-    if (!columnLine.contains("not null")) {
+    if (!columnLine.contains("not null") || columnLine.contains("default null")) {
       hints = hints.allowNull();
     }
     if (columnLine.contains("invisible")) {
@@ -243,7 +243,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return hints;
   }
 
-  private BuildingHints getHintFromSql(BuildingHints hints, String keyLine) {
+  private BuildingHints getKeyHintsFromSql(BuildingHints hints, String keyLine) {
     if (keyLine.contains("PRIMARY")) {
       return hints.primary();
     } else if (keyLine.contains("UNIQUE")) {
@@ -293,7 +293,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       return null;
     }
     if (tableLine.replaceFirst("default null", "").length() != tableLine.length()) {
-      return LiteralNull.make();
+      return LiteralNull.instance;
     }
     String defaultVal = tableLine.replaceAll("^.*default", "").replaceFirst(",$", "");
     if (defaultVal.replaceFirst("current_timestamp", "").length() != defaultVal.length()) {
@@ -311,7 +311,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     } else if (defaultVal.replace("false", "").replace("true", "").length() == 0) {
       return Literal.make(Boolean.parseBoolean(defaultVal));
     }
-    return Literal.make(defaultVal.replaceAll("'","").strip());
+    return Literal.make(defaultVal.replaceAll("'", "").strip());
   }
 
   private DataSpec getDataSpecFromSql(String tableLine) {
@@ -747,6 +747,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       } else {
         output = s.column.getColumnName();
       }
+    } else if (e instanceof LiteralNull) {
+      output = " default null";
     } else if (e instanceof LiteralString) {
       final LiteralString litStr = (LiteralString) e;
       output = "'" + litStr.value + "'";
@@ -900,7 +902,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     String unsigned = "";
     String invisible = "";
 //    String generatedFrom = "";
-    if (column.hints.isAllowNull() || column.hints.isPrimary() || column.defaultValue != null || column.hints.isInvisible()) {
+    if (column.hints.isAllowNull() || column.hints.isPrimary() || column.hints.isInvisible()) {
+      nullVal = "";
+    }
+    if (column.defaultValue != null && column.defaultValue != LiteralNull.instance) {
       nullVal = "";
     }
     if (column instanceof NumericColumn && column.hints.isAutoInc()) {
@@ -910,7 +915,12 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       unsigned = " unsigned";
     }
     if (column.defaultValue != null) {
-      defaultVal = " default (" + toSql(column.defaultValue) + ")";
+      final String defVal = toSql(column.defaultValue);
+      if (defVal == null || defVal.equals(" default null")) {
+        defaultVal = "";
+      } else {
+        defaultVal = " default (" + defVal + ")";
+      }
       if (defaultVal.contains("current_timestamp")) {
         defaultVal = defaultVal.replace("(", "").replace(")", "");
       }

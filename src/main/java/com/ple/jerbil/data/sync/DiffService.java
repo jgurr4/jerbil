@@ -8,15 +8,12 @@ import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
-import com.ple.observabilityBridge.RecordingService;
-import com.ple.observabilityBridge.SystemOutLogHandler;
 import com.ple.util.IArrayList;
 import com.ple.util.IEntry;
 import com.ple.util.IList;
 import com.ple.util.IMap;
-import reactor.core.publisher.Mono;
 
-import java.util.Deque;
+import java.util.Optional;
 
 /**
  * Contains static methods for obtaining all differences between existing database structure and Database Object.
@@ -391,9 +388,13 @@ public class DiffService {
     IList<IndexedColumnDiff> indexedColumnDiffs = IArrayList.empty;
     for (IEntry<String, IndexedColumn> rightIndexedColumn : rightIndexedColumns) {
       if (rightIndexedColumn != null) {
-        indexedColumnDiffs = indexedColumnDiffs.add(compareIndexedCoumns(
-            getIndexedColumnMatchingName(leftIndexedColumns, rightIndexedColumn.value.column.columnName),
-            rightIndexedColumn.value));
+        final Optional<IndexedColumn> leftIndexedColumn = getIndexedColumnMatchingName(leftIndexedColumns,
+            rightIndexedColumn.value.column.columnName);
+        if (leftIndexedColumn.isPresent()) {
+          indexedColumnDiffs = indexedColumnDiffs.add(compareIndexedCoumns(
+              leftIndexedColumn.get(),
+              rightIndexedColumn.value));
+        }
       }
     }
     return indexedColumnDiffs;
@@ -416,20 +417,14 @@ public class DiffService {
     return IndexedColumnDiff.make(columnDiff, prefixSizeDiff, sortOrderDiff, leftIndexedColumn, rightIndexedColumn);
   }
 
-  private static IndexedColumn getIndexedColumnMatchingName(IMap<String, IndexedColumn> leftIndexedColumns,
-                                                            String columnName) {
+  private static Optional<IndexedColumn> getIndexedColumnMatchingName(IMap<String, IndexedColumn> leftIndexedColumns,
+                                                               String columnName) {
     for (IEntry<String, IndexedColumn> leftIndexedColumn : leftIndexedColumns) {
       if (leftIndexedColumn.key.equals(columnName)) {
-        return leftIndexedColumn.value;
+        return Optional.of(leftIndexedColumn.value);
       }
     }
-    //TODO: implement observability bridge.
-//    final SystemOutLogHandler mainLog = SystemOutLogHandler.only;
-//    final RecordingService rs = RecordingService.make(mainLog);
-//    rs.open("IndexedColumn not found in list.", "sync", System.Logger.Level.INFO);
-//    final Deque<Long> startTimeList = rs.startTimeList;
-//    rs.close("");
-    return null;
+    return Optional.empty();
   }
 
   public static boolean checkTableNameInList(IList<TableContainer> tables, TableContainer t1) {

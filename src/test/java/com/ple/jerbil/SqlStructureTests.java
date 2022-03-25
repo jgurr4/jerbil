@@ -37,7 +37,7 @@ public class SqlStructureTests {
     assertEquals("""
         create table `order` (
           orderId bigint(20) unsigned auto_increment,
-          `add` varchar(255) default ('barter'),
+          `add` varchar(255) not null,
           phrase text,
           userId int(11) unsigned not null,
           itemId int(10) unsigned not null,
@@ -95,7 +95,7 @@ public class SqlStructureTests {
         ) ENGINE=Aria;
         create table `order` (
           orderId bigint(20) unsigned auto_increment,
-          `add` varchar(255) default ('barter'),
+          `add` varchar(255) not null,
           phrase text,
           userId int(11) unsigned not null,
           itemId int(10) unsigned not null,

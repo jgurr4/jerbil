@@ -75,7 +75,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
   }
 
   public static BooleanColumn make(String columnName, Table table) {
-    return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool),null, BuildingHints.make());
+    return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool), null, BuildingHints.make());
   }
 
   public BooleanExpression eq(LiteralBoolean bool) {
