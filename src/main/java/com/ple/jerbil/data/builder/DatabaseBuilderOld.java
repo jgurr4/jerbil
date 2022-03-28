@@ -1,5 +1,6 @@
-package com.ple.jerbil.data;
+package com.ple.jerbil.data.builder;
 
+import com.ple.jerbil.data.*;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
@@ -10,9 +11,10 @@ import com.ple.util.*;
 import java.lang.reflect.*;
 
 @Immutable
-public class DatabaseBuilder {
+public class DatabaseBuilderOld {
 
   //FIXME: Figure out a way to handle multi-column indexes for secondary, fulltext, and foreign.
+  //TODO: Make this handle creating ArrayMap of columns, as well as setting the fields of the CustomTableContainer class using reflection.
   public static <T extends DatabaseContainer> T generate(Class<T> customDbContainerClass, String dbName) {
     Constructor<?>[] customTblConstructors = null;
     Parameter[] customTblConstructorParams = null;

@@ -1,8 +1,7 @@
-package com.ple.jerbil.testcommon.orm;
+package com.ple.jerbil.testcommon.DBO;
 
 import com.ple.jerbil.data.DbRecord;
 import com.ple.jerbil.data.DbResult;
-import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.util.Immutable;
 
 @Immutable

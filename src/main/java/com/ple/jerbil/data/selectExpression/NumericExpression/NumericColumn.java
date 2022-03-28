@@ -40,45 +40,6 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   }
 
 
-  @Override
-  public NumericColumn indexed() {
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.index());
-  }
-
-  @Override
-  public NumericColumn primary() {
-    return new NumericColumn(columnName, table, dataSpec, null, hints.primary());
-  }
-
-  @Override
-  public NumericColumn unique() {
-    return null;
-  }
-
-  @Override
-  public NumericColumn invisible() {
-    Expression newDefault = defaultValue;
-    if (defaultValue == null) {
-      newDefault = LiteralNull.instance;
-    }
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) newDefault, hints.invisible());
-  }
-
-  @Override
-  public NumericColumn allowNull() {
-    return null;
-  }
-
-  @Override
-  public NumericColumn defaultValue(Expression e) {
-    return null;
-  }
-
-  @Override
-  public NumericColumn defaultValue(Enum<?> value) {
-    return null;
-  }
-
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression defaultValue)  {
     return new NumericColumn(columnName, table, dataSpec, defaultValue, BuildingHints.make());
   }
@@ -105,14 +66,6 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
 
   public Equals eq(Expression value) {
     return Equals.make(this, value);
-  }
-
-  public NumericColumn ai() {
-    return new NumericColumn(columnName, table, dataSpec, null, hints.autoInc().primary());
-  }
-
-  public NumericColumn unsigned() {
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.unsigned());
   }
 
   @Override

@@ -1,25 +1,18 @@
 package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.Database;
-import com.ple.jerbil.data.DatabaseBuilder;
+import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.*;
-import io.r2dbc.spi.Result;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import reactor.core.publisher.Flux;
-import reactor.test.StepVerifier;
 
-import java.time.Duration;
 import java.util.Properties;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class StatementExecutionTests {
 
-  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
+  final TestDatabaseContainer testDb = DatabaseBuilderOld.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;

@@ -31,41 +31,6 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
     return new BooleanColumn(columnName, table, dataSpec, defaultValue, hints);
   }
 
-  @Override
-  public BooleanColumn indexed() {
-    return new BooleanColumn(columnName, table, dataSpec, (BooleanExpression) defaultValue, hints.index());
-  }
-
-  @Override
-  public BooleanColumn primary() {
-    return null;
-  }
-
-  @Override
-  public BooleanColumn unique() {
-    return null;
-  }
-
-  @Override
-  public BooleanColumn invisible() {
-    return null;
-  }
-
-  @Override
-  public BooleanColumn allowNull() {
-    return null;
-  }
-
-  @Override
-  public BooleanColumn defaultValue(Expression e) {
-    return null;
-  }
-
-  @Override
-  public BooleanColumn defaultValue(Enum<?> value) {
-    return null;
-  }
-
   public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
     return new BooleanColumn(columnName, table, dataSpec, null, hints);
   }
@@ -91,10 +56,6 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
         ", hints=" + hints +
         ", table=" + table +
         '}';
-  }
-
-  public BooleanColumn defaultValue(BooleanExpression bool) {
-    return new BooleanColumn(columnName, table, dataSpec, bool, hints);
   }
 
   public BooleanExpression<UnaliasedExpression> isFalse() {

@@ -24,53 +24,6 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
     return new DateColumn(columnName, table, dataSpec, defaultValue, hints);
   }
 
-  @Override
-  public DateColumn indexed() {
-    return null;
-  }
-
-  @Override
-  public DateColumn primary() {
-    return null;
-  }
-
-  @Override
-  public DateColumn unique() {
-    return null;
-  }
-
-  @Override
-  public DateColumn invisible() {
-    return null;
-  }
-
-  @Override
-  public DateColumn allowNull() {
-    return null;
-  }
-
-  @Override
-  public DateColumn defaultValue(Expression e) {
-    return null;
-  }
-
-  @Override
-  public DateColumn defaultValue(Enum<?> value) {
-    return null;
-  }
-
-  public DateColumn onUpdate(Expression onUpdate) {
-    return new DateColumn(columnName, table, dataSpec, (DateExpression) defaultValue, hints);
-  }
-
-  public DateColumn onUpdate(Enum<?> value) {
-    return null;
-  }
-
-  public DateColumn onUpdateCurrentTimeStamp() {
-    return new DateColumn(columnName, table, dataSpec, (DateExpression) defaultValue, hints.autoUpdateTime());
-  }
-
   public static DateColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
     return new DateColumn(columnName, table, dataSpec, null, hints);
   }
@@ -126,7 +79,4 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
         '}';
   }
 
-  public DateColumn defaultValue(LocalDateTime ldateTime) {
-    return new DateColumn(columnName, table, dataSpec, LiteralDate.make(ldateTime), hints);
-  }
 }

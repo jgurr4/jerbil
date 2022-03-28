@@ -1,12 +1,11 @@
 package com.ple.jerbil;
 
 import com.ple.jerbil.data.DataGlobal;
-import com.ple.jerbil.data.DatabaseBuilder;
+import com.ple.jerbil.data.builder.DatabaseBuilderOld;
+import com.ple.jerbil.data.builder.DatabaseBuilder;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.PartialInsertQuery;
-import com.ple.jerbil.data.query.SelectQuery;
-import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
@@ -18,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SqlStatementTests {
 
-  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
+  final TestDatabaseContainer testDb = DatabaseBuilderOld.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;

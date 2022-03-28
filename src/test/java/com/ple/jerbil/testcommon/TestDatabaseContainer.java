@@ -2,6 +2,7 @@ package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.Database;
 import com.ple.jerbil.data.DatabaseContainer;
+import com.ple.jerbil.data.builder.DatabaseBuilder;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.util.IArrayMap;

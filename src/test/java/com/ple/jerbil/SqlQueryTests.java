@@ -2,6 +2,8 @@ package com.ple.jerbil;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
+import com.ple.jerbil.data.builder.DatabaseBuilder;
+import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.Agg;
@@ -18,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class SqlQueryTests {
 
-  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
+//  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
+  final TestDatabaseContainer testDb = DatabaseBuilderOld.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;

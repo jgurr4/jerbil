@@ -1,12 +1,12 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.data.DatabaseBuilder;
+import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
 public class sqlLanguageGeneratorTests {
 
-  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
+  final TestDatabaseContainer testDb = DatabaseBuilderOld.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;

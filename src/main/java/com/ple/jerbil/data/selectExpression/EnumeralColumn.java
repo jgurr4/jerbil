@@ -27,41 +27,6 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
   }
 
   @Override
-  public EnumeralColumn indexed() {
-    return null;
-  }
-
-  @Override
-  public EnumeralColumn primary() {
-    return null;
-  }
-
-  @Override
-  public EnumeralColumn unique() {
-    return null;
-  }
-
-  @Override
-  public EnumeralColumn invisible() {
-    return null;
-  }
-
-  @Override
-  public EnumeralColumn allowNull() {
-    return null;
-  }
-
-  @Override
-  public EnumeralColumn defaultValue(Expression e) {
-    return new EnumeralColumn(columnName, table, dataSpec, (StringExpression) e, hints);
-  }
-
-  @Override
-  public EnumeralColumn defaultValue(Enum<?> value) {
-    return new EnumeralColumn(columnName, table, dataSpec, Literal.make(value.name()), hints);
-  }
-
-  @Override
   public AliasedExpression as(String name) {
     return null;
   }

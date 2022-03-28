@@ -34,30 +34,6 @@ public abstract class Column <T extends Column> extends PartialColumn{
 
     public abstract T make(String columnName, DataSpec dataSpec);
 
-    public abstract T indexed();
-
-    public abstract T primary();
-
-    public abstract T unique();
-
-    public abstract T invisible();
-
-    public abstract T allowNull();
-
-    public abstract T defaultValue(Expression e);
-
-    public abstract T defaultValue(Enum<?> value);
-/*
-
-    public abstract T onUpdate(Expression e);
-
-    public abstract T onUpdate(Enum<?> value);
-
-    public T generatedFrom(Expression generatedFrom) {
-        return make(columnName, dataSpec, generatedFrom);
-    }
-*/
-
     public String toSql() {
         if (DataGlobal.bridge == null) {
             throw new NullPointerException("Global.sqlGenerator not set.");

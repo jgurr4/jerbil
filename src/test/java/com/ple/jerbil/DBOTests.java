@@ -2,26 +2,27 @@ package com.ple.jerbil;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
+import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.data.selectExpression.Literal;
 import com.ple.jerbil.data.selectExpression.booleanExpression.And;
 import com.ple.jerbil.testcommon.*;
-import com.ple.jerbil.testcommon.orm.User;
-import com.ple.jerbil.testcommon.orm.UserId;
+import com.ple.jerbil.testcommon.DBO.User;
+import com.ple.jerbil.testcommon.DBO.UserId;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Properties;
 
-public class ORMTests {
-  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
+public class DBOTests {
+  final TestDatabaseContainer testDb = DatabaseBuilderOld.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
   final InventoryTableContainer inventory = testDb.inventory;
   final OrderTableContainer order = testDb.order;
 
-  public ORMTests() {
+  public DBOTests() {
     final Properties props = ConfigProps.getProperties();
     DataGlobal.bridge = MariadbR2dbcBridge.make(
         props.getProperty("host"), Integer.parseInt(props.getProperty("port")),

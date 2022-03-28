@@ -1,4 +1,4 @@
-package com.ple.jerbil.testcommon.orm;
+package com.ple.jerbil.testcommon.DBO;
 
 import com.ple.jerbil.data.DbRecordId;
 import com.ple.util.Immutable;

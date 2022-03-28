@@ -2,10 +2,10 @@ package com.ple.jerbil.functional;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
+import com.ple.jerbil.data.builder.DatabaseBuilder;
+import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
-import com.ple.jerbil.data.reactiveUtils.ReactiveMono;
-import com.ple.jerbil.data.reactiveUtils.ReactiveWrapper;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.StringColumn;
@@ -15,9 +15,7 @@ import com.ple.util.IArrayList;
 import com.ple.util.IArrayMap;
 import com.ple.util.IList;
 import com.ple.util.IMap;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import reactor.core.publisher.Hooks;
 
 import java.util.Properties;
@@ -25,7 +23,7 @@ import java.util.Properties;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class BridgeTests {
-  final TestDatabaseContainer testDb = DatabaseBuilder.generate(TestDatabaseContainer.class, "test");
+  final TestDatabaseContainer testDb = DatabaseBuilderOld.generate(TestDatabaseContainer.class, "test");
   final UserTableContainer user = testDb.user;
   final ItemTableContainer item = testDb.item;
   final PlayerTableContainer player = testDb.player;
