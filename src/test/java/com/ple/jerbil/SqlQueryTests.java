@@ -2,7 +2,6 @@ package com.ple.jerbil;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
-import com.ple.jerbil.data.builder.DatabaseBuilder;
 import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.data.query.CompleteQuery;
 import com.ple.jerbil.data.query.SelectQuery;
@@ -10,9 +9,7 @@ import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
-
 import java.util.Properties;
-
 import static com.ple.jerbil.data.selectExpression.Literal.make;
 import static com.ple.jerbil.data.selectExpression.booleanExpression.And.and;
 import static com.ple.jerbil.data.selectExpression.booleanExpression.Or.or;

@@ -58,15 +58,16 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final IMap<String, Index> indexes = getIndexesFromSql(createTableString, table, columns);
     NumericColumn autoIncColumn = null;
     if (indexes.size() != 0 && indexes.get("primary") != null) {
-      autoIncColumn = getAutoIncColumn(indexes.get("primary").indexedColumns);
+      autoIncColumn = getAutoIncColumn(indexes.get("primary").indexedColumns, columns);
     }
     return TableContainer.make(table, columns, engine, indexes, autoIncColumn);
   }
 
-  private NumericColumn getAutoIncColumn(IMap<String, IndexedColumn> primary) {
-    for (IEntry<String, IndexedColumn> indexedColumnEntry : primary) {
-      if (indexedColumnEntry.value.column.hints.isAutoInc()) {
-        return (NumericColumn) indexedColumnEntry.value.column;
+  private NumericColumn getAutoIncColumn(IMap<String, IndexedColumn> primary, IMap<String, Column> columns) {
+    for (IEntry<String, IndexedColumn> icEntry : primary) {
+      final Column col = columns.get(icEntry.key);
+      if (col.hints.isAutoInc()) {
+        return (NumericColumn) col;
       }
     }
     return null;
@@ -121,7 +122,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final IMap<String, Integer> indexedColumnsAndPrefixSizes = getIndexedColumnsAndPrefixSize(indexString);
     for (IEntry<String, Integer> indexColumnEntry : indexedColumnsAndPrefixSizes) {
       indexedColumns = indexedColumns.add(
-          IndexedColumn.make(columns.get(indexColumnEntry.key), indexColumnEntry.value, null));
+          IndexedColumn.make(indexColumnEntry.key, indexColumnEntry.value, null));
     }
     return indexedColumns;
   }
@@ -1118,7 +1119,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
           sortOrder = " desc";
         }
       }
-      sql += separator + indexedColumn.column.columnName + prefix + sortOrder;
+      sql += separator + indexedColumn.columnName + prefix + sortOrder;
       separator = ",";
     }
     return sql + ")";
@@ -1289,7 +1290,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         separator = ",\n  ";
       }
       sql += ",";
-      indexes = toSql(t.indexes.values());
+      indexes = toSql(t.indexes.values(), t.columns);
     }
     sql += indexes + "\n) ENGINE=" + engine + "\n";
     return sql;
@@ -1320,15 +1321,15 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return "drop database if exists " + database.database.databaseName;
   }
 
-  private String toSql(IList<Index> indexes) {
-    IList<Column> columns = IArrayList.make();
+  private String toSql(IList<Index> indexes, IMap<String, Column> columns) {
+    IList<Column> cols = IArrayList.make();
     String separtor = "";
     String sql = "";
     String references = "";
     boolean generateName = true;
     for (Index index : indexes) {
       for (IEntry<String, IndexedColumn> indexedColumn : index.indexedColumns) {
-        columns = columns.add(indexedColumn.value.column);
+        cols = cols.add(columns.get(indexedColumn.value.columnName));
       }
       if (index.type.equals(IndexType.primary)) {
         sql += separtor + "\n  primary key";
@@ -1344,9 +1345,9 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 //        references = toSql(index.fkReference); //TODO: Finish implementing foreign key with Index.
       }
       separtor = ",";
-      sql += " " + toSqlIndexColumns(columns, generateName);
+      sql += " " + toSqlIndexColumns(cols, generateName);
       generateName = true;
-      columns = IArrayList.make();
+      cols = IArrayList.make();
     }
     return sql;
   }
