@@ -1,8 +1,7 @@
 package com.ple.jerbil.testcommon;
 
-import com.ple.jerbil.data.Database;
+import com.ple.jerbil.data.*;
 import com.ple.util.Immutable;
-import com.ple.jerbil.data.Index;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
@@ -34,16 +33,15 @@ public class ItemTableContainer extends TableContainer {
 
   public static ItemTableContainer make(Database db) {
     final Table itemTable = Table.make("item", db);
-    final NumericColumn itemId = Column.make("itemId", itemTable).id();
-    final StringColumn name = Column.make("name", itemTable).asVarchar(20).indexed();
-    final EnumeralColumn type = Column.make("type", itemTable).asEnum(ItemType.class);
-    final NumericColumn price = Column.make("price", itemTable).asInt();
-//    final IList<Index> indexSpecs = IArrayList.make(Index.make(IndexType.primary, itemId),
-//        Index.make(IndexType.secondary, name));
-//    final NumericColumn autoIncrementColumn = itemId;
+    final NumericColumn itemId = NumericColumn.make("itemId", itemTable, DataSpec.make(DataType.integer));
+    final StringColumn name = StringColumn.make("name", itemTable, DataSpec.make(DataType.varchar, 20));
+    final EnumeralColumn type = EnumeralColumn.make("type", itemTable, DataSpec.make(DataType.enumeration, ItemType.class));
+    final NumericColumn price = NumericColumn.make("price", itemTable, DataSpec.make(DataType.integer));
+    final IMap<String, Index> indexSpecs = IArrayMap.make("primary", Index.make(IndexType.primary, "primary", itemTable, itemId),
+        "nm_idx", Index.make(IndexType.secondary, "nm_idx", itemTable, name));
     final IMap<String, Column> columns = IArrayMap.make(
         itemId.columnName, itemId, name.columnName, name, type.columnName, type, price.columnName, price);
-    return new ItemTableContainer(itemTable, columns, itemId, name, type, price, null, null);
+    return new ItemTableContainer(itemTable, columns, itemId, name, type, price, indexSpecs, itemId);
   }
 
 }

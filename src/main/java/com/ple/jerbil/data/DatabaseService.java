@@ -6,7 +6,6 @@ import com.ple.util.IList;
 
 public class DatabaseService {
 
-
   public static String generateIndexName(Column... columns) {
     return generateIndexName(IArrayList.make(), columns);
   }

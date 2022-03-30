@@ -21,6 +21,10 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
     return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, hints);
   }
 
+  public static StringColumn make(String columnName, Table table, DataSpec dataSpec, StringExpression defaultValue) {
+    return new StringColumn(columnName, table, dataSpec, defaultValue, BuildingHints.empty);
+  }
+
   public static StringColumn make(String columnName, Table table, int size, StringExpression defaultValue,
                                   BuildingHints hints) {
     return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), defaultValue, hints);
@@ -36,11 +40,11 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
   }
 
   public static StringColumn make(String columnName, Table table, int size) {
-    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), null, BuildingHints.make());
+    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), null, BuildingHints.empty);
   }
 
   public static StringColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new StringColumn(columnName, table, dataSpec, null, BuildingHints.make());
+    return new StringColumn(columnName, table, dataSpec, null, BuildingHints.empty);
   }
 
   public Equals eq(StringExpression value) {

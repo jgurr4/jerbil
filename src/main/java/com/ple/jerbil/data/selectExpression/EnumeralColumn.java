@@ -21,6 +21,10 @@ public class EnumeralColumn extends Column<EnumeralColumn> implements StringExpr
     return new EnumeralColumn(columnName, table, dataSpec, defaultValue, hints);
   }
 
+  public static EnumeralColumn make(String columnName, Table table, DataSpec dataSpec, Enum<?> defaultValue) {
+    return new EnumeralColumn(columnName, table, dataSpec, Literal.make(defaultValue.name()), BuildingHints.empty);
+  }
+
   @Override
   public EnumeralColumn make(String columnName, DataSpec dataSpec) {
     return null;

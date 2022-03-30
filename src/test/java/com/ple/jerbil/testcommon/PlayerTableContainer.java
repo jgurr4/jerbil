@@ -1,14 +1,12 @@
 package com.ple.jerbil.testcommon;
 
 import com.ple.jerbil.data.*;
-import com.ple.util.Immutable;
+import com.ple.util.*;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.StringColumn;
-import com.ple.util.IArrayMap;
-import com.ple.util.IMap;
 import org.jetbrains.annotations.Nullable;
 
 @Immutable
@@ -30,14 +28,14 @@ public class PlayerTableContainer extends TableContainer {
 
   public static PlayerTableContainer make(Database db) {
     Table playerTable = Table.make("player", db);
-    final NumericColumn playerId = Column.make("playerId", playerTable).asInt().ai();
-    final NumericColumn userId = Column.make("userId", playerTable).asInt();
-    final StringColumn name = Column.make("name", playerTable).asVarchar(20);
-//    final IList<Index> indexes = IArrayList.make(Index.make(IndexType.primary, playerId, userId));
-//    final NumericColumn autoIncrementColumn = playerId;
+    final NumericColumn playerId = NumericColumn.make("playerId", playerTable, DataSpec.make(DataType.integer), BuildingHints.make().autoInc());
+    final NumericColumn userId = NumericColumn.make("userId", playerTable, DataSpec.make(DataType.integer));
+    final StringColumn name = StringColumn.make("name", playerTable, DataSpec.make(DataType.varchar, 20));
+    final String indexName = DatabaseService.generateIndexName(playerId);
+    final IMap<String, Index> indexes = IArrayMap.make(indexName, Index.make(IndexType.primary, indexName, playerTable, playerId));
     final IMap<String, Column> columns = IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId,
         name.columnName, name);
-    return new PlayerTableContainer(playerTable, columns, playerId, userId, name, null, null);
+    return new PlayerTableContainer(playerTable, columns, playerId, userId, name, indexes, playerId);
   }
 
 }

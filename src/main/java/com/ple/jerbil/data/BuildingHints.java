@@ -23,6 +23,7 @@ import java.util.Objects;
  */
 @Immutable
 public class BuildingHints {
+  public static final BuildingHints empty = BuildingHints.make();
   public final short flags;
   private static final short primary = 1 << 14;
   private static final short secondary = 1 << 13;
