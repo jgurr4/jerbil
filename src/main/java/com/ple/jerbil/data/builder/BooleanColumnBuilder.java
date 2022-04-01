@@ -12,6 +12,11 @@ public class BooleanColumnBuilder extends ColumnBuilder {
     this.column = column;
   }
 
+  public static BooleanColumnBuilder make(DatabaseBuilder dbBuild, TableBuilder tblBuild,
+                                          BooleanColumn column) {
+    return new BooleanColumnBuilder(dbBuild, tblBuild, column.columnName, column.table);
+  }
+
   public BooleanColumn defaultValue(BooleanExpression bool) {
     return new BooleanColumn(columnName, table, dataSpec, bool, hints);
   }

@@ -9,9 +9,13 @@ import com.ple.jerbil.data.selectExpression.StringExpression;
 public class EnumeralColumnBuilder extends ColumnBuilder{
   private EnumeralColumn column;
 
-  protected EnumeralColumnBuilder(DatabaseBuilder dbBuild, String columnName, Table table, EnumeralColumn column) {
+  protected EnumeralColumnBuilder(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table, EnumeralColumn column) {
     super(dbBuild, tblBuild, columnName, table);
     this.column = column;
+  }
+
+  public static EnumeralColumnBuilder make(DatabaseBuilder dbBuild, TableBuilder tblBuild, EnumeralColumn column) {
+    return new EnumeralColumnBuilder(dbBuild, tblBuild, column.getColumnName(), column.table, column);
   }
 
   public EnumeralColumnBuilder defaultValue(Enum<?> e) {

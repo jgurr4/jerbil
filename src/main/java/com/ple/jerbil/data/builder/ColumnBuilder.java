@@ -27,6 +27,10 @@ public class ColumnBuilder extends AbstractBuilder {
     return table;
   }
 
+  public TableBuilder getTblBuild() {
+    return tblBuild;
+  }
+
   @Override
   public TableBuilder newTable(String tableName) {
     return dbBuild.newTable(tableName);

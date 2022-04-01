@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
-import com.ple.jerbil.data.BuildingHints;
+import com.ple.jerbil.data.ColumnProps;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
@@ -17,30 +17,30 @@ import org.jetbrains.annotations.Nullable;
 public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpression {
 
   protected BooleanColumn(String columnName, Table table, DataSpec dataSpec, @Nullable BooleanExpression defaultValue,
-                          BuildingHints hints) {
-    super(columnName, table, dataSpec, defaultValue, hints);
+                          ColumnProps props) {
+    super(columnName, table, dataSpec, defaultValue, props);
   }
 
   @Override
   public BooleanColumn make(String columnName, DataSpec dataSpec) {
-    return new BooleanColumn(columnName, table, dataSpec, null, BuildingHints.make());
+    return new BooleanColumn(columnName, table, dataSpec, null, ColumnProps.make());
   }
 
   public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, BooleanExpression defaultValue,
-                                   BuildingHints hints) {
-    return new BooleanColumn(columnName, table, dataSpec, defaultValue, hints);
+                                   ColumnProps props) {
+    return new BooleanColumn(columnName, table, dataSpec, defaultValue, props);
   }
 
-  public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
-    return new BooleanColumn(columnName, table, dataSpec, null, hints);
+  public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec, ColumnProps props) {
+    return new BooleanColumn(columnName, table, dataSpec, null, props);
   }
 
   public static BooleanColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new BooleanColumn(columnName, table, dataSpec, null, BuildingHints.make());
+    return new BooleanColumn(columnName, table, dataSpec, null, ColumnProps.make());
   }
 
   public static BooleanColumn make(String columnName, Table table) {
-    return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool), null, BuildingHints.make());
+    return new BooleanColumn(columnName, table, DataSpec.make(DataType.bool), null, ColumnProps.make());
   }
 
   public BooleanExpression eq(LiteralBoolean bool) {
@@ -53,7 +53,7 @@ public class BooleanColumn extends Column<BooleanColumn> implements BooleanExpre
         "columnName='" + columnName + '\'' +
         ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
-        ", hints=" + hints +
+        ", props=" + props +
         ", table=" + table +
         '}';
   }

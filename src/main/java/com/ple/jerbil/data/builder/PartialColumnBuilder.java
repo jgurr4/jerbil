@@ -1,203 +1,122 @@
 package com.ple.jerbil.data.builder;
 
-import com.ple.jerbil.data.BuildingHints;
-import com.ple.jerbil.data.DataSpec;
-import com.ple.jerbil.data.DataType;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 
 public class PartialColumnBuilder extends ColumnBuilder {
 
-
   public PartialColumnBuilder(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table) {
     super(dbBuild, tblBuild, columnName, table);
   }
 
-  public static PartialColumnBuilder make(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table) {
+  public static PartialColumnBuilder make(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName,
+                                          Table table) {
     return new PartialColumnBuilder(dbBuild, tblBuild, columnName, table);
   }
 
   public NumericColumnBuilder asBigInt() {
-    return NumericColumnBuilder.make(getDbBuild(), PartialColumn.make(getColumnName(), getTable()).asBigInt());
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.bigint)));
   }
 
   public StringColumnBuilder asVarchar() {
-    return null;
+    return StringColumnBuilder.make(getDbBuild(), getTblBuild(),
+        StringColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.varchar)));
   }
 
   public StringColumnBuilder asVarchar(int size) {
-    return null;
+    return StringColumnBuilder.make(getDbBuild(), getTblBuild(),
+        StringColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.varchar, size)));
   }
 
   public StringColumnBuilder asText() {
-    return null;
+    return StringColumnBuilder.make(getDbBuild(), getTblBuild(),
+        StringColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.text)));
   }
 
   public NumericColumnBuilder asIntUnsigned() {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.integer),
+            ColumnProps.empty.unsigned()));
   }
 
   public NumericColumnBuilder asInt() {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.integer)));
   }
 
   public NumericColumnBuilder asInt(int i) {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.integer, i)));
   }
 
   public NumericColumnBuilder asMediumIntUnsigned() {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.mediumint)));
   }
 
   public NumericColumnBuilder asSmallInt() {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.smallint)));
   }
 
   public NumericColumnBuilder asDecimal(int i, int i2) {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.smallint, i, i2)));
   }
 
-  public NumericColumnBuilder asBoolean() {
-    return null;
+  public BooleanColumnBuilder asBoolean() {
+    return BooleanColumnBuilder.make(getDbBuild(), getTblBuild(),
+        BooleanColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.bool)));
   }
 
   public NumericColumnBuilder asDouble() {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.aDouble)));
   }
 
   public NumericColumnBuilder asFloat() {
-    return null;
-  }
-
-  public EnumeralColumnBuilder asSet(Class<?> itemTypeClass) {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.aFloat)));
   }
 
   public DateColumnBuilder asDate() {
-    return null;
+    return DateColumnBuilder.make(getDbBuild(), getTblBuild(),
+        DateColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.date)));
   }
 
-  public EnumeralColumnBuilder asTime() {
-    return null;
+  public DateColumnBuilder asTime() {
+    return DateColumnBuilder.make(getDbBuild(), getTblBuild(),
+        DateColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.time)));
   }
 
   public DateColumnBuilder asDateTime() {
-    return null;
+    return DateColumnBuilder.make(getDbBuild(), getTblBuild(),
+        DateColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.datetime)));
   }
 
   public NumericColumnBuilder bigId() {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.bigint), ColumnProps.make().unsigned().autoInc()),
+        BuildingHints.make().primary().autoInc().unsigned());
   }
 
   public NumericColumnBuilder id() {
-    return null;
+    return NumericColumnBuilder.make(getDbBuild(), getTblBuild(),
+        NumericColumn.make(getColumnName(), getTable(), DataSpec.make(DataType.integer), ColumnProps.make().autoInc().unsigned()),
+        BuildingHints.make().primary().autoInc().unsigned());
   }
 
   public EnumeralColumnBuilder asEnum(Class<?> type) {
-    return null;
+    return EnumeralColumnBuilder.make(getDbBuild(), getTblBuild(), EnumeralColumn.make(getColumnName(), getTable(),
+        EnumSpec.make(DataType.enumeration, type)));
   }
 
-  public NumericColumn asInt() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer));
-  }
-
-  public NumericColumn asInt(int size) {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer, size));
-  }
-
-  public NumericColumn asBigInt() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint));
-  }
-
-  public NumericColumn asDecimal(int precision, int scale) {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.decimal, precision, scale));
-  }
-
-  public StringColumn asVarchar() {
-    return StringColumn.make(columnName, table, DataSpec.make(DataType.varchar, 255));
-  }
-
-  public StringColumn asVarchar(int size) {
-    return StringColumn.make(columnName, table, DataSpec.make(DataType.varchar, size));
-  }
-
-  public StringColumn asChar() {
-    return StringColumn.make(columnName, table, DataSpec.make(DataType.character, 255));
-  }
-
-  public StringColumn asChar(int size) {
-    return StringColumn.make(columnName, table, DataSpec.make(DataType.character, size));
-  }
-
-  public EnumeralColumn asEnum(Class<?> enumObj) {
-    return EnumeralColumn.make(columnName, table, DataSpec.make(DataType.enumeration, enumObj));
-  }
-
-  public EnumeralColumn asSet(Class<?> enumObj) {
-    return EnumeralColumn.make(columnName, table, DataSpec.make(DataType.set, enumObj));
-  }
-
-  public NumericColumn bigId() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.bigint), null,
-        BuildingHints.make().primary().autoInc());
-  }
-
-  public NumericColumn mediumId() {
-    return null;
-  }
-
-  public NumericColumn id() {
-    return NumericColumn.make(columnName, table, BuildingHints.make().primary().autoInc());
-  }
-
-  public StringColumn asText() {
-    return StringColumn.make(columnName, table, DataSpec.make(DataType.text));
-  }
-
-  public NumericColumn asIntUnsigned() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.integer), BuildingHints.make().unsigned());
-  }
-
-  public NumericColumn asMediumIntUnsigned() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.mediumint), BuildingHints.make().unsigned());
-  }
-
-  public NumericColumn asSmallInt() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.smallint));
-  }
-
-  public NumericColumn asTinyInt() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.tinyint));
-  }
-
-  public BooleanColumn asBoolean() {
-    //MySql uses tinyint(1) data type to make a boolean column.
-    return BooleanColumn.make(columnName, table, DataSpec.make(DataType.bool));
-  }
-
-  public NumericColumn asDouble() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.aDouble));
-  }
-
-  public NumericColumn asFloat() {
-    return NumericColumn.make(columnName, table, DataSpec.make(DataType.aFloat));
-  }
-
-  public DateColumn asDate() {
-    return DateColumn.make(columnName, table, DataSpec.make(DataType.date));
-  }
-
-  public DateColumn asTime() {
-    return DateColumn.make(columnName, table, DataSpec.make(DataType.time));
-  }
-
-  public DateColumn asDateTime() {
-    return DateColumn.make(columnName, table, DataSpec.make(DataType.datetime));
-  }
-
-  public DateColumn asTimeStamp() {
-    return DateColumn.make(columnName, table, DataSpec.make(DataType.timestamp));
+  public EnumeralColumnBuilder asSet(Class<?> type) {
+    return EnumeralColumnBuilder.make(getDbBuild(), getTblBuild(), EnumeralColumn.make(getColumnName(), getTable(),
+        EnumSpec.make(DataType.set, type)));
   }
 
 }

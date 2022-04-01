@@ -18,14 +18,14 @@ public abstract class Column <T extends Column> extends PartialColumn{
 //    @Nullable public final Expression generatedFrom;
     @Nullable public final Expression defaultValue;
     public static Column[] emptyArray = new Column[0];
-    public final BuildingHints hints;
+    public final ColumnProps props;
 
-    protected Column(String columnName, Table table, DataSpec dataSpec, @Nullable Expression defaultValue, BuildingHints hints) {
+    protected Column(String columnName, Table table, DataSpec dataSpec, @Nullable Expression defaultValue, ColumnProps props) {
         super(columnName, table);
         this.dataSpec = dataSpec;
 //        this.generatedFrom = generatedFrom;
         this.defaultValue = defaultValue;
-        this.hints = hints;
+        this.props = props;
     }
 
     public static PartialColumn make(String columnName, Table table) {
@@ -60,12 +60,12 @@ public abstract class Column <T extends Column> extends PartialColumn{
         if (!super.equals(o)) return false;
         Column<?> column = (Column<?>) o;
         return dataSpec.equals(column.dataSpec) && Objects.equals(defaultValue,
-            column.defaultValue) && hints.equals(column.hints);
+            column.defaultValue) && props.equals(column.props);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), dataSpec, defaultValue, hints);
+        return Objects.hash(super.hashCode(), dataSpec, defaultValue, props);
     }
 
     @Override

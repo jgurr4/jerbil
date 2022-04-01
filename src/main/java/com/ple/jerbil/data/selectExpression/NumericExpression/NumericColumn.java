@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.selectExpression.NumericExpression;
 
-import com.ple.jerbil.data.BuildingHints;
+import com.ple.jerbil.data.ColumnProps;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.selectExpression.LiteralNull;
@@ -17,43 +17,43 @@ import org.jetbrains.annotations.Nullable;
 public class NumericColumn extends Column<NumericColumn> implements NumericExpression {
 
   protected NumericColumn(String columnName, Table table, DataSpec dataSpec, @Nullable NumericExpression defaultValue,
-                          BuildingHints hints) {
-    super(columnName, table, dataSpec, defaultValue, hints);
+                          ColumnProps props) {
+    super(columnName, table, dataSpec, defaultValue, props);
   }
 
-  public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
-    return new NumericColumn(columnName, table, dataSpec, null, hints);
+  public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, ColumnProps props) {
+    return new NumericColumn(columnName, table, dataSpec, null, props);
   }
 
   @Override
   public NumericColumn make(String columnName, DataSpec dataSpec) {
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints);
+    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, props);
   }
 
-  public static NumericColumn make(String columnName, Table table, BuildingHints hints) {
-    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, hints);
+  public static NumericColumn make(String columnName, Table table, ColumnProps props) {
+    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, props);
   }
 
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression defaultValue,
-                                   BuildingHints hints) {
-    return new NumericColumn(columnName, table, dataSpec, defaultValue, hints);
+                                   ColumnProps props) {
+    return new NumericColumn(columnName, table, dataSpec, defaultValue, props);
   }
 
 
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression defaultValue)  {
-    return new NumericColumn(columnName, table, dataSpec, defaultValue, BuildingHints.make());
+    return new NumericColumn(columnName, table, dataSpec, defaultValue, ColumnProps.make());
   }
 
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new NumericColumn(columnName, table, dataSpec, null, BuildingHints.make());
+    return new NumericColumn(columnName, table, dataSpec, null, ColumnProps.make());
   }
 
   public static NumericColumn make(String columnName, Table table, int size) {
-    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer, size), null, BuildingHints.make());
+    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer, size), null, ColumnProps.make());
   }
 
   public static NumericColumn make(String columnName, Table table) {
-    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, BuildingHints.make());
+    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, ColumnProps.make());
   }
 
   public GreaterThan isGreaterThan(Expression value) {
@@ -74,7 +74,7 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
         "columnName='" + columnName + '\'' +
         ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
-        ", hints=" + hints +
+        ", props=" + props +
         ", table=" + table +
         '}';
   }

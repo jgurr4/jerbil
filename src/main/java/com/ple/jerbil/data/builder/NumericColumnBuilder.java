@@ -1,5 +1,6 @@
 package com.ple.jerbil.data.builder;
 
+import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.Expression;
 import com.ple.jerbil.data.selectExpression.LiteralNull;
@@ -8,38 +9,50 @@ import com.ple.jerbil.data.selectExpression.NumericExpression.NumericExpression;
 
 public class NumericColumnBuilder extends ColumnBuilder implements ColumnBuilderServices{
   public NumericColumn column;
+  public BuildingHints hints;
 
-  protected NumericColumnBuilder(DatabaseBuilder dbBuild, String columnName, Table table, NumericColumn column) {
+  protected NumericColumnBuilder(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table, NumericColumn column,
+                                 BuildingHints hints) {
     super(dbBuild, tblBuild, columnName, table);
     this.column = column;
+    this.hints = hints;
   }
 
-  public static NumericColumnBuilder make(DatabaseBuilder dbBuild, NumericColumn column) {
-    return new NumericColumnBuilder(dbBuild, column.columnName, column.table, column);
+  public static NumericColumnBuilder make(DatabaseBuilder dbBuild, TableBuilder tblBuild, NumericColumn column) {
+    return new NumericColumnBuilder(dbBuild, tblBuild, column.columnName, column.table, column, BuildingHints.empty);
+  }
+
+  public static NumericColumnBuilder make(DatabaseBuilder dbBuild, TableBuilder tblBuild, NumericColumn column, BuildingHints hints) {
+    return new NumericColumnBuilder(dbBuild, tblBuild, column.columnName, column.table, column, hints);
   }
 
   public NumericColumnBuilder ai() {
-    column = NumericColumn.make(column.columnName, column.table, column.dataSpec, column.hints.autoInc().primary());
+    column = NumericColumn.make(column.columnName, column.table, column.dataSpec, column.props.autoInc());
+    hints = hints.primary().autoInc();
     return this;
   }
 
   public NumericColumnBuilder unsigned() {
-    column = NumericColumn.make(column.columnName, column.table, column.dataSpec, column.hints.unsigned());
+    column = NumericColumn.make(column.columnName, column.table, column.dataSpec, column.props.unsigned());
+    hints = hints.unsigned();
     return this;
   }
 
   public NumericColumnBuilder invisible() {
-    return null;
+    column = NumericColumn.make(column.columnName, column.table, column.dataSpec, column.props.invisible());
+    hints = hints.invisible();
+    return this;
   }
 
-  @Override
-  public ColumnBuilder allowNull() {
-    return null;
+  public NumericColumnBuilder allowNull() {
+    column = NumericColumn.make(column.columnName, column.table, column.dataSpec, column.props.allowNull());
+    hints = hints.allowNull();
+    return this;
   }
 
-  @Override
-  public ColumnBuilder defaultValue(Expression e) {
-    return null;
+  public NumericColumnBuilder defaultValue(Expression defaultValue) {
+    column = NumericColumn.make(column.columnName, column.table, column.dataSpec, (NumericExpression) defaultValue, column.props);
+    return this;
   }
 
   @Override
@@ -47,65 +60,18 @@ public class NumericColumnBuilder extends ColumnBuilder implements ColumnBuilder
     return null;
   }
 
-  @Override
-  public ColumnBuilder indexed() {
-    return null;
+  public NumericColumnBuilder indexed() {
+    hints = hints.index();
+    return this;
   }
 
   public NumericColumnBuilder primary() {
-    return null;
+    hints = hints.primary();
+    return this;
   }
 
-  @Override
-  public ColumnBuilder unique() {
-    return null;
+  public NumericColumnBuilder unique() {
+    hints = hints.unique();
+    return this;
   }
-
-  @Override
-  public NumericColumn indexed() {
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.index());
-  }
-
-  @Override
-  public NumericColumn primary() {
-    return new NumericColumn(columnName, table, dataSpec, null, hints.primary());
-  }
-
-  @Override
-  public NumericColumn unique() {
-    return null;
-  }
-
-  @Override
-  public NumericColumn invisible() {
-    Expression newDefault = defaultValue;
-    if (defaultValue == null) {
-      newDefault = LiteralNull.instance;
-    }
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) newDefault, hints.invisible());
-  }
-
-  @Override
-  public NumericColumn allowNull() {
-    return null;
-  }
-
-  @Override
-  public NumericColumn defaultValue(Expression e) {
-    return null;
-  }
-
-  @Override
-  public NumericColumn defaultValue(Enum<?> value) {
-    return null;
-  }
-
-  public NumericColumn ai() {
-    return new NumericColumn(columnName, table, dataSpec, null, hints.autoInc().primary());
-  }
-
-  public NumericColumn unsigned() {
-    return new NumericColumn(columnName, table, dataSpec, (NumericExpression) defaultValue, hints.unsigned());
-  }
-
 }

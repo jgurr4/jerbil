@@ -11,9 +11,13 @@ import java.time.LocalDateTime;
 public class DateColumnBuilder extends ColumnBuilder {
   private DateColumn column;
 
-  protected DateColumnBuilder(DatabaseBuilder dbBuild, String columnName, Table table, DateColumn column) {
+  protected DateColumnBuilder(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table, DateColumn column) {
     super(dbBuild, tblBuild, columnName, table);
     this.column = column;
+  }
+
+  public static DateColumnBuilder make(DatabaseBuilder dbBuild, TableBuilder tblBuild, DateColumn column) {
+    return null;
   }
 
   @Override

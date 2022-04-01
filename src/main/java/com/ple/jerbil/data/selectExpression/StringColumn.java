@@ -1,6 +1,6 @@
 package com.ple.jerbil.data.selectExpression;
 
-import com.ple.jerbil.data.BuildingHints;
+import com.ple.jerbil.data.ColumnProps;
 import com.ple.jerbil.data.DataSpec;
 import com.ple.jerbil.data.DataType;
 import com.ple.jerbil.data.query.Table;
@@ -12,39 +12,39 @@ import org.jetbrains.annotations.Nullable;
 public class StringColumn extends Column<StringColumn> implements StringExpression {
 
   protected StringColumn(String columnName, Table table, DataSpec dataSpec, @Nullable StringExpression defaultValue,
-                         BuildingHints hints) {
-    super(columnName, table, dataSpec, defaultValue, hints);
+                         ColumnProps props) {
+    super(columnName, table, dataSpec, defaultValue, props);
   }
 
   @Override
   public StringColumn make(String columnName, DataSpec dataSpec) {
-    return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, hints);
+    return new StringColumn(columnName, table, dataSpec, (StringExpression) defaultValue, props);
   }
 
   public static StringColumn make(String columnName, Table table, DataSpec dataSpec, StringExpression defaultValue) {
-    return new StringColumn(columnName, table, dataSpec, defaultValue, BuildingHints.empty);
+    return new StringColumn(columnName, table, dataSpec, defaultValue, ColumnProps.empty);
   }
 
   public static StringColumn make(String columnName, Table table, int size, StringExpression defaultValue,
-                                  BuildingHints hints) {
-    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), defaultValue, hints);
+                                  ColumnProps props) {
+    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), defaultValue, props);
   }
 
   public static StringColumn make(String columnName, Table table, DataSpec dataSpec, StringExpression defaultValue,
-                                  BuildingHints hints) {
-    return new StringColumn(columnName, table, dataSpec, defaultValue, hints);
+                                  ColumnProps props) {
+    return new StringColumn(columnName, table, dataSpec, defaultValue, props);
   }
 
-  public static StringColumn make(String columnName, Table table, int size, BuildingHints hints) {
-    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), null, hints);
+  public static StringColumn make(String columnName, Table table, int size, ColumnProps props) {
+    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), null, props);
   }
 
   public static StringColumn make(String columnName, Table table, int size) {
-    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), null, BuildingHints.empty);
+    return new StringColumn(columnName, table, DataSpec.make(DataType.varchar, size), null, ColumnProps.empty);
   }
 
   public static StringColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new StringColumn(columnName, table, dataSpec, null, BuildingHints.empty);
+    return new StringColumn(columnName, table, dataSpec, null, ColumnProps.empty);
   }
 
   public Equals eq(StringExpression value) {
@@ -69,7 +69,7 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
         "columnName='" + columnName + '\'' +
         ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
-        ", hints=" + hints +
+        ", props=" + props +
         ", table=" + table +
         '}';
   }

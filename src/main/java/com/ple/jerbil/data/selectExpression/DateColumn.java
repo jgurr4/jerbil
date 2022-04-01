@@ -11,33 +11,33 @@ import java.time.LocalDateTime;
 @Immutable
 public class DateColumn extends Column<DateColumn> implements DateExpression {
 
-  protected DateColumn(String columnName, Table table, DataSpec dataSpec, @Nullable DateExpression defaultValue, BuildingHints hints) {
-    super(columnName, table, dataSpec, defaultValue, hints);
+  protected DateColumn(String columnName, Table table, DataSpec dataSpec, @Nullable DateExpression defaultValue, ColumnProps props) {
+    super(columnName, table, dataSpec, defaultValue, props);
   }
 
   @Override
   public DateColumn make(String columnName, DataSpec dataSpec) {
-    return new DateColumn(columnName, table, dataSpec, (DateExpression) defaultValue, BuildingHints.make());
+    return new DateColumn(columnName, table, dataSpec, (DateExpression) defaultValue, ColumnProps.make());
   }
 
-  public static DateColumn make(String columnName, Table table, DataSpec dataSpec, DateExpression defaultValue, BuildingHints hints) {
-    return new DateColumn(columnName, table, dataSpec, defaultValue, hints);
+  public static DateColumn make(String columnName, Table table, DataSpec dataSpec, DateExpression defaultValue, ColumnProps props) {
+    return new DateColumn(columnName, table, dataSpec, defaultValue, props);
   }
 
-  public static DateColumn make(String columnName, Table table, DataSpec dataSpec, BuildingHints hints) {
-    return new DateColumn(columnName, table, dataSpec, null, hints);
+  public static DateColumn make(String columnName, Table table, DataSpec dataSpec, ColumnProps props) {
+    return new DateColumn(columnName, table, dataSpec, null, props);
   }
 
   public static DateColumn make(String columnName, Table table, DataSpec dataSpec) {
-    return new DateColumn(columnName, table, dataSpec, null, BuildingHints.make());
+    return new DateColumn(columnName, table, dataSpec, null, ColumnProps.make());
   }
 
   public static DateColumn make(String columnName, Table table) {
-    return new DateColumn(columnName, table, DataSpec.make(DataType.datetime),null, BuildingHints.make());
+    return new DateColumn(columnName, table, DataSpec.make(DataType.datetime),null, ColumnProps.make());
   }
 
   public DateColumn defaultValue(DateExpression dateExp) {
-    return new DateColumn(columnName, table, dataSpec, dateExp, hints);
+    return new DateColumn(columnName, table, dataSpec, dateExp, props);
   }
 
 /*
@@ -74,7 +74,7 @@ public class DateColumn extends Column<DateColumn> implements DateExpression {
         "columnName='" + columnName + '\'' +
         ", dataSpec=" + dataSpec +
         ", defaultValue=" + defaultValue +
-        ", hints=" + hints +
+        ", props=" + props +
         ", table=" + table +
         '}';
   }
