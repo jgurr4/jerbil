@@ -1,60 +1,60 @@
 package com.ple.jerbil.data.builder;
 
+import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.selectExpression.EnumeralColumn;
-import com.ple.jerbil.data.selectExpression.Expression;
-import com.ple.jerbil.data.selectExpression.Literal;
-import com.ple.jerbil.data.selectExpression.StringExpression;
+import com.ple.jerbil.data.selectExpression.*;
 
 public class EnumeralColumnBuilder extends ColumnBuilder{
   private EnumeralColumn column;
+  private BuildingHints hints;
 
-  protected EnumeralColumnBuilder(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table, EnumeralColumn column) {
+  protected EnumeralColumnBuilder(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table, EnumeralColumn column, BuildingHints hints) {
     super(dbBuild, tblBuild, columnName, table);
     this.column = column;
+    this.hints = hints;
   }
 
   public static EnumeralColumnBuilder make(DatabaseBuilder dbBuild, TableBuilder tblBuild, EnumeralColumn column) {
-    return new EnumeralColumnBuilder(dbBuild, tblBuild, column.getColumnName(), column.table, column);
+    return new EnumeralColumnBuilder(dbBuild, tblBuild, column.getColumnName(), column.table, column, BuildingHints.empty);
   }
 
-  public EnumeralColumnBuilder defaultValue(Enum<?> e) {
-    return null;
+  public EnumeralColumnBuilder indexed() {
+    hints = hints.index();
+    return this;
   }
 
-  @Override
-  public EnumeralColumn indexed() {
-    return null;
+  public EnumeralColumnBuilder primary() {
+    hints = hints.primary();
+    return this;
   }
 
-  @Override
-  public EnumeralColumn primary() {
-    return null;
+  public EnumeralColumnBuilder unique() {
+    hints = hints.unique();
+    return this;
   }
 
-  @Override
-  public EnumeralColumn unique() {
-    return null;
+  public EnumeralColumnBuilder invisible() {
+    StringExpression val = (StringExpression) column.defaultValue;
+    if (column.defaultValue == null) {
+      val = LiteralNull.instance;
+    }
+    column = EnumeralColumn.make(getColumnName(), getTable(), column.dataSpec, val, column.props.invisible());
+    return this;
   }
 
-  @Override
-  public EnumeralColumn invisible() {
-    return null;
+  public EnumeralColumnBuilder allowNull() {
+    column = EnumeralColumn.make(getColumnName(), getTable(), column.dataSpec, (StringExpression) column.defaultValue, column.props.allowNull());
+    return this;
   }
 
-  @Override
-  public EnumeralColumn allowNull() {
-    return null;
+  public EnumeralColumnBuilder defaultValue(StringExpression e) {
+    column = EnumeralColumn.make(getColumnName(), getTable(), column.dataSpec, e, column.props);
+    return this;
   }
 
-  @Override
-  public EnumeralColumn defaultValue(Expression e) {
-    return new EnumeralColumn(columnName, table, dataSpec, (StringExpression) e, hints);
-  }
-
-  @Override
-  public EnumeralColumn defaultValue(Enum<?> value) {
-    return new EnumeralColumn(columnName, table, dataSpec, Literal.make(value.name()), hints);
+  public EnumeralColumnBuilder defaultValue(Enum<?> value) {
+    column = EnumeralColumn.make(getColumnName(), getTable(), column.dataSpec, Literal.make(value.name()), column.props);
+    return this;
   }
 
 }

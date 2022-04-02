@@ -1,6 +1,6 @@
 package com.ple.jerbil;
 
-import com.ple.jerbil.data.DataGlobal;
+import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.data.builder.DatabaseBuilder;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
@@ -9,6 +9,7 @@ import com.ple.jerbil.data.query.CreateQuery;
 import com.ple.jerbil.data.query.QueryList;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
+import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.testcommon.*;
 import org.junit.jupiter.api.Test;
 
@@ -121,8 +122,10 @@ public class SqlStructureTests {
 
   @Test
   void testAddColumn() {
-    Column newColumn = Column.make("quantity", item.table).asInt().indexed();
+    NumericColumn newColumn = NumericColumn.make("quantity", item.table, DataSpec.make(DataType.integer)); //.asInt().indexed();
+    Index qntyIdx = Index.make(IndexType.secondary, newColumn.columnName, newColumn.table, newColumn);
     TableContainer newTable = item.add(newColumn);
+    newTable = newTable.add(qntyIdx);
     final CompleteQuery q = newTable.create();
     assertEquals("""
         create table item (

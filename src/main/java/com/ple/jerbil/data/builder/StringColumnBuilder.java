@@ -5,8 +5,8 @@ import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.selectExpression.*;
 
 public class StringColumnBuilder extends ColumnBuilder{
-  public StringColumn column;
-  public BuildingHints hints;
+  private StringColumn column;
+  private BuildingHints hints;
 
   protected StringColumnBuilder(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table, StringColumn column, BuildingHints hints) {
     super(dbBuild, tblBuild, columnName, table);

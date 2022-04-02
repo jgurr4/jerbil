@@ -8,8 +8,8 @@ import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericExpression;
 
 public class NumericColumnBuilder extends ColumnBuilder implements ColumnBuilderServices{
-  public NumericColumn column;
-  public BuildingHints hints;
+  private NumericColumn column;
+  private BuildingHints hints;
 
   protected NumericColumnBuilder(DatabaseBuilder dbBuild, TableBuilder tblBuild, String columnName, Table table, NumericColumn column,
                                  BuildingHints hints) {

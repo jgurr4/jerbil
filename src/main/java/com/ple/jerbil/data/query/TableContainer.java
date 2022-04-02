@@ -45,33 +45,41 @@ public class TableContainer extends FromExpression {
     return new TableContainer(table, columns, StorageEngine.simple, null, null);
   }
 
+  public TableContainer add(Index idx) {
+    return null;
+/*
+    indexType = IndexType.primary;
+  } else if (column.hints.isPrimary()) {
+    indexType = IndexType.primary;
+  } else if (column.hints.isIndexed()) {
+    indexType = IndexType.secondary;
+  } else if (column.hints.isFulltext()) {
+    indexType = IndexType.fulltext;
+  }
+  //TODO: Make this check prefixSize and sortOrder from indexes or buildinghints.
+      if (indexType != null) {
+    indexList = indexList.put(indexName,
+        Index.make(indexType, indexName, table, IndexedColumn.make(column, 0, null)));
+  }
+*/
+}
+
+
   public TableContainer add(Column... columnArr) {
     IMap<String, Column> newColumns = columns;
-    IMap<String, Index> indexList = indexes;
+    IMap<String, Index> newIndexes = indexes;
     IList<String> existingIdxNames = indexes.keys();
     NumericColumn autoIncCol = autoIncrementColumn;
     for (Column column : columnArr) {
       final String indexName = DatabaseService.generateIndexName(existingIdxNames, column);
       existingIdxNames = existingIdxNames.add(indexName);
-      IndexType indexType = null;
       newColumns = newColumns.put(column.columnName, column);
-      if (column.hints.isAutoInc()) {
+      if (column.props.isAutoInc()) {
         autoIncCol = (NumericColumn) column;
-        indexType = IndexType.primary;
-      } else if (column.hints.isPrimary()) {
-        indexType = IndexType.primary;
-      } else if (column.hints.isIndexed()) {
-        indexType = IndexType.secondary;
-      } else if (column.hints.isFulltext()) {
-        indexType = IndexType.fulltext;
-      }
-      //TODO: Make this check prefixSize and sortOrder from indexes or buildinghints.
-      if (indexType != null) {
-        indexList = indexList.put(indexName,
-            Index.make(indexType, indexName, table, IndexedColumn.make(column, 0, null)));
+        newIndexes = newIndexes.put(indexName, Index.make(IndexType.primary, indexName, column.table, column));
       }
     }
-    return new TableContainer(table, newColumns, storageEngine, indexList, autoIncCol);
+    return new TableContainer(table, newColumns, storageEngine, newIndexes, autoIncCol);
   }
 
   public ReactiveMono<SyncResult<TableDiff>> sync() {

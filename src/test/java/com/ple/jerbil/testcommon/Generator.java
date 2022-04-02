@@ -1,8 +1,12 @@
 package com.ple.jerbil.testcommon;
 
+import com.ple.jerbil.data.Index;
+import com.ple.jerbil.data.IndexType;
 import com.ple.jerbil.data.builder.DatabaseBuilder;
 import com.ple.jerbil.data.JavaCodeGenerator;
 import com.ple.jerbil.data.selectExpression.Literal;
+import com.ple.util.IArrayMap;
+import com.ple.util.IMap;
 import com.ple.util.Immutable;
 
 @Immutable
@@ -47,14 +51,9 @@ public class Generator {
         .newColumn("playerId").asInt().ai()
         .newColumn("userId").asInt()
         .newColumn("name").asVarchar(20);
-    JavaCodeGenerator.generate(db, "../DBOClasses", "ORM");
 
 //    final IMap<String, Index> indexes = IArrayMap.make("usrd_itmd_idx",
 //        Index.make(IndexType.secondary, "usrd_itmd_idx", orderTable, userId, itemId));
-
-//    return new OrderTableContainer(orderTable, columns, orderId, add, phrase, userId,
-//        itemId, scale, quantity, price, total, finalized, myDouble, myFloat, mySet, saleDate, saleTime, saleDateTime,
-//        myInvis, indexes, null);
+    JavaCodeGenerator.generate(db, "../DBOClasses", "ORM");
   }
-
 }
