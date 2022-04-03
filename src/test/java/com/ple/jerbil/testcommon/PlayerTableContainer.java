@@ -28,7 +28,7 @@ public class PlayerTableContainer extends TableContainer {
 
   public static PlayerTableContainer make(Database db) {
     Table playerTable = Table.make("player", db);
-    final NumericColumn playerId = NumericColumn.make("playerId", playerTable, DataSpec.make(DataType.integer), BuildingHints.make().autoInc());
+    final NumericColumn playerId = NumericColumn.make("playerId", playerTable, DataSpec.make(DataType.integer), ColumnProps.make().autoInc());
     final NumericColumn userId = NumericColumn.make("userId", playerTable, DataSpec.make(DataType.integer));
     final StringColumn name = StringColumn.make("name", playerTable, DataSpec.make(DataType.varchar, 20));
     final String indexName = DatabaseService.generateIndexName(playerId);

@@ -34,11 +34,9 @@ public class OrderTableContainer extends TableContainer {
   protected OrderTableContainer(Table table, IMap<String, Column> columns, NumericColumn orderId, StringColumn add,
                                 StringColumn phrase, NumericColumn userId, NumericColumn itemId, NumericColumn scale,
                                 NumericColumn quantity, NumericColumn price, NumericColumn total,
-                                BooleanColumn finalized,
-                                NumericColumn myDouble, NumericColumn myFloat, EnumeralColumn mySet,
+                                BooleanColumn finalized, NumericColumn myDouble, NumericColumn myFloat, EnumeralColumn mySet,
                                 DateColumn saleDate, DateColumn saleTime, DateColumn saleDateTime,
-                                NumericColumn myInvis,
-                                IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
+                                NumericColumn myInvis, IMap<String, Index> indexes, @Nullable NumericColumn autoIncrementColumn) {
     super(table, columns, null, indexes, autoIncrementColumn);
     this.orderId = orderId;
     this.add = add;
@@ -63,19 +61,19 @@ public class OrderTableContainer extends TableContainer {
   public static OrderTableContainer make(Database db) {
     final Table orderTable = Table.make("order", db);
     final NumericColumn orderId = NumericColumn.make("orderId", orderTable, DataSpec.make(DataType.bigint),
-        BuildingHints.make().unsigned().autoInc());
+        ColumnProps.make().unsigned().autoInc());
     final StringColumn add = StringColumn.make("add", orderTable, DataSpec.make(DataType.varchar),
         Literal.make("barter"));
     final StringColumn phrase = StringColumn.make("phrase", orderTable, DataSpec.make(DataType.text), null,
-        BuildingHints.empty.allowNull());
+        ColumnProps.empty.allowNull());
     final NumericColumn userId = NumericColumn.make("userId", orderTable, DataSpec.make(DataType.integer),
-        BuildingHints.empty.unsigned());
+        ColumnProps.empty.unsigned());
     final NumericColumn itemId = NumericColumn.make("itemId", orderTable, DataSpec.make(DataType.integer, 10),
-        BuildingHints.empty.unsigned());
+        ColumnProps.empty.unsigned());
     final NumericColumn scale = NumericColumn.make("scale", orderTable, DataSpec.make(DataType.mediumint),
-        BuildingHints.empty.unsigned());
+        ColumnProps.empty.unsigned());
     final NumericColumn quantity = NumericColumn.make("quantity", orderTable, DataSpec.make(DataType.smallint),
-        BuildingHints.empty.unsigned());
+        ColumnProps.empty.unsigned());
     final NumericColumn price = NumericColumn.make("price", orderTable, DataSpec.make(DataType.decimal, 14, 2));
     final NumericColumn total = NumericColumn.make("total", orderTable, DataSpec.make(DataType.decimal, 14, 2),
         quantity.times(price));
@@ -87,9 +85,9 @@ public class OrderTableContainer extends TableContainer {
     final DateColumn saleDate = DateColumn.make("saleDate", orderTable, DataSpec.make(DataType.date));
     final DateColumn saleTime = DateColumn.make("saleTime", orderTable, DataSpec.make(DataType.time));
     final DateColumn saleDateTime = DateColumn.make("saleDateTime", orderTable, DataSpec.make(DataType.datetime),
-        LiteralDate.currentTimestamp, BuildingHints.empty.autoUpdateTime());
+        LiteralDate.currentTimestamp, ColumnProps.empty.autoUpdateTime());
     final NumericColumn myInvis = NumericColumn.make("myInvis", orderTable, DataSpec.make(DataType.integer),
-        BuildingHints.empty.invisible());
+        ColumnProps.empty.invisible());
 //    final StringColumn myChar = Column.make("myChar", orderTable, DataSpec.make(DataType.char));
     final IMap<String, Column> columns = IArrayMap.make(orderId.columnName, orderId, add.columnName, add,
         phrase.columnName, phrase, userId.columnName, userId, itemId.columnName, itemId, scale.columnName, scale,

@@ -69,11 +69,11 @@ public class BridgeTests {
     // TODO: Once we implement the comment system with id, we'll be able to allow renaming columns and tables which will automatically
     //  migrate the data successfully. Until then we have to simply add and drop columns/tables.
     final Table userTable = Table.make("user", testDb.database);
-    final NumericColumn userId = Column.make("userId", userTable).asInt();
-    final StringColumn name = Column.make("name", userTable).asVarchar(15);
-    final NumericColumn age = Column.make("agee", userTable).asInt();
+    final NumericColumn userId = NumericColumn.make("userId", userTable, DataSpec.make(DataType.integer));
+    final StringColumn name = StringColumn.make("name", userTable, DataSpec.make(DataType.varchar, 15));
+    final NumericColumn age = NumericColumn.make("agee", userTable, DataSpec.make(DataType.integer));
     final IMap<String, Index> indexSpecs = IArrayMap.make("nm_idx", Index.make(IndexType.secondary, "nm_idx",
-        userTable, IndexedColumn.make(name, 10, null)));
+        userTable, IndexedColumn.make(name.columnName, 10, null)));
     final IMap<String, Column> columns = IArrayMap.make(userId.columnName, userId, name.columnName, name,
         age.columnName, age);
     final TableContainer updatedUser = TableContainer.make(userTable, columns, StorageEngine.simple, indexSpecs, userId);
@@ -101,11 +101,11 @@ public class BridgeTests {
   @Test
   void testDiffToSqlWithFilter() {
     final Table userTable = Table.make("user", testDb.database);
-    final NumericColumn userId = Column.make("userId", userTable).asInt();
-    final StringColumn name = Column.make("name", userTable).asVarchar(15);
-    final NumericColumn age = Column.make("agee", userTable).asInt();
+    final NumericColumn userId = NumericColumn.make("userId", userTable, DataSpec.make(DataType.integer));
+    final StringColumn name = StringColumn.make("name", userTable, DataSpec.make(DataType.varchar, 15));
+    final NumericColumn age = NumericColumn.make("agee", userTable, DataSpec.make(DataType.integer));
     final IMap<String, Index> indexSpecs = IArrayMap.make("nm_idx", Index.make(IndexType.secondary, "nm_idx",
-        userTable, IndexedColumn.make(name, 10, null)));
+        userTable, IndexedColumn.make(name.columnName, 10, null)));
     final IMap<String, Column> columns = IArrayMap.make(userId.columnName, userId, name.columnName, name,
         age.columnName, age);
     final TableContainer updatedUser = TableContainer.make(userTable, columns, StorageEngine.simple, indexSpecs, userId);

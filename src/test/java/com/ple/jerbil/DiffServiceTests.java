@@ -2,12 +2,12 @@ package com.ple.jerbil;
 
 import com.ple.jerbil.data.*;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
-import com.ple.jerbil.data.builder.DatabaseBuilder;
 import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.data.query.Table;
 import com.ple.jerbil.data.query.TableContainer;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
+import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
 import com.ple.util.IArrayMap;
@@ -47,8 +47,8 @@ public class DiffServiceTests {
 
   @Test
   void testCompareDifferentDatabase() {
-    final Column extra = Column.make("extra", order.table).asChar(13);
-    final Column modified = Column.make("phrase", order.table).asVarchar();
+    final StringColumn extra = StringColumn.make("extra", order.table, DataSpec.make(DataType.character, 13));
+    final StringColumn modified = StringColumn.make("phrase", order.table, DataSpec.make(DataType.varchar));
     DatabaseContainer testDb2 = testDb;
     TableContainer newOrder = testDb2.tables.get("order").add(extra, modified).remove(order.add);
     newOrder = newOrder.add(extra);
@@ -62,8 +62,8 @@ public class DiffServiceTests {
       assertEquals(extra, diffs.tables.update.get(0).columns.delete.get(0));
       if (diffs.tables.update.get(0).columns.update != null) {
         assertEquals(BuildingHints.make().allowNull().fulltext(),
-            diffs.tables.update.get(0).columns.update.get(0).buildingHints.before);
-        assertEquals(BuildingHints.make(), diffs.tables.update.get(0).columns.update.get(0).buildingHints.after);
+            diffs.tables.update.get(0).columns.update.get(0).columnProps.before);
+        assertEquals(BuildingHints.make(), diffs.tables.update.get(0).columns.update.get(0).columnProps.after);
         assertEquals(DataType.text, diffs.tables.update.get(0).columns.update.get(0).dataSpec.before.dataType);
         assertEquals(DataType.varchar, diffs.tables.update.get(0).columns.update.get(0).dataSpec.after.dataType);
       }
@@ -73,14 +73,16 @@ public class DiffServiceTests {
   @Test
   void testDbDiffFilter() {
     final Table alteredItem = Table.make("item", testDb.database);
-    final NumericColumn price = Column.make("price", alteredItem).asInt();
+    final NumericColumn price = NumericColumn.make("price", alteredItem, DataSpec.make(DataType.integer));
     final IMap<String, Column> alteredItemColumns = IArrayMap.make(item.itemId.columnName, item.itemId,
         item.name.columnName, item.name, item.type.columnName, item.type, price.columnName, price);
     final Table extraTable = Table.make("extra", testDb.database);
-    final NumericColumn id = Column.make("id", extraTable).bigId();
+    final NumericColumn id = NumericColumn.make("id", extraTable, DataSpec.make(DataType.bigint), ColumnProps.empty.autoInc().unsigned());
     final IMap<String, Column> extraTableColumns = IArrayMap.make(id.columnName, id);
+    final String indexName = DatabaseService.generateIndexName(id);
+    final IMap<String, Index> indexSpecs = IArrayMap.make(indexName, Index.make(IndexType.primary, indexName, id.table, id));
     final TableContainer alteredItemTableContainer = TableContainer.make(alteredItem, alteredItemColumns,
-        StorageEngine.transactional, null, null);
+        StorageEngine.transactional, indexSpecs, id);
     final TableContainer extraTableContainer = TableContainer.make(extraTable, extraTableColumns);
     final DatabaseContainer myDb = DatabaseContainer.make(Database.make("myDb"),
         IArrayMap.make(user.tableName, user, player.tableName, player, inventory.tableName, inventory,
@@ -111,10 +113,10 @@ public class DiffServiceTests {
     final Index rightIdx = item.indexes.get("primary");
     final IndexDiff indexDiff = DiffService.compareIndexes(leftIdx, rightIdx);
     assertNull(indexDiff.indexName);
-    assertEquals(inventory.playerId, indexDiff.indexedColumns.create.get(0).column);
+    assertEquals(inventory.playerId, indexDiff.indexedColumns.create.get(0).columnName);
     assertNull(indexDiff.indexedColumns.delete);
-    assertEquals(inventory.indexes.get("primary").indexedColumns.get("playerId").column,
-        indexDiff.indexedColumns.create.get(0).column);
+    assertEquals(inventory.indexes.get("primary").indexedColumns.get("playerId").columnName,
+        indexDiff.indexedColumns.create.get(0).columnName);
   }
 
   @Test

@@ -66,7 +66,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   private NumericColumn getAutoIncColumn(IMap<String, IndexedColumn> primary, IMap<String, Column> columns) {
     for (IEntry<String, IndexedColumn> icEntry : primary) {
       final Column col = columns.get(icEntry.key);
-      if (col.hints.isAutoInc()) {
+      if (col.props.isAutoInc()) {
         return (NumericColumn) col;
       }
     }
@@ -197,27 +197,27 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       }
     }
     columnLine = columnLine.toLowerCase(Locale.ROOT);
-    hints = getColumnHintsFromSql(columnLine, hints);
+    ColumnProps cProps = getColumnHintsFromSql(columnLine, hints);
     final DataSpec dataSpec = getDataSpecFromSql(columnLine);
     final SelectExpression defaultValue = getDefaultValFromSql(columnLine);
 //    final Expression generatedFrom = getGeneratedFromSql(columnLine);
     if (columnLine.contains("AUTO_INCREMENT")) {
-      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, hints);
+      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, cProps);
     } else if (dataSpec.dataType.equals(DataType.integer) || dataSpec.dataType.equals(DataType.decimal) ||
         dataSpec.dataType.equals(DataType.bigint) || dataSpec.dataType.equals(DataType.tinyint) ||
         dataSpec.dataType.equals(DataType.mediumint) || dataSpec.dataType.equals(DataType.smallint) ||
         dataSpec.dataType.equals(DataType.aDouble) || dataSpec.dataType.equals(DataType.aFloat)) {
-      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, hints);
+      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, cProps);
     } else if (dataSpec.dataType.equals(DataType.varchar) || dataSpec.dataType.equals(DataType.text) ||
         dataSpec.dataType.equals(DataType.character)) {
-      return StringColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, hints);
+      return StringColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, cProps);
     } else if (dataSpec.dataType.equals(DataType.set) || dataSpec.dataType.equals(DataType.enumeration)) {
-      return EnumeralColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, hints);
+      return EnumeralColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, cProps);
     } else if (dataSpec.dataType.equals(DataType.datetime) || dataSpec.dataType.equals(DataType.date) ||
         dataSpec.dataType.equals(DataType.time) || dataSpec.dataType.equals(DataType.timestamp)) {
-      return DateColumn.make(colName, table, dataSpec, (DateExpression) defaultValue, hints);
+      return DateColumn.make(colName, table, dataSpec, (DateExpression) defaultValue, cProps);
     } else if (dataSpec.dataType.equals(DataType.bool)) {
-      return BooleanColumn.make(colName, table, dataSpec, (BooleanExpression) defaultValue, hints);
+      return BooleanColumn.make(colName, table, dataSpec, (BooleanExpression) defaultValue, cProps);
     } else {
       //FIXME: replace this with observability bridge logging.
       System.out.println("Failed to determine data type of this column:" + colName);
@@ -225,23 +225,24 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return null;
   }
 
-  private BuildingHints getColumnHintsFromSql(String columnLine, BuildingHints hints) {
+  private ColumnProps getColumnHintsFromSql(String columnLine, BuildingHints hints) {
+    ColumnProps cProps = ColumnProps.empty;
     if (columnLine.contains("unsigned")) {
-      hints = hints.unsigned();
+      cProps = cProps.unsigned();
     }
     if (columnLine.contains("auto_increment")) {
-      hints = hints.autoInc();
+      cProps = cProps.autoInc();
     }
     if (!columnLine.contains("not null") || columnLine.contains("default null")) {
-      hints = hints.allowNull();
+      cProps = cProps.allowNull();
     }
     if (columnLine.contains("invisible")) {
-      hints = hints.invisible();
+      cProps = cProps.invisible();
     }
     if (columnLine.contains("on update current_timestamp")) {
-      hints = hints.autoUpdateTime();
+      cProps = cProps.autoUpdateTime();
     }
-    return hints;
+    return cProps;
   }
 
   private BuildingHints getKeyHintsFromSql(BuildingHints hints, String keyLine) {
@@ -903,16 +904,16 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     String unsigned = "";
     String invisible = "";
 //    String generatedFrom = "";
-    if (column.hints.isAllowNull() || column.hints.isPrimary() || column.hints.isInvisible()) {
+    if (column.props.isAllowNull() || column.props.isInvisible()) {
       nullVal = "";
     }
     if (column.defaultValue != null && column.defaultValue != LiteralNull.instance) {
       nullVal = "";
     }
-    if (column instanceof NumericColumn && column.hints.isAutoInc()) {
+    if (column instanceof NumericColumn && column.props.isAutoInc()) {
       autoIncrement = " auto_increment";
     }
-    if (column instanceof NumericColumn && column.hints.isUnsigned()) {
+    if (column instanceof NumericColumn && column.props.isUnsigned()) {
       unsigned = " unsigned";
     }
     if (column.defaultValue != null) {
@@ -926,10 +927,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         defaultVal = defaultVal.replace("(", "").replace(")", "");
       }
     }
-    if (column.hints.isAutoUpdateTime()) {
+    if (column.props.isAutoUpdateTime()) {
       onUpdateVal = " on update current_timestamp";
     }
-    if (column.hints.isInvisible()) {
+    if (column.props.isInvisible()) {
       invisible = " invisible";
     }
 //    if (column.generatedFrom != null) {
@@ -1058,7 +1059,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     if (toSql(columnDiff.columnA).contains(" auto_increment")) {
       primary = " primary key";
     }
-    if (columnDiff.columnName != null || columnDiff.dataSpec != null || columnDiff.defaultValue != null || columnDiff.buildingHints != null) {
+    if (columnDiff.columnName != null || columnDiff.dataSpec != null || columnDiff.defaultValue != null || columnDiff.columnProps != null) {
       sql += "alter table " + columnDiff.columnA.table.tableName + " change " + columnDiff.columnB.columnName + " " +
           toSql(columnDiff.columnA) + primary + ";\n";
     }

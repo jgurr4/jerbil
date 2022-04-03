@@ -28,9 +28,9 @@ public class UserTableContainer extends TableContainer {
 
   public static UserTableContainer make(Database db) {
     final Table userTable = Table.make("user", db);
-    //TODO: Consider calling BuildingHints something else because that doesn't belong in Columns, You could say ColumnProps or something. Primary/indexes shouldn't be inside it though, primary is inside indexes not in columns.
+    //TODO: Consider calling ColumnProps something else because that doesn't belong in Columns, You could say ColumnProps or something. Primary/indexes shouldn't be inside it though, primary is inside indexes not in columns.
     final NumericColumn userId = NumericColumn.make("userId", userTable, DataSpec.make(DataType.bigint),
-       null, BuildingHints.make().autoInc());
+       null, ColumnProps.make().autoInc());
     final StringColumn name = StringColumn.make("name", userTable, DataSpec.make(DataType.varchar));
     final NumericColumn age = NumericColumn.make("age", userTable, DataSpec.make(DataType.integer));
     final String idxName1 = DatabaseService.generateIndexName(name); //Alternatively, users can name the indexes themselves rather than using the generator.

@@ -33,30 +33,6 @@ public class SqlQueryTests {
     );
   }
 
-/*
-  @Test
-  void temporaryTest() {
-    //This more verbose method makes it so that column names will never conflict with Database or Tables properties/fields.
-    Column itemIdVerbose = testDb.tables.get("inventory").columns.get("itemId");
-    NumericColumn itemId = testDb.inventory.itemId;
-    CharSet charSet = testDb.charSet;
-    NumericColumn playerId = testDb.inventory.playerId;
-    StorageEngine storageEngine = testDb.item.storageEngine;
-    DataSpec dataSpec = testDb.item.itemId.dataSpec;
-    final IList<Index> indexes = testDb.order.indexes;
-    testDb.sync();
-    testDb.item.sync();
-    testDb.item.itemId.sync();
-    InventoryTableContainer inventory = testDb.inventory;
-    ItemTableContainer item = testDb.item;
-    CompleteQuery q = testDb.inventory.select().where(inventory.itemId.eq(make(3)));
-    String name = q.execute().unwrapFlux().flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name")))
-        .blockFirst();
-    Mono<String> rName = q.execute().unwrapFlux()
-        .flatMap(result -> result.map((row, rowMetadata) -> (String) row.get("name"))).next();
-  }
-*/
-
   @Test
   void testSelect() {
     final CompleteQuery q = user.where(user.name.eq(make("john"))).select(user.userId);

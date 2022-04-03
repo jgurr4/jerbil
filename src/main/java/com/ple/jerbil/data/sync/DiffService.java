@@ -212,20 +212,20 @@ public class DiffService {
     IList<IndexedColumnDiff> update = IArrayList.empty;
     for (IndexedColumn rightIdxCol : rightIndexedColumns.values()) {
       for (IndexedColumn leftColumn : leftIndexedColumns.values()) {
-        if (leftIndexedColumns.get(rightIdxCol.column.columnName) == null) {
+        if (leftIndexedColumns.get(rightIdxCol.columnName) == null) {
           delete = delete.add(rightIdxCol);
         }
-        if (rightIndexedColumns.get(leftColumn.column.columnName) == null) {
+        if (rightIndexedColumns.get(leftColumn.columnName) == null) {
           create = create.add(leftColumn);
         }
-        if (leftIndexedColumns.get(rightIdxCol.column.columnName) != null && !leftIndexedColumns.get(
-            rightIdxCol.column.columnName).equals(rightIdxCol)) {
-          final IndexedColumn leftIndexedColumn = leftIndexedColumns.get(rightIdxCol.column.columnName);
-          ScalarDiff<Column> columnDiff = null;
+        if (leftIndexedColumns.get(rightIdxCol.columnName) != null && !leftIndexedColumns.get(
+            rightIdxCol.columnName).equals(rightIdxCol)) {
+          final IndexedColumn leftIndexedColumn = leftIndexedColumns.get(rightIdxCol.columnName);
+          ScalarDiff<String> colNameDiff = null;
           ScalarDiff<Integer> prefixDiff = null;
           ScalarDiff<SortOrder> sortOrderDiff = null;
-          if (!leftIndexedColumn.column.equals(rightIdxCol.column)) {
-            columnDiff = ScalarDiff.make(leftIndexedColumn.column, rightIdxCol.column);
+          if (!leftIndexedColumn.columnName.equals(rightIdxCol.columnName)) {
+            colNameDiff = ScalarDiff.make(leftIndexedColumn.columnName, rightIdxCol.columnName);
           }
           if (leftIndexedColumn.prefixSize != rightIdxCol.prefixSize) {
             prefixDiff = ScalarDiff.make(leftIndexedColumn.prefixSize, rightIdxCol.prefixSize);
@@ -239,8 +239,8 @@ public class DiffService {
           } else if (leftIndexedColumn.sortOrder.equals(rightIdxCol.sortOrder)) {
             sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, rightIdxCol.sortOrder);
           }
-          if (columnDiff != null || prefixDiff != null || sortOrderDiff != null) {
-            update = update.add(IndexedColumnDiff.make(columnDiff, prefixDiff, sortOrderDiff, leftIndexedColumn, rightIdxCol));
+          if (colNameDiff != null || prefixDiff != null || sortOrderDiff != null) {
+            update = update.add(IndexedColumnDiff.make(colNameDiff, prefixDiff, sortOrderDiff, leftIndexedColumn, rightIdxCol));
           }
         }
       }
@@ -362,9 +362,9 @@ public class DiffService {
     } else if (c1.defaultValue != null & c2.defaultValue == null) {
       defaultDiff = ScalarDiff.make(c1.defaultValue, null);
     }
-    final ScalarDiff<BuildingHints> hintsDiff = c1.hints.equals(c2.hints) ? null : ScalarDiff.make(
-        c1.hints, c2.hints);
-    return ColumnDiff.make(nameDiff, tableDiff, dataSpecDiff, defaultDiff, hintsDiff, c1, c2);
+    final ScalarDiff<ColumnProps> propsDiff = c1.props.equals(c2.props) ? null : ScalarDiff.make(
+        c1.props, c2.props);
+    return ColumnDiff.make(nameDiff, tableDiff, dataSpecDiff, defaultDiff, propsDiff, c1, c2);
   }
 
   public static IndexDiff compareIndexes(Index leftIndex, Index rightIndex) {
@@ -389,7 +389,7 @@ public class DiffService {
     for (IEntry<String, IndexedColumn> rightIndexedColumn : rightIndexedColumns) {
       if (rightIndexedColumn != null) {
         final Optional<IndexedColumn> leftIndexedColumn = getIndexedColumnMatchingName(leftIndexedColumns,
-            rightIndexedColumn.value.column.columnName);
+            rightIndexedColumn.value.columnName);
         if (leftIndexedColumn.isPresent()) {
           indexedColumnDiffs = indexedColumnDiffs.add(compareIndexedCoumns(
               leftIndexedColumn.get(),
@@ -402,11 +402,11 @@ public class DiffService {
 
   private static IndexedColumnDiff compareIndexedCoumns(IndexedColumn leftIndexedColumn,
                                                         IndexedColumn rightIndexedColumn) {
-    ScalarDiff<Column> columnDiff = null;
+    ScalarDiff<String> colNameDiff = null;
     ScalarDiff<Integer> prefixSizeDiff = null;
     ScalarDiff<SortOrder> sortOrderDiff = null;
-    if (!leftIndexedColumn.column.equals(rightIndexedColumn.column)) {
-      columnDiff = ScalarDiff.make(leftIndexedColumn.column, rightIndexedColumn.column);
+    if (!leftIndexedColumn.columnName.equals(rightIndexedColumn.columnName)) {
+      colNameDiff = ScalarDiff.make(leftIndexedColumn.columnName, rightIndexedColumn.columnName);
     }
     if (leftIndexedColumn.prefixSize != rightIndexedColumn.prefixSize) {
       prefixSizeDiff = ScalarDiff.make(leftIndexedColumn.prefixSize, rightIndexedColumn.prefixSize);
@@ -414,7 +414,7 @@ public class DiffService {
     if (!leftIndexedColumn.sortOrder.equals(rightIndexedColumn.sortOrder)) {
       sortOrderDiff = ScalarDiff.make(leftIndexedColumn.sortOrder, rightIndexedColumn.sortOrder);
     }
-    return IndexedColumnDiff.make(columnDiff, prefixSizeDiff, sortOrderDiff, leftIndexedColumn, rightIndexedColumn);
+    return IndexedColumnDiff.make(colNameDiff, prefixSizeDiff, sortOrderDiff, leftIndexedColumn, rightIndexedColumn);
   }
 
   private static Optional<IndexedColumn> getIndexedColumnMatchingName(IMap<String, IndexedColumn> leftIndexedColumns,

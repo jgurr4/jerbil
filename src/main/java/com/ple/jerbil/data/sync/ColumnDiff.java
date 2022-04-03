@@ -2,10 +2,8 @@ package com.ple.jerbil.data.sync;
 
 
 import com.ple.jerbil.data.*;
-import com.ple.jerbil.data.query.TableContainer;
 import com.ple.util.Immutable;
 import com.ple.jerbil.data.query.Table;
-import com.ple.jerbil.data.BuildingHints;
 import com.ple.jerbil.data.selectExpression.Column;
 import com.ple.jerbil.data.selectExpression.Expression;
 import org.jetbrains.annotations.Nullable;
@@ -21,29 +19,29 @@ public class ColumnDiff implements Diff<Column> {
   @Nullable public final ScalarDiff<DataSpec> dataSpec;
 //  @Nullable public final ScalarDiff<Expression> generatedFrom;
   @Nullable public final ScalarDiff<Expression> defaultValue;
-  @Nullable public final ScalarDiff<BuildingHints> buildingHints;
+  @Nullable public final ScalarDiff<ColumnProps> columnProps;
 //  private final ScalarDiff<String> comment;
   public final Column columnA;
   public final Column columnB;
 
   protected ColumnDiff(@Nullable ScalarDiff<String> columnName, @Nullable ScalarDiff<Table> table,
                        @Nullable ScalarDiff<DataSpec> dataSpec, @Nullable ScalarDiff<Expression> defaultValue,
-                       @Nullable ScalarDiff<BuildingHints> buildingHints, Column columnA, Column columnB) {
+                       @Nullable ScalarDiff<ColumnProps> columnProps, Column columnA, Column columnB) {
     this.columnName = columnName;
     this.table = table;
     this.dataSpec = dataSpec;
 //    this.generatedFrom = generatedFrom;
     this.defaultValue = defaultValue;
 //    this.comment = comment;
-    this.buildingHints = buildingHints;
+    this.columnProps = columnProps;
     this.columnA = columnA;
     this.columnB = columnB;
   }
 
   public static ColumnDiff make(ScalarDiff<String> columnName, ScalarDiff<Table> table,
                                 ScalarDiff<DataSpec> dataSpec, ScalarDiff<Expression> defaultValue,
-                                ScalarDiff<BuildingHints> buildingHints, Column columnA, Column columnB) {
-    return new ColumnDiff(columnName, table, dataSpec, defaultValue, buildingHints, columnA, columnB);
+                                ScalarDiff<ColumnProps> columnProps, Column columnA, Column columnB) {
+    return new ColumnDiff(columnName, table, dataSpec, defaultValue, columnProps, columnA, columnB);
   }
 
   @Override
@@ -57,7 +55,7 @@ public class ColumnDiff implements Diff<Column> {
     ScalarDiff<Table> newTable = null;
     ScalarDiff<DataSpec> newDataSpec = null;
     ScalarDiff<Expression> newDefaultVal = null;
-    ScalarDiff<BuildingHints> newBuildingHints = null;
+    ScalarDiff<ColumnProps> newColProps = null;
     if (columnName != null) {
       newColName = columnName.filter(ddlOption);
     }
@@ -70,10 +68,10 @@ public class ColumnDiff implements Diff<Column> {
     if (defaultValue != null) {
       newDefaultVal = defaultValue.filter(ddlOption);
     }
-    if (buildingHints != null) {
-      newBuildingHints = buildingHints.filter(ddlOption);
+    if (columnProps != null) {
+      newColProps = columnProps.filter(ddlOption);
     }
-    return new ColumnDiff(newColName, newTable, newDataSpec, newDefaultVal, newBuildingHints, columnA, columnB);
+    return new ColumnDiff(newColName, newTable, newDataSpec, newDefaultVal, newColProps, columnA, columnB);
   }
 
   @Override
@@ -83,13 +81,13 @@ public class ColumnDiff implements Diff<Column> {
     ColumnDiff that = (ColumnDiff) o;
     return Objects.equals(columnName, that.columnName) && Objects.equals(table,
         that.table) && Objects.equals(dataSpec, that.dataSpec) && Objects.equals(defaultValue,
-        that.defaultValue) && Objects.equals(buildingHints, that.buildingHints) && columnA.equals(
+        that.defaultValue) && Objects.equals(columnProps, that.columnProps) && columnA.equals(
         that.columnA) && columnB.equals(that.columnB);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(columnName, table, dataSpec, defaultValue, buildingHints, columnA, columnB);
+    return Objects.hash(columnName, table, dataSpec, defaultValue, columnProps, columnA, columnB);
   }
 
   @Override
@@ -98,7 +96,7 @@ public class ColumnDiff implements Diff<Column> {
     String tables = "";
     String dSpec = "";
     String defVal = "";
-    String bHints = "";
+    String cProps = "";
     if (columnName != null) {
       colNames = "\n  columnName= \n    left: " + columnName.before + "\n    right: " + columnName.after;
     }
@@ -111,15 +109,15 @@ public class ColumnDiff implements Diff<Column> {
     if (defaultValue != null) {
       defVal = "\n  defaultValue= \n    left: " + defaultValue.before + "\n    right: " + defaultValue.after;
     }
-    if (buildingHints != null) {
-      bHints = "\n  buildingHints= \n    left: " + buildingHints.before + "\n    right: " + buildingHints.after;
+    if (columnProps != null) {
+      cProps = "\n  buildingHints= \n    left: " + columnProps.before + "\n    right: " + columnProps.after;
     }
     return "ColumnDiff{ leftName: " + columnA.columnName + "  rightName: " + columnB.columnName +
         colNames +
         tables +
         dSpec +
         defVal +
-        bHints +
+        cProps +
         '}';
   }
 }
