@@ -197,7 +197,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       }
     }
     columnLine = columnLine.toLowerCase(Locale.ROOT);
-    ColumnProps cProps = getColumnHintsFromSql(columnLine, hints);
+    ColumnProps cProps = getColumnPropsFromSql(columnLine);
     final DataSpec dataSpec = getDataSpecFromSql(columnLine);
     final SelectExpression defaultValue = getDefaultValFromSql(columnLine);
 //    final Expression generatedFrom = getGeneratedFromSql(columnLine);
@@ -225,7 +225,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return null;
   }
 
-  private ColumnProps getColumnHintsFromSql(String columnLine, BuildingHints hints) {
+  private ColumnProps getColumnPropsFromSql(String columnLine) {
     ColumnProps cProps = ColumnProps.empty;
     if (columnLine.contains("unsigned")) {
       cProps = cProps.unsigned();
@@ -904,7 +904,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     String unsigned = "";
     String invisible = "";
 //    String generatedFrom = "";
-    if (column.props.isAllowNull() || column.props.isInvisible()) {
+    if (column.props.isAllowNull() || column.props.isInvisible() || column.props.isAutoInc()) {
       nullVal = "";
     }
     if (column.defaultValue != null && column.defaultValue != LiteralNull.instance) {

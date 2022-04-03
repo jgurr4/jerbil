@@ -38,14 +38,14 @@ public class SqlStructureTests {
     assertEquals("""
         create table `order` (
           orderId bigint(20) unsigned auto_increment,
-          `add` varchar(255) not null,
+          `add` varchar(255) default ('barter'),
           phrase text,
           userId int(11) unsigned not null,
           itemId int(10) unsigned not null,
           scale mediumint(8) unsigned not null,
           quantity smallint(5) unsigned not null,
           price decimal(14, 2) not null,
-          total decimal(14, 2) not null,
+          total decimal(14, 2) default (quantity * price),
           finalized boolean not null,
           myDouble double not null,
           myFloat float not null,
@@ -72,8 +72,8 @@ public class SqlStructureTests {
           userId bigint(20) auto_increment,
           name varchar(255) not null,
           age int(11) not null,
-          primary key (userId),
-          key nm_idx (name)
+          key nm_idx (name),
+          primary key (userId)
         ) ENGINE=Aria;
         create table player (
           playerId int(11) auto_increment,
@@ -82,7 +82,7 @@ public class SqlStructureTests {
           primary key (playerId)
         ) ENGINE=Innodb;
         create table item (
-          itemId int(11) auto_increment,
+          itemId int(11) unsigned auto_increment,
           name varchar(20) not null,
           type enum('weapon','armor','shield','accessory') not null,
           price int(11) not null,
@@ -90,20 +90,20 @@ public class SqlStructureTests {
           key nm_idx (name)
         ) ENGINE=Aria;
         create table inventory (
-          playerId int(11),
-          itemId int(11),
+          playerId int(11) not null,
+          itemId int(11) not null,
           primary key (playerId,itemId)
         ) ENGINE=Aria;
         create table `order` (
           orderId bigint(20) unsigned auto_increment,
-          `add` varchar(255) not null,
+          `add` varchar(255) default ('barter'),
           phrase text,
           userId int(11) unsigned not null,
           itemId int(10) unsigned not null,
           scale mediumint(8) unsigned not null,
           quantity smallint(5) unsigned not null,
           price decimal(14, 2) not null,
-          total decimal(14, 2) not null,
+          total decimal(14, 2) default (quantity * price),
           finalized boolean not null,
           myDouble double not null,
           myFloat float not null,
@@ -122,14 +122,15 @@ public class SqlStructureTests {
 
   @Test
   void testAddColumn() {
-    NumericColumn newColumn = NumericColumn.make("quantity", item.table, DataSpec.make(DataType.integer)); //.asInt().indexed();
-    Index qntyIdx = Index.make(IndexType.secondary, newColumn.columnName, newColumn.table, newColumn);
+    NumericColumn newColumn = NumericColumn.make("quantity", item.table, DataSpec.make(DataType.integer));
+    Index qntyIdx = Index.make(IndexType.secondary, DatabaseService.generateIndexName(item.indexes.keys(), newColumn),
+        newColumn.table, newColumn);
     TableContainer newTable = item.add(newColumn);
     newTable = newTable.add(qntyIdx);
     final CompleteQuery q = newTable.create();
     assertEquals("""
         create table item (
-          itemId int(11) auto_increment,
+          itemId int(11) unsigned auto_increment,
           name varchar(20) not null,
           type enum('weapon','armor','shield','accessory') not null,
           price int(11) not null,
@@ -141,12 +142,12 @@ public class SqlStructureTests {
         """, q.toSql());
   }
 
+  /*
   @Test
   void testRemoveColumn() {
 
   }
 
-  /*
     @Test
     void dropDatabase() {
 

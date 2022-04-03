@@ -46,22 +46,9 @@ public class TableContainer extends FromExpression {
   }
 
   public TableContainer add(Index idx) {
-    return null;
-/*
-    indexType = IndexType.primary;
-  } else if (column.hints.isPrimary()) {
-    indexType = IndexType.primary;
-  } else if (column.hints.isIndexed()) {
-    indexType = IndexType.secondary;
-  } else if (column.hints.isFulltext()) {
-    indexType = IndexType.fulltext;
-  }
-  //TODO: Make this check prefixSize and sortOrder from indexes or buildinghints.
-      if (indexType != null) {
-    indexList = indexList.put(indexName,
-        Index.make(indexType, indexName, table, IndexedColumn.make(column, 0, null)));
-  }
-*/
+    IMap<String, Index> newIndexes = indexes;
+    newIndexes = newIndexes.put(idx.indexName, idx);
+    return new TableContainer(table, columns, storageEngine, newIndexes, autoIncrementColumn);
 }
 
 

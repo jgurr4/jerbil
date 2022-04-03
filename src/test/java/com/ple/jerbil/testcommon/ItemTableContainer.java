@@ -33,7 +33,7 @@ public class ItemTableContainer extends TableContainer {
 
   public static ItemTableContainer make(Database db) {
     final Table itemTable = Table.make("item", db);
-    final NumericColumn itemId = NumericColumn.make("itemId", itemTable, DataSpec.make(DataType.integer));
+    final NumericColumn itemId = NumericColumn.make("itemId", itemTable, DataSpec.make(DataType.integer), ColumnProps.empty.autoInc().unsigned());
     final StringColumn name = StringColumn.make("name", itemTable, DataSpec.make(DataType.varchar, 20));
     final EnumeralColumn type = EnumeralColumn.make("type", itemTable, DataSpec.make(DataType.enumeration, ItemType.class));
     final NumericColumn price = NumericColumn.make("price", itemTable, DataSpec.make(DataType.integer));
