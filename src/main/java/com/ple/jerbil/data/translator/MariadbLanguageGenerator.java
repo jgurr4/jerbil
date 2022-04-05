@@ -260,36 +260,6 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     return hints;
   }
 
-  public BuildingHints getHintsFromSql(String tableLine, IMap<String, String[]> columnsInIndex) {
-    //TODO: Finish implementing.
-    final String colName = tableLine.replaceFirst(" .*", "");
-    BuildingHints hints = BuildingHints.make();
-    String indexType = "";
-    if (columnsInIndex.keys().contains("PRIMARY KEY")) {
-      indexType = "PRIMARY KEY";
-    }
-    for (String column : columnsInIndex.get(indexType)) {
-      if (column.equals(colName)) {
-        hints = hints.primary();
-      }
-    }
-    if (columnsInIndex.keys().contains("PRIMARY KEY")) {
-      for (String column : columnsInIndex.get("PRIMARY KEY")) {
-        if (column.equals(colName)) {
-          hints = hints.primary();
-        }
-      }
-    }
-    if (columnsInIndex.keys().contains("KEY")) {
-      for (String column : columnsInIndex.get("KEY")) {
-        if (column.equals(colName)) {
-          hints = hints.index();
-        }
-      }
-    }
-    return hints;
-  }
-
   private SelectExpression getDefaultValFromSql(String tableLine) {
     if (tableLine.replaceFirst("^.*default ", "").length() == tableLine.length()) {
       return null;
@@ -312,6 +282,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       return Literal.make(LocalDateTime.parse(defaultVal));
     } else if (defaultVal.replace("false", "").replace("true", "").length() == 0) {
       return Literal.make(Boolean.parseBoolean(defaultVal));
+    } else if (defaultVal.matches("[a-zA-Z].* [\\-\\+\\*\\/] [a-zA-Z]*[0-9]*")) {  // This is regex to check if it is a column name. Just replace this with updated method once I pass in the colum names.
+      throw new RuntimeException("default value expressions are not supported yet.");
+      // This must return Times(PartialColumn, PartialColumn) then later those columns will become full columns once we know what the columns will be.
+//      return PartialColumn.make("")
     }
     return Literal.make(defaultVal.replaceAll("'", "").strip());
   }

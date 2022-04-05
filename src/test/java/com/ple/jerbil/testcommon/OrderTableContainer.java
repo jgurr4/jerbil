@@ -75,8 +75,8 @@ public class OrderTableContainer extends TableContainer {
     final NumericColumn quantity = NumericColumn.make("quantity", orderTable, DataSpec.make(DataType.smallint),
         ColumnProps.empty.unsigned());
     final NumericColumn price = NumericColumn.make("price", orderTable, DataSpec.make(DataType.decimal, 14, 2));
-    final NumericColumn total = NumericColumn.make("total", orderTable, DataSpec.make(DataType.decimal, 14, 2),
-        quantity.times(price));
+    final NumericColumn total = NumericColumn.make("total", orderTable, DataSpec.make(DataType.decimal, 14, 2));
+//        quantity.times(price));
     final BooleanColumn finalized = BooleanColumn.make("finalized", orderTable, DataSpec.make(DataType.bool));
     final NumericColumn myDouble = NumericColumn.make("myDouble", orderTable, DataSpec.make(DataType.aDouble));
     final NumericColumn myFloat = NumericColumn.make("myFloat", orderTable, DataSpec.make(DataType.aFloat));
