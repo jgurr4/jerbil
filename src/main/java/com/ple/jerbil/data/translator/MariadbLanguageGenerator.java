@@ -1320,7 +1320,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
 //        references = toSql(index.fkReference); //TODO: Finish implementing foreign key with Index.
       }
       separtor = ",";
-      sql += " " + toSqlIndexColumns(cols, generateName);
+      sql += toSqlIndexColumns(cols, generateName);
       generateName = true;
       cols = IArrayList.make();
     }
@@ -1338,9 +1338,9 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       separator = ",";
     }
     if (generateName) {
-      indexName = DatabaseService.generateIndexName(columns.toArray());
+      indexName = " " + DatabaseService.generateIndexName(columns.toArray());
     }
-    sql += indexName + "(" + indexedColumns + ")";
+    sql += indexName + " (" + indexedColumns + ")";
     return sql;
   }
 

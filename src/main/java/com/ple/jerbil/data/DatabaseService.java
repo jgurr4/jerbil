@@ -18,7 +18,7 @@ public class DatabaseService {
       idxName += "_" + i;
       i++;
     }
-    return idxName + "_idx ";
+    return idxName + "_idx";
   }
 
   public static String formatForIndexNameGenerator(Column... columns) {

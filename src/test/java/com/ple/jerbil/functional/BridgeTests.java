@@ -147,6 +147,7 @@ public class BridgeTests {
         """, update.toSql());
   }
 
+  /*
   @Test
   void testCompareTableWithModifiedColumn() {
     DataGlobal.bridge.execute("use test; alter table player modify column name varchar(50) not null").unwrapFlux().blockLast();
@@ -169,7 +170,6 @@ public class BridgeTests {
     assertEquals(0 , diff.columns.update.size());
   }
 
-  /*
   @Test
   void testCompareDbWithNoDiffs() {
     final DbDiff diff = DiffService.compareDatabases(testDb, DataGlobal.bridge.getDb("test").unwrap());
