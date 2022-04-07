@@ -955,14 +955,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       sql += dbDiff.databaseA.createAll().toSql() + "\n" + migrateToSql(dbDiff.databaseB, dbDiff.databaseA) + ";\n";
     }
     if (dbDiff.tables != null) {
-      if (dbDiff.tables.create != null) {
-        for (TableContainer table : dbDiff.tables.create) {
-          sql += toSqlCreate(table) + ";\n";
-        }
-      }
       if (dbDiff.tables.delete != null) {
         for (TableContainer table : dbDiff.tables.delete) {
           sql += toSqlDrop(table) + ";\n";
+        }
+      }
+      if (dbDiff.tables.create != null) {
+        for (TableContainer table : dbDiff.tables.create) {
+          sql += toSqlCreate(table) + ";\n";
         }
       }
       if (dbDiff.tables.update != null) {
@@ -990,14 +990,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
           tableDiff.tableA.storageEngine) + ";\n";
     }
     if (tableDiff.columns != null) {
-      if (tableDiff.columns.create != null) {
-        for (Column column : tableDiff.columns.create) {
-          sql += toSqlCreate(column) + ";\n";
-        }
-      }
       if (tableDiff.columns.delete != null) {
         for (Column column : tableDiff.columns.delete) {
           sql += toSqlDrop(column) + ";\n";
+        }
+      }
+      if (tableDiff.columns.create != null) {
+        for (Column column : tableDiff.columns.create) {
+          sql += toSqlCreate(column) + ";\n";
         }
       }
       if (tableDiff.columns.update != null) {
@@ -1007,14 +1007,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       }
     }
     if (tableDiff.indexes != null) {
-      if (tableDiff.indexes.create != null) {
-        for (Index index : tableDiff.indexes.create) {
-          sql += toSqlCreate(index) + ";\n";
-        }
-      }
       if (tableDiff.indexes.delete != null) {
         for (Index index : tableDiff.indexes.delete) {
           sql += toSqlDrop(index) + ";\n";
+        }
+      }
+      if (tableDiff.indexes.create != null) {
+        for (Index index : tableDiff.indexes.create) {
+          sql += toSqlCreate(index) + ";\n";
         }
       }
       if (tableDiff.indexes.update != null) {

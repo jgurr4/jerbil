@@ -31,8 +31,7 @@ public class PlayerTableContainer extends TableContainer {
     final NumericColumn playerId = NumericColumn.make("playerId", playerTable, DataSpec.make(DataType.integer), ColumnProps.make().autoInc());
     final NumericColumn userId = NumericColumn.make("userId", playerTable, DataSpec.make(DataType.integer));
     final StringColumn name = StringColumn.make("name", playerTable, DataSpec.make(DataType.varchar, 20));
-    final String indexName = DatabaseService.generateIndexName(playerId);
-    final IMap<String, Index> indexes = IArrayMap.make(indexName, Index.make(IndexType.primary, indexName, playerTable, playerId));
+    final IMap<String, Index> indexes = IArrayMap.make("primary", Index.make(IndexType.primary, "primary", playerTable, playerId));
     final IMap<String, Column> columns = IArrayMap.make(playerId.columnName, playerId, userId.columnName, userId,
         name.columnName, name);
     return new PlayerTableContainer(playerTable, columns, playerId, userId, name, indexes, playerId);

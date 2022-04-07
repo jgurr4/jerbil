@@ -151,8 +151,10 @@ public class TableDiff implements Diff<TableContainer> {
       }
     }
     if (indexes != null) {
-      for (IndexDiff idxDiff : indexes.update) {
-        indexDiffs += separator + idxDiff;
+      if (indexes.update != null) {
+        for (IndexDiff idxDiff : indexes.update) {
+          indexDiffs += separator + idxDiff;
+        }
       }
     }
     return "TableDiff{ leftName: " + tableA.table.tableName + "  rightName: " + tableB.table.tableName +

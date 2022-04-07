@@ -88,8 +88,8 @@ public class BridgeTests {
           name varchar(20) not null,
           primary key (playerId)
         ) ENGINE=Innodb;
-        alter table user add column age int(11) not null;
         alter table user drop column agee;
+        alter table user add column age int(11) not null;
         alter table user change userId userId bigint(20) auto_increment primary key;
         alter table user change name name varchar(255) not null;
         alter table user add primary key if not exists (userId);
@@ -147,7 +147,6 @@ public class BridgeTests {
         """, update.toSql());
   }
 
-  /*
   @Test
   void testCompareTableWithModifiedColumn() {
     DataGlobal.bridge.execute("use test; alter table player modify column name varchar(50) not null").unwrapFlux().blockLast();
@@ -161,6 +160,7 @@ public class BridgeTests {
     assertEquals(1 , diff.columns.update.size());
   }
 
+  /*
   @Test
   void testCompareOrderTable() {
     final TableDiff diff = DiffService.compareTables(testDb.order, DataGlobal.bridge.getDb("test").unwrap().tables.get("order"));

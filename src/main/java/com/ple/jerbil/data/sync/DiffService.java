@@ -143,7 +143,7 @@ public class DiffService {
     if (rightIndexes != null && leftIndexes != null) {
       for (Index rightIndex : rightIndexes.values()) {
         leftIndex = leftIndexes.get(rightIndex.indexName);
-        if (leftIndexes.get(rightIndex.indexName) == null) {
+        if (leftIndex == null) {
           delete = delete.add(rightIndex);
         }
         for (Index lIndex : leftIndexes.values()) {
