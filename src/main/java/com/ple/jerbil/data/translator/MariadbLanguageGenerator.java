@@ -99,10 +99,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   }
 
   private IndexType getIndexTypeFromSql(String indexString) {
-    String type = indexString.replaceAll("KEY \\(.*", "KEY");
-    if (type.replaceAll("\\sKEY ", "").length() < type.length()) {
-      return IndexType.secondary;
-    } else if (type.contains("PRIMARY")) {
+    String type = indexString.stripLeading().replaceAll("KEY \\(.*", "KEY");
+    if (type.contains("PRIMARY")) {
       return IndexType.primary;
     } else if (type.contains("FULLTEXT")) {
       return IndexType.fulltext;
@@ -110,6 +108,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       return IndexType.unique;
     } else if (type.contains("FOREIGN")) {
       return IndexType.foreign;
+    } else if (type.matches("^KEY .*")) {
+      return IndexType.secondary;
     }
     return null;
   }
@@ -282,7 +282,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       return Literal.make(LocalDateTime.parse(defaultVal));
     } else if (defaultVal.replace("false", "").replace("true", "").length() == 0) {
       return Literal.make(Boolean.parseBoolean(defaultVal));
-    } else if (defaultVal.matches("[a-zA-Z].* [\\-\\+\\*\\/] [a-zA-Z]*[0-9]*")) {  // This is regex to check if it is a column name. Just replace this with updated method once I pass in the colum names.
+    } else if (defaultVal.matches(
+        "[a-zA-Z].* [\\-\\+\\*\\/] [a-zA-Z]*[0-9]*")) {  // This is regex to check if it is a column name. Just replace this with updated method once I pass in the colum names.
       throw new RuntimeException("default value expressions are not supported yet.");
       // This must return Times(PartialColumn, PartialColumn) then later those columns will become full columns once we know what the columns will be.
 //      return PartialColumn.make("")
@@ -304,7 +305,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     } else if (tableLine.contains("set(")) {
       tableLine = tableLine.replaceFirst("^.*set\\(", "").replaceAll("'", "");
       endIndex = tableLine.indexOf(") ");
-      return DataSpec.make(DataType.enumeration, tableLine.substring(0, endIndex));
+      return DataSpec.make(DataType.set, tableLine.substring(0, endIndex));
     } else if (tableLine.contains("varchar(")) {
       regex = "^.*varchar\\(";
       dataType = DataType.varchar;
@@ -354,20 +355,31 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       regex = "^.* timestamp";
       dataType = DataType.timestamp;
     }
+    size = dataType.defaultSize;
     tableLine = tableLine.replaceFirst(regex, "");
     endIndex = tableLine.indexOf(")");
-    if (endIndex != -1 && !dataType.defaultSize.isEmpty()) {
+    if (endIndex != -1 && !isTemporal(dataType)) {
       String[] sizeAndPrecision = tableLine.replaceAll("\\).*", "").split(",");
       size = Optional.of(Integer.parseInt(sizeAndPrecision[0]));
       if (sizeAndPrecision.length > 1) {
         precision = Integer.parseInt(sizeAndPrecision[1]);
-        return DataSpec.make(dataType, precision, size.get());
+        return DataSpec.make(dataType, size.get(), precision);
       }
     }
-    if (dataType.equals(DataType.tinyint) && size.get() == 1) {
-      dataType = DataType.bool;
+    if (size.isPresent()) {
+      if (dataType.equals(DataType.tinyint) && size.get() == 1) {
+        return DataSpec.make(DataType.bool);
+      }
     }
     return DataSpec.make(dataType, size);
+  }
+
+  private boolean isTemporal(DataType dataType) {
+    if (dataType.equals(DataType.date) || dataType.equals(DataType.time) || dataType.equals(
+        DataType.datetime) || dataType.equals(DataType.timestamp)) {
+      return true;
+    }
+    return false;
   }
 
   private String[] formatToIndexLines(String createTableString) {
@@ -375,8 +387,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         .replaceAll("\n\\) ENGINE=.*", "")
         .replaceAll("^CREATE TABLE .*\n", "").split("\n");
     return Arrays.stream(lines).filter(line -> line.contains("PRIMARY") || line.contains("KEY")
-            || line.contains("FULLTEXT") || line.contains("FOREIGN"))
-        .collect(Collectors.toList()).toArray(new String[0]);
+        || line.contains("FULLTEXT") || line.contains("FOREIGN")).collect(Collectors.toList()).toArray(new String[0]);
   }
 
   private String[] splitToColumnLines(String createTableString) {
@@ -881,7 +892,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     if (column.props.isAllowNull() || column.props.isInvisible() || column.props.isAutoInc()) {
       nullVal = "";
     }
-    if (column.defaultValue != null && column.defaultValue != LiteralNull.instance) {
+    if (column.defaultValue == LiteralNull.instance) {
       nullVal = "";
     }
     if (column instanceof NumericColumn && column.props.isAutoInc()) {

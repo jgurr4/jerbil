@@ -43,8 +43,8 @@ public class DataSpec {
     return new DataSpec(type, size, null);
   }
 
-  public static DataSpec make(DataType type, int precision, int scale) {
-    return new DataSpec(type, type.defaultSize, new int[]{precision, scale});
+  public static DataSpec make(DataType type, int scale, int precision) {
+    return new DataSpec(type, type.defaultSize, new int[]{scale, precision});
   }
 
   public static DataSpec make(DataType type, Class enumObj) {

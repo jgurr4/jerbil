@@ -160,16 +160,17 @@ public class BridgeTests {
     assertEquals(1 , diff.columns.update.size());
   }
 
-  /*
   @Test
   void testCompareOrderTable() {
     final TableDiff diff = DiffService.compareTables(testDb.order, DataGlobal.bridge.getDb("test").unwrap().tables.get("order"));
-    System.out.println(diff);
-    System.out.println(diff.toSql());
-    assertEquals("", diff.toSql());
-    assertEquals(0 , diff.columns.update.size());
+    if (diff != null) {
+      System.out.println(diff);
+      System.out.println(diff.toSql());
+    }
+    assertNull(diff);
   }
 
+  /*
   @Test
   void testCompareDbWithNoDiffs() {
     final DbDiff diff = DiffService.compareDatabases(testDb, DataGlobal.bridge.getDb("test").unwrap());

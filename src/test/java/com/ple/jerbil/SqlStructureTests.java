@@ -38,7 +38,7 @@ public class SqlStructureTests {
     assertEquals("""
         create table `order` (
           orderId bigint(20) unsigned auto_increment,
-          `add` varchar(255) default ('barter'),
+          `add` varchar(255) not null default ('barter'),
           phrase text,
           userId int(11) unsigned not null,
           itemId int(10) unsigned not null,
@@ -49,10 +49,10 @@ public class SqlStructureTests {
           finalized boolean not null,
           myDouble double not null,
           myFloat float not null,
-          mySet set('weapon','armor','shield','accessory') default ('weapon'),
+          mySet set('weapon','armor','shield','accessory') not null default ('weapon'),
           saleDate date not null,
           saleTime time not null,
-          saleDateTime datetime default current_timestamp on update current_timestamp,
+          saleDateTime datetime not null default current_timestamp on update current_timestamp,
           myInvis int(11) invisible,
           key usrd_itmd_idx (userId,itemId),
           primary key (orderId),
@@ -96,7 +96,7 @@ public class SqlStructureTests {
         ) ENGINE=Aria;
         create table `order` (
           orderId bigint(20) unsigned auto_increment,
-          `add` varchar(255) default ('barter'),
+          `add` varchar(255) not null default ('barter'),
           phrase text,
           userId int(11) unsigned not null,
           itemId int(10) unsigned not null,
@@ -107,10 +107,10 @@ public class SqlStructureTests {
           finalized boolean not null,
           myDouble double not null,
           myFloat float not null,
-          mySet set('weapon','armor','shield','accessory') default ('weapon'),
+          mySet set('weapon','armor','shield','accessory') not null default ('weapon'),
           saleDate date not null,
           saleTime time not null,
-          saleDateTime datetime default current_timestamp on update current_timestamp,
+          saleDateTime datetime not null default current_timestamp on update current_timestamp,
           myInvis int(11) invisible,
           key usrd_itmd_idx (userId,itemId),
           primary key (orderId),

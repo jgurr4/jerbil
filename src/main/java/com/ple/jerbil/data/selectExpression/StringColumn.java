@@ -32,6 +32,9 @@ public class StringColumn extends Column<StringColumn> implements StringExpressi
 
   public static StringColumn make(String columnName, Table table, DataSpec dataSpec, StringExpression defaultValue,
                                   ColumnProps props) {
+    if (defaultValue == null && props.isAllowNull()) {
+      defaultValue = LiteralNull.instance;
+    }
     return new StringColumn(columnName, table, dataSpec, defaultValue, props);
   }
 

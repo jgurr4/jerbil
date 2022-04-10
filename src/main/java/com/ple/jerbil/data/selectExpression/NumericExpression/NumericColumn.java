@@ -22,7 +22,12 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   }
 
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, ColumnProps props) {
-    return new NumericColumn(columnName, table, dataSpec, null, props);
+    NumericExpression defVal = null;
+    if (props.isInvisible()) {
+      defVal = LiteralNull.instance;
+      props = props.allowNull();
+    }
+    return new NumericColumn(columnName, table, dataSpec, defVal, props);
   }
 
   @Override
@@ -31,7 +36,12 @@ public class NumericColumn extends Column<NumericColumn> implements NumericExpre
   }
 
   public static NumericColumn make(String columnName, Table table, ColumnProps props) {
-    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), null, props);
+    NumericExpression defVal = null;
+    if (props.isInvisible()) {
+      defVal = LiteralNull.instance;
+      props = props.allowNull();
+    }
+    return new NumericColumn(columnName, table, DataSpec.make(DataType.integer), defVal, props);
   }
 
   public static NumericColumn make(String columnName, Table table, DataSpec dataSpec, NumericExpression defaultValue,
