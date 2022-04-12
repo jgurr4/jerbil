@@ -222,7 +222,6 @@ public class MariadbR2dbcBridge implements DataBridge {
 
   @Override
   public <T extends DbRecord, I extends DbRecordId> I save(T record) {
-
     return null;
   }
 

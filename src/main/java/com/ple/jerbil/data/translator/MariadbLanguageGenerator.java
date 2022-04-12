@@ -7,6 +7,7 @@ import com.ple.jerbil.data.selectExpression.NumericExpression.*;
 import com.ple.jerbil.data.selectExpression.NumericExpression.function.Sum;
 import com.ple.jerbil.data.selectExpression.booleanExpression.*;
 import com.ple.jerbil.data.sync.*;
+import com.ple.observabilityBridge.RecordingService;
 import com.ple.util.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,21 +57,22 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final StorageEngine engine = getEngineFromSql(createTableString);
     final IMap<String, Column> columns = getColumnsFromSql(createTableString, table);
     final IMap<String, Index> indexes = getIndexesFromSql(createTableString, table, columns);
-    NumericColumn autoIncColumn = null;
+    Optional<NumericColumn> autoIncColumn = Optional.empty();
     if (indexes.size() != 0 && indexes.get("primary") != null) {
       autoIncColumn = getAutoIncColumn(indexes.get("primary").indexedColumns, columns);
     }
-    return TableContainer.make(table, columns, engine, indexes, autoIncColumn);
+    return autoIncColumn.map(numericColumn -> TableContainer.make(table, columns, engine, indexes, numericColumn))
+        .orElseGet(() -> TableContainer.make(table, columns, engine, indexes, null));
   }
 
-  private NumericColumn getAutoIncColumn(IMap<String, IndexedColumn> primary, IMap<String, Column> columns) {
+  private Optional<NumericColumn> getAutoIncColumn(IMap<String, IndexedColumn> primary, IMap<String, Column> columns) {
     for (IEntry<String, IndexedColumn> icEntry : primary) {
       final Column col = columns.get(icEntry.key);
       if (col.props.isAutoInc()) {
-        return (NumericColumn) col;
+        return Optional.of((NumericColumn) col);
       }
     }
-    return null;
+    return Optional.empty();
   }
 
   private IMap<String, Index> getIndexesFromSql(String createTableString, Table table, IMap<String, Column> columns) {
@@ -111,14 +113,14 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     } else if (type.matches("^KEY .*")) {
       return IndexType.secondary;
     }
-    return null;
+    throw new RuntimeException("No index type was found from sql string.");
   }
 
   private IList<IndexedColumn> getIndexedColumnsFromSql(String indexString, IMap<String, Column> columns) {
     IList<IndexedColumn> indexedColumns = IArrayList.make();
     //FIXME: Once you figure out how to obtain sortOrder from Show create table or Show index commands use that method
     // here to obtain sortOrder for each column. Figure out a method that works for mariadb and mysql both if possible.
-    SortOrder sortOrder = null;
+//    SortOrder sortOrder = null;
     final IMap<String, Integer> indexedColumnsAndPrefixSizes = getIndexedColumnsAndPrefixSize(indexString);
     for (IEntry<String, Integer> indexColumnEntry : indexedColumnsAndPrefixSizes) {
       indexedColumns = indexedColumns.add(
@@ -170,10 +172,12 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     String[] columnLines = splitToColumnLines(createTableString);
     String[] keyLines = splitToKeyLines(createTableString);
     IMap<String, Column> columns = IArrayMap.empty;
-    Column columnFromSql = null;
     for (String columnLine : columnLines) {
-      columnFromSql = getColumnFromSql(columnLine, keyLines, table);
-      columns = columns.put(columnFromSql.columnName, columnFromSql);
+      Failable<Column> columnFromSql = getColumnFromSql(columnLine, keyLines, table);
+      if (columnFromSql.object == null) {
+        columns = columns.put(columnFromSql.object.columnName, columnFromSql.object);
+      }
+      DataGlobal.recordingService.log(columnFromSql.failMessage);
     }
     return columns;
   }
@@ -186,8 +190,8 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
         .split(",\n");
   }
 
-  @Override
-  public Column getColumnFromSql(String columnLine, String[] keyLines, Table table) {
+//  @Override
+  public Failable<Column> getColumnFromSql(String columnLine, String[] keyLines, Table table) {
     columnLine = columnLine.stripLeading();
     final String colName = columnLine.replaceFirst(" .*", "");
     BuildingHints hints = BuildingHints.make();
@@ -202,27 +206,25 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     final SelectExpression defaultValue = getDefaultValFromSql(columnLine);
 //    final Expression generatedFrom = getGeneratedFromSql(columnLine);
     if (columnLine.contains("AUTO_INCREMENT")) {
-      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, cProps);
+      return Failable.make(NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, cProps));
     } else if (dataSpec.dataType.equals(DataType.integer) || dataSpec.dataType.equals(DataType.decimal) ||
         dataSpec.dataType.equals(DataType.bigint) || dataSpec.dataType.equals(DataType.tinyint) ||
         dataSpec.dataType.equals(DataType.mediumint) || dataSpec.dataType.equals(DataType.smallint) ||
         dataSpec.dataType.equals(DataType.aDouble) || dataSpec.dataType.equals(DataType.aFloat)) {
-      return NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, cProps);
+      return Failable.make(NumericColumn.make(colName, table, dataSpec, (NumericExpression) defaultValue, cProps));
     } else if (dataSpec.dataType.equals(DataType.varchar) || dataSpec.dataType.equals(DataType.text) ||
         dataSpec.dataType.equals(DataType.character)) {
-      return StringColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, cProps);
+      return Failable.make(StringColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, cProps));
     } else if (dataSpec.dataType.equals(DataType.set) || dataSpec.dataType.equals(DataType.enumeration)) {
-      return EnumeralColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, cProps);
+      return Failable.make(EnumeralColumn.make(colName, table, dataSpec, (StringExpression) defaultValue, cProps));
     } else if (dataSpec.dataType.equals(DataType.datetime) || dataSpec.dataType.equals(DataType.date) ||
         dataSpec.dataType.equals(DataType.time) || dataSpec.dataType.equals(DataType.timestamp)) {
-      return DateColumn.make(colName, table, dataSpec, (DateExpression) defaultValue, cProps);
+      return Failable.make(DateColumn.make(colName, table, dataSpec, (DateExpression) defaultValue, cProps));
     } else if (dataSpec.dataType.equals(DataType.bool)) {
-      return BooleanColumn.make(colName, table, dataSpec, (BooleanExpression) defaultValue, cProps);
-    } else {
-      //FIXME: replace this with observability bridge logging.
-      System.out.println("Failed to determine data type of this column:" + colName);
+      return Failable.make(BooleanColumn.make(colName, table, dataSpec, (BooleanExpression) defaultValue, cProps));
     }
-    return null;
+    return Failable.make("Failed to determine data type of this column:" + colName, new RuntimeException());
+//    throw new RuntimeException("Failed to determine data type of this column:" + colName);
   }
 
   private ColumnProps getColumnPropsFromSql(String columnLine) {

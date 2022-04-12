@@ -29,7 +29,7 @@ public class VoidLanguageGenerator implements LanguageGenerator {
     return null;
   }
 
-  @Override
+//  @Override
   public Column getColumnFromSql(String tableLine, String[] columnsInIndex, Table table) {
     return null;
   }
