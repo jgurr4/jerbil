@@ -68,8 +68,10 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
   private Optional<NumericColumn> getAutoIncColumn(IMap<String, IndexedColumn> primary, IMap<String, Column> columns) {
     for (IEntry<String, IndexedColumn> icEntry : primary) {
       final Column col = columns.get(icEntry.key);
-      if (col.props.isAutoInc()) {
-        return Optional.of((NumericColumn) col);
+      if (col != null) {
+        if (col.props.isAutoInc()) {
+          return Optional.of((NumericColumn) col);
+        }
       }
     }
     return Optional.empty();
@@ -174,7 +176,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
     IMap<String, Column> columns = IArrayMap.empty;
     for (String columnLine : columnLines) {
       Failable<Column> columnFromSql = getColumnFromSql(columnLine, keyLines, table);
-      if (columnFromSql.object == null) {
+      if (columnFromSql.object != null) {
         columns = columns.put(columnFromSql.object.columnName, columnFromSql.object);
       }
       DataGlobal.recordingService.log(columnFromSql.failMessage);
