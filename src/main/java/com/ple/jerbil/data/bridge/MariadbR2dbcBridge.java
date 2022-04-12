@@ -6,6 +6,7 @@ import com.ple.jerbil.data.reactiveUtils.ReactiveFlux;
 import com.ple.jerbil.data.reactiveUtils.ReactiveMono;
 import com.ple.jerbil.data.translator.LanguageGenerator;
 import com.ple.jerbil.data.translator.MariadbLanguageGenerator;
+import com.ple.observabilityBridge.RecordingService;
 import com.ple.util.*;
 import io.r2dbc.pool.ConnectionPool;
 import io.r2dbc.pool.ConnectionPoolConfiguration;
@@ -32,19 +33,21 @@ public class MariadbR2dbcBridge implements DataBridge {
   public final String password;
   @Nullable public final String database;
   public final ConnectionPool pool;
+  public final RecordingService recordingService;
 
   protected MariadbR2dbcBridge(String host, int port, String username, String password, @Nullable String database,
-                               ConnectionPool pool) {
+                               ConnectionPool pool, RecordingService recordingService) {
     this.host = host;
     this.port = port;
     this.username = username;
     this.password = password;
     this.database = database;
     this.pool = pool;
+    this.recordingService = recordingService;
   }
 
   public static MariadbR2dbcBridge make(String host, int port, String username, String password,
-                                        String database) {
+                                        String database, RecordingService recordingService) {
     final MariadbConnectionConfiguration factoryConfig = MariadbConnectionConfiguration.builder()
         .host(host)
         .port(port)
@@ -60,19 +63,19 @@ public class MariadbR2dbcBridge implements DataBridge {
         .maxIdleTime(Duration.ofMillis(1000))
         .maxSize(10)
         .build();
-    return new MariadbR2dbcBridge(host, port, username, password, database, new ConnectionPool(poolConfig));
+    return new MariadbR2dbcBridge(host, port, username, password, database, new ConnectionPool(poolConfig), recordingService);
   }
 
   private Mono<MariadbR2dbcBridge> reactiveMake(String host, int port, String username, String password,
-                                                String database) {
-    return Mono.just(make(host, port, username, password, database))
+                                                String database, RecordingService recordingService) {
+    return Mono.just(make(host, port, username, password, database, recordingService))
         .doOnError(e -> {
           throw new IllegalArgumentException("Issue creating connection pool");
         });
   }
 
-  public static DataBridge make(String host, int port, String username, String password) {
-    return make(host, port, username, password, null);
+  public static DataBridge make(String host, int port, String username, String password, RecordingService recordingService) {
+    return make(host, port, username, password, null, recordingService);
   }
 
   @Override
@@ -231,7 +234,6 @@ public class MariadbR2dbcBridge implements DataBridge {
     return ReactiveMono.make(Flux.fromIterable(tblNameList)
         .flatMap(tblName -> execute("use " + dbName + "; show create table " + generator.checkToAddBackticks(
             tblName)).unwrapFlux()) //FIXME: Figure out a way to support .flatMap with ReactiveFlux without needing to unrwapFlux.
-//        .log()
         .flatMap(dbResult -> Flux.just(dbResult.getColumn("create table")))
         .map(tblCreateStr -> generator.getTableFromSql((String) tblCreateStr, database))
         .collectList()

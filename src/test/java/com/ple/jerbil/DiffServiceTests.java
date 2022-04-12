@@ -10,6 +10,9 @@ import com.ple.jerbil.data.selectExpression.NumericExpression.NumericColumn;
 import com.ple.jerbil.data.selectExpression.StringColumn;
 import com.ple.jerbil.data.sync.*;
 import com.ple.jerbil.testcommon.*;
+import com.ple.observabilityBridge.JaegerHandler;
+import com.ple.observabilityBridge.PrometheusHandler;
+import com.ple.observabilityBridge.RecordingService;
 import com.ple.util.IArrayMap;
 import com.ple.util.IMap;
 import org.junit.jupiter.api.Test;
@@ -30,10 +33,9 @@ public class DiffServiceTests {
 
   public DiffServiceTests() {
     final Properties props = ConfigProps.getProperties();
-    DataGlobal.bridge = MariadbR2dbcBridge.make(
-        props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
-        props.getProperty("user"), props.getProperty("password")
-    );
+    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
+        props.getProperty("user"), props.getProperty("password"), RecordingService.make(PrometheusHandler.only,
+            JaegerHandler.only));
   }
 
   @Test

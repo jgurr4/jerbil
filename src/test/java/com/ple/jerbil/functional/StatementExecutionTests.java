@@ -4,6 +4,9 @@ import com.ple.jerbil.data.DataGlobal;
 import com.ple.jerbil.data.builder.DatabaseBuilderOld;
 import com.ple.jerbil.data.bridge.MariadbR2dbcBridge;
 import com.ple.jerbil.testcommon.*;
+import com.ple.observabilityBridge.JaegerHandler;
+import com.ple.observabilityBridge.PrometheusHandler;
+import com.ple.observabilityBridge.RecordingService;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.TestMethodOrder;
 
@@ -20,7 +23,9 @@ public class StatementExecutionTests {
 
   public StatementExecutionTests() {
     final Properties props = ConfigProps.getProperties();
-    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("host"), Integer.parseInt(props.getProperty("port")), props.getProperty("user"), props.getProperty("password"));
+    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
+        props.getProperty("user"), props.getProperty("password"), RecordingService.make(PrometheusHandler.only,
+            JaegerHandler.only));
   }
 
   /*

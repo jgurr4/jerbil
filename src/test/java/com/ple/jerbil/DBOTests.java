@@ -8,6 +8,9 @@ import com.ple.jerbil.data.selectExpression.booleanExpression.And;
 import com.ple.jerbil.testcommon.*;
 import com.ple.jerbil.testcommon.DBO.User;
 import com.ple.jerbil.testcommon.DBO.UserId;
+import com.ple.observabilityBridge.JaegerHandler;
+import com.ple.observabilityBridge.PrometheusHandler;
+import com.ple.observabilityBridge.RecordingService;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,10 +27,9 @@ public class DBOTests {
 
   public DBOTests() {
     final Properties props = ConfigProps.getProperties();
-    DataGlobal.bridge = MariadbR2dbcBridge.make(
-        props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
-        props.getProperty("user"), props.getProperty("password")
-    );
+    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
+        props.getProperty("user"), props.getProperty("password"), RecordingService.make(PrometheusHandler.only,
+            JaegerHandler.only));
   }
 
   //TODO: Finish implementing load and save inside the relevant classes using external Bridge methods.

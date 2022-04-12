@@ -3,6 +3,7 @@ package com.ple.jerbil.data;
 import com.ple.jerbil.data.bridge.DataBridge;
 import com.ple.jerbil.data.bridge.VoidBridge;
 import com.ple.observabilityBridge.RecordingService;
+import com.ple.observabilityBridge.SystemOutLogHandler;
 
 public class DataGlobal {
   // bridge contains all the information needed to connect to database. Each bridge will only need one language Generator.
@@ -12,6 +13,6 @@ public class DataGlobal {
   // Must be set to something so there is a default if no other bridge is present. May use VoidBridge if you don't want
   // anything to happen, or MemoryBridge if you want an in memory data manager.
   public static DataBridge bridge = new VoidBridge();
-  public static RecordingService recordingService = null;  //Alternatively default to console_log.
+  public static RecordingService recordingService = RecordingService.make(SystemOutLogHandler.only);  //Alternatively default to console_log.
   //TODO: replace recordingService value with RecordingService.make(NullHandler) once jerm pushes his updates.
 }

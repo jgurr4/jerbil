@@ -8,6 +8,9 @@ import com.ple.jerbil.data.query.SelectQuery;
 import com.ple.jerbil.data.selectExpression.Agg;
 import com.ple.jerbil.data.selectExpression.AliasedExpression;
 import com.ple.jerbil.testcommon.*;
+import com.ple.observabilityBridge.JaegerHandler;
+import com.ple.observabilityBridge.PrometheusHandler;
+import com.ple.observabilityBridge.RecordingService;
 import org.junit.jupiter.api.Test;
 import java.util.Properties;
 import static com.ple.jerbil.data.selectExpression.Literal.make;
@@ -27,10 +30,9 @@ public class SqlQueryTests {
 
   public SqlQueryTests() {
     final Properties props = ConfigProps.getProperties();
-    DataGlobal.bridge = MariadbR2dbcBridge.make(
-        props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
-        props.getProperty("user"), props.getProperty("password")
-    );
+    DataGlobal.bridge = MariadbR2dbcBridge.make(props.getProperty("host"), Integer.parseInt(props.getProperty("port")),
+        props.getProperty("user"), props.getProperty("password"), RecordingService.make(PrometheusHandler.only,
+            JaegerHandler.only));
   }
 
   @Test
