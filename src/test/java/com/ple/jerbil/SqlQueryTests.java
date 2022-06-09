@@ -37,6 +37,7 @@ public class SqlQueryTests {
 
   @Test
   void testSelect() {
+    user.where(user.name.eq("john")).select(user.userId);
     final CompleteQuery q = user.where(user.name.eq(make("john"))).select(user.userId);
     assertEquals("""
         select userId
