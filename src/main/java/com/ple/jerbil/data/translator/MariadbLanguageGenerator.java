@@ -179,7 +179,7 @@ public class MariadbLanguageGenerator implements LanguageGenerator {
       if (columnFromSql.object != null) {
         columns = columns.put(columnFromSql.object.columnName, columnFromSql.object);
       }
-      DataGlobal.recordingService.log(columnFromSql.failMessage);
+//      DataGlobal.recordingService.log(columnFromSql.failMessage);
     }
     return columns;
   }
